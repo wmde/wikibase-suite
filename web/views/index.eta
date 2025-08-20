@@ -591,15 +591,28 @@
           });
       }
 
-      const wbHostInput = form.querySelector('[name=WIKIBASE_PUBLIC_HOST]');
-      const wdqsHostInput = form.querySelector('[name=WDQS_PUBLIC_HOST]');
+      (function wdqsHostDefault() {
+        const wbHostInput = form.querySelector('[name=WIKIBASE_PUBLIC_HOST]');
+        const wdqsHostInput = form.querySelector('[name=WDQS_PUBLIC_HOST]');
+        if (!wbHostInput || !wdqsHostInput) return;
 
-      wbHostInput.addEventListener('input', () => {
-        if (!wdqsHostInput.value.trim()) {
-          const base = wbHostInput.value.trim();
-          wdqsHostInput.placeholder = base ? `query.${base}` : '';
-        }
-      });
+        const derive = v => v ? `query.${v}` : '';
+
+        wbHostInput.addEventListener('input', () => {
+          if (wdqsHostInput.dataset.defaulted === 'true') {
+            wdqsHostInput.value = derive(wbHostInput.value.trim());
+          }
+        });
+
+        wdqsHostInput.addEventListener('input', () => {
+          wdqsHostInput.dataset.defaulted = wdqsHostInput.value.trim() ? 'false' : 'true';
+          if (wdqsHostInput.dataset.defaulted === 'true') {
+            wdqsHostInput.value = derive(wbHostInput.value.trim());
+          }
+        });
+
+        if (!wdqsHostInput.value.trim()) wdqsHostInput.dataset.defaulted = 'true';
+      })();
 
       // Bindings
       // Minimal wiring for Pico-styled dialogs using data attributes
