@@ -102,7 +102,7 @@ clone_repo() {
   mkdir -p "$WBS_DIR"
   pushd "$WBS_DIR" >/dev/null || return 1
 
-  git clone "$SETUP_REPO_URL" --single-branch main --depth 1
+  git clone --branch main --single-branch "$SETUP_REPO_URL" --depth 1 >/dev/null 2>&1
 
   if [ ! -d wikibase-release-pipeline/.git ]; then
     git clone --branch "$REPO_BRANCH" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
