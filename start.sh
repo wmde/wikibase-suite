@@ -44,14 +44,15 @@ done
 
 # When running within a repository assume it is wikibase-release-pipeline
 # and use files in that repo
-if [[ -d "$(dirname "${BASH_SOURCE[0]:-}")/../../.git" ]]; then
+if [[ -d "$(dirname "${BASH_SOURCE[0]:-}")/.git" ]]; then
   SKIP_CLONE=true
-  WBS_DIR=../../..
+  WBS_DIR=..
   echo "⚠️ Running inside repo (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
 fi
 
 # --- Setup variables (including defaults) ---
 
+SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/lorenjohnson/wbs-deploy-setup.git}"
 REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
 # TODO: Change to default to latest deploy version tag once released
 REPO_BRANCH="${REPO_BRANCH:-deploy-setup-script}"
@@ -64,9 +65,9 @@ export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"
 export SKIP_LAUNCH="${SKIP_LAUNCH:-false}"
 export RESET="${RESET:-false}"
 
+export SETUP_DIR="${SETUP_DIR:-$WBS_DIR/wbs-deploy-setup}"
 export DEPLOY_DIR="${DEPLOY_DIR:-$WBS_DIR/wikibase-release-pipeline/deploy}"
 export ENV_FILE_PATH="$DEPLOY_DIR/.env"
-export SETUP_DIR="${SETUP_DIR:-$DEPLOY_DIR/setup}"
 export SCRIPTS_DIR="$SETUP_DIR/scripts"
 
 # --- Functions ---
@@ -100,6 +101,8 @@ clone_repo() {
   echo "Cloning repository to $WBS_DIR..."
   mkdir -p "$WBS_DIR"
   pushd "$WBS_DIR" >/dev/null || return 1
+
+  git clone "$SETUP_REPO_URL" --single-branch main --depth 1
 
   if [ ! -d wikibase-release-pipeline/.git ]; then
     git clone --branch "$REPO_BRANCH" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
