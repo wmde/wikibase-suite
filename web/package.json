@@ -1,0 +1,21 @@
+{
+	"name": "wbs-deploy-setup",
+	"description": "Wikibase Suite Deploy Setup",
+	"main": "server.js",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"start": "node server.js",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"better-sse": "^0.15.1",
+		"eta": "^3.1.0",
+		"express": "^5.1.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.3",
+		"@types/node": "^24.0.13",
+		"typescript": "^5.4.5"
+	}
+}

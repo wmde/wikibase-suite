@@ -1,0 +1,26 @@
+{
+	"root": true,
+	"parser": "any-eslint-parser",
+	"ignorePatterns": [
+		"node_modules",
+		"test/**/results",
+		"!.github",
+		"package-lock.json",
+		"pnpm/**/**",
+		"pnpm-lock.yaml",
+		"deploy/config/extensions",
+		"cloud-init.yml",
+		"*.properties",
+		"*.ts",
+		"*.js",
+		"*.json",
+		"*.yml",
+		"*.yaml",
+		"*.json",
+		"*.png",
+		"*.ico"
+	],
+	"rules": {
+		"eol-last": [ "error", "always" ]
+	}
+}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wikibase Suite Deploy Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: auto;
+      width: 100%;
+    }
+
+    #header {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    #header img {
+      height: 80px;
+    }
+
+    /* Single column by default; auto-switch to two columns when status has content */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    /* When either #waiting or #complete is visible (not [hidden]), make it two columns */
+    .grid:has(#status-section #waiting:not([hidden])),
+    .grid:has(#status-section #complete:not([hidden])) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    #log-wrapper {
+      background-color: #111;
+      color: #eee;
+      font-size: 0.6em;
+      font-family: monospace;
+      padding: 1em;
+      max-height: 600px;
+      overflow-y: auto;
+      display: none;
+      border-radius: 0.5rem;
+      white-space: pre-wrap;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    #log-content {
+      white-space: pre-wrap;
+    }
+
+    #config-content {
+      background-color: #111;
+      color: #eee;
+      font-size: 0.6em;
+      font-family: monospace;
+      padding: 1em;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    #log *::selection,
+    #log::selection,
+    #config-content *::selection,
+    #config-content::selection {
+      background-color: var(--primary);
+      color: var(--primary-inverse);
+    }
+
+    #copy-config,
+    #download-config {
+      margin-top: 0.5rem;
+      margin-right: 1rem;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    label:has(.field-help) input {
+      margin-bottom: 1rem;
+    }
+
+    label:has(.just-validate-error-label) input {
+      margin-bottom: 0;
+    }
+
+    .field-help {
+      font-weight: normal;
+      font-size: 0.7rem;
+      color: #555;
+    }
+
+    .field-help .help-actions {
+      float: right;
+    }
+
+    .just-validate-error-label {
+      font-weight: normal;
+      font-size: 0.7rem;
+    }
+
+    .just-validate-error-field {
+      border: solid 3px;
+      border-color: rgb(197, 47, 33);
+    }
+
+    /* Waiting messages (inline) */
+    #waiting {
+      margin-top: 0.5rem;
+      font-size: 0.9em;
+      color: var(--muted, #666);
+      white-space: pre-wrap;
+    }
+    .status-line {
+      margin: 0.15rem 0;
+    }
+
+    /* Log dialog styling */
+    #log-dialog article {
+      max-width: 960px;
+      max-height: initial;
+    }
+    #log-dialog pre {
+      background-color: #111;
+      color: #eee;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      max-height: 60vh;
+      overflow: auto;
+    }
+    #log-dialog pre *::selection, #log-dialog pre::selection {
+      background-color: var(--primary);
+      color: var(--primary-inverse);
+    }
+
+    /* Show Log link aligned to the right within the header */
+    #toggle-log {
+      display: flex;
+      justify-content: flex-end;
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.8rem;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    #toggle-log:hover,
+    #toggle-log:focus {
+      text-decoration: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="header">
+      <img src="/Wikibase_Suite_(RGB).png" alt="Wikibase Logo" />
+      <h2>Deploy Setup</h2>
+      <a href="#" id="toggle-log" data-modal-open data-modal-target="log-dialog">Show Log</a>
+    </div>
+
+    <div class="grid" id="main-grid">
+      <!-- Left: Configuration -->
+      <div id="config-section">
+        <form id="config-form" data-disabled="<%= isConfigSaved %>">
+          <label>
+            MediaWiki Admin Email Address:
+            <div class="field-help">Used for MediaWiki admin and alerts.</div>
+            <input name="MW_ADMIN_EMAIL" type="email" required />
+          </label>
+          <label>
+            Wikibase Host:
+            <div class="field-help">
+              A DNS entry which points to <span class="inline-pre"><%= SERVER_IP %></span> via an A record, localhost, or any .test domain
+              <span class="help-actions">
+                <a href="#" data-modal-open data-modal-target="dns-help-dialog" aria-label="DNS help">Help</a>
+              </span>
+            </div>
+            <input name="WIKIBASE_PUBLIC_HOST" type="text" />
+          </label>
+          <details name="config">
+            <summary role="secondary" style="font-weight: bold;">Advanced Options</summary>
+            <label>
+              Query Service Host:
+              <div class="field-help">
+                A DNS entry which points to <span class="inline-pre"><%= SERVER_IP %></span> via a DNS A record, localhost, or any .test domain
+                <br />
+                <em>default: <pre style="display: inline;">query.&lt;Wikibase Host&gt;</pre></em>
+                <span class="help-actions">
+                  <a href="#" data-modal-open data-modal-target="dns-help-dialog" aria-label="DNS help">Help</a>
+                </span>
+              </div>
+              <input name="WDQS_PUBLIC_HOST" type="text" />
+            </label>
+            <label>
+              MediaWiki Admin Name:
+              <div class="field-help">Will be the login name for the MediaWiki admin</div>
+              <input name="MW_ADMIN_NAME" />
+            </label>
+            <label>
+              MediaWiki Admin Password:
+              <div class="field-help">Minimum 10 characters. <em>default: randomly generated and revealed at end of install</em></div>
+              <input name="MW_ADMIN_PASS" type="password" />
+            </label>
+            <label>
+              Database Name:
+              <div class="field-help"><em>default: my_wiki</em></div>
+              <input name="DB_NAME" />
+            </label>
+            <label>
+              Database User:
+              <div class="field-help">Used by MediaWiki to connect to the database. <em>default: sqluser</em></div>
+              <input name="DB_USER" />
+            </label>
+            <label>Database Password:
+              <div class="field-help">Minimum 10 characters. <em>default: randomly generated and revealed at end of install</em></div>
+              <input name="DB_PASS" type="password" />
+            </label>
+          </details>
+          <label>
+            <input
+              type="checkbox"
+              name="METADATA_CALLBACK"
+              role="switch"
+            />
+            I want this Wikibase to be visible in the global Wikibase directory
+          </label>
+          <br />
+          <button type="submit">Save</button>
+        </form>
+      </div>
+
+      <!-- Right: Status + Complete -->
+      <div id="status-section">
+        <div id="waiting" hidden></div>
+
+        <div id="complete" <%= isBooted ? '' : 'hidden' %>>
+          <p>
+            <strong>✅ Services started successfully!</strong>
+            <br /><br />
+            MediaWiki/Wikibase:
+            <br />
+            <a target="_blank" data-bind="WIKIBASE_PUBLIC_HOST" data-prefix="https://">https://</a>
+            <br /><br />
+            Query Service:
+            <br />
+            <a target="_blank" data-bind="WDQS_PUBLIC_HOST" data-prefix="https://">https://</a>
+            <br /><br />
+            QuickStatements:
+            <br />
+            <a target="_blank" data-bind="WIKIBASE_PUBLIC_HOST" data-prefix="https://" data-suffix="/tools/quickstatements">https:///tools/quickstatements</a>
+          </p>
+
+          <section id="config">
+            <p>
+              <strong>⚠️ Please save this configuration somewhere secure. The passwords will be removed after this installation is complete.</strong>
+            </p>
+            <pre id="config-content"></pre>
+            <button id="copy-config">Copy</button>
+            <a id="download-config" href="#" download="wbs-deploy-setup.env">Download as a wbs-deploy-setup.env file</a>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="dns-help-dialog">
+    <article>
+      <h3>How to register a domain and point it here</h3>
+      <p>This server's public IP address is: <code><%= SERVER_IP %></code></p>
+      <ol>
+        <li>Register a domain name with any common registrar (e.g., Cloudflare, Namecheap, etc).</li>
+        <li>Open your domain’s DNS settings.</li>
+        <li>Create an <strong>A record</strong>:
+          <ul>
+            <li><strong>Type</strong>: <code>A</code></li>
+            <li><strong>Name/Host</strong>: <code>wikibase</code> (or blank/<code>@</code> for root)</li>
+            <li><strong>Value</strong>: <code><%= SERVER_IP %></code></li>
+          </ul>
+        </li>
+        <li>Create another A record for <code>query</code> pointing to the same IP.</li>
+        <li>It may take a few minutes for new DNS entries to propagate.</li>
+      </ol>
+      <p class="help-small">
+        <em>
+          For testing and development <code>localhost</code> or <code>.test</code> domains (e.g. <code>wikibase.test</code>) are allowed.
+          Another option is to use <code><%= SERVER_IP %>.nip.io</code> and <code>query.<%= SERVER_IP %>.nip.io</code> "magic" addresses
+          which will automatically resolve to this server's IP address. In all cases use with caution as it is currently not easy
+          to change these host names after initial WBS Deploy setup. 
+        </em>
+      </p>
+      <footer>
+        <button data-modal-close class="secondary">Close</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <!-- Log dialog -->
+  <dialog id="log-dialog">
+    <article>
+      <pre id="log-content">Loading logs...</pre>
+      <footer style="margin-top: 0">
+        <div style="display:flex; justify-content: space-between; gap:20rem;">
+          <button id="shutdown-btn" style="border-color: rgb(217, 53, 38); color: rgb(217, 53, 38)" class="outline">Shut Down Installer</button>
+          <button id="hide-log" data-modal-close class="secondary">Close</button>
+        </div>
+        <p id="shutdown-msg" style="text-align: left;"></p>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STATUS_LOG_ENTRY_REGEX = /\[status\]\s*(.*)$/i;
+      const BOOT_COMPLETE_REGEX = /setup is complete!?/i;
+
+      const el = (id) => document.getElementById(id);
+      const on = (node, type, handler) => node && node.addEventListener(type, handler);
+
+      function openSSE(url, { onOpen, onMessage, onError, events } = {}) {
+        const es = new EventSource(url, { withCredentials: false });
+        if (onOpen) es.onopen = onOpen;
+        if (onMessage) es.onmessage = onMessage;
+        if (onError) es.onerror = onError;
+        if (events) Object.entries(events).forEach(([t, fn]) => es.addEventListener(t, fn));
+        return es;
+      }
+
+      const form = el('config-form');
+      const elWaiting = el('waiting');
+      const elComplete = el('complete');
+      const elConfigContent = el('config-content');
+      const elCopyBtn = el('copy-config');
+      const elDownloadLink = el('download-config');
+      const elLogContent = el('log-content');
+      const elShutdownBtn = el('shutdown-btn');
+      const elShutdownMsg = el('shutdown-msg');
+
+      let logStream = null;
+      let alreadyHandledBootedState = false;
+      let isLogDialogOpen = false;
+
+      // --- New: shared page state & hydrators ---
+
+      const pageState = { config: null, configText: '' };
+
+      async function fetchConfig() {
+        try {
+          const res = await fetch('/config');
+          if (!res.ok) return;
+          const { config, configText } = await res.json();
+          pageState.config = config || {};
+          pageState.configText = configText || '';
+        } catch {}
+      }
+
+      function hydrateFormFromConfig(form, cfg) {
+        if (!form || !cfg) return;
+        form.querySelectorAll('input, select, textarea').forEach(el => {
+          const name = el.getAttribute('name');
+          if (!name || !(name in cfg)) return;
+          const val = cfg[name];
+
+          // switches/checkboxes
+          if (el.type === 'checkbox' || el.getAttribute('role') === 'switch') {
+            const on = (typeof val === 'boolean') ? val : String(val).toLowerCase() === 'true' || String(val) === '1';
+            el.checked = on;
+            return;
+          }
+
+          // don't overwrite password with empty
+          if (el.type === 'password' && (val == null || String(val) === '')) return;
+
+          el.value = (val ?? '');
+        });
+      }
+
+      function hydrateBindingsFromConfig(cfg) {
+        document.querySelectorAll('[data-bind]').forEach(node => {
+          const key = node.dataset.bind;
+          const prefix = node.dataset.prefix || '';
+          const suffix = node.dataset.suffix || '';
+          const v = cfg && cfg[key];
+
+          if (!v) {
+            // keep formatting placeholder text present but inert
+            if (node.tagName === 'A') node.removeAttribute('href');
+            // leave existing text (like "https://" scaffolding) as-is
+            return;
+          }
+
+          const rendered = `${prefix}${v}${suffix}`;
+
+          // text preserves the "final URL" formatting exactly
+          node.textContent = rendered;
+
+          if (node.tagName === 'A') {
+            node.setAttribute('href', rendered);
+          }
+        });
+      }
+
+      function renderConfigTextBlock(preEl) {
+        if (!preEl) return;
+        preEl.textContent = pageState.configText || '';
+      }
+
+      // --- existing helpers ---
+
+      function appendToLog(text) {
+        const t = text.endsWith('\n') ? text : text + '\n';
+        elLogContent.insertAdjacentText('beforeend', t);
+      }
+
+      function appendStatusLine(text) {
+        if (!text) return;
+        const div = document.createElement('div');
+        div.className = 'status-line';
+        div.textContent = text;
+        elWaiting.appendChild(div);
+      }
+
+      function extractStatusLines(text) {
+        if (!text) return [];
+        return text
+          .split('\n')
+          .map((line) => {
+            const m = line.match(STATUS_LOG_ENTRY_REGEX);
+            return (m && m[1]) ? m[1].trim() : null;
+          })
+          .filter(Boolean);
+      }
+
+      async function handleBootComplete() {
+        if (alreadyHandledBootedState) return;
+
+        alreadyHandledBootedState = true;
+
+        // refresh config and hydrate UI
+        await fetchConfig();
+        hydrateFormFromConfig(form, pageState.config);
+        hydrateBindingsFromConfig(pageState.config);
+        renderConfigTextBlock(elConfigContent);
+
+        elWaiting.hidden = true;
+        elComplete.hidden = false;
+
+        const configContent = pageState.configText || '';
+
+        elCopyBtn.onclick = () => {
+          navigator.clipboard.writeText(configContent).then(() => {
+            elCopyBtn.textContent = 'Copied!';
+            setTimeout(() => (elCopyBtn.textContent = 'Copy'), 2000);
+          }).catch(() => {
+            alert('⚠️ Failed to copy. Please do it manually.');
+          });
+        };
+
+        if (elDownloadLink.href && elDownloadLink.href.startsWith('blob:')) {
+          URL.revokeObjectURL(elDownloadLink.href);
+        }
+        const blob = new Blob([configContent], { type: 'text/plain' });
+        elDownloadLink.href = URL.createObjectURL(blob);
+      }
+
+      function startLogStream() {
+        if (logStream) return;
+
+        logStream = openSSE('/log/stream', {
+          onMessage: (e) => {
+            if (!e.data) return;
+
+            const lines = JSON.parse(e.data); // always unwraps the quotes
+
+            extractStatusLines(lines).forEach(appendStatusLine);
+
+            if (BOOT_COMPLETE_REGEX.test(lines)) {
+              handleBootComplete();
+            }
+
+            appendToLog(lines);
+          },
+          onError: () => {
+            console.log('SSE error (will auto-reconnect)');
+          }
+        });
+      }
+
+      function initValidation() {
+        const hostNameRegex = /^(localhost|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
+        const passwordValidator = (value) => value.length === 0 || value.length >= 10;
+
+        const hostResolvesToServerIPRule = {
+          validator: value => async () => {
+            const hostname = (value || '').trim();
+            if (!hostname) return true;
+            if (hostname === 'localhost' || /\.test$/i.test(hostname)) return true;
+            try {
+              const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(hostname)}&type=A`);
+              if (!res.ok) return false;
+              const json = await res.json();
+              const answers = Array.isArray(json?.Answer) ? json.Answer : [];
+              return answers.some(a => a.type === 1 && a.data === '<%= SERVER_IP %>');
+            } catch {
+              return false;
+            }
+          },
+          errorMessage: `Doesn't resolve to <%= SERVER_IP %>`
+        };
+        
+        startLogStream();
+
+        const validate = new JustValidate('#config-form');
+
+        validate
+          .addField('[name=MW_ADMIN_EMAIL]', [{ rule:'required' }, { rule:'email' }])
+          .addField('[name=WIKIBASE_PUBLIC_HOST]', [
+            { rule:'customRegexp', value: hostNameRegex, errorMessage: 'Must be a valid hostname (e.g. example.com)' },
+            hostResolvesToServerIPRule
+          ])
+          .addField('[name=WDQS_PUBLIC_HOST]', [
+            { rule:'customRegexp', value: hostNameRegex, errorMessage: 'Must be a valid hostname (e.g. query.example.com)' },
+            hostResolvesToServerIPRule
+          ])
+          .addField('[name=MW_ADMIN_PASS]', [
+            { validator: passwordValidator, errorMessage: 'Password must be at least 10 characters or left blank' }
+          ])
+          .addField('[name=DB_PASS]', [
+            { validator: passwordValidator, errorMessage: 'Password must be at least 10 characters or left blank' }
+          ])
+          .onSuccess(async (event) => {
+            const f = event.target;
+            const data = Object.fromEntries(new FormData(f).entries());
+            data.METADATA_CALLBACK = f.METADATA_CALLBACK?.checked ? 'true' : 'false';
+
+            const res = await fetch('/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+              // lock form
+              f.querySelectorAll('input, button').forEach((i) => (i.disabled = true));
+
+              // echo back saved config for coherence
+              const { config, configText } = await res.json();
+              pageState.config = config || {};
+              pageState.configText = configText || '';
+
+              hydrateFormFromConfig(f, pageState.config);
+              hydrateBindingsFromConfig(pageState.config);
+              renderConfigTextBlock(elConfigContent);
+
+              elWaiting.hidden = false;
+              elWaiting.innerHTML = '';
+              elComplete.hidden = true;
+            } else {
+              alert('Failed to save environment. See console for details.');
+            }
+          });
+      }
+
+      // Bindings
+      // Minimal wiring for Pico-styled dialogs using data attributes
+      document.addEventListener('click', (e) => {
+        const opener = e.target.closest('[data-modal-open]');
+        if (opener) {
+          e.preventDefault();
+          const id = opener.getAttribute('data-modal-target');
+          const dlg = id && document.getElementById(id);
+          if (dlg) dlg.showModal();
+          return;
+        }
+        const closer = e.target.closest('[data-modal-close]');
+        if (closer) {
+          e.preventDefault();
+          const dlg = closer.closest('dialog');
+          if (dlg) dlg.close();
+        }
+      });
+
+      on(elShutdownBtn, 'click', async (e) => {
+        e.preventDefault();
+        if (!elShutdownBtn) return;
+
+        elShutdownBtn.disabled = true;
+        elShutdownMsg.textContent = 'Shutting down installer...';
+
+        try {
+          const res = await fetch('/finalize-setup', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+          if (res.ok) elShutdownMsg.textContent = '✅ Finalized. The installer will stop shortly.';
+          else {
+            elShutdownMsg.textContent = `❌ Finalize failed (HTTP ${res.status}). Check logs.`;
+            elShutdownBtn.disabled = false;
+          }
+        } catch (err) {
+          console.error(err);
+          elShutdownMsg.textContent = '❌ Network error while finalizing. See console/logs.';
+          elShutdownBtn.disabled = false;
+        }
+      });
+
+      const initializePage = async () => {
+        initValidation();
+
+        // get config once and hydrate everything
+        await fetchConfig();
+
+        hydrateFormFromConfig(form, pageState.config);
+        hydrateBindingsFromConfig(pageState.config);
+        renderConfigTextBlock(elConfigContent);
+
+        if (form.dataset.disabled === 'true') {
+          // .env config file already saved, disable inputs
+          form.querySelectorAll('input, button').forEach((el) => (el.disabled = true));
+
+          // If server didn't render #complete (not booted), start in waiting mode
+          if (elComplete.hasAttribute('hidden')) {
+            if (elWaiting) elWaiting.hidden = false;
+          }
+        } else {
+          // Fresh start: nothing in status yet
+          elWaiting.hidden = true;
+          elComplete.hidden = true;
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', initializePage);
+    })();
+  </script>
+</body>
+</html>
