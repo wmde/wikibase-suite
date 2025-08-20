@@ -539,7 +539,10 @@
         const validate = new JustValidate('#config-form');
 
         validate
-          .addField('[name=MW_ADMIN_EMAIL]', [{ rule:'required' }, { rule:'email' }])
+          .addField('[name=MW_ADMIN_EMAIL]', [
+            { rule:'required' },
+            { rule:'email' }
+          ])
           .addField('[name=WIKIBASE_PUBLIC_HOST]', [
             { rule:'required' },
             { rule:'customRegexp', value: hostNameRegex, errorMessage: 'Must be a valid hostname (e.g. example.com)' },
