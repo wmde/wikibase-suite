@@ -587,6 +587,16 @@
           });
       }
 
+      const wbHostInput = form.querySelector('[name=WIKIBASE_PUBLIC_HOST]');
+      const wdqsHostInput = form.querySelector('[name=WDQS_PUBLIC_HOST]');
+
+      wbHostInput.addEventListener('input', () => {
+        if (!wdqsHostInput.value.trim()) {
+          const base = wbHostInput.value.trim();
+          wdqsHostInput.placeholder = base ? `query.${base}` : '';
+        }
+      });
+
       // Bindings
       // Minimal wiring for Pico-styled dialogs using data attributes
       document.addEventListener('click', (e) => {

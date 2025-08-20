@@ -84,9 +84,8 @@ export function getConfig( input: Record<string, string> = {} ): {
 		};
 
 		return { config: configObject, configText: makeConfigText( configObject ) };
+	// 3) No .env and no input → template + localhost defaults + generated passwords
 	} else {
-
-		// 3) No .env and no input → template + localhost defaults + generated passwords
 		const templateEnv = getTemplateEnv();
 		const configObject: Record<string, string> = {
 			...templateEnv,
