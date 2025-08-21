@@ -54,6 +54,20 @@ ui_prompt_masked DB_PASS "Database password (auto-generate)" 10
 # Yes/No with default Yes. (This prints one newline after, by design.)
 ui_yes_no METADATA_CALLBACK "Make this Wikibase visible in the global directory?" Y
 
+# The following config values are purposely not prompted for with the assumption
+# that they are not important considerations for most users. This same set is also
+# excluded in the web configuration. These prompts are left here as comments for
+# reference or for if we ever change our mind:
+
+# MW_ADMIN_NAME=${defaults[MW_ADMIN_NAME]}
+# ui_prompt_until MW_ADMIN_NAME "MediaWiki admin user name" true false
+
+# DB_NAME=${defaults[DB_NAME]}
+# ui_prompt_until DB_NAME "Name of database" true false
+
+# DB_USER=${defaults[DB_USER]}
+# ui_prompt_until DB_USER "Name of database user" true false
+
 _append_config MW_ADMIN_EMAIL        "$MW_ADMIN_EMAIL"
 _append_config WIKIBASE_PUBLIC_HOST  "$WIKIBASE_PUBLIC_HOST"
 _append_config WDQS_PUBLIC_HOST      "$WDQS_PUBLIC_HOST"
