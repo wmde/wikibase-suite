@@ -2,11 +2,11 @@
 
 This script bootstraps a Wikibase Suite Deploy installation handling or guiding you through all of the following steps:
 
-1. **Check for Git** – Installs Git if it is not already available on the system.  
-2. **Clone the repository** – Downloads the Wikibase Suite Deploy code from the official repository.  
-3. **Check for Docker** – Installs Docker if it is not already available on the system.  
-4. **Prompt for configuration** – Collects all required setup values interactively through a web interface.  
-5. **Launch deployment** – Starts the deployment process once configuration is complete and notifies you once your new Suite instance is available.
+1. **Checks for Git** – Installs Git if it is not already available on the system.  
+2. **Clones the repository** – Downloads the Wikibase Suite Deploy code from the official repository.  
+3. **Checks for Docker** – Installs Docker if it is not already available on the system.  
+4. **Prompts for configuration** – Collects all required setup values interactively through a web interface.  
+5. **Launches deployment** – Starts the deployment process once configuration is complete and notifies you once your new Suite instance is available.
 
 ## Installation
 
