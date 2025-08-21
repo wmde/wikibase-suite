@@ -19,7 +19,7 @@ This script bootstraps a Wikibase Suite Deploy installation handling or guiding 
 2. SSH as root into your new VPS instance and enter the following, following instructions from there:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) [OPTIONS]
 ```
 
 Alternatively, if you already have cloned the repository you can run do start setup running the following commands:
@@ -50,7 +50,7 @@ cd deploy/setup
 These options can be applied using the following command formats:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh | bash -s -- [OPTIONS]
+bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) [OPTIONS]
 ```
 
 Or, from within the deploy/setup directory of an already cloned repository:
