@@ -36,13 +36,13 @@ fi
 # shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/_prompt-ui.sh"
 
-ui_prompt_until MW_ADMIN_EMAIL "MediaWiki ${defaults[MW_ADMIN_NAME]} user email" ui_valid_email
-
 $LOCALHOST && WIKIBASE_PUBLIC_HOST="wikibase.test"
-ui_prompt_until WIKIBASE_PUBLIC_HOST "Wikibase host, e.g. example.com or *.test" ui_host_is_valid
+ui_prompt_until WIKIBASE_PUBLIC_HOST "Wikibase host, e.g. example.com or *.test if running locally" ui_host_is_valid
 
 [[ -z "${WDQS_PUBLIC_HOST:-}" ]] && WDQS_PUBLIC_HOST="query.${WIKIBASE_PUBLIC_HOST}"
 ui_prompt_until WDQS_PUBLIC_HOST "Query Service host" ui_host_is_valid true
+
+ui_prompt_until MW_ADMIN_EMAIL "MediaWiki ${defaults[MW_ADMIN_NAME]} user email" ui_valid_email
 
 # Passwords (blank ⇒ auto-generate; enforce min length ≥ 10 if provided)
 ui_prompt_masked MW_ADMIN_PASS "MediaWiki admin password (auto-generate)" 10
