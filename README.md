@@ -25,8 +25,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setu
 Alternatively, if you already have cloned the repository you can run do start setup running the following commands:
 
 ```bash
-cd deploy/setup
-./start.sh --skip-clone
+./start.sh
 ```
 
 ## CLI Options
@@ -45,7 +44,7 @@ cd deploy/setup
 | Option           | Description |
 |------------------|-------------|
 | `--dev`          | Development mode: skips clone, dependency installs, and launch; uses a relative repo path for local development. |
-| `--local`        | Mark this run as local which launches setup on localhost:8888 and runs the interactive instead of as a background process. Useful only for dev/testing at this stage.|
+| `--local`        | Mark this run as intended for localhost runs, defaulting  config to `wikibase.test` and `query.wikibase.test`.|
 
 These options can be applied using the following command formats:
 

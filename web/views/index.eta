@@ -195,7 +195,7 @@
           <label>
             Wikibase Host:
             <div class="field-help">
-              A DNS entry which points to <span class="inline-pre"><%= SERVER_IP %></span> via an A record, localhost, or any .test domain
+              Either a DNS A record resolving to <%= SERVER_IP %> or a localhost *.test domain
               <span class="help-actions">
                 <a href="#" data-modal-open data-modal-target="dns-help-dialog" aria-label="DNS help">Help</a>
               </span>
@@ -205,7 +205,7 @@
           <label>
             Query Service Host:
             <div class="field-help">
-              A DNS entry which points to <span class="inline-pre"><%= SERVER_IP %></span> via a DNS A record, localhost, or any .test domain
+              Either a DNS A record resolving to <%= SERVER_IP %> or a localhost *.test domain
               <br />
               <em>default: <pre style="display: inline;">query.&lt;Wikibase Host&gt;</pre></em>
               <span class="help-actions">
