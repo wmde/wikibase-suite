@@ -21,7 +21,7 @@ source "$SCRIPTS_DIR/_logging.sh"
 
 wait_for_env_file() {
   until [ -s "$ENV_FILE_PATH" ]; do sleep 2; done
-  debug "Configuration saved."
+  status "Configuration saved."
 }
 
 launch_wikibase() {

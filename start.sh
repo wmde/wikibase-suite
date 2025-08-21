@@ -17,6 +17,9 @@ echo
 
 for arg in "$@"; do
   case "$arg" in
+    --cli)
+      CLI=true
+      ;;
     --dev)
       LOCALHOST=true
       SKIP_DEPENDENCY_INSTALLS=true
@@ -59,6 +62,7 @@ REPO_BRANCH="${REPO_BRANCH:-deploy-setup-script}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_DIR="${WBS_DIR:-$HOME/wbs}"
 
+export CLI="${CLI:-false}"
 export DEBUG="${DEBUG:-false}"
 export LOCALHOST="${LOCALHOST:-false}"
 export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"

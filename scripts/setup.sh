@@ -3,6 +3,7 @@ set -euo pipefail
 
 # --- Expected Variables ---
 
+export CLI
 export DEBUG
 export LOCALHOST
 export SKIP_DEPENDENCY_INSTALLS
@@ -19,11 +20,42 @@ source "$SCRIPTS_DIR/_logging.sh"
 
 # --- Setup Phase ---
 
+if $RESET; then
+  echo
+  if [[ -f "$ENV_FILE_PATH" ]]; then
+    printf "⛔️ Delete the current configuration found in .env? [y/N]: "
+    read -n 1 -r reset_config
+    case "${reset_config:-n}" in
+      y|Y)
+        rm -f "$ENV_FILE_PATH"
+        ;;
+    esac
+    echo 
+  fi
+
+  printf "⛔️ Delete any existing wbs-deploy services AND data? [y/N]: "
+  read -n 1 -r reset_data
+  case "${reset_data:-n}" in
+    y|Y)
+      ;;
+    *)
+      export RESET=false
+      ;;
+  esac
+
+  echo
+  echo
+fi
+
 if ! $SKIP_DEPENDENCY_INSTALLS; then
   bash "$SCRIPTS_DIR/install-docker.sh"
 fi
 
-bash "$SCRIPTS_DIR/web-config.sh"
+if $CLI; then
+  bash "$SCRIPTS_DIR/cli-config.sh"
+else
+  bash "$SCRIPTS_DIR/web-config.sh"
+fi
 
 # --- Launch or exit ---
 
@@ -33,16 +65,18 @@ if $SKIP_LAUNCH; then
 fi
 
 # Detach to avoid accidental interruption of the launch process
-debug "Starting background process..."
-nohup env \
-  DEPLOY_DIR="$DEPLOY_DIR" \
-  LOG_PATH="$LOG_PATH" \
-  DEBUG="$DEBUG" \
-  LOCALHOST="$LOCALHOST" \
-  bash "$SCRIPTS_DIR/launch.sh" \
-  >/dev/null 2>&1 &
+if ! $CLI; then
+  debug "Starting background process..."
+  nohup env \
+    DEPLOY_DIR="$DEPLOY_DIR" \
+    LOG_PATH="$LOG_PATH" \
+    DEBUG="$DEBUG" \
+    LOCALHOST="$LOCALHOST" \
+    bash "$SCRIPTS_DIR/launch.sh" \
+    >/dev/null 2>&1 &
 
-echo "It is now safe to close this terminal session."
-echo
-
-exit 0
+  echo "It is now safe to close this terminal session."
+  echo
+else
+  bash "$SCRIPTS_DIR/launch.sh"
+fi
