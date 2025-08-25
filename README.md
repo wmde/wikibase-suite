@@ -31,4 +31,4 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 
 ## More for developers and testers
 
-If you are testing this setup utility locally, developing on it, or need non‑standard setups of the Wikibase Suite stack, see DEVELOPMENT.md in this repository for detailed guidance on local runs, CLI options, and localhost defaults.
+If you are testing this setup utility locally, developing on it, or need non‑standard setups of the Wikibase Suite stack, see [DEVELOPMENT.md](DEVELOPMENT.md) in this repository for detailed guidance on local runs, CLI options, and localhost defaults.
