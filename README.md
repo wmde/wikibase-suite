@@ -26,8 +26,9 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 ## Troubleshooting
 
 - **Browser warns about certificate**  
-  - On localhost installs, or if Let’s Encrypt fails, setup falls back to a self-signed certificate.  
-  - Your browser will show a warning; you can continue after accepting it.  
+  - If Let’s Encrypt fails, setup falls back to a **self-signed certificate**. You should have been warned in the course of running setup that happened.
+  - In this case, your browser will show a warning such as **“Your connection is not private”** when you try and access the setup URL, and it is safe to bypass it to continue setup. 
+  - Here are browser-specific steps on how to bypass the warning, see [Vultr’s guide to bypassing HTTPS warnings for self-signed certificates](https://docs.vultr.com/how-to-bypass-the-https-warning-for-self-signed-ssl-tls-certificates).
 
 ## More for developers and testers
 
