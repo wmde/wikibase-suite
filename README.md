@@ -1,59 +1,34 @@
-# Wikibase Suite Deploy – Setup Script
+# Wikibase Suite Deploy Setup
 
-This script bootstraps a Wikibase Suite Deploy installation handling or guiding you through all of the following steps:
+This script bootstraps a Wikibase Suite Deploy installation and guides you through:
 
-1. **Checks for Git** – Installs Git if it is not already available on the system.  
-2. **Clones the repository** – Downloads the Wikibase Suite Deploy code from the official repository.  
-3. **Checks for Docker** – Installs Docker if it is not already available on the system.  
-4. **Prompts for configuration** – Collects all required setup values interactively through a web interface.  
-5. **Launches deployment** – Starts the deployment process once configuration is complete and notifies you once your new Suite instance is available.
+1. **Checks/installs Git** – Installs Git if not already available.  
+2. **Clones repositories** – Downloads this setup tool and the current version of the Wikibase Suite code.
+3. **Checks/installs Docker** – Installs Docker unless already installed.  
+4. **Collects configuration** – Through a web interface.  
+5. **Launches Wikibase Suite** – Shows you the finalized configuration and links to your services once complete.
 
-## Installation
+## Installing on a new VPS instance
 
-1. Setup on a new VPS instance that meets the following criteria:
+1. Provision a new VPS that:
+   - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#requirements  
+   - Runs a supported Linux (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS/Alma/Rocky)  
+   - Lets you SSH in as root  
 
-  - Meets minimum hardware requirements (see https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#requirements)
-  - Is running one of these officially supported Linux distributions: Ubuntu (22, 24), Debian (11, 12), Fedora, and CentOS
-  - You have root level SSH access to the instance
+2. SSH in as root and run:
 
-2. SSH as root into your new VPS instance and enter the following, following instructions from there:
+   ```bash
+   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh)
+   ```
 
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh)
-```
+3. After some initial setup messages you'll be provided a web URL to access where you can complete configuration and launching your server.
 
-Alternatively, if you already have cloned the repository you can run do start setup running the following commands:
+## Troubleshooting
 
-```bash
-./start.sh
-```
+- **Browser warns about certificate**  
+  - On localhost installs, or if Let’s Encrypt fails, setup falls back to a self-signed certificate.  
+  - Your browser will show a warning; you can continue after accepting it.  
 
-## CLI Options
+## More for developers and testers
 
-`start.sh` also has some CLI options available for special cases, debugging, and development:
-
-| Option           | Description |
-|------------------|-------------|
-| `--debug`        | Enable verbose/debug logging for troubleshooting. |
-| `--skip-clone`   | Skip cloning the repository (use an existing checkout). |
-| `--skip-deps`    | Skip dependency installation (assumes Git & Docker are already installed). |
-| `--skip-launch`  | Do not launch services after configuration completes. |
-
-### Dev-only
-
-| Option           | Description |
-|------------------|-------------|
-| `--dev`          | Development mode: skips clone, dependency installs, and launch; uses a relative repo path for local development. |
-| `--local`        | Mark this run as intended for localhost runs, defaulting  config to `wikibase.test` and `query.wikibase.test`.|
-
-These options can be applied using the following command formats:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) [OPTIONS]
-```
-
-Or, from within the deploy/setup directory of an already cloned repository:
-
-```bash
-./setup [OPTIONS]
-```
+If you are testing this setup utility locally, developing on it, or need non‑standard setups of the Wikibase Suite stack, see DEVELOPMENT.md in this repository for detailed guidance on local runs, CLI options, and localhost defaults.
