@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: wikibase/wikibase:4
+    image: wikibase/wikibase:5
     depends_on:
       mysql:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
       start_period: 5m
 
   wikibase-jobrunner:
-    image: wikibase/wikibase:4
+    image: wikibase/wikibase:5
     command: /jobrunner-entrypoint.sh
     depends_on:
       wikibase:
