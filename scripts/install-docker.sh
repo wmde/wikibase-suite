@@ -87,7 +87,7 @@ confirm_arch() {
 confirm_docker_version() {
   local docker_ver
   docker_ver="$(docker --version)"
-  if ./scripts/check_semver.sh "$MIN_DOCKER_VERSION" "$docker_ver"; then
+  if "$SCRIPTS_DIR/check_semver.sh" "$MIN_DOCKER_VERSION" "$docker_ver"; then
     return 0
   else
     status "Docker version is '$docker_ver' (>= $MIN_DOCKER_VERSION is required)"
@@ -103,7 +103,7 @@ confirm_docker_compose_version() {
     return 1
   fi
 
-  if ./scripts/check_semver.sh "$MIN_DOCKER_COMPOSE_VERSION" "$compose_ver"; then
+  if "$SCRIPTS_DIR/check_semver.sh" "$MIN_DOCKER_COMPOSE_VERSION" "$compose_ver"; then
     return 0
   else
     status "Docker Compose version is '$compose_ver' (>= $MIN_DOCKER_COMPOSE_VERSION is required)"
