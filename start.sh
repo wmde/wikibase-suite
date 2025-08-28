@@ -45,12 +45,13 @@ for arg in "$@"; do
   esac
 done
 
-# When running within a repository assume it is wikibase-release-pipeline
-# and use files in that repo
-if [[ -d "$(dirname "${BASH_SOURCE[0]:-}")/.git" ]]; then
+# When a wikibase-release-pipeline checkout is available
+# in the parent directory use the parent directory as WBS_DIR
+# and use the repo there instead of cloning again
+if [[ -d "$(dirname "${BASH_SOURCE[0]}")/../wikibase-release-pipeline/.git" ]]; then
+  WBS_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
   SKIP_CLONE=true
-  WBS_DIR=..
-  echo "⚠️ Running inside repo (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
+  echo "⚠️ Using an existing checkout of wikibase-release-pipeline (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
 fi
 
 # --- Setup variables (including defaults) ---

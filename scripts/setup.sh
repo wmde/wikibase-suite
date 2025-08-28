@@ -47,9 +47,17 @@ if $RESET; then
   echo
 fi
 
+# shellcheck disable=SC1091
+source "$SCRIPTS_DIR/install-docker.sh"
 if ! $SKIP_DEPENDENCY_INSTALLS; then
-  bash "$SCRIPTS_DIR/install-docker.sh"
+  install-docker
 fi
+if ! $LOCALHOST; then
+  confirm_arch
+fi
+confirm_docker_version
+confirm_docker_compose_version
+confirm_docker_running
 
 if $CLI; then
   bash "$SCRIPTS_DIR/cli-config.sh"
