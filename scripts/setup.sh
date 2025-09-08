@@ -50,7 +50,7 @@ fi
 # shellcheck disable=SC1091
 source "$SCRIPTS_DIR/install-docker.sh"
 if ! $SKIP_DEPENDENCY_INSTALLS; then
-  install-docker
+  install_docker
 fi
 if ! $LOCALHOST; then
   confirm_arch
