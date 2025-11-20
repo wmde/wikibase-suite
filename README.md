@@ -1,24 +1,46 @@
 # Wikibase Suite Deploy
 
-Wikibase Suite (WBS) Deploy is a containerized, production-ready [Wikibase](https://wikiba.se) system that allows you to self-host a knowledge graph similar to [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). In addition to Wikibase on MediaWiki, WBS Deploy includes the Wikidata Query Service (WDQS) and its front end, along with QuickStatements, Elasticsearch and a Traefik reverse proxy with SSL termination and ACME support. The service orchestration is implemented using Docker Compose V2.
-
-> 🔧 This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase).
-
-> 💡 This document presumes familiarity with basic Linux administration tasks and with Docker and Docker Compose.
-
-## What's in the box?
+Wikibase Suite (WBS) Deploy is a containerized, production-ready [Wikibase](https://wikiba.se) system that allows you to self-host a knowledge graph similar to [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). 
 
 WBS Deploy consists of the following services:
 
-- **[Wikibase](https://hub.docker.com/r/wikibase/wikibase)** MediaWiki packaged with the Wikibase extension and other commonly used extensions.
-- **Job Runner** The MediaWiki [JobRunner](https://www.mediawiki.org/wiki/Manual:Job_queue#Cron) service which uses the same Wikibase container as above.
-- **[MariaDB](https://hub.docker.com/_/mariadb)** Database service for MediaWiki and Wikibase.
-- **[Elasticsearch](https://hub.docker.com/r/wikibase/elasticsearch)** Search service used by MediaWiki.
-- **[WDQS](https://hub.docker.com/r/wikibase/wdqs)** Wikidata Query Service to process SPARQL queries.
+- **[Wikibase](https://hub.docker.com/r/wikibase/wikibase):** MediaWiki packaged with the Wikibase extension and other commonly used extensions.
+- **Job Runner:** The MediaWiki [JobRunner](https://www.mediawiki.org/wiki/Manual:Job_queue#Cron) service which uses the same Wikibase container as above.
+- **[MariaDB](https://hub.docker.com/_/mariadb):** Database service for MediaWiki and Wikibase.
+- **[Elasticsearch](https://hub.docker.com/r/wikibase/elasticsearch):** Search service used by MediaWiki.
+- **[WDQS](https://hub.docker.com/r/wikibase/wdqs):** Wikidata Query Service to process SPARQL queries.
 - **[WDQS Frontend](https://hub.docker.com/r/wikibase/wdqs-frontend)** Web front end for SPARQL queries.
-- **[WDQS Updater](https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#runUpdate.sh)** Keeps the WDQS data in sync with Wikibase.
-- **[Quickstatements](https://hub.docker.com/r/wikibase/quickstatements)** A web-based tool to import and manipulate large amounts of data.
-- **[Traefik](https://hub.docker.com/_/traefik)** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
+- **[WDQS Updater](https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#runUpdate.sh):** Keeps the WDQS data in sync with Wikibase.
+- **[Quickstatements](https://hub.docker.com/r/wikibase/quickstatements):** A web-based tool to import and manipulate large amounts of data.
+- **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
+
+The service orchestration is implemented using Docker Compose V2.
+
+> 🔧 This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase).
+
+> 💡 This document presumes familiarity with basic Linux administration tasks and with [Docker](https://docs.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/).
+
+### Index
+- [Installation](#installation)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+  - [Initial Configuration](#initial-configuration)
+  - [Starting instance](#starting)
+  - [Stopping instance](#stopping)
+  - [Resetting the configuration](#resetting-the-configuration)
+- [Call Back](#call-back)
+- [Updating and Versioning](#updating-and-versioning)
+  - [Minor and patch updates](#minor-and-patch-updates-for-wbs-deploy)
+  - [Major updates](#major-upgrades)
+  - [Automatic upgrades](#automatic-updates)
+  - [Downgrades](#downgrades)
+- [Advanced Configuration](#advanced-configuration)
+- [Managing your data](#managing-your-data)
+- [Frequently Asked Questions](#frequently-asked-questions)
+- [Removing Wikibase Suite Completely with all its Data](#removing-wikibase-suite-completely-with-all-its-data)
+- [WDQS](#wdqs)
+
+## Installation
 
 ### Requirements
 
@@ -31,9 +53,9 @@ WBS Deploy consists of the following services:
 
 #### Software
 
-- Docker 22.0 (or greater)
-- Docker Compose 2.10 (or greater)
-- git
+- Docker 22.0 or greater ([upgrading documentation](https://docs.docker.com/engine/install/ubuntu/#installation-methods))
+- Docker Compose 2.10 or greater ([upgrading documentation](https://docs.docker.com/compose/install/))
+- [git](https://git-scm.com/install/) 
 
 #### Domain names
 
@@ -42,11 +64,11 @@ You need two DNS records that resolve to your machine's IP address:
 - Wikibase, e.g., "wikibase.example"
 - QueryService, e.g., "query.wikibase.example"
 
-## Setup
+### Setup
 
 > 💡 If you want to run a quick test on a machine that has no public IP address (such as your local machine), check our [FAQ entry](#can-i-host-wbs-deploy-locally) below.
 
-### Download WBS Deploy
+#### Download WBS Deploy
 
 Check out the files from Github, move to the subdirectory `deploy`.
 
@@ -63,7 +85,7 @@ Make a copy of the [configuration template](./template.env) in the `wikibase-rel
 cp template.env .env
 ```
 
-Follow the instructions in the comments in your newly created `.env` file to set domain names, usernames and passwords.
+> Please follow the instructions in the comments in your newly created `.env` file to set domain names, usernames and passwords. We would also like to bring your attention to our [Call Back](#call-back) feature which you can opt-in here.
 
 ### Starting
 
@@ -77,7 +99,7 @@ The first start can take a couple of minutes. You can check the status of the st
 
 🎉 Congratulations! You can now access your instance via https://wikibase.example. Make sure to adjust your domain name accordingly.
 
-> 💡 If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages.
+> 💡 If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. In case you run into some issues in this step, please make sure to [reset the configuration](#resetting-the-configuration) after fixing the error.
 
 ### Stopping
 
@@ -103,29 +125,7 @@ docker compose down
 docker compose up
 ```
 
-## Advanced configuration
-
-On first launch, WBS Deploy will create files in the `deploy/config` directory. This is your instance configuration. **You own and control these files.** Be sure to include them in your backups.
-
-### `config/LocalSettings.php`
-
-This file is generated by the [MediaWiki installer script](https://www.mediawiki.org/wiki/Manual:Install.php) and supplemented by the Wikibase container's `entrypoint.sh` script on first launch. Once this file has been generated, you own and control it. You may _need_ to make changes to it for [MediaWiki major version updates](https://www.mediawiki.org/wiki/Manual:Upgrading#Adapt_your_LocalSettings.php).
-
-If `config/LocalSettings.php` is missing, it triggers the Wikibase container to run the [MediaWiki installer script](https://www.mediawiki.org/wiki/Manual:Install.php). If you need to run the installer again, you can remove the `deploy/config/LocalSettings.php` file (but keep a backup just in case!) and restart your instance.
-
-### `config/wikibase-php.ini`
-
-This is Wikibase's `php.ini` override file, a good place for tuning PHP configuration values. It gets loaded by the Mediawiki Wikibase web server's PHP interpreter.
-
-### `config/wdqs-frontend-config.json`
-
-This configuration file allows you to control `wdqs-frontend`, the GUI for the query service.
-
-### User-defined extensions
-
-It is possible to add extensions to Wikibase Suite Deploy's MediaWiki. To learn how this works, consult the [README in `deploy/config/extensions`](./config/extensions/README.md).
-
-### Call Back
+## Call Back
 
 The Wikibase Suite Wikibase Image has a Call Back feature. This initiative will help maintain an index of Wikibases. The goal of this index is to gather more quantitative data to learn more about how Wikibase is being used. It eventually also aims to be a central hub for data re-use and federation initiatives between Wikibases, where users can discover other Wikibases easily. In the near future, we expect to have a proper showcase of all the Wikibases that have opted in so as to increase discoverability. For now, however, this data will remain only with Wikimedia Deutschland.
 
@@ -135,75 +135,13 @@ You can disable the feature at any time by setting `METADATA_CALLBACK=false` in 
  
 Let's build the Linked Open Data Web together!
 
-### docker-compose.yml
-
-To further customize your instance, you can also make changes to `docker-compose.yml`. To ease updating to newer versions of WBS Deploy, consider putting your customizations into a new file called, for example, `docker-compose.override.yml`. If you do this, you'll need to start using the following commands to restart your instance:
-
-```sh
-docker compose -f docker-compose.yml -f docker-compose.override.yml down
-docker compose -f docker-compose.yml -f docker-compose.override.yml up
-```
-
-This way, your changes are kept separate from the original WBS Deploy code.
-
-## Managing your data
-
-Besides [your configuration](#advanced-configuration), it's your data that makes your instance unique. All instance data is stored in [Docker volumes](https://docs.docker.com/storage/volumes/).
-
-- `wikibase-image-data`: MediaWiki image and media file uploads
-- `mysql-data`: MediaWiki/Wikibase MariaDB raw database
-- `wdqs-data`: Wikidata Query Service raw database
-- `elasticsearch-data`: Elasticsearch raw database
-- `quickstatements-data`: generated Quickstatements OAuth binding for this MediaWiki instance
-- `traefik-letsencrypt-data`: Traefik SSL certificates generated by letsencrypt
-
-### Back up your data
-
-To back up your data, shut down the instance and dump the contents of all Docker volumes into `.tar.gz` files.
-
-```sh
-docker compose down
-
-for v in \
-    wbs-deploy_wikibase-image-data \
-    wbs-deploy_mysql-data \
-    wbs-deploy_wdqs-data \
-    wbs-deploy_elasticsearch-data \
-    wbs-deploy_quickstatements-data \
-    wbs-deploy_traefik-letsencrypt-data \
-    ; do
-  docker run --rm --volume $v:/backup debian:12-slim tar cz backup > $v.tar.gz
-done
-```
-
-### Restore from a backup
-
-To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from your `.tar.gz` files.
-
-```sh
-docker compose down
-
-for v in \
-    wbs-deploy_wikibase-image-data \
-    wbs-deploy_mysql-data \
-    wbs-deploy_wdqs-data \
-    wbs-deploy_elasticsearch-data \
-    wbs-deploy_quickstatements-data \
-    wbs-deploy_traefik-letsencrypt-data \
-    ; do
-  docker volume rm $v 2> /dev/null
-  docker volume create $v
-  docker run -i --rm --volume $v:/backup debian:12-slim tar xz < $v.tar.gz
-done
-```
-
 ## Updating and versioning
 
 WBS uses [semantic versioning](https://semver.org/spec/v2.0.0.html). WBS Deploy and each WBS image have individual version numbers.
 
 WBS Deploy always references the latest minor and patch releases of the compatible WBS images' major versions using the Docker images' major version tag. For example, WBS Deploy 2.0.1 might reference `wikibase/wikibase:3`, a tag that always points to the latest image Wikibase 3.x.x image.
 
-#### Minor and patch updates for WBS images
+### Minor and patch updates for WBS images
 
 Because WBS Deploy always references the latest minor and patch releases of compatible WBS images, non-breaking changes (including security updates) can be pulled at any time.
 
@@ -328,30 +266,92 @@ At the moment, WBS Deploy does not support automatic updates. To automatically d
 
 Downgrades are not supported. In order to revert an update, restore your data from a backup made prior to the upgrade.
 
-### Removing Wikibase Suite Completely with all its Data
+## Advanced configuration
 
-‼️ **This will destroy all data! [Back up](#back-up-your-data) anything you wish to retain.**
+On first launch, WBS Deploy will create files in the `deploy/config` directory. This is your instance configuration. **You own and control these files.** Be sure to include them in your backups.
 
-To reset the configuration and data, remove the Docker containers, Docker volumes and the generated `deploy/config` files.
+### `config/LocalSettings.php`
+
+This file is generated by the [MediaWiki installer script](https://www.mediawiki.org/wiki/Manual:Install.php) and supplemented by the Wikibase container's `entrypoint.sh` script on first launch. Once this file has been generated, you own and control it. You may _need_ to make changes to it for [MediaWiki major version updates](https://www.mediawiki.org/wiki/Manual:Upgrading#Adapt_your_LocalSettings.php).
+
+If `config/LocalSettings.php` is missing, it triggers the Wikibase container to run the [MediaWiki installer script](https://www.mediawiki.org/wiki/Manual:Install.php). If you need to run the installer again, you can remove the `deploy/config/LocalSettings.php` file (but keep a backup just in case!) and restart your instance.
+
+### `config/wikibase-php.ini`
+
+This is Wikibase's `php.ini` override file, a good place for tuning PHP configuration values. It gets loaded by the Mediawiki Wikibase web server's PHP interpreter.
+
+### `config/wdqs-frontend-config.json`
+
+This configuration file allows you to control `wdqs-frontend`, the GUI for the query service.
+
+### User-defined extensions
+
+It is possible to add extensions to Wikibase Suite Deploy's MediaWiki. To learn how this works, consult the [README in `deploy/config/extensions`](./config/extensions/README.md).
+
+
+### docker-compose.yml
+
+To further customize your instance, you can also make changes to `docker-compose.yml`. To ease updating to newer versions of WBS Deploy, consider putting your customizations into a new file called, for example, `docker-compose.override.yml`. If you do this, you'll need to start using the following commands to restart your instance:
 
 ```sh
-docker compose down --volumes
-rm -vf config/{LocalSettings.php,wikibase-php.ini,wdqs-frontend-config.json}
+docker compose -f docker-compose.yml -f docker-compose.override.yml down
+docker compose -f docker-compose.yml -f docker-compose.override.yml up
 ```
 
-Removing the `traefik-letsencrypt-data` volume will request a new certificate from LetsEncrypt on the next launch of your instance. Certificate generation on LetsEncrypt is [rate-limited](https://letsencrypt.org/docs/rate-limits/); eventually you may be blocked from generating new certificates **for multiple days**. To avoid that outcome, change to the LetsEncrypt staging server by appending the following line to the `traefik` `command` stanza of your `docker-compose.yml` file:
+This way, your changes are kept separate from the original WBS Deploy code.
 
-```yml
---certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+## Managing your data
+
+Besides [your configuration](#advanced-configuration), it's your data that makes your instance unique. All instance data is stored in [Docker volumes](https://docs.docker.com/storage/volumes/).
+
+- `wikibase-image-data`: MediaWiki image and media file uploads
+- `mysql-data`: MediaWiki/Wikibase MariaDB raw database
+- `wdqs-data`: Wikidata Query Service raw database
+- `elasticsearch-data`: Elasticsearch raw database
+- `quickstatements-data`: generated Quickstatements OAuth binding for this MediaWiki instance
+- `traefik-letsencrypt-data`: Traefik SSL certificates generated by letsencrypt
+
+### Back up your data
+
+To back up your data, shut down the instance and dump the contents of all Docker volumes into `.tar.gz` files.
+
+```sh
+docker compose down
+
+for v in \
+    wbs-deploy_wikibase-image-data \
+    wbs-deploy_mysql-data \
+    wbs-deploy_wdqs-data \
+    wbs-deploy_elasticsearch-data \
+    wbs-deploy_quickstatements-data \
+    wbs-deploy_traefik-letsencrypt-data \
+    ; do
+  docker run --rm --volume $v:/backup debian:12-slim tar cz backup > $v.tar.gz
+done
 ```
 
-## WDQS
+### Restore from a backup
 
-To interact with the WDQS via the web front end, navigate to the URL defined as `WDQS_PUBLIC_HOST` in the `.env` file. By default, this is set to `query.wikibase.example`.
+To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from your `.tar.gz` files.
 
-Alternatively, send `GET` requests with your SPARQL query to the WDQS API endpoint: `https://query.wikibase.example/sparql?query={SPARQL}`
+```sh
+docker compose down
 
-## FAQ
+for v in \
+    wbs-deploy_wikibase-image-data \
+    wbs-deploy_mysql-data \
+    wbs-deploy_wdqs-data \
+    wbs-deploy_elasticsearch-data \
+    wbs-deploy_quickstatements-data \
+    wbs-deploy_traefik-letsencrypt-data \
+    ; do
+  docker volume rm $v 2> /dev/null
+  docker volume create $v
+  docker run -i --rm --volume $v:/backup debian:12-slim tar xz < $v.tar.gz
+done
+```
+
+## Frequently Asked Questions
 
 ### Can I host WBS Deploy locally?
 
@@ -385,3 +385,26 @@ As of this writing, we can offer no specific recommendations for VPS providers t
 ### Where can I get further help?
 
 If you have questions not listed above or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.
+
+## Removing Wikibase Suite Completely with all its Data
+
+‼️ **This will destroy all data! [Back up](#back-up-your-data) anything you wish to retain.**
+
+To reset the configuration and data, remove the Docker containers, Docker volumes and the generated `deploy/config` files.
+
+```sh
+docker compose down --volumes
+rm -vf config/{LocalSettings.php,wikibase-php.ini,wdqs-frontend-config.json}
+```
+
+Removing the `traefik-letsencrypt-data` volume will request a new certificate from LetsEncrypt on the next launch of your instance. Certificate generation on LetsEncrypt is [rate-limited](https://letsencrypt.org/docs/rate-limits/); eventually you may be blocked from generating new certificates **for multiple days**. To avoid that outcome, change to the LetsEncrypt staging server by appending the following line to the `traefik` `command` stanza of your `docker-compose.yml` file:
+
+```yml
+--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+```
+
+## WDQS
+
+To interact with the WDQS via the web front end, navigate to the URL defined as `WDQS_PUBLIC_HOST` in the `.env` file. By default, this is set to `query.wikibase.example`.
+
+Alternatively, send `GET` requests with your SPARQL query to the WDQS API endpoint: `https://query.wikibase.example/sparql?query={SPARQL}`
