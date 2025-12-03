@@ -46,6 +46,14 @@ The service orchestration is implemented using Docker Compose V2.
 
 #### Hardware
 
+Here are some official installation guides for commonly used hosting providers:
+- [Hetzner](https://docs.hetzner.com/cloud/servers/getting-started/creating-a-server/)
+- [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
+- [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
+- [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
+
+> Please note that we do not recommend any of the providers. There are many other options available out there with different features.
+
 - Network connection with a public IP address
 - x86_64 (AMD64) architecture
 - 8 GB RAM
