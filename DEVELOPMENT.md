@@ -45,5 +45,5 @@ To use these special localhost-only domains, you’ll need to add entries to you
 - The setup web server runs on port 8888 (HTTPS).  
 - For non-localhost installs, setup will try to obtain a Let’s Encrypt cert on port 80. If that fails, it falls back to a self-signed cert (browser warning).  
 - If `docker-compose.local.yml` exists in `deploy/`, it will be merged automatically.  
-- Default `wikibase-release-pipeline` branch is `deploy@5.0.0` (can be overridden with `REPO_BRANCH`).  
+- Default `wikibase-release-pipeline` branch is `deploy@5.0.1` (can be overridden with `REPO_BRANCH`).  
 - After launch, your saved `.env` config is displayed—be sure to store credentials securely.
