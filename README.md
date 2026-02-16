@@ -101,7 +101,7 @@ Open the file in the text editor of your choice. (Options include but are not li
 ### 4. Editing the file
 
 #### Callback
-The callback function allows for maintaining an index of Wikibases. You can find more information [here](#call-back). Set this variable to `true` to opt in or `false` to opt out.
+The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
 
 ```sh
 METADATA_CALLBACK=true
