@@ -2,6 +2,8 @@
 
 Wikibase Suite (WBS) Deploy is a containerized, production-ready [Wikibase](https://wikiba.se) system that allows you to self-host a knowledge graph similar to [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). 
 
+This installation guide walks you through how to set up a production-ready Wikibase. This guide isn't for hosting Wikibase locally.
+
 WBS Deploy consists of the following services:
 
 - **[Wikibase](https://hub.docker.com/r/wikibase/wikibase):** MediaWiki packaged with the Wikibase extension and other commonly used extensions.
@@ -16,9 +18,8 @@ WBS Deploy consists of the following services:
 
 The service orchestration is implemented using Docker Compose V2.
 
-> 🔧 This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase).
-
-> 💡 This document presumes familiarity with basic Linux administration tasks and with [Docker](https://docs.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/).
+> [!NOTE]
+> This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase). This document presumes familiarity with basic Linux administration tasks and with [Docker](https://docs.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/).
 
 ### Index
 - [Installation](#installation)
@@ -36,20 +37,21 @@ The service orchestration is implemented using Docker Compose V2.
 - [Removing Wikibase Suite Completely with all its Data](removing-wikibase.md)
 - [WDQS](wdqs.md)
 
+---
+
 ## Installation
 
-### Requirements
+### 1. Requirements
 
 #### Hardware
 
-Here are some official installation guides for commonly used hosting providers:
+Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
 - [Hetzner](https://docs.hetzner.com/cloud/servers/getting-started/creating-a-server/)
-- [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
+- [DigitalOcean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
 - [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
 - [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
 
-> Please note that we do not recommend any of the providers. There are many other options available out there with different features.
-
+The minimum requirements for your server are as follows: 
 - Network connection with a public IP address
 - x86_64 (AMD64) architecture
 - 8 GB RAM
@@ -57,31 +59,34 @@ Here are some official installation guides for commonly used hosting providers:
 
 #### Software
 
-- Docker 22.0 or greater ([upgrading documentation](https://docs.docker.com/engine/install/ubuntu/#installation-methods))
-- Docker Compose 2.10 or greater ([upgrading documentation](https://docs.docker.com/compose/install/))
+- Docker 22.0 or greater ([installation documentation](https://docs.docker.com/engine/install/ubuntu/#installation-methods))
+- Docker Compose 2.10 or greater ([installation documentation](https://docs.docker.com/compose/install/))
 - [git](https://git-scm.com/install/) 
 
 #### Domain names
 
-You need two DNS records that resolve to your machine's IP address:
+You'll need to configure two DNS records with fully qualified domain names that resolve to your server's IP address, one for Wikibase itself and one for the query service (WDQS). Many Wikibase users configure the query service as a subdomain of the main address:
 
-- Wikibase, e.g., "wikibase.example"
-- QueryService, e.g., "query.wikibase.example"
+Examples:
+- Wikibase: "yourdomain.example"
+- WDQS: "query.yourdomain.example"
 
-### Setup
+---
 
-> 💡 If you want to run a quick test on a machine that has no public IP address (such as your local machine), check our [FAQ entry](#can-i-host-wbs-deploy-locally) below.
+### 2. Setup
 
 #### Download WBS Deploy
 
-Check out the files from Github, move to the subdirectory `deploy`.
+Check out the files from Github, then change to the subdirectory `deploy`.
 
 ```sh
 git clone https://github.com/wmde/wikibase-release-pipeline
 cd wikibase-release-pipeline/deploy
 ```
 
-### Initial configuration
+---
+
+### 3. Initial configuration
 
 Make a copy of the [configuration template](./template.env) in the `wikibase-release-pipeline/deploy` directory.
 
@@ -89,52 +94,77 @@ Make a copy of the [configuration template](./template.env) in the `wikibase-rel
 cp template.env .env
 ```
 
-> Please follow the instructions in the comments in your newly created `.env` file to set domain names, usernames and passwords. We would also like to bring your attention to our [Call Back](#call-back) feature which you can opt-in here.
+Open the file in the text editor of your choice. (Options include but are not limited to vim, nano, kedit, Sublime Text, and VSCode.)
 
-### Starting
+---
 
-Run the following command from within `wikibase-release-pipeline/deploy`:
+### 4. Editing the file
+
+#### Callback
+The callback function allows for maintaining an index of Wikibases. You can find more information [here](#call-back). Set this variable to `true` to opt in or `false` to opt out.
+
+```sh
+METADATA_CALLBACK=true
+```
+
+> [!NOTE]
+> If this variable is not set, the container will not run successfully.
+
+#### Public hostnames
+The domain names for your Wikibase Suite services should be configured on your DNS host to point to the public IP address 
+of the server you are deploying to. Note that you need two distinct names, i.e., two different fully qualified domain names. Without them, the traefik reverse proxy cannot route properly.
+
+#### MediaWiki (Wikibase) user
+Please enter the username, email address and password you would like to use to log into the Wikibase web interface.
+
+> [!NOTE]
+> Password must be at least 10 characters, different from your username, and must not appear in the list of commonly used passwords 
+> this project uses. If these conditions are not met, the container won't run successfully.
+
+#### Database configuration:
+These settings are used to configure the MariaDB container when creating a new database, and by MediaWiki when generating a new `LocalSettings.php` file. They won't be set on an existing database, nor will MediaWiki update those settings in your `LocalSettings.php`. To change those settings, adjust them manually in MariaDB and your `LocalSettings.php` file. Alternatively, delete your MariaDB volume `mysql-data` (all data will be lost) and the `LocalSettings.php` file from the `./config` directory, then restart.
+
+---
+
+### 5. Starting Wikibase
+
+Run the following command from within the `wikibase-release-pipeline/deploy` directory:
 
 ```sh
 docker compose up
 ```
 
-The first start can take a couple of minutes. You can check the status of the stack by running `docker ps` from another terminal. When your WBS Deploy instance is ready, the `wbs-deploy-wikibase-1` container will be marked `healthy`.
+The first start may take a couple of minutes. You can check the status of the stack by running `docker ps` from another terminal. When your WBS Deploy instance is ready, the `wbs-deploy-wikibase-1` container will be marked `healthy`.
 
-🎉 Congratulations! You can now access your instance via https://wikibase.example. Make sure to adjust your domain name accordingly.
+🎉 Congratulations! You can now access your instance via your domain name.
 
-> 💡 If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. In case you run into some issues in this step, please make sure to [reset the configuration](#resetting-the-configuration) after fixing the error.
+> [!NOTE]
+> If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. Should you run into some issues in this step, make sure to [reset the configuration](#resetting-the-configuration) after you fix the error.
 
-### Stopping
+---
 
-To stop, use
+### 6. Stopping
+
+To stop Wikibase, run:
 
 ```sh
 docker compose stop
 ```
 
+---
+
 ### Resetting the configuration
 
 Most values set in `.env` are written into the respective containers after you run `docker compose up` for the first time.
 
-If you want to reset the configuration while retaining your existing data:
+To reset the configuration while retaining your existing data:
 
 1. Make any needed changes to the values in `.env`.
-   NOTE: Do not change `DB_*` values unless you are also [re-creating the database](#removing-wikibase-suite-completely-with-all-its-data).
-2. Remove your `LocalSettings.php` file from the `deploy/config` directory. (Create a backup if you made any changes.)
-3. Remove and re-create containers:
+> [!NOTE] Do not change `DB_*` values unless you are also [re-creating the database](#removing-wikibase-suite-completely-with-all-its-data).
+2. Back up and then remove the `LocalSettings.php` file from the `deploy/config` directory.
+3. Remove and re-create the containers by running:
 
 ```sh
 docker compose down
 docker compose up
 ```
-
-## Call Back
-
-The Wikibase Suite Wikibase Image has a Call Back feature. This initiative will help maintain an index of Wikibases. The goal of this index is to gather more quantitative data to learn more about how Wikibase is being used. It eventually also aims to be a central hub for data re-use and federation initiatives between Wikibases, where users can discover other Wikibases easily. In the near future, we expect to have a proper showcase of all the Wikibases that have opted in so as to increase discoverability. For now, however, this data will remain only with Wikimedia Deutschland.
-
-You can join this initiative by setting `METADATA_CALLBACK=true` or disable the feature by setting `METADATA_CALLBACK=false` in your `.env` file. If you enable the feature, your hostnames configured in `.env` will be shared and added to the list. We will then be able to periodically analyze publicly available information on your Wikibase instance. It is important to note that we can only access publicly visible information. If your Wikibase instance requires a login to view data, we will not be able to collect statistics.
-
-You can disable the feature at any time by setting `METADATA_CALLBACK=false` in your `.env` file and by sending an E-Mail to [wikibase-suite-support@wikimedia.de](mailto:wikibase-suite-support@wikimedia.de) containing your hostname to remove your instance from the listing and stop periodic analysis.
- 
-Let's build the Linked Open Data Web together!
