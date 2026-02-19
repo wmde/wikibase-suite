@@ -3,6 +3,7 @@
 Updates in concert with Wikibase image v6.0.0 (mw-1.45) release
 
 - Moves wikibase and wikibase-jobrunner to wikibase/wikibase:6 source image spec
+- Passes Deploy version reporting through to Wikibase image so it appears in Special:Version and action API
 
 ## 5.0.1 (2025-08-26)
 
