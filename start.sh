@@ -58,7 +58,7 @@ fi
 
 SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/lorenjohnson/wbs-deploy-setup.git}"
 REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
-REPO_BRANCH="${REPO_BRANCH:-"deploy@5.0.1"}"
+REPO_BRANCH="${REPO_BRANCH:-"deploy@6.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_DIR="${WBS_DIR:-$HOME/wbs}"
 
