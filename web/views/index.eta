@@ -10,65 +10,282 @@
   />
   <script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
   <style>
+    :root {
+      --font-size: 15px;
+      --spacing: 0.9rem;
+      --tab-active-bg: #ffffff;
+      --shell-bg: #f5f7fb;
+      --panel-bg: #ffffff;
+      --panel-border: #d9e1ee;
+      --panel-shadow: 0 10px 30px rgba(8, 22, 52, 0.05);
+      --status-bg: #eef5ff;
+      --status-border: #bcd3f5;
+      --status-text: #243b67;
+      --locked-bg: #f8fafc;
+      --locked-border: #d5dee9;
+      --muted-text: #49566e;
+    }
+
     body {
-      display: flex;
-      flex-direction: column;
       min-height: 100vh;
-      padding: 1rem;
+      margin: 0;
+      background: radial-gradient(circle at top left, #ffffff 0%, var(--shell-bg) 55%, #edf2f8 100%);
+      padding: 0.65rem 1.15rem 1.15rem;
+      font-size: 15px;
     }
 
     main {
-      flex: 1;
-      max-width: 1200px;
+      max-width: 980px;
       margin: auto;
       width: 100%;
     }
 
+    body > main {
+      padding: 0 !important;
+    }
+
     #header {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid #d8e1ee;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(243, 248, 255, 0.96) 100%);
+      box-shadow: 0 8px 24px rgba(15, 33, 68, 0.06);
+    }
+
+    #header-brand {
+      display: flex;
+      gap: 0.95rem;
+      align-items: center;
     }
 
     #header img {
-      height: 80px;
+      height: 56px;
+      width: auto;
+      flex-shrink: 0;
     }
 
-    /* Single column by default; auto-switch to two columns when status has content */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.25rem;
-    }
-    /* When either #waiting or #complete is visible (not [hidden]), make it two columns */
-    .grid:has(#status-section #waiting:not([hidden])),
-    .grid:has(#status-section #complete:not([hidden])) {
-      grid-template-columns: 1fr 1fr;
+    #header-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
-    #log-wrapper {
-      background-color: #111;
-      color: #eee;
-      font-size: 0.6em;
-      font-family: monospace;
-      padding: 1em;
-      max-height: 600px;
-      overflow-y: auto;
-      display: none;
-      border-radius: 0.5rem;
-      white-space: pre-wrap;
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
+    #header h1 {
+      margin: 0;
+      font-size: 1.22rem;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      color: #16243d;
     }
-    
-    #log-content {
-      white-space: pre-wrap;
+
+    #header-subtitle {
+      margin: 0;
+      color: #4f5f78;
+      font-size: 0.79rem;
+      line-height: 1.25;
+    }
+
+    #setup-steps {
+      display: block;
+      margin: 0;
+      padding: 0;
+      border-bottom: 1px solid var(--panel-border);
+      position: relative;
+      z-index: 3;
+    }
+
+    #setup-steps ol {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.35rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    #setup-steps ol:first-of-type,
+    #setup-steps ol:last-of-type {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #setup-steps li {
+      margin: 0;
+      padding: 0 !important;
+      list-style: none;
+    }
+
+    #setup-steps li::before {
+      content: none !important;
+    }
+
+    #setup-steps li.step-item {
+      flex: 0 0 auto;
+    }
+
+    #setup-steps li.log-item {
+      margin-left: auto;
+    }
+
+    .step {
+      appearance: none;
+      width: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.48rem;
+      padding: 0.46rem 0.62rem;
+      min-height: 2.7rem;
+      border-radius: 12px 12px 0 0;
+      border: 1px solid var(--panel-border);
+      border-bottom-color: var(--panel-border);
+      background: #edf3fb;
+      text-align: left;
+      cursor: pointer;
+      color: #5f6d84;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      margin: 0 0 -1px;
+    }
+
+    .step-item .step {
+      min-width: 11.7rem;
+    }
+
+    .step-index {
+      width: 1.18rem;
+      height: 1.18rem;
+      border-radius: 999px;
+      border: 1px solid #b8c5dd;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.69rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: #fff;
+    }
+
+    .step-label {
+      font-size: 0.77rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .step.is-current {
+      color: #5f6d84;
+    }
+
+    .step.is-current .step-index {
+      border-color: #b8c5dd;
+      color: inherit;
+    }
+
+    .step.is-active {
+      border-color: var(--panel-border);
+      border-bottom-color: var(--tab-active-bg);
+      background: #fff;
+      position: relative;
+      z-index: 2;
+      box-shadow: none;
+    }
+
+    .step[disabled] {
+      cursor: default;
+      opacity: 1;
+    }
+
+    .step[disabled]:not(.is-done):not(.is-current) {
+      color: #9ca8b8;
+      background: #f1f4f8;
+      border-color: #dbe2ec;
+    }
+
+    .step[disabled]:not(.is-done):not(.is-current) .step-index {
+      border-color: #ccd5e2;
+      background: #f8fafc;
+      color: #b2bccb;
+    }
+
+    .step[aria-selected='true'] {
+      border-color: var(--panel-border);
+      border-bottom-color: var(--tab-active-bg);
+      box-shadow: none;
+    }
+
+    .step.is-done {
+      color: #5f6d84;
+      background: #edf3fb;
+      border-color: var(--panel-border);
+    }
+
+    .step.is-done .step-index {
+      border-color: #4f8f74;
+      background: #4f8f74;
+      color: #fff;
+      font-size: 0.68rem;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-top: 0;
+      border-radius: 0 0 16px 16px;
+      box-shadow: var(--panel-shadow);
+      padding: 0.86rem 0.9rem 0.8rem;
+      margin-top: 0;
+    }
+
+    #setup-layout {
+      margin-top: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel > h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.98rem;
+      letter-spacing: 0.01em;
+    }
+
+    #config-locked-note {
+      margin: 0 0 0.7rem;
+      color: #3f4e66;
+      font-size: 0.84rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    #config-section.is-locked {
+      border-color: var(--panel-border);
+      background: var(--panel-bg);
+    }
+
+    #config-section.is-locked input,
+    #config-section.is-locked button,
+    #config-section.is-locked details {
+      opacity: 0.86;
+    }
+
+    #config-form button[type='submit'][disabled] {
+      background: #adb8c5 !important;
+      border-color: #adb8c5 !important;
+      color: #f2f6fa !important;
+      opacity: 1;
+      filter: saturate(0.45);
+      cursor: not-allowed;
     }
 
     #config-content {
       background-color: #111;
       color: #eee;
-      font-size: 0.6em;
+      font-size: 0.66rem;
       font-family: monospace;
       padding: 1em;
       border-radius: 0.5rem;
@@ -76,8 +293,8 @@
       white-space: pre;
     }
 
-    #log *::selection,
-    #log::selection,
+    #log-content *::selection,
+    #log-content::selection,
     #config-content *::selection,
     #config-content::selection {
       background-color: var(--primary);
@@ -92,7 +309,7 @@
 
     label {
       font-weight: bold;
-      font-size: 0.9rem;
+      font-size: 0.86rem;
     }
 
     label:has(.field-help) input {
@@ -105,8 +322,8 @@
 
     .field-help {
       font-weight: normal;
-      font-size: 0.7rem;
-      color: #555;
+      font-size: 0.71rem;
+      color: #5a667b;
     }
 
     .field-help .help-actions {
@@ -123,69 +340,266 @@
       border-color: rgb(197, 47, 33);
     }
 
-    /* Waiting messages (inline) */
-    #waiting {
-      margin-top: 0.5rem;
-      font-size: 0.9em;
-      color: var(--muted, #666);
-      white-space: pre-wrap;
-    }
-    .status-line {
-      margin: 0.15rem 0;
+    #status-intro {
+      margin: 0 0 0.75rem;
+      color: var(--muted-text);
+      font-size: 0.82rem;
     }
 
-    /* Log dialog styling */
-    #log-dialog article {
-      max-width: 960px;
-      max-height: initial;
+    #waiting {
+      margin-top: 0.35rem;
+      font-size: 0.86rem;
+      color: var(--status-text);
+      white-space: pre-wrap;
+      background: var(--status-bg);
+      border: 1px solid var(--status-border);
+      border-radius: 12px;
+      padding: 0.72rem 0.85rem;
     }
-    #log-dialog pre {
+
+    .status-line {
+      position: relative;
+      margin: 0.2rem 0 0.2rem 0.95rem;
+    }
+
+    .status-line::before {
+      content: '';
+      position: absolute;
+      left: -0.72rem;
+      top: 0.48rem;
+      width: 0.33rem;
+      height: 0.33rem;
+      border-radius: 999px;
+      background: #4667a2;
+    }
+
+    #complete {
+      margin-top: 0.55rem;
+      border-top: 1px solid #e5ebf5;
+      padding-top: 0.9rem;
+    }
+
+    #complete p {
+      margin-bottom: 0.9rem;
+    }
+
+    #saved-config {
+      margin-top: 0.9rem;
+    }
+
+    #saved-config p {
+      margin-bottom: 0.45rem;
+    }
+
+    #log-section pre {
       background-color: #111;
       color: #eee;
       font-family: monospace;
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       padding: 1rem;
       border-radius: 0.5rem;
-      max-height: 60vh;
+      max-height: 52vh;
       overflow: auto;
+      margin: 0.4rem 0 0.8rem;
     }
-    #log-dialog pre *::selection, #log-dialog pre::selection {
+    #log-section pre *::selection, #log-section pre::selection {
       background-color: var(--primary);
       color: var(--primary-inverse);
     }
 
-    /* Show Log link aligned to the right within the header */
-    #toggle-log {
-      display: flex;
-      justify-content: flex-end;
-      flex: 1;
-      background: none;
-      border: none;
-      padding: 0;
-      font-size: 0.8rem;
-      color: var(--primary);
-      cursor: pointer;
-      text-decoration: underline;
+    .utility-tab {
+      width: auto;
+      min-width: 5.3rem;
+      justify-content: center;
+      padding-inline: 0.72rem;
+      border-color: #c4d5f1;
+      background: #edf4ff;
+      color: #2a4f86;
     }
 
-    #toggle-log:hover,
-    #toggle-log:focus {
-      text-decoration: none;
-      outline: none;
+    .utility-tab.is-active,
+    .utility-tab[aria-selected='true'] {
+      border-color: var(--panel-border);
+      border-bottom-color: var(--tab-active-bg);
+      background: #fff;
+      color: #1f3f73;
+      box-shadow: none;
+    }
+
+    .utility-tab .step-label {
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    #log-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 0.65rem;
+      border: 1px solid #f0d8d8;
+      border-radius: 10px;
+      background: #fff8f8;
+    }
+
+    #shutdown-btn {
+      margin: 0;
+      width: auto !important;
+      min-width: 9.25rem;
+      display: inline-flex !important;
+      flex: 0 0 auto;
+      justify-content: center;
+      align-self: start;
+      padding: 0.42rem 0.74rem;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      border-color: #d44c47 !important;
+      background: #d44c47 !important;
+      color: #fff !important;
+    }
+
+    #shutdown-btn:hover,
+    #shutdown-btn:focus-visible {
+      border-color: #b9322d !important;
+      background: #b9322d !important;
+      color: #fff !important;
+    }
+
+    #shutdown-help {
+      margin: 0;
+      color: #6d5151;
+      font-size: 0.78rem;
+      line-height: 1.3;
+      max-width: 46rem;
+    }
+
+    #shutdown-msg {
+      margin: 0.45rem 0 0;
+      color: var(--muted-text);
+      font-size: 0.79rem;
+      grid-column: 1 / -1;
+    }
+
+    #shutdown-msg:empty {
+      display: none;
+    }
+
+    #step-log {
+      margin-left: 0;
+    }
+
+    #step-log:hover,
+    #step-log:focus-visible {
+      border-color: #9cb7e4;
+      background: #e6f0ff;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 0.5rem 0.72rem 0.72rem;
+      }
+
+      #header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      #header-brand {
+        align-items: flex-start;
+      }
+
+      #header img {
+        height: 52px;
+      }
+
+      #header h1 {
+        font-size: 1.26rem;
+      }
+
+      #header-subtitle {
+        font-size: 0.82rem;
+      }
+
+      #setup-steps ol {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      #setup-steps li.step-item {
+        flex: 1 1 100%;
+      }
+
+      #setup-steps li.log-item {
+        margin-left: 0;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      #step-log {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 0;
+        margin-left: 0;
+      }
+
+      #log-actions {
+        grid-template-columns: 1fr;
+      }
+
+      #shutdown-btn {
+        align-self: start;
+      }
+
+      .panel {
+        padding: 0.85rem 0.75rem;
+      }
     }
   </style>
 </head>
 <body>
   <main>
     <div id="header">
-      <img src="/Wikibase_Suite_(RGB).png" alt="Wikibase Logo" />
-      <h2>Deploy Setup</h2>
-      <a href="#" id="toggle-log" data-modal-open data-modal-target="log-dialog">Show Log</a>
+      <div id="header-brand">
+        <img src="/Wikibase_Suite_(RGB).png" alt="Wikibase Logo" />
+        <div id="header-copy">
+          <h1>Deploy Setup</h1>
+          <p id="header-subtitle">Configure your instance, then watch services start in real time.</p>
+        </div>
+      </div>
     </div>
 
-    <div class="grid" id="main-grid">
-      <!-- Left: Configuration -->
-      <div id="config-section">
+    <nav id="setup-steps" aria-label="Setup steps">
+      <ol role="tablist" aria-label="Setup stages">
+        <li class="step-item">
+          <button id="step-config" type="button" class="step is-active is-current" aria-selected="true" aria-controls="config-section" role="tab">
+            <span class="step-index">1</span>
+            <span class="step-label">Configure</span>
+          </button>
+        </li>
+        <li class="step-item">
+          <button id="step-launch" type="button" class="step" aria-selected="false" aria-controls="status-section" role="tab" disabled>
+            <span class="step-index">2</span>
+            <span class="step-label">Starting Services</span>
+          </button>
+        </li>
+        <li class="step-item">
+          <button id="step-complete" type="button" class="step" aria-selected="false" aria-controls="complete-section" role="tab" disabled>
+            <span class="step-index">3</span>
+            <span class="step-label">Complete</span>
+          </button>
+        </li>
+        <li class="log-item">
+          <button id="step-log" type="button" class="step utility-tab" aria-selected="false" aria-controls="log-section" role="tab">
+            <span class="step-label">Log</span>
+          </button>
+        </li>
+      </ol>
+    </nav>
+
+    <div id="setup-layout">
+      <section id="config-section" class="panel" data-tab="configure" role="tabpanel" aria-labelledby="step-config">
+        <h3>1. Configuration</h3>
+        <p id="config-locked-note" hidden><strong>⚠️ Settings are now locked.</strong> Setup is in progress below.</p>
         <form id="config-form" data-disabled="<%= isConfigSaved %>">
           <label>
             MediaWiki Admin Email Address:
@@ -252,12 +666,16 @@
           <br />
           <button type="submit">Save</button>
         </form>
-      </div>
+      </section>
 
-      <!-- Right: Status + Complete -->
-      <div id="status-section">
+      <section id="status-section" class="panel" data-tab="launch" role="tabpanel" aria-labelledby="step-launch" hidden>
+        <h3>2. Setup Progress</h3>
+        <p id="status-intro">Setup is running. Live progress is shown below.</p>
         <div id="waiting" hidden></div>
+      </section>
 
+      <section id="complete-section" class="panel" data-tab="complete" role="tabpanel" aria-labelledby="step-complete" hidden>
+        <h3>3. Setup Complete</h3>
         <div id="complete" <%= isBooted ? '' : 'hidden' %>>
           <p>
             <strong>✅ Services started successfully!</strong>
@@ -275,7 +693,7 @@
             <a target="_blank" data-bind="WIKIBASE_PUBLIC_HOST" data-prefix="https://" data-suffix="/tools/quickstatements">https:///tools/quickstatements</a>
           </p>
 
-          <section id="config">
+          <section id="saved-config">
             <p>
               <strong>⚠️ Please save this configuration somewhere secure. The passwords will be removed after this installation is complete.</strong>
             </p>
@@ -284,7 +702,19 @@
             <a id="download-config" href="#" download="wbs-deploy-setup.env">Download as a wbs-deploy-setup.env file</a>
           </section>
         </div>
-      </div>
+      </section>
+
+      <section id="log-section" class="panel" data-tab="log" role="tabpanel" aria-labelledby="step-log" hidden>
+        <h3>Installer Log</h3>
+        <pre id="log-content">Loading logs...</pre>
+        <div id="log-actions">
+          <p id="shutdown-help">
+            Stop only after setup completes or if you intentionally want to cancel this installer session.
+          </p>
+          <button id="shutdown-btn">Shut Down Installer</button>
+          <p id="shutdown-msg"></p>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -319,20 +749,6 @@
     </article>
   </dialog>
 
-  <!-- Log dialog -->
-  <dialog id="log-dialog">
-    <article>
-      <pre id="log-content">Loading logs...</pre>
-      <footer style="margin-top: 0">
-        <div style="display:flex; justify-content: space-between; gap:20rem;">
-          <button id="shutdown-btn" style="border-color: rgb(217, 53, 38); color: rgb(217, 53, 38)" class="outline">Shut Down Installer</button>
-          <button id="hide-log" data-modal-close class="secondary">Close</button>
-        </div>
-        <p id="shutdown-msg" style="text-align: left;"></p>
-      </footer>
-    </article>
-  </dialog>
-
   <script>
     (function () {
       'use strict';
@@ -353,6 +769,16 @@
       }
 
       const form = el('config-form');
+      const elStepConfig = el('step-config');
+      const elStepLaunch = el('step-launch');
+      const elStepComplete = el('step-complete');
+      const elStepLog = el('step-log');
+      const elConfigSection = el('config-section');
+      const elStatusSection = el('status-section');
+      const elCompleteSection = el('complete-section');
+      const elLogSection = el('log-section');
+      const elConfigLockedNote = el('config-locked-note');
+      const elStatusIntro = el('status-intro');
       const elWaiting = el('waiting');
       const elComplete = el('complete');
       const elConfigContent = el('config-content');
@@ -364,11 +790,139 @@
 
       let logStream = null;
       let alreadyHandledBootedState = false;
-      let isLogDialogOpen = false;
 
       // --- New: shared page state & hydrators ---
 
       const pageState = { config: null, configText: '' };
+      const orderedSteps = [ 'configure', 'launch', 'complete' ];
+      const stepNodes = {
+        configure: elStepConfig,
+        launch: elStepLaunch,
+        complete: elStepComplete
+      };
+      const panelNodes = {
+        configure: elConfigSection,
+        launch: elStatusSection,
+        complete: elCompleteSection,
+        log: elLogSection
+      };
+
+      let currentSetupStage = 'configure';
+      let maxReachedStepIndex = 0;
+      let activeTab = 'configure';
+
+      function updateStepTabs() {
+        const currentIndex = orderedSteps.indexOf(currentSetupStage);
+        const activeIndex = orderedSteps.indexOf(activeTab);
+
+        orderedSteps.forEach((name, index) => {
+          const node = stepNodes[name];
+          if (!node) return;
+
+          node.classList.remove('is-active', 'is-done', 'is-current');
+          node.removeAttribute('aria-current');
+          node.setAttribute('aria-selected', 'false');
+          node.disabled = index > maxReachedStepIndex;
+
+          if (index < currentIndex) {
+            node.classList.add('is-done');
+          }
+          if (index === currentIndex) {
+            node.classList.add('is-current');
+          }
+          if (index === activeIndex) {
+            node.classList.add('is-active');
+            node.setAttribute('aria-selected', 'true');
+          }
+          if (index === currentIndex) {
+            node.setAttribute('aria-current', 'step');
+          }
+
+          const indexNode = node.querySelector('.step-index');
+          if (indexNode) {
+            indexNode.textContent = index < currentIndex ? '✓' : String(index + 1);
+          }
+        });
+
+        if (elStepLog) {
+          const isLogTabActive = activeTab === 'log';
+          elStepLog.classList.toggle('is-active', isLogTabActive);
+          elStepLog.setAttribute('aria-selected', isLogTabActive ? 'true' : 'false');
+          if (isLogTabActive) {
+            elStepLog.setAttribute('aria-current', 'step');
+          } else {
+            elStepLog.removeAttribute('aria-current');
+          }
+        }
+      }
+
+      function setActiveTab(tab) {
+        const isLogTab = tab === 'log';
+        const tabIndex = orderedSteps.indexOf(tab);
+        if (!isLogTab && (tabIndex === -1 || tabIndex > maxReachedStepIndex)) return;
+
+        activeTab = tab;
+        Object.entries(panelNodes).forEach(([name, panel]) => {
+          if (!panel) return;
+          panel.hidden = name !== activeTab;
+        });
+
+        const activePanel = panelNodes[activeTab];
+        if (activePanel) {
+          const activeBg = window.getComputedStyle(activePanel).backgroundColor || '#ffffff';
+          document.documentElement.style.setProperty('--tab-active-bg', activeBg);
+        } else {
+          document.documentElement.style.setProperty('--tab-active-bg', '#ffffff');
+        }
+
+        updateStepTabs();
+      }
+
+      function setSetupStep(step) {
+        const stepIndex = orderedSteps.indexOf(step);
+        if (stepIndex === -1) return;
+        currentSetupStage = step;
+        maxReachedStepIndex = Math.max(maxReachedStepIndex, stepIndex);
+        setActiveTab(step);
+      }
+
+      on(elStepConfig, 'click', (e) => {
+        e.preventDefault();
+        setActiveTab('configure');
+      });
+      on(elStepLaunch, 'click', (e) => {
+        e.preventDefault();
+        setActiveTab('launch');
+      });
+      on(elStepComplete, 'click', (e) => {
+        e.preventDefault();
+        setActiveTab('complete');
+      });
+      on(elStepLog, 'click', (e) => {
+        e.preventDefault();
+        setActiveTab('log');
+      });
+
+      function setConfigLockedState(locked) {
+        if (elConfigSection) {
+          elConfigSection.classList.toggle('is-locked', locked);
+        }
+        if (elConfigLockedNote) {
+          elConfigLockedNote.hidden = !locked;
+        }
+        if (form) {
+          form.setAttribute('aria-disabled', locked ? 'true' : 'false');
+        }
+      }
+
+      function showWaitingStartMessage() {
+        if (!elWaiting) return;
+        if (elWaiting.children.length > 0) return;
+        const msg = document.createElement('div');
+        msg.className = 'status-line';
+        msg.textContent = 'Configuration saved. Waiting for startup updates...';
+        elWaiting.appendChild(msg);
+      }
 
       async function fetchConfig() {
         try {
@@ -461,6 +1015,11 @@
         if (alreadyHandledBootedState) return;
 
         alreadyHandledBootedState = true;
+        setConfigLockedState(true);
+        setSetupStep('complete');
+        if (elStatusIntro) {
+          elStatusIntro.textContent = 'Setup complete. Your service links and saved configuration are below.';
+        }
 
         // refresh config and hydrate UI
         await fetchConfig();
@@ -572,6 +1131,11 @@
             if (res.ok) {
               // lock form
               f.querySelectorAll('input, button').forEach((i) => (i.disabled = true));
+              setConfigLockedState(true);
+              setSetupStep('launch');
+              if (elStatusIntro) {
+                elStatusIntro.textContent = 'Setup is running. Live progress is shown below.';
+              }
 
               // echo back saved config for coherence
               const { config, configText } = await res.json();
@@ -584,6 +1148,7 @@
 
               elWaiting.hidden = false;
               elWaiting.innerHTML = '';
+              showWaitingStartMessage();
               elComplete.hidden = true;
             } else {
               alert('Failed to save environment. See console for details.');
@@ -665,17 +1230,33 @@
         renderConfigTextBlock(elConfigContent);
 
         if (form.dataset.disabled === 'true') {
+          setConfigLockedState(true);
           // .env config file already saved, disable inputs
           form.querySelectorAll('input, button').forEach((el) => (el.disabled = true));
 
           // If server didn't render #complete (not booted), start in waiting mode
           if (elComplete.hasAttribute('hidden')) {
             if (elWaiting) elWaiting.hidden = false;
+            showWaitingStartMessage();
+            setSetupStep('launch');
+            if (elStatusIntro) {
+              elStatusIntro.textContent = 'Setup is running. Live progress is shown below.';
+            }
+          } else {
+            setSetupStep('complete');
+            if (elStatusIntro) {
+              elStatusIntro.textContent = 'Setup complete. Your service links and saved configuration are below.';
+            }
           }
         } else {
+          setConfigLockedState(false);
+          setSetupStep('configure');
           // Fresh start: nothing in status yet
           elWaiting.hidden = true;
           elComplete.hidden = true;
+          if (elStatusIntro) {
+            elStatusIntro.textContent = 'Save your configuration to begin setup.';
+          }
         }
       }
 
