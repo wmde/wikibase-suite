@@ -11,10 +11,10 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 ## Installing on a new VPS instance
 
 1. Provision a new VPS that:
-   - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#requirements  
+   - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#1-requirements
+   - Uses AMD64 (`x86_64`) architecture
    - Runs a supported Linux with `apt-get` or `dnf` available (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS Stream/RHEL/Rocky/Alma)  
-   - Uses AMD64 (`x86_64`) architecture for standard server mode  
-   - Lets you SSH in as root  
+   - Lets you SSH in as root the user
 
 2. SSH in as root and run:
 
@@ -23,11 +23,6 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
    ```
 
 3. After some initial setup messages you'll be provided a web URL to access where you can complete configuration and launching your server.
-
-4. Networking notes:
-   - Port `8888` must be reachable from your browser for the setup UI.
-   - Port `80` must be reachable if you want automatic Let's Encrypt certificate provisioning for the setup UI.
-   - If Let's Encrypt provisioning fails, setup falls back to a self-signed cert and you can continue after the browser warning.
 
 ## Troubleshooting
 
@@ -42,4 +37,4 @@ If you are testing this setup utility locally, developing on it, or need non‑s
 
 ## Project docs
 
-Additional implementation and onboarding notes live in [docs/README.md](docs/README.md).
+Additional implementation and project notes live in [docs/README.md](docs/README.md).

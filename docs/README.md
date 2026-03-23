@@ -1,20 +1,21 @@
-# Project Docs
+# Documentation Overview
 
-This folder is a working memory for this repository.
+This is the front door for evaluating WBS Deploy Setup.
 
-Use these docs to:
-- understand what the code does today
-- spot drift between docs and implementation
-- capture intent decisions as we clarify project goals
+## Start Here
 
-## Documents
+- [`adrs/0001-wbs-deploy-setup/index.md`](adrs/0001-wbs-deploy-setup/index.md)
+  - Primary context for UX/Product review of the current reference implementation.
+- [`adrs/0001-wbs-deploy-setup/technical-addendum.md`](adrs/0001-wbs-deploy-setup/technical-addendum.md) (optional deep detail)
+  - Use this for engineering and architecture evaluation of implementation specifics.
+- [`adrs/0002-wbs-deploy-setup-dokploy.md`](adrs/0002-wbs-deploy-setup-dokploy.md)
+  - Use this for discussion of the proposed Dokploy-based variant.
 
-- `implementation-map.md` - high-level architecture, file ownership, and data flow
-- `current-state.md` - what is currently true, what was verified, and known risks
-- `intentions-log.md` - living notes for goals, constraints, and decisions
+## ADR Structure Rules
 
-## Suggested workflow
-
-1. Start with `implementation-map.md`.
-2. Read `current-state.md` before making broad changes.
-3. Record product or behavior decisions in `intentions-log.md` so context is not lost.
+- The ADR format is used because it is familiar in the WMDE technical ecosystem.
+- In this repository, ADRs are also used as an active-development pattern.
+- If an ADR needs only one file, keep it as a single file in `docs/adrs/`.
+- If an ADR needs multiple files, create a directory for it and add `index.md` as the main ADR file.
+  - Additional files inside an ADR directory can be named freely, but names should describe their purpose.
+  - Every file in an ADR directory should be linked and briefly explained inside that ADR directory's `index.md` (typically in a short related-files section near the end).
