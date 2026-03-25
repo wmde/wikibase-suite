@@ -1,15 +1,18 @@
 <?php
 // ************************************************************************
-// Wikibase Suite Deploy Extension.php
+// Wikibase Suite Deploy Extensions.php
 // ************************************************************************
 //
-// File to load MediaWiki extension.
+// File to load MediaWiki extension in the Wikibase image.
 //
-// This file will be loaded after all other extensions have been loaded,
-// just like as if this code would be at the end of LocalSettings.php.
+// This file will be loaded after all other extensions and LocalSettings.php 
+// have loaded.
 //
-// Make sure to prefix the extensions name with "extensions/" when loading.
-// e.g. when extension installation instructions state you need to put
-//   wfLoadExtension( 'WikibaseLexeme' );
-// here in Wikibase Suite Deploy you need to put
-//   wfLoadExtension( 'extensions/WikibaseLexeme' );
+// For extensions added via deploy/config/extensions, prefix the name with
+// "extensions/".
+// e.g. wfLoadExtension( 'WikibaseLexeme' ); becomes
+//      wfLoadExtension( 'extensions/WikibaseLexeme' );
+
+// NOTE: As of the 7.0.0 version of the Wikibase image EDTF is no longer
+// loaded by default. To re-enable it uncomment the following line:
+// wfLoadExtension( 'WikibaseEdtf' );
