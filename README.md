@@ -100,16 +100,6 @@ Open the file in the text editor of your choice. (Options include but are not li
 
 ### 4. Editing the file
 
-#### Callback
-The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
-
-```sh
-METADATA_CALLBACK=true
-```
-
-> [!NOTE]
-> If this variable is not set, the container will not run successfully.
-
 #### Public hostnames
 The domain names for your Wikibase Suite services should be configured on your DNS host to point to the public IP address 
 of the server you are deploying to. Note that you need two distinct names, i.e., two different fully qualified domain names. Without them, the traefik reverse proxy cannot route properly.
@@ -123,6 +113,19 @@ Please enter the username, email address and password you would like to use to l
 
 #### Database configuration:
 These settings are used to configure the MariaDB container when creating a new database, and by MediaWiki when generating a new `LocalSettings.php` file. They won't be set on an existing database, nor will MediaWiki update those settings in your `LocalSettings.php`. To change those settings, adjust them manually in MariaDB and your `LocalSettings.php` file. Alternatively, delete your MariaDB volume `mysql-data` (all data will be lost) and the `LocalSettings.php` file from the `./config` directory, then restart.
+
+> [!NOTE]
+> These values do not need to be changed for the instance to successfully be set up.
+
+#### Callback
+The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
+
+```sh
+METADATA_CALLBACK=true
+```
+
+> [!NOTE]
+> If this variable is not set, the container will not run successfully.
 
 ---
 
