@@ -23,19 +23,20 @@ The service orchestration is implemented using Docker Compose V2.
 
 ### Index
 - [Installation](#installation)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-  - [Initial Configuration](#initial-configuration)
-  - [Starting instance](#starting)
-  - [Stopping instance](#stopping)
+  - [Requirements](#1-requirements)
+  - [Setup](#2-setup)
+  - [Initial Configuration](#3-initial-configuration)
+  - [Editing environment variables](#4-editing-environment-variables)
+  - [Starting instance](#5-starting-wikibase)
+  - [Stopping instance](#6-stopping)
   - [Resetting the configuration](#resetting-the-configuration)
-- [Call Back](#call-back)
-- [Updating and Versioning](updating-and-versioning.md)
-- [Advanced Configuration](advanced-configuration.md)
-- [Managing your data](manage-your-data.md)
-- [Frequently Asked Questions](FAQs.md)
-- [Removing Wikibase Suite Completely with all its Data](removing-wikibase.md)
-- [WDQS](wdqs.md)
+- [Call Back](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect)
+- [Updating and Versioning](./1-updating-and-versioning.md)
+- [Advanced Configuration](./2-advanced-configuration.md)
+- [Managing your data](./3-manage-your-data.md)
+- [Frequently Asked Questions](./4-FAQs.md)
+- [Removing Wikibase Suite Completely with all its Data](./5-removing-wikibase.md)
+- [WDQS](./6-wdqs.md)
 
 ---
 
@@ -98,7 +99,7 @@ Open the file in the text editor of your choice. (Options include but are not li
 
 ---
 
-### 4. Editing the file
+### 4. Editing environment variables
 
 #### Public hostnames
 The domain names for your Wikibase Suite services should be configured on your DNS host to point to the public IP address 
