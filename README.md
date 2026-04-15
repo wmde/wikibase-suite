@@ -23,19 +23,20 @@ The service orchestration is implemented using Docker Compose V2.
 
 ### Index
 - [Installation](#installation)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-  - [Initial Configuration](#initial-configuration)
-  - [Starting instance](#starting)
-  - [Stopping instance](#stopping)
+  - [Requirements](#1-requirements)
+  - [Setup](#2-setup)
+  - [Initial Configuration](#3-initial-configuration)
+  - [Editing environment variables](#4-editing-environment-variables)
+  - [Starting instance](#5-starting-wikibase)
+  - [Stopping instance](#6-stopping)
   - [Resetting the configuration](#resetting-the-configuration)
-- [Call Back](#call-back)
-- [Updating and Versioning](updating-and-versioning.md)
-- [Advanced Configuration](advanced-configuration.md)
-- [Managing your data](manage-your-data.md)
-- [Frequently Asked Questions](FAQs.md)
-- [Removing Wikibase Suite Completely with all its Data](removing-wikibase.md)
-- [WDQS](wdqs.md)
+- [Call Back](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect)
+- [Updating and Versioning](./1-updating-and-versioning.md)
+- [Advanced Configuration](./2-advanced-configuration.md)
+- [Managing your data](./3-manage-your-data.md)
+- [Frequently Asked Questions](./4-FAQs.md)
+- [Removing Wikibase Suite Completely with all its Data](./5-removing-wikibase.md)
+- [WDQS](./6-wdqs.md)
 
 ---
 
@@ -98,17 +99,7 @@ Open the file in the text editor of your choice. (Options include but are not li
 
 ---
 
-### 4. Editing the file
-
-#### Callback
-The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
-
-```sh
-METADATA_CALLBACK=true
-```
-
-> [!NOTE]
-> If this variable is not set, the container will not run successfully.
+### 4. Editing environment variables
 
 #### Public hostnames
 The domain names for your Wikibase Suite services should be configured on your DNS host to point to the public IP address 
@@ -123,6 +114,19 @@ Please enter the username, email address and password you would like to use to l
 
 #### Database configuration:
 These settings are used to configure the MariaDB container when creating a new database, and by MediaWiki when generating a new `LocalSettings.php` file. They won't be set on an existing database, nor will MediaWiki update those settings in your `LocalSettings.php`. To change those settings, adjust them manually in MariaDB and your `LocalSettings.php` file. Alternatively, delete your MariaDB volume `mysql-data` (all data will be lost) and the `LocalSettings.php` file from the `./config` directory, then restart.
+
+> [!NOTE]
+> These values do not need to be changed for the instance to successfully be set up.
+
+#### Callback
+The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
+
+```sh
+METADATA_CALLBACK=true
+```
+
+> [!NOTE]
+> If this variable is not set, the container will not run successfully.
 
 ---
 
