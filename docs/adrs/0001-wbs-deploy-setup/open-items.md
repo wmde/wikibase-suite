@@ -11,6 +11,11 @@ Use this file for:
 
 Create a new ADR only when we need a separate durable decision, not when we are refining this same baseline.
 
+## Reference Links
+
+- Figma: [WBS Installation Wizard v1 evaluation notes](https://www.figma.com/design/GUWSDKbomRnGZiI5ZIusMl/-WBS--Installation-Wizard-v1-evaluation?node-id=0-1&t=Y8eH9VPeSd34IVSm-1) (requires access)
+- Google Sheets: [Actional digestion of notes from Figma](https://docs.google.com/spreadsheets/d/1WhroI0WnuB2AHr848sezBzHQNckSHlVH_VYZlwHv11w/edit?usp=sharing)
+
 ## Current UX Review Batch
 
 Source: `WBS Deploy Setup Tool - UI Notes - wbs_installation_wizard_notes.csv`
