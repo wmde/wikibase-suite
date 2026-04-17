@@ -10,6 +10,8 @@ proposed
 
 Wikibase Suite Deploy setup has inherent baseline complexity, and the current process includes known foot-guns that can fail late and unclearly, especially non-compliant passwords and domain names that are not correctly mapped to the target server. This ADR treats the current setup tool implementation as a reference for some ways we could reduce those failures and provide more clear user feedback throughout setup, including failure states. It is not intended to lock or pre-determine architectural or UI/UX efforts in ideating possible solution to setup friction.
 
+This ADR is intentionally kept slim. Ongoing UX feedback, copy questions, and enhancement candidates that refine this baseline live in [`open-items.md`](open-items.md). Implementation detail and runtime notes live in [`technical-addendum.md`](technical-addendum.md).
+
 The objective of this reference implementation is to reduce setup failure risk while focusing and simplifying the process of first-time setup for self-hosting users of Wikibase.
 
 The current implementation includes these key characteristics:
@@ -63,13 +65,16 @@ The reference baseline behavior is:
   - improves confidence via progress and log visibility
   - reduces password-entry errors via generated secure defaults
 
-- Current known gaps in the reference implementation:
+- Current known implementation gaps:
   - CLI parity is partial: advanced values (`MW_ADMIN_NAME`, `DB_NAME`, `DB_USER`) are not interactively prompted in CLI and remain template-defaulted.
   - Password checks enforce minimum length but do not pre-check against MediaWiki common-password rejection rules, so late setup failure is still possible.
   - Auto-finalize is implemented as a fixed timer plus boot-state check; a user-visible countdown synchronized to actual teardown behavior is not yet implemented.
   - Release target selection remains pinned by default (`REPO_BRANCH=deploy@6.0.0`) and needs explicit product/engineering decision on long-term default behavior.
 
+- Process consequence:
+  - UX refinement work for this baseline continues inside the ADR 0001 sidecar files instead of creating a new ADR for every iteration.
+
 ## Related Files
 
+- [`open-items.md`](open-items.md) - current UX review queue, copy gaps, bugs, and enhancement candidates tied to this ADR.
 - [`technical-addendum.md`](technical-addendum.md) - implementation details, runtime flow, logging behavior, and verification notes supporting this ADR.
-- [`open-items.md`](open-items.md) - current open bugs and enhancement candidates tied to this ADR effort.

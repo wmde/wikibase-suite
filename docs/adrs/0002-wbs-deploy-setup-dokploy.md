@@ -4,7 +4,7 @@ Date: 2026-03-12
 
 ## Status
 
-proposed
+rejected
 
 ## Context
 
@@ -24,33 +24,18 @@ Key context constraints:
 
 ## Decision
 
-Propose an additive second workflow that:
+Do not adopt a Dokploy-based setup workflow at this time.
 
-1. installs/verifies Dokploy
-2. launches setup UI for config capture and validation
-3. configures a Dokploy Compose service via API
-4. deploys Wikibase Suite from Git source
-5. hands user off to Dokploy project/service status for monitoring
+Keep the current setup tool baseline from ADR 0001 as the active product direction for ongoing UX and implementation work.
 
-This remains an additional path while product/UX/engineering decide default mode behavior.
-
-For this path:
-
-- default source repository URL: https://github.com/wmde/wikibase-release-pipeline.git
-- default source git ref: `deploy@6.0.0`
-- both values are Advanced overrides in setup UI
-
-Configuration parity requirement with current setup tool remains mandatory (`MW_ADMIN_EMAIL`, hostnames, admin/db credentials, metadata callback, and existing advanced/default-backed values).
-Where practical, reuse existing Web and CLI prompt/validation behavior as the implementation baseline for this variable collection.
+This Dokploy variant is retained only as a rejected exploration reference in case it needs to be revisited later.
 
 ## Consequences
 
 - Positive:
-  - uses Dokploy as deployment control plane
-  - preserves current setup variable semantics and validation intent
-  - adds flexibility for repository/ref overrides without changing default path immediately
+  - keeps the current product and UX effort focused on one setup path
+  - avoids introducing additional orchestration and support complexity during active baseline refinement
 
 - Tradeoffs:
-  - introduces additional orchestration/API integration complexity
-  - requires explicit UX/product decision on mode selection and default behavior
-  - requires careful handling of failure/resume behavior across bootstrap and API phases
+  - no Dokploy-based install path is planned in the current direction
+  - if this idea is revisited later, a fresh ADR update or successor ADR should confirm whether the assumptions in this document still hold
