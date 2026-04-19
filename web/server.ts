@@ -30,6 +30,10 @@ const AUTO_FINALIZE_TIMEOUT_MS = 10 * 60 * 1000;
 // Express setup
 const app = express();
 app.use( express.static( join( dirName, 'public' ) ) );
+app.use(
+	'/codex-assets',
+	express.static( join( dirName, 'node_modules', '@wikimedia', 'codex', 'dist' ) )
+);
 app.use( express.json() );
 
 // Eta setup

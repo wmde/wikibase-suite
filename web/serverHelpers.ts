@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 export const ENV_FILE_PATH = '/app/deploy/.env';
 export const ENV_TEMPLATE_FILE_PATH = '/app/deploy/template.env';
 export const LOG_PATH = '/app/setup.log';
+const DEFAULT_MW_ADMIN_NAME = 'Admin';
 
 // Status
 
@@ -70,13 +71,20 @@ export function getConfig( input: Record<string, string> = {} ): {
 	// 1) Existing .env wins verbatim
 	const existingEnv = getEnv();
 	if ( existingEnv ) {
-		return { config: existingEnv, configText: makeConfigText( existingEnv ) };
+		const configObject = {
+			...existingEnv,
+			MW_ADMIN_NAME: existingEnv.MW_ADMIN_NAME && existingEnv.MW_ADMIN_NAME !== '' ?
+				existingEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME
+		};
+		return { config: configObject, configText: makeConfigText( configObject ) };
 	}
 
 	// 2) User input present → use exactly; passwords autogenerate if blank/missing
 	if ( hasAnyInput( input ) ) {
 		const configObject: Record<string, string> = {
 			...input,
+			MW_ADMIN_NAME: input.MW_ADMIN_NAME && input.MW_ADMIN_NAME !== '' ?
+				input.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
 			MW_ADMIN_PASS: input.MW_ADMIN_PASS && input.MW_ADMIN_PASS !== '' ?
 				input.MW_ADMIN_PASS : generatePassword(),
 			DB_PASS: input.DB_PASS && input.DB_PASS !== '' ?
@@ -90,6 +98,8 @@ export function getConfig( input: Record<string, string> = {} ): {
 		const configObject: Record<string, string> = {
 			...templateEnv,
 			MW_ADMIN_EMAIL: '',
+			MW_ADMIN_NAME: templateEnv.MW_ADMIN_NAME && templateEnv.MW_ADMIN_NAME !== '' ?
+				templateEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
 			WIKIBASE_PUBLIC_HOST: isLocalhostSetup() ? 'wikibase.test' : '',
 			WDQS_PUBLIC_HOST: isLocalhostSetup() ? 'query.wikibase.test' : '',
 			MW_ADMIN_PASS: generatePassword(),

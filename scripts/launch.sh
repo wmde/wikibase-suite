@@ -46,9 +46,11 @@ launch_wikibase() {
     run "docker compose ${compose_opts[*]} down --volumes"
   fi
 
+  status "Starting Docker Compose services..."
   status "Waiting for services to start. Generally takes 2–6 minutes..."
 
   run "docker compose ${compose_opts[*]} up ${compose_up_opts[*]}"
+  status "Docker Compose services reported ready."
 
   popd >/dev/null || return 1
 }
