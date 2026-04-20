@@ -1,3 +1,9 @@
+## 7.0.0 (2026-04-20)
+
+Updates in concert with Wikibase image v7.0.0 (mw-1.45.3) release
+
+- See `build/wikibase/CHANGELOG.md` for the paired Wikibase image changes in this release.
+
 ## 6.0.0 (2026-02-16)
 
 Updates in concert with Wikibase image v6.0.0 (mw-1.45) release
