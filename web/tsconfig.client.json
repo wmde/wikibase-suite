@@ -1,0 +1,13 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"types": ["vite/client"]
+	},
+	"include": ["client/**/*.ts", "client/**/*.vue", "shared/**/*.ts", "vite.config.ts"],
+	"exclude": ["node_modules"]
+}

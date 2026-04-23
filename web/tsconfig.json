@@ -8,6 +8,6 @@
 		"skipLibCheck": true,
 		"outDir": "."
 	},
-	"exclude": ["node_modules"],
-	"include": ["**/*.ts"]
+	"exclude": ["node_modules", "client", "public/assets", "vite.config.ts"],
+	"include": ["server.ts", "serverHelpers.ts", "logStreamer.ts", "passwordPolicy.ts", "shared/**/*.ts"]
 }

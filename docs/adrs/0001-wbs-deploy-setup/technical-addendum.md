@@ -50,7 +50,8 @@ Both paths feed the same launch/deploy flow and are intended to reduce known fir
 - `web/server.ts` - HTTPS config app and control endpoints
 - `web/serverHelpers.ts` - `.env` read/write/default/sanitize helpers
 - `web/logStreamer.ts` - SSE log tailing
-- `web/views/index.eta` - setup UI and front-end behavior
+- `web/client/` - Vue/Codex setup UI source
+- `web/public/setup.css` - setup UI layout refinements on top of Codex styles
 
 ## Inputs and Outputs
 
@@ -92,7 +93,7 @@ Current gap:
 ## Known Risk Areas
 
 - No automated full integration coverage yet for key environment permutations.
-- Password validation is length-based and does not pre-check against MediaWiki common-password rejection behavior.
+- Password validation covers setup-facing length/common-value checks, but does not fully mirror MediaWiki server-side password policy.
 - DNS validation path can be sensitive to restricted network conditions.
 - Docker-install helper supports common Linux package-manager paths, but not every distro variant.
 

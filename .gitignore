@@ -21,6 +21,7 @@ test/suites/**/results/
 
 # dependencies
 node_modules
+web/public/assets/
 
 # IDE - VSCode
 .vscode/*

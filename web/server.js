@@ -1,11 +1,11 @@
 import { createSession, createChannel } from 'better-sse';
-import { Eta } from 'eta';
 import express from 'express';
 import { existsSync, readFileSync } from 'fs';
 import https, { request } from 'https';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createLogStreamer } from './logStreamer.js';
+import { validateSetupPassword } from './passwordPolicy.js';
 import { LOG_PATH, isBooted, isConfigSaved, isLocalhostSetup, getConfig, saveConfigText, clearLog, sanitizeConfig } from './serverHelpers.js';
 const fileName = fileURLToPath(import.meta.url);
 const dirName = dirname(fileName);
@@ -20,26 +20,37 @@ app.use(express.static(join(dirName, 'public')));
 app.use('/codex-assets', express.static(join(dirName, 'node_modules', '@wikimedia', 'codex', 'dist')));
 app.use('/codex-icons', express.static(join(dirName, 'node_modules', '@wikimedia', 'codex-icons', 'dist', 'images')));
 app.use(express.json());
-// Eta setup
-const eta = new Eta({
-    views: join(dirName, 'views'),
-    cache: false,
-    useWith: true
-});
 const logChannel = createChannel();
+function escapeJsonForHtml(value) {
+    return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+function renderSetupShell() {
+    const initialState = {
+        isConfigSaved: isConfigSaved(),
+        isBooted: isBooted(),
+        isLocalhostSetup: isLocalhostSetup(),
+        serverIp: process.env.SERVER_IP || ''
+    };
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wikibase Suite Deploy Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/codex-assets/codex.style.css" />
+  <link rel="stylesheet" href="/setup.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script>window.__SETUP_STATE__ = ${escapeJsonForHtml(initialState)};</script>
+  <script type="module" src="/assets/setup-app.js"></script>
+</body>
+</html>`;
+}
 // ---------- Routes ----------
 app.get('/', async (req, res) => {
     try {
-        const html = eta.render('index.eta', {
-            isConfigSaved: isConfigSaved(),
-            isBooted: isBooted(),
-            isLocalhostSetup: isLocalhostSetup(),
-            SERVER_IP: process.env.SERVER_IP
-        });
-        if (!html) {
-            throw new Error('Eta render returned null');
-        }
-        res.type('html').send(html);
+        res.type('html').send(renderSetupShell());
     }
     catch (err) {
         console.error('Failed to render template:', err);
@@ -58,6 +69,18 @@ app.get('/log/stream', async (req, res) => {
 });
 app.post('/config', async (req, res) => {
     try {
+        const adminPasswordValidation = validateSetupPassword(String(req.body.MW_ADMIN_PASS ?? ''));
+        const databasePasswordValidation = validateSetupPassword(String(req.body.DB_PASS ?? ''));
+        if (!adminPasswordValidation.valid || !databasePasswordValidation.valid) {
+            res.status(400).json({
+                status: 'invalid',
+                errors: {
+                    MW_ADMIN_PASS: adminPasswordValidation.valid ? undefined : adminPasswordValidation.reason,
+                    DB_PASS: databasePasswordValidation.valid ? undefined : databasePasswordValidation.reason
+                }
+            });
+            return;
+        }
         const { config, configText } = getConfig(req.body);
         saveConfigText(configText);
         console.log('.env file written successfully');
@@ -66,6 +89,17 @@ app.post('/config', async (req, res) => {
     catch (err) {
         console.error('Failed to write .env:', err);
         res.status(500).send('Failed to write .env');
+    }
+});
+app.post('/validate/password', async (req, res) => {
+    try {
+        const password = typeof req.body?.password === 'string' ? req.body.password : '';
+        const validation = validateSetupPassword(password);
+        res.status(200).json(validation);
+    }
+    catch (err) {
+        console.error('Failed to validate password:', err);
+        res.status(500).json({ valid: false, reason: 'validation-error' });
     }
 });
 app.get('/config', async (req, res) => {

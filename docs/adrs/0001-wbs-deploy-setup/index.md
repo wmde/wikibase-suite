@@ -67,7 +67,7 @@ The reference baseline behavior is:
 
 - Current known implementation gaps:
   - CLI parity is partial: advanced values (`MW_ADMIN_NAME`, `DB_NAME`, `DB_USER`) are not interactively prompted in CLI and remain template-defaulted.
-  - Password checks enforce minimum length but do not pre-check against MediaWiki common-password rejection rules, so late setup failure is still possible.
+  - Password checks cover setup-facing length/common-value validation but do not fully mirror MediaWiki server-side password policy, so late setup failure is still possible.
   - Auto-finalize is implemented as a fixed timer plus boot-state check; a user-visible countdown synchronized to actual teardown behavior is not yet implemented.
   - Release target selection remains pinned by default (`REPO_BRANCH=deploy@6.0.0`) and needs explicit product/engineering decision on long-term default behavior.
 
