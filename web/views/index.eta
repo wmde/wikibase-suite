@@ -6,584 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/codex-assets/codex.style.css" />
   <script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
-  <style>
-    :root {
-      color-scheme: light;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background:
-        radial-gradient(circle at top left, rgba(51, 102, 204, 0.08), transparent 34%),
-        linear-gradient(180deg, #f8f9fa 0%, #fff 32%);
-      color: var(--color-base, #202122);
-      font-family: sans-serif;
-      line-height: var(--line-height-medium, 1.625rem);
-    }
-
-    .page-shell {
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 28px 16px 48px;
-    }
-
-    .wizard-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color-subtle, #eaecf0);
-    }
-
-    .wizard-header__identity {
-      min-width: 0;
-    }
-
-    .wizard-header__brand {
-      flex-shrink: 0;
-    }
-
-    .wizard-header__brand img {
-      display: block;
-      width: 180px;
-      height: auto;
-      opacity: 0.9;
-    }
-
-    .wizard-header h1 {
-      margin: 0;
-      font-size: clamp(1.7rem, 2.5vw, 2.15rem);
-      line-height: 1.1;
-    }
-
-    .surface-card {
-      background: var(--background-color-base, #fff);
-      border: 1px solid var(--border-color-subtle, #c8ccd1);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    }
-
-    .wizard-card {
-      width: min(100%, 768px);
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .wizard-progress-area {
-      max-width: 720px;
-      margin-bottom: 20px;
-    }
-
-    .wizard-progress {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      width: 100%;
-    }
-
-    .wizard-progress__item {
-      border: 1px solid var(--border-color-subtle, #dfe3e8);
-      border-radius: 10px;
-      padding: 12px;
-      background: var(--background-color-neutral-subtle, #f8f9fa);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    }
-
-    .wizard-progress__item.is-active {
-      border-color: var(--border-color-progressive, #6485d1);
-      box-shadow: inset 0 0 0 1px var(--box-shadow-color-progressive--focus, #36c);
-      background: var(--background-color-base, #fff);
-    }
-
-    .wizard-progress__item.is-complete {
-      background: var(--background-color-progressive-subtle, #e8eeff);
-      border-color: var(--border-color-progressive, #6485d1);
-    }
-
-    .wizard-progress__topline {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      white-space: nowrap;
-    }
-
-    .wizard-progress__step {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      background: var(--background-color-interactive-subtle, #f8f9fa);
-      color: var(--color-subtle, #54595d);
-      font-size: 0.9375rem;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .wizard-progress__item.is-active .wizard-progress__step,
-    .wizard-progress__item.is-complete .wizard-progress__step {
-      background: var(--background-color-progressive, #36c);
-      color: var(--color-inverted-fixed, #fff);
-    }
-
-    .wizard-progress__title {
-      display: inline-block;
-      font-weight: 700;
-      font-size: 1rem;
-      line-height: 1.25;
-    }
-
-    .wizard-progress__description {
-      display: block;
-      color: var(--color-subtle, #54595d);
-      font-size: 0.875rem;
-      line-height: 1.4;
-    }
-
-    .wizard-progress__item:not(.is-active):not(.is-complete) .wizard-progress__title {
-      color: var(--color-neutral, #404244);
-    }
-
-    .wizard-progress__item:not(.is-active):not(.is-complete) .wizard-progress__description {
-      color: var(--color-placeholder, #72777d);
-    }
-
-    .wizard-panel {
-      display: none;
-    }
-
-    .wizard-panel.is-active {
-      display: block;
-    }
-
-    .wizard-panel__header {
-      margin-bottom: 20px;
-    }
-
-    .wizard-panel__header h2 {
-      margin: 0 0 8px;
-      font-size: 1.8rem;
-      line-height: 1.15;
-    }
-
-    .wizard-panel__header p {
-      margin: 0;
-      color: var(--color-subtle, #54595d);
-      font-size: 1.02rem;
-    }
-
-    .wizard-panel__body {
-      display: grid;
-      gap: 20px;
-    }
-
-    .wizard-panel__body--configure {
-      max-width: 720px;
-      gap: 28px;
-    }
-
-    .wizard-panel__body--configure .cdx-field {
-      max-width: 40rem;
-    }
-
-    .wizard-panel[data-step-panel="0"] .wizard-actions {
-      max-width: 720px;
-    }
-
-    .wizard-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .wizard-actions__group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .field-stack {
-      display: grid;
-      gap: 24px;
-    }
-
-    .field-section {
-      display: grid;
-      gap: 16px;
-      padding: 16px;
-      border: 1px solid var(--border-color-subtle, #c8ccd1);
-      border-radius: 10px;
-      background: var(--background-color-neutral-subtle, #f8f9fa);
-    }
-
-    .field-section--plain {
-      padding: 0;
-      border: 0;
-      background: transparent;
-      gap: 12px;
-    }
-
-    .field-section--plain + .field-section--plain {
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color-subtle, #eaecf0);
-    }
-
-    .field-section__header {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field-section__header h2 {
-      margin: 0;
-      font-size: 1.1rem;
-      line-height: 1.3;
-    }
-
-    .field-section__header p {
-      margin: 0;
-      color: var(--color-subtle, #54595d);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      max-width: 46rem;
-    }
-
-    .field-example {
-      white-space: nowrap;
-    }
-
-    .cdx-field {
-      width: 100%;
-    }
-
-    .cdx-field__control {
-      margin-top: 8px;
-    }
-
-    .cdx-text-input,
-    .cdx-text-area {
-      width: 100%;
-      min-width: 0;
-    }
-
-    .cdx-text-input__input {
-      width: 100%;
-    }
-
-    .complete-links {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .complete-links li {
-      margin-bottom: 8px;
-    }
-
-    .review-status {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border: 1px solid var(--border-color-subtle, #c8ccd1);
-      border-radius: 10px;
-      background: var(--background-color-neutral-subtle, #f8f9fa);
-    }
-
-    .review-status[hidden] {
-      display: none;
-    }
-
-    .review-status__topline {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px 16px;
-    }
-
-    .review-status__actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .review-status__topline h3 {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.35;
-    }
-
-    .review-status__percent {
-      color: var(--color-subtle, #54595d);
-      font-size: 0.9375rem;
-      font-weight: 700;
-    }
-
-    .review-status__summary {
-      margin: 0;
-      color: var(--color-subtle, #54595d);
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    .review-status .cdx-progress-bar__bar {
-      width: var(--review-progress-width, 0%);
-      animation: none;
-      transition: width 0.2s ease;
-    }
-
-    .status-lines {
-      display: grid;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .status-line {
-      padding: 10px 12px;
-      border-radius: 8px;
-      background: var(--background-color-neutral-subtle, #f8f9fa);
-      color: var(--color-subtle, #54595d);
-    }
-
-    .metadata-choice {
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color-subtle, #eaecf0);
-    }
-
-    .metadata-choice .cdx-checkbox {
-      align-items: flex-start;
-    }
-
-    .metadata-choice .cdx-checkbox__label {
-      font-weight: 700;
-      line-height: 1.45;
-    }
-
-    .metadata-choice__description {
-      margin-top: 6px;
-      padding-left: 28px;
-      color: var(--color-subtle, #54595d);
-      font-size: 0.8125rem;
-      line-height: 1.5;
-    }
-
-    .optional-setup.cdx-accordion {
-      margin: 0;
-      border: 0;
-      border-radius: 0;
-      overflow: visible;
-      background: transparent;
-    }
-
-    .optional-setup > summary {
-      padding: 0;
-    }
-
-    .optional-setup .cdx-accordion__content {
-      padding: 12px 0 0;
-    }
-
-    .password-input .cdx-text-input__input {
-      padding-right: calc(8px + calc(8px * 2 + var(--font-size-medium, 1rem)) + var(--font-size-medium, 1rem));
-    }
-
-    .password-toggle {
-      position: absolute;
-      top: 50%;
-      right: 9px;
-      z-index: 1;
-      width: var(--font-size-medium, 1rem);
-      height: var(--font-size-medium, 1rem);
-      margin: 0;
-      border: 0;
-      padding: 0;
-      background: transparent;
-      color: var(--color-placeholder, #72777d);
-      transform: translateY(-50%);
-      cursor: pointer;
-      opacity: var(--opacity-icon-placeholder, 0.51);
-    }
-
-    .password-toggle:hover {
-      color: var(--color-base, #202122);
-      opacity: 1;
-    }
-
-    .password-toggle:focus {
-      outline: 1px solid transparent;
-      color: var(--color-progressive, #36c);
-      opacity: 1;
-    }
-
-    .password-toggle svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-      fill: currentColor;
-    }
-
-    .password-input .cdx-text-input__input:focus ~ .password-toggle,
-    .password-input .cdx-text-input__input.cdx-text-input__input--has-value ~ .password-toggle {
-      color: var(--color-subtle, #54595d);
-      opacity: 1;
-    }
-
-    .password-input .cdx-text-input__input:disabled ~ .password-toggle {
-      cursor: default;
-      color: var(--color-disabled, #a2a9b1);
-      opacity: var(--opacity-icon-base--disabled, 0.51);
-    }
-
-    #config-content,
-    #log-content {
-      margin: 0;
-      padding: 16px;
-      overflow: auto;
-      border-radius: 8px;
-      background: #101418;
-      color: #f8f9fa;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    .complete-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .dialog {
-      width: min(840px, calc(100% - 24px));
-      border: none;
-      border-radius: 12px;
-      padding: 0;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-    }
-
-    .dialog::backdrop {
-      background: rgba(0, 0, 0, 0.45);
-    }
-
-    .dialog__surface {
-      display: grid;
-      gap: 16px;
-      padding: 24px;
-      background: var(--background-color-base, #fff);
-    }
-
-    .dialog__header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: start;
-    }
-
-    .dialog__header h3 {
-      margin: 0;
-      font-size: 1.5rem;
-      line-height: 1.2;
-    }
-
-    .dialog__header p {
-      margin: 8px 0 0;
-      color: var(--color-subtle, #54595d);
-    }
-
-    .dialog__footer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .shutdown-panel {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .shutdown-panel__message {
-      color: var(--color-subtle, #54595d);
-    }
-
-    .just-validate-error-label {
-      display: inline-flex;
-      margin-top: 8px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      background: var(--background-color-error-subtle, #ffe9e5);
-      color: var(--color-error, #bf3c2c);
-      font-size: 0.875rem;
-      line-height: 1.4;
-    }
-
-    .cdx-text-input__input.just-validate-error-field,
-    .cdx-text-area__textarea.just-validate-error-field {
-      border-color: var(--border-color-error, #f54739);
-      box-shadow: inset 0 0 0 1px var(--box-shadow-color-error, #f54739);
-      background: var(--background-color-error-subtle, #ffe9e5);
-      color: var(--color-error, #bf3c2c);
-    }
-
-    .cdx-accordion[data-disabled="true"] > summary {
-      color: var(--color-disabled, #a2a9b1);
-      cursor: default;
-    }
-
-    .cdx-accordion[data-disabled="true"] > summary:hover {
-      background: var(--background-color-transparent, transparent);
-    }
-
-    @media (max-width: 720px) {
-      .wizard-header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .wizard-header__brand img {
-        width: 88px;
-      }
-
-      .wizard-card,
-      .wizard-progress {
-        grid-template-columns: 1fr;
-      }
-
-      .wizard-card {
-        padding: 16px;
-      }
-
-      .dialog__footer {
-        justify-content: flex-start;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/setup.css" />
 </head>
 <body>
-  <main class="page-shell">
+  <main class="page-shell" data-server-ip="<%= SERVER_IP %>">
       <section class="surface-card wizard-card">
         <header class="wizard-header">
-          <div class="wizard-header__identity">
-            <h1>Deploy Setup</h1>
-          </div>
           <div class="wizard-header__brand" aria-hidden="true">
             <img src="/Wikibase_Suite_(RGB).png" alt="" />
+          </div>
+          <div class="wizard-header__identity">
+            <h1>Deploy Setup</h1>
           </div>
         </header>
 
@@ -593,82 +26,96 @@
               <li class="wizard-progress__item" data-step-progress="0">
                 <div class="wizard-progress__topline">
                   <span class="wizard-progress__step">1</span>
-                  <span class="wizard-progress__title">Configure</span>
+                  <span class="wizard-progress__title">Basics</span>
                 </div>
-                <span class="wizard-progress__description">
-                  Enter host names and admin contact details.
-                </span>
               </li>
-            <li class="wizard-progress__item" data-step-progress="1">
-              <div class="wizard-progress__topline">
-                <span class="wizard-progress__step">2</span>
-                <span class="wizard-progress__title">Setup</span>
-              </div>
-              <span class="wizard-progress__description">
-                Start setup and follow progress here.
-              </span>
-            </li>
-          </ol>
+              <li class="wizard-progress__item" data-step-progress="1">
+                <div class="wizard-progress__topline">
+                  <span class="wizard-progress__step">2</span>
+                  <span class="wizard-progress__title">Preferences</span>
+                </div>
+              </li>
+              <li class="wizard-progress__item" data-step-progress="2">
+                <div class="wizard-progress__topline">
+                  <span class="wizard-progress__step">3</span>
+                  <span class="wizard-progress__title">Setup</span>
+                </div>
+              </li>
+            </ol>
           </div>
 
           <section class="wizard-panel" data-step-panel="0">
-            <div class="wizard-panel__body wizard-panel__body--configure">
-              <div class="field-stack">
-                <section class="field-section field-section--plain">
-                  <div class="cdx-field">
-                    <div class="cdx-label">
-                      <label class="cdx-label__label" for="mw-admin-email">
-                        <span class="cdx-label__label__text">Admin email address</span>
-                      </label>
-                      <span class="cdx-label__description" id="mw-admin-email-description">
-                        Used for the initial admin account and service notices.
-                      </span>
-                    </div>
-                    <div class="cdx-field__control">
-                      <div class="cdx-text-input">
-                        <input
-                          id="mw-admin-email"
-                          class="cdx-text-input__input"
-                          name="MW_ADMIN_EMAIL"
-                          type="email"
-                          required
-                          autocomplete="email"
-                          placeholder="you@example.org"
-                          aria-describedby="mw-admin-email-description"
-                        />
-                      </div>
-                    </div>
+            <div class="wizard-panel__body wizard-panel__body--form">
+              <div class="cdx-field">
+                <div class="cdx-label">
+                  <label class="cdx-label__label" for="mw-admin-email">
+                    <span class="cdx-label__label__text">Admin email address</span>
+                  </label>
+                  <span class="cdx-label__description" id="mw-admin-email-description">
+                    Used for the initial admin account and service notices.
+                  </span>
+                </div>
+                <div class="cdx-field__control">
+                  <div class="cdx-text-input validated-input" data-validation-status="neutral">
+                    <input
+                      id="mw-admin-email"
+                      class="cdx-text-input__input"
+                      name="MW_ADMIN_EMAIL"
+                      type="email"
+                      required
+                      autocomplete="email"
+                      placeholder="you@example.org"
+                      aria-describedby="mw-admin-email-description"
+                    />
+                    <span class="validated-input__status-icon validated-input__status-icon--valid" aria-hidden="true"></span>
+                    <span class="validated-input__status-icon validated-input__status-icon--invalid" aria-hidden="true"></span>
                   </div>
-                </section>
+                </div>
+              </div>
 
-                <section class="field-section" aria-labelledby="domain-section-title">
-                  <div class="field-section__header">
-                    <h2 id="domain-section-title">Domain names</h2>
-                    <p>
-                      The two host fields that follow are the addresses you will use to access your Wikibase after
-                      setup. Both host names must point to <code><%= SERVER_IP %></code> before you continue. See
-                      <a
-                        href="#"
-                        data-modal-open
-                        data-modal-target="dns-help-dialog"
-                      >
-                        DNS help
-                      </a>
-                      for further guidance on how to set up these records.
-                    </p>
-                  </div>
+              <section class="field-section" aria-labelledby="domain-names-title">
+                <div class="field-section__header">
+                  <h2 id="domain-names-title">Domain names</h2>
+                  <p>
+                    Your server's IP address is:
+                    <button
+                      type="button"
+                      class="inline-copy__button"
+                      data-copy-text="<%= SERVER_IP %>"
+                      aria-label="Copy server IP address"
+                      title="Copy IP address"
+                    >
+                      <span class="inline-copy__text"><%= SERVER_IP %></span>
+                      <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="default">
+                        <path d="M6 2a2 2 0 0 0-2 2v8h2V4h8V2H6zm4 4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-6zm0 2h6v8h-6V8z"></path>
+                      </svg>
+                      <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="copied" hidden>
+                        <path d="M4.5 10.5 8.2 14.2 15.5 6.8"></path>
+                      </svg>
+                    </button>.
+                    You can't proceed to the next step until both host names below resolve to this IP address.
+                    For additional guidance or troubleshooting in this process see <a
+                    href="#"
+                    data-modal-open
+                    data-modal-target="dns-help-dialog"
+                  >
+                    DNS help
+                  </a>.
+                  </p>
+                </div>
 
+                <section class="field-section field-section--plain" aria-labelledby="domain-names-title">
                   <div class="cdx-field">
                     <div class="cdx-label">
                       <label class="cdx-label__label" for="wikibase-host">
                         <span class="cdx-label__label__text">Wikibase host</span>
                       </label>
                       <span class="cdx-label__description" id="wikibase-host-description">
-                        The main public domain for your Wikibase, <span class="field-example">for example <code>yourwikibase.com</code>.</span>
+                        Public address to your Wikibase (e.g. <code>mywikibase.com</code>)
                       </span>
                     </div>
                     <div class="cdx-field__control">
-                      <div class="cdx-text-input">
+                      <div class="cdx-text-input validated-input host-input" data-host-status="neutral" data-validation-status="neutral">
                         <input
                           id="wikibase-host"
                           class="cdx-text-input__input"
@@ -680,6 +127,9 @@
                           placeholder="yourwikibase.com"
                           aria-describedby="wikibase-host-description"
                         />
+                        <span class="host-input__spinner" aria-hidden="true"></span>
+                        <span class="validated-input__status-icon validated-input__status-icon--valid" aria-hidden="true"></span>
+                        <span class="validated-input__status-icon validated-input__status-icon--invalid" aria-hidden="true"></span>
                       </div>
                     </div>
                   </div>
@@ -690,11 +140,11 @@
                         <span class="cdx-label__label__text">Query Service host</span>
                       </label>
                       <span class="cdx-label__description" id="wdqs-host-description">
-                        <span class="field-example">Usually a subdomain such as <code>query.yourwikibase.com</code>.</span>
+                        Public address for your Wikibase Query Service (e.g. <code>query.mywikibase.com</code>)
                       </span>
                     </div>
                     <div class="cdx-field__control">
-                      <div class="cdx-text-input">
+                      <div class="cdx-text-input validated-input host-input" data-host-status="neutral" data-validation-status="neutral">
                         <input
                           id="wdqs-host"
                           class="cdx-text-input__input"
@@ -706,18 +156,90 @@
                           placeholder="query.yourwikibase.com"
                           aria-describedby="wdqs-host-description"
                         />
+                        <span class="host-input__spinner" aria-hidden="true"></span>
+                        <span class="validated-input__status-icon validated-input__status-icon--valid" aria-hidden="true"></span>
+                        <span class="validated-input__status-icon validated-input__status-icon--invalid" aria-hidden="true"></span>
                       </div>
                     </div>
                   </div>
 
+                <details
+                  class="cdx-accordion cdx-accordion--separation-outline optional-setup"
+                >
+                  <summary>
+                    <div class="cdx-accordion__header">
+                      <span class="cdx-accordion__header__title">Need more help?</span>
+                    </div>
+                  </summary>
+                  <ol>
+                    <li>If you have not already registered the domain used above you will need to register it. See [CODEX: insert a link to general help on how to register a new domain name]) for additional help on registering a new domain name.
+                    </li>
+                    <li>
+                      Create an <strong>A</strong> record in your DNS service for your domain name for each of the names you chose above. Both should point to IP address of this server, which is:
+                      <button
+                          type="button"
+                          class="inline-copy__button"
+                          data-copy-text="<%= SERVER_IP %>"
+                          aria-label="Copy server IP address"
+                          title="Copy IP address"
+                        >
+                          <span class="inline-copy__text"><%= SERVER_IP %></span>
+                          <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="default">
+                            <path d="M6 2a2 2 0 0 0-2 2v8h2V4h8V2H6zm4 4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-6zm0 2h6v8h-6V8z"></path>
+                          </svg>
+                          <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="copied" hidden>
+                            <path d="M4.5 10.5 8.2 14.2 15.5 6.8"></path>
+                          </svg>
+                        </button>
+                    </li>
+                    <li>Enter your chosen domain names in the fields below.</li>
+                  </ol>
+                </details>
                 </section>
+              </div>
+            </div>
 
+            <div class="wizard-actions">
+              <span></span>
+              <div class="wizard-actions__group">
+                <button
+                  type="button"
+                  id="domain-continue"
+                  class="cdx-button cdx-button--action-progressive cdx-button--weight-primary"
+                  disabled
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="wizard-panel" data-step-panel="1">
+            <div class="wizard-panel__body wizard-panel__body--form">
+              <div class="metadata-choice">
+                <div class="cdx-checkbox">
+                  <input
+                    id="metadata-callback"
+                    class="cdx-checkbox__input"
+                    type="checkbox"
+                    name="METADATA_CALLBACK"
+                  />
+                  <span class="cdx-checkbox__icon" aria-hidden="true"></span>
+                  <label class="cdx-checkbox__label" for="metadata-callback">
+                    Make this Wikibase visible in the global Wikibase directory
+                  </label>
+                </div>
+                <div class="metadata-choice__description">
+                  Enable this if you want your Wikibase to be listed in the shared global directory for discovery.
+                </div>
+              </div>
+              <div class="field-stack">
                 <section class="field-section" aria-labelledby="optional-setup-title">
                   <div class="field-section__header">
                     <h2 id="optional-setup-title">Optional</h2>
                     <p>
-                      Several configuration values are set by default, including the automatic generation of secure
-                      passwords. Expand and review those fields below if you have special requirements or preferences,
+                      Some settings are set by default, including the automatic generation of secure passwords. You
+                      can view and edit those settings below if you have special requirements or preferences,
                       otherwise that can be safely left as is.
                     </p>
                   </div>
@@ -881,33 +403,25 @@
                     </div>
                   </details>
                 </section>
-
-                <div class="metadata-choice">
-                  <div class="cdx-checkbox">
-                    <input
-                      id="metadata-callback"
-                      class="cdx-checkbox__input"
-                      type="checkbox"
-                      name="METADATA_CALLBACK"
-                    />
-                    <span class="cdx-checkbox__icon" aria-hidden="true"></span>
-                    <label class="cdx-checkbox__label" for="metadata-callback">
-                      Make this Wikibase visible in the global Wikibase directory
-                    </label>
-                  </div>
-                  <div class="metadata-choice__description">
-                    Enable this if you want your Wikibase to be listed in the shared global directory for discovery.
-                  </div>
-                </div>
               </div>
             </div>
 
             <div class="wizard-actions">
-              <span></span>
+              <div class="wizard-actions__group">
+                <button
+                  type="button"
+                  id="config-back"
+                  class="cdx-button cdx-button--weight-quiet"
+                >
+                  Back
+                </button>
+              </div>
               <div class="wizard-actions__group">
                 <button
                   type="submit"
+                  id="config-submit"
                   class="cdx-button cdx-button--action-progressive cdx-button--weight-primary"
+                  disabled
                 >
                   Start Setup
                 </button>
@@ -915,7 +429,7 @@
             </div>
           </section>
 
-          <section class="wizard-panel" data-step-panel="1">
+          <section class="wizard-panel" data-step-panel="2">
             <div class="wizard-panel__header">
               <h2>Setup</h2>
               <p>Follow progress here while setup runs, then collect the final configuration once services are ready.</p>
@@ -923,16 +437,6 @@
 
             <div class="wizard-panel__body">
               <div class="review-status" id="waiting" hidden>
-                <div class="review-status__actions">
-                  <button
-                    type="button"
-                    class="cdx-button cdx-button--size-small cdx-button--weight-quiet cdx-button--action-progressive"
-                    data-modal-open
-                    data-modal-target="log-dialog"
-                  >
-                    Open full setup log
-                  </button>
-                </div>
                 <div class="review-status__topline">
                   <h3>Setup progress</h3>
                   <span class="review-status__percent" id="review-progress-percent">0%</span>
@@ -943,20 +447,19 @@
                 <p class="review-status__summary" id="review-progress-summary">
                   Setup has started. Waiting for the first progress update.
                 </p>
-                <div class="cdx-message">
-                  <span class="cdx-message__icon"></span>
-                  <div class="cdx-message__content">
-                    Setup is running. Follow the live status updates below or open the full setup log for more detail.
+                <div class="live-status">
+                  <div class="live-status__header">
+                    <h3>Live status</h3>
+                    <button
+                      type="button"
+                      class="cdx-button cdx-button--size-small cdx-button--weight-quiet cdx-button--action-progressive"
+                      data-modal-open
+                      data-modal-target="log-dialog"
+                    >
+                      Full log
+                    </button>
                   </div>
-                </div>
-                <div class="cdx-message">
-                  <span class="cdx-message__icon"></span>
-                  <div class="cdx-message__content">
-                    When setup completes, save the generated configuration promptly. This temporary installer will then close automatically.
-                  </div>
-                </div>
-                <div>
-                  <h3>Live status</h3>
+                  <p class="live-status__empty" id="waiting-empty">Waiting for status updates.</p>
                   <ul class="status-lines" id="waiting-lines"></ul>
                 </div>
               </div>
@@ -964,7 +467,7 @@
               <section id="complete" <%= isBooted ? '' : 'hidden' %>>
                 <div class="wizard-panel__header">
                   <h2>Setup completed</h2>
-                  <p>Your services are up. Save the generated configuration now before this temporary setup session is closed.</p>
+                  <p>Your services are up. Save the generated configuration somewhere secure now; this temporary setup session will close automatically and passwords will be removed after it closes.</p>
                 </div>
 
                 <div class="wizard-panel__body">
@@ -995,13 +498,6 @@
                     </ul>
                   </div>
 
-                  <div class="cdx-message cdx-message--warning">
-                    <span class="cdx-message__icon"></span>
-                    <div class="cdx-message__content">
-                      Please save this configuration somewhere secure. The passwords will be removed after this setup is closed.
-                    </div>
-                  </div>
-
                   <pre id="config-content"></pre>
 
                   <div class="complete-actions">
@@ -1027,16 +523,35 @@
     <div class="dialog__surface">
       <div class="dialog__header">
         <div>
-          <h3>How to point a domain to this server</h3>
-          <p>This server's public IP address is <code><%= SERVER_IP %></code>.</p>
+          <h3>More DNS help</h3>
+          <p>Use this if you want a fuller walkthrough or need help troubleshooting why a host is not validating.</p>
         </div>
         <button type="button" class="cdx-button cdx-button--weight-quiet" data-modal-close>Close</button>
       </div>
 
       <ol>
-        <li>Register a domain with your preferred registrar.</li>
+        <li>Register the domain/s with your preferred registrar if you do not already have one.</li>
         <li>Open the DNS settings for that domain.</li>
-        <li>Create an <strong>A</strong> record for your main Wikibase host pointing to <code><%= SERVER_IP %></code>.</li>
+        <li>
+          Create an <strong>A</strong> record for your main Wikibase host pointing to
+          <span class="inline-copy">
+            <button
+              type="button"
+              class="inline-copy__button"
+              data-copy-text="<%= SERVER_IP %>"
+              aria-label="Copy server IP address"
+              title="Copy IP address"
+            >
+              <span class="inline-copy__text"><%= SERVER_IP %></span>
+              <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="default">
+                <path d="M6 2a2 2 0 0 0-2 2v8h2V4h8V2H6zm4 4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-6zm0 2h6v8h-6V8z"></path>
+              </svg>
+              <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="copied" hidden>
+                <path d="M4.5 10.5 8.2 14.2 15.5 6.8"></path>
+              </svg>
+            </button>
+          </span>.
+        </li>
         <li>Create another <strong>A</strong> record for the query host, usually <code>query</code>, pointing to the same IP.</li>
         <li>Wait for DNS propagation, then return here and try continuing again.</li>
       </ol>
@@ -1045,22 +560,39 @@
         <span class="cdx-message__icon"></span>
         <div class="cdx-message__content">
           If a host still fails validation, the most common causes are an incorrect A record, propagation still being in progress,
-          or the host pointing somewhere other than <code><%= SERVER_IP %></code>.
+          or the host pointing somewhere other than
+          <span class="inline-copy">
+            <button
+              type="button"
+              class="inline-copy__button"
+              data-copy-text="<%= SERVER_IP %>"
+              aria-label="Copy server IP address"
+              title="Copy IP address"
+            >
+              <span class="inline-copy__text"><%= SERVER_IP %></span>
+              <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="default">
+                <path d="M6 2a2 2 0 0 0-2 2v8h2V4h8V2H6zm4 4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-6zm0 2h6v8h-6V8z"></path>
+              </svg>
+              <svg viewBox="0 0 20 20" aria-hidden="true" data-copy-icon="copied" hidden>
+                <path d="M4.5 10.5 8.2 14.2 15.5 6.8"></path>
+              </svg>
+            </button>
+          </span>.
         </div>
       </div>
 
-      <div class="cdx-message">
-        <span class="cdx-message__icon"></span>
-        <div class="cdx-message__content">
-          For development and testing, <code>localhost</code> or <code>.test</code> host names are allowed.
-          You can also use <code><%= SERVER_IP %>.nip.io</code> and <code>query.<%= SERVER_IP %>.nip.io</code>,
-          but change these with care because they are not easy to update after the initial deployment.
-        </div>
+      <div class="dialog__resources">
+        <h4>Common provider guides</h4>
+        <ul>
+          <li><a href="https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/" target="_blank" rel="noreferrer">Cloudflare: create DNS records</a></li>
+          <li><a href="https://www.godaddy.com/help/add-an-a-record-19238" target="_blank" rel="noreferrer">GoDaddy: add an A record</a></li>
+          <li><a href="https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-an-a-address-record-for-my-domain/" target="_blank" rel="noreferrer">Namecheap: set up an A record</a></li>
+        </ul>
       </div>
     </div>
   </dialog>
 
-  <dialog id="log-dialog" class="dialog">
+  <dialog id="log-dialog" class="dialog dialog--log">
     <div class="dialog__surface">
       <div class="dialog__header">
         <div>
@@ -1087,698 +619,6 @@
     </div>
   </dialog>
 
-  <script>
-    (function () {
-      'use strict';
-
-      const STATUS_LOG_ENTRY_REGEX = /\[status\]\s*(.*)$/i;
-      const BOOT_COMPLETE_REGEX = /setup is complete!?/i;
-      const STEP_LABELS = [ 'Configure', 'Setup' ];
-      const RUN_PROGRESS_MARKERS = [
-        {
-          pattern: /Configuration saved\./i,
-          progress: 20,
-          summary: 'Configuration saved. Preparing service startup.'
-        },
-        {
-          pattern: /Removing config\/LocalSettings\.php \(RESET=true\)/i,
-          progress: 25,
-          summary: 'Removing the previous MediaWiki configuration.'
-        },
-        {
-          pattern: /Taking down any existing wbs-deploy services and data \(RESET=true\)/i,
-          progress: 35,
-          summary: 'Removing existing services and data before restart.'
-        },
-        {
-          pattern: /Starting Docker Compose services\.\.\./i,
-          progress: 55,
-          summary: 'Starting the Wikibase Suite services.'
-        },
-        {
-          pattern: /Waiting for services to start\./i,
-          progress: 70,
-          summary: 'Waiting for the services to come online. This usually takes 2-6 minutes.'
-        },
-        {
-          pattern: /Docker Compose services reported ready\./i,
-          progress: 90,
-          summary: 'Services reported ready. Finishing setup details.'
-        },
-        {
-          pattern: /SKIP_LAUNCH=true; not starting services\./i,
-          progress: 100,
-          summary: 'Setup stopped before service launch because skip-launch mode is enabled.'
-        },
-        {
-          pattern: /Setup is Complete!?/i,
-          progress: 100,
-          summary: 'Setup complete. Your services are ready.'
-        }
-      ];
-      const REQUIRED_FIELD_SELECTORS = [
-        '[name=MW_ADMIN_EMAIL]',
-        '[name=WIKIBASE_PUBLIC_HOST]',
-        '[name=WDQS_PUBLIC_HOST]'
-      ];
-      const OPTIONAL_VALIDATED_FIELD_SELECTORS = [
-        '[name=MW_ADMIN_PASS]',
-        '[name=DB_PASS]'
-      ];
-      const HOST_FIELD_NAMES = new Set([ 'WIKIBASE_PUBLIC_HOST', 'WDQS_PUBLIC_HOST' ]);
-      const OPTIONAL_FIELDS = [
-        'MW_ADMIN_NAME',
-        'MW_ADMIN_PASS',
-        'DB_NAME',
-        'DB_USER',
-        'DB_PASS'
-      ];
-
-      const el = (id) => document.getElementById(id);
-      const on = (node, type, handler) => node && node.addEventListener(type, handler);
-
-      function openSSE(url, { onOpen, onMessage, onError, events } = {}) {
-        const es = new EventSource(url, { withCredentials: false });
-        if (onOpen) {
-          es.onopen = onOpen;
-        }
-        if (onMessage) {
-          es.onmessage = onMessage;
-        }
-        if (onError) {
-          es.onerror = onError;
-        }
-        if (events) {
-          Object.entries(events).forEach(([ type, fn ]) => es.addEventListener(type, fn));
-        }
-        return es;
-      }
-
-      const form = el('config-form');
-      const optionalSetup = el('optional-setup');
-      const stepPanels = Array.from(document.querySelectorAll('[data-step-panel]'));
-      const stepProgress = Array.from(document.querySelectorAll('[data-step-progress]'));
-      const elWaiting = el('waiting');
-      const elWaitingLines = el('waiting-lines');
-      const elReviewProgressBar = el('review-progress-bar');
-      const elReviewProgressPercent = el('review-progress-percent');
-      const elReviewProgressSummary = el('review-progress-summary');
-      const elComplete = el('complete');
-      const elConfigContent = el('config-content');
-      const elCopyBtn = el('copy-config');
-      const elDownloadLink = el('download-config');
-      const elLogContent = el('log-content');
-      const elShutdownBtn = el('shutdown-btn');
-      const elShutdownMsg = el('shutdown-msg');
-
-      let currentStep = 0;
-      let currentRunProgress = 0;
-      let logStream = null;
-      let alreadyHandledBootedState = false;
-
-      const pageState = {
-        config: null,
-        configText: ''
-      };
-
-      async function fetchConfig() {
-        try {
-          const res = await fetch('/config');
-          if (!res.ok) {
-            return;
-          }
-          const { config, configText } = await res.json();
-          pageState.config = config || {};
-          pageState.configText = configText || '';
-        } catch {
-          // Ignore fetch failures during initial render.
-        }
-      }
-
-      function getCheckboxValue(input) {
-        return input ? input.checked : false;
-      }
-
-      function hydrateFormFromConfig(targetForm, cfg) {
-        if (!targetForm || !cfg) {
-          return;
-        }
-
-        targetForm.querySelectorAll('input, select, textarea').forEach((field) => {
-          const name = field.getAttribute('name');
-          if (!name || !(name in cfg)) {
-            return;
-          }
-
-          const value = cfg[name];
-
-          if (field.type === 'checkbox') {
-            field.checked = typeof value === 'boolean' ? value : String(value).toLowerCase() === 'true' || String(value) === '1';
-            return;
-          }
-
-          if (field.type === 'password' && (value == null || String(value) === '')) {
-            return;
-          }
-
-          field.value = value ?? '';
-        });
-      }
-
-      function hydrateBindingsFromConfig(cfg) {
-        document.querySelectorAll('[data-bind]').forEach((node) => {
-          const key = node.dataset.bind;
-          const prefix = node.dataset.prefix || '';
-          const suffix = node.dataset.suffix || '';
-          const value = cfg && cfg[key];
-
-          if (!value) {
-            if (node.tagName === 'A') {
-              node.removeAttribute('href');
-            }
-            return;
-          }
-
-          const rendered = `${prefix}${value}${suffix}`;
-          node.textContent = rendered;
-
-          if (node.tagName === 'A') {
-            node.setAttribute('href', rendered);
-          }
-        });
-      }
-
-      function renderConfigTextBlock(preEl) {
-        if (!preEl) {
-          return;
-        }
-        preEl.textContent = pageState.configText || '';
-      }
-
-      function deriveWdqsHost(host) {
-        return host ? `query.${host}` : '';
-      }
-
-      function getFormValue(name) {
-        const field = form.elements[name];
-        if (!field) {
-          return '';
-        }
-
-        if (field.type === 'checkbox') {
-          return getCheckboxValue(field);
-        }
-
-        return (field.value || '').trim();
-      }
-
-      function hasOptionalValues() {
-        return OPTIONAL_FIELDS.some((name) => getFormValue(name));
-      }
-
-      function revealOptionalSetup() {
-        if (optionalSetup) {
-          optionalSetup.open = true;
-        }
-      }
-
-      function setFormDisabled(disabled) {
-        form.querySelectorAll('input, textarea, select, button[type="submit"], [data-password-target]').forEach((field) => {
-          field.disabled = disabled;
-        });
-
-        form.querySelectorAll('details').forEach((details) => {
-          details.dataset.disabled = disabled ? 'true' : 'false';
-        });
-      }
-
-      function setRunProgress(progress, summary) {
-        const safeProgress = Math.max(0, Math.min(100, progress));
-
-        if (safeProgress < currentRunProgress) {
-          return;
-        }
-
-        currentRunProgress = safeProgress;
-
-        if (elWaiting) {
-          elWaiting.style.setProperty('--review-progress-width', `${safeProgress}%`);
-        }
-
-        if (elReviewProgressBar) {
-          elReviewProgressBar.style.width = `${safeProgress}%`;
-        }
-
-        if (elReviewProgressPercent) {
-          elReviewProgressPercent.textContent = `${safeProgress}%`;
-        }
-
-        if (elReviewProgressSummary && summary) {
-          elReviewProgressSummary.textContent = summary;
-        }
-      }
-
-      function shouldValidateTouchedField(field) {
-        if (!field || !field.name) {
-          return false;
-        }
-
-        if (REQUIRED_FIELD_SELECTORS.includes(`[name=${field.name}]`)) {
-          return true;
-        }
-
-        if (OPTIONAL_VALIDATED_FIELD_SELECTORS.includes(`[name=${field.name}]`)) {
-          return true;
-        }
-
-        return Boolean((field.value || '').trim());
-      }
-
-      function markFieldTouched(field) {
-        if (field) {
-          field.dataset.touched = 'true';
-        }
-      }
-
-      function isFieldTouched(field) {
-        return field && field.dataset.touched === 'true';
-      }
-
-      function revalidateTouchedField(validation, field) {
-        if (!field || !isFieldTouched(field) || !shouldValidateTouchedField(field)) {
-          return;
-        }
-
-        validation.revalidateField(field);
-      }
-
-      function activateStep(stepIndex) {
-        currentStep = Math.max(0, Math.min(stepPanels.length - 1, stepIndex));
-
-        stepPanels.forEach((panel) => {
-          panel.classList.toggle('is-active', Number(panel.dataset.stepPanel) === currentStep);
-        });
-
-        stepProgress.forEach((item) => {
-          const step = Number(item.dataset.stepProgress);
-          item.classList.toggle('is-active', step === currentStep);
-          item.classList.toggle('is-complete', step < currentStep);
-        });
-      }
-
-      function appendToLog(text) {
-        const safeText = text.endsWith('\n') ? text : `${text}\n`;
-        elLogContent.insertAdjacentText('beforeend', safeText);
-      }
-
-      function appendStatusLine(text) {
-        if (!text) {
-          return;
-        }
-
-        const item = document.createElement('li');
-        item.className = 'status-line';
-        item.textContent = text;
-        elWaitingLines.appendChild(item);
-      }
-
-      function updateRunProgressFromLog(text) {
-        if (!text) {
-          return;
-        }
-
-        const marker = RUN_PROGRESS_MARKERS.find((candidate) => candidate.pattern.test(text));
-        if (marker) {
-          setRunProgress(marker.progress, marker.summary);
-        }
-      }
-
-      function extractStatusLines(text) {
-        if (!text) {
-          return [];
-        }
-
-        return text
-          .split('\n')
-          .map((line) => {
-            const match = line.match(STATUS_LOG_ENTRY_REGEX);
-            return match && match[1] ? match[1].trim() : null;
-          })
-          .filter(Boolean);
-      }
-
-      async function handleBootComplete() {
-        if (alreadyHandledBootedState) {
-          return;
-        }
-
-        alreadyHandledBootedState = true;
-
-        await fetchConfig();
-        hydrateFormFromConfig(form, pageState.config);
-        hydrateBindingsFromConfig(pageState.config);
-        renderConfigTextBlock(elConfigContent);
-
-        setRunProgress(100, 'Setup complete. Your services are ready.');
-        elWaiting.hidden = true;
-        elComplete.hidden = false;
-
-        activateStep(1);
-
-        const configContent = pageState.configText || '';
-
-        elCopyBtn.onclick = () => {
-          navigator.clipboard.writeText(configContent).then(() => {
-            elCopyBtn.textContent = 'Copied';
-            setTimeout(() => {
-              elCopyBtn.textContent = 'Copy configuration';
-            }, 2000);
-          }).catch(() => {
-            alert('Failed to copy the configuration. Please copy it manually.');
-          });
-        };
-
-        if (elDownloadLink.href && elDownloadLink.href.startsWith('blob:')) {
-          URL.revokeObjectURL(elDownloadLink.href);
-        }
-
-        const blob = new Blob([ configContent ], { type: 'text/plain' });
-        elDownloadLink.href = URL.createObjectURL(blob);
-      }
-
-      function startLogStream() {
-        if (logStream) {
-          return;
-        }
-
-        logStream = openSSE('/log/stream', {
-          onMessage: (event) => {
-            if (!event.data) {
-              return;
-            }
-
-            const lines = JSON.parse(event.data);
-            extractStatusLines(lines).forEach(appendStatusLine);
-            updateRunProgressFromLog(lines);
-
-            if (BOOT_COMPLETE_REGEX.test(lines)) {
-              handleBootComplete();
-            }
-
-            appendToLog(lines);
-          },
-          onError: () => {
-            console.log('SSE error (will auto-reconnect)');
-          }
-        });
-      }
-
-      function updatePasswordToggle(button, isVisible) {
-        if (!button) {
-          return;
-        }
-
-        button.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
-        button.setAttribute('aria-label', `${isVisible ? 'Hide' : 'Show'} ${button.dataset.passwordLabel || 'password'}`);
-        const hiddenIcon = button.querySelector('[data-password-icon="hidden"]');
-        const visibleIcon = button.querySelector('[data-password-icon="visible"]');
-        if (hiddenIcon) {
-          hiddenIcon.hidden = isVisible;
-        }
-        if (visibleIcon) {
-          visibleIcon.hidden = !isVisible;
-        }
-      }
-
-      function initValidation() {
-        const hostNameRegex = /^(localhost|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
-        const passwordValidator = (value) => value.length === 0 || value.length >= 10;
-
-        const hostResolvesToServerIPRule = {
-          validator: (value) => async () => {
-            const hostname = (value || '').trim();
-            if (!hostname) {
-              return true;
-            }
-            if (hostname === 'localhost' || /\.test$/i.test(hostname)) {
-              return true;
-            }
-            try {
-              const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(hostname)}&type=A`);
-              if (!res.ok) {
-                return false;
-              }
-              const json = await res.json();
-              const answers = Array.isArray(json && json.Answer) ? json.Answer : [];
-              return answers.some((answer) => answer.type === 1 && answer.data === '<%= SERVER_IP %>');
-            } catch {
-              return false;
-            }
-          },
-          errorMessage: `Does not resolve to <%= SERVER_IP %> yet. Check the A record and allow time for DNS propagation.`
-        };
-
-        startLogStream();
-
-        const validation = new JustValidate('#config-form', {
-          errorFieldCssClass: 'just-validate-error-field',
-          errorLabelCssClass: 'just-validate-error-label',
-          focusInvalidField: true
-        });
-
-        validation
-          .addField('[name=MW_ADMIN_EMAIL]', [
-            { rule: 'required' },
-            { rule: 'email' }
-          ])
-          .addField('[name=WIKIBASE_PUBLIC_HOST]', [
-            { rule: 'required' },
-            { rule: 'customRegexp', value: hostNameRegex, errorMessage: 'Must be a valid host name, for example example.com' },
-            hostResolvesToServerIPRule
-          ])
-          .addField('[name=WDQS_PUBLIC_HOST]', [
-            { rule: 'customRegexp', value: hostNameRegex, errorMessage: 'Must be a valid host name, for example query.example.com' },
-            hostResolvesToServerIPRule
-          ])
-          .addField('[name=MW_ADMIN_PASS]', [
-            { validator: passwordValidator, errorMessage: 'Password must be at least 10 characters or left blank' }
-          ])
-          .addField('[name=DB_PASS]', [
-            { validator: passwordValidator, errorMessage: 'Password must be at least 10 characters or left blank' }
-          ])
-          .onFail(() => {
-            activateStep(0);
-            if (hasOptionalValues()) {
-              revealOptionalSetup();
-            }
-          })
-          .onSuccess(async (event) => {
-            const targetForm = event.target;
-            const data = Object.fromEntries(new FormData(targetForm).entries());
-            data.METADATA_CALLBACK = targetForm.METADATA_CALLBACK && targetForm.METADATA_CALLBACK.checked ? 'true' : 'false';
-
-            const res = await fetch('/config', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
-            });
-
-            if (!res.ok) {
-              alert('Failed to save the environment. See the browser console for details.');
-              return;
-            }
-
-            setFormDisabled(true);
-
-            const { config, configText } = await res.json();
-            pageState.config = config || {};
-            pageState.configText = configText || '';
-
-            hydrateFormFromConfig(targetForm, pageState.config);
-            hydrateBindingsFromConfig(pageState.config);
-            renderConfigTextBlock(elConfigContent);
-
-            setRunProgress(0, 'Setup has started. Waiting for the first progress update.');
-            activateStep(1);
-            elWaiting.hidden = false;
-            elWaitingLines.innerHTML = '';
-            elComplete.hidden = true;
-          });
-
-        return validation;
-      }
-
-      function initTouchedValidation(validation) {
-        const fields = [
-          ...REQUIRED_FIELD_SELECTORS,
-          ...OPTIONAL_VALIDATED_FIELD_SELECTORS
-        ]
-          .map((selector) => form.querySelector(selector))
-          .filter(Boolean);
-
-        fields.forEach((field) => {
-          on(field, 'focus', () => markFieldTouched(field));
-          on(field, 'blur', () => revalidateTouchedField(validation, field));
-
-          if (!HOST_FIELD_NAMES.has(field.name)) {
-            on(field, 'input', () => {
-              if (!isFieldTouched(field)) {
-                return;
-              }
-
-              if (!shouldValidateTouchedField(field)) {
-                return;
-              }
-
-              validation.revalidateField(field);
-            });
-          }
-        });
-      }
-
-      function initDerivedWdqsHost(validation) {
-        const wbHostInput = form.querySelector('[name=WIKIBASE_PUBLIC_HOST]');
-        const wdqsHostInput = form.querySelector('[name=WDQS_PUBLIC_HOST]');
-        if (!wbHostInput || !wdqsHostInput) {
-          return;
-        }
-
-        wbHostInput.addEventListener('input', () => {
-          if (wdqsHostInput.dataset.defaulted === 'true') {
-            wdqsHostInput.value = deriveWdqsHost(wbHostInput.value.trim());
-          }
-          syncReviewPanel();
-        });
-
-        wdqsHostInput.addEventListener('input', () => {
-          wdqsHostInput.dataset.defaulted = wdqsHostInput.value.trim() ? 'false' : 'true';
-          if (wdqsHostInput.dataset.defaulted === 'true') {
-            wdqsHostInput.value = deriveWdqsHost(wbHostInput.value.trim());
-          }
-          syncReviewPanel();
-        });
-
-        if (!wdqsHostInput.value.trim()) {
-          wdqsHostInput.dataset.defaulted = 'true';
-        }
-
-      }
-
-      function initPasswordReveal() {
-        document.querySelectorAll('[data-password-target]').forEach((button) => {
-          const targetId = button.getAttribute('data-password-target');
-          button.dataset.passwordLabel = targetId === 'db-pass' ? 'database password' : 'admin password';
-          updatePasswordToggle(button, false);
-
-          on(button, 'click', () => {
-            const field = targetId && document.getElementById(targetId);
-            if (!field || field.disabled) {
-              return;
-            }
-
-            const isVisible = field.type === 'password';
-            field.type = isVisible ? 'text' : 'password';
-            updatePasswordToggle(button, isVisible);
-          });
-        });
-      }
-
-      function initModalWiring() {
-        document.addEventListener('click', (event) => {
-          const disabledSummary = event.target.closest('details[data-disabled="true"] > summary');
-          if (disabledSummary) {
-            event.preventDefault();
-            return;
-          }
-
-          const opener = event.target.closest('[data-modal-open]');
-          if (opener) {
-            event.preventDefault();
-            const id = opener.getAttribute('data-modal-target');
-            const dialog = id && document.getElementById(id);
-            if (dialog) {
-              dialog.showModal();
-            }
-            return;
-          }
-
-          const closer = event.target.closest('[data-modal-close]');
-          if (closer) {
-            event.preventDefault();
-            const dialog = closer.closest('dialog');
-            if (dialog) {
-              dialog.close();
-            }
-          }
-        });
-      }
-
-      function initShutdown() {
-        on(elShutdownBtn, 'click', async (event) => {
-          event.preventDefault();
-          if (!elShutdownBtn) {
-            return;
-          }
-
-          elShutdownBtn.disabled = true;
-          elShutdownMsg.textContent = 'Shutting down installer...';
-
-          try {
-            const res = await fetch('/finalize-setup', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (res.ok) {
-              elShutdownMsg.textContent = 'Finalized. The installer will stop shortly.';
-            } else {
-              elShutdownMsg.textContent = `Finalize failed (HTTP ${res.status}). Check the log for details.`;
-              elShutdownBtn.disabled = false;
-            }
-          } catch (err) {
-            console.error(err);
-            elShutdownMsg.textContent = 'Network error while finalizing. See the log for details.';
-            elShutdownBtn.disabled = false;
-          }
-        });
-      }
-
-      async function initializePage() {
-        const validation = initValidation();
-        initTouchedValidation(validation);
-        initDerivedWdqsHost(validation);
-        initPasswordReveal();
-        initModalWiring();
-        initShutdown();
-
-        await fetchConfig();
-
-        hydrateFormFromConfig(form, pageState.config);
-        hydrateBindingsFromConfig(pageState.config);
-        renderConfigTextBlock(elConfigContent);
-
-        const isSaved = form.dataset.disabled === 'true';
-        setFormDisabled(isSaved);
-        activateStep(isSaved ? 1 : 0);
-
-        if (isSaved && !elComplete.hasAttribute('hidden')) {
-          await handleBootComplete();
-          return;
-        }
-
-        if (isSaved) {
-          setRunProgress(0, 'Setup has started. Waiting for the first progress update.');
-          elWaiting.hidden = false;
-          elComplete.hidden = true;
-          return;
-        }
-
-        elWaiting.hidden = true;
-        elComplete.hidden = true;
-      }
-
-      window.addEventListener('DOMContentLoaded', initializePage);
-    })();
-  </script>
+  <script src="/setup.js" defer></script>
 </body>
 </html>

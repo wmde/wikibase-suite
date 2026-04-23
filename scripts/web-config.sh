@@ -25,6 +25,7 @@ WEB_IMAGE_NAME="${WEB_IMAGE_NAME:-wikibase/deploy-setup-webserver}"
 WEB_DIR="$SETUP_DIR/web"
 LE_DIR="$WEB_DIR/letsencrypt"
 CERTS_DIR="$WEB_DIR/certs"
+PUBLIC_DIR="$WEB_DIR/public"
 VIEWS_DIR="$WEB_DIR/views"
 
 # --- Functions ---
@@ -109,6 +110,7 @@ start_setup_webserver() {
     -e LOCALHOST=$LOCALHOST \
     -p $SETUP_PORT:443 \
     -v $DEPLOY_DIR:/app/deploy \
+    -v $PUBLIC_DIR:/app/public \
     -v $VIEWS_DIR:/app/views \
     -v $CERTS_DIR:/app/certs \
     -v $LOG_PATH:/app/setup.log \

@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@wikimedia/codex": "^2.4.0",
+		"@wikimedia/codex-icons": "^2.4.0",
 		"better-sse": "^0.15.1",
 		"eta": "^3.1.0",
 		"express": "^5.1.0"
