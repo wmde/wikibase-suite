@@ -4,6 +4,8 @@ export const ENV_FILE_PATH = '/app/deploy/.env';
 export const ENV_TEMPLATE_FILE_PATH = '/app/deploy/template.env';
 export const LOG_PATH = '/app/setup.log';
 const DEFAULT_MW_ADMIN_NAME = 'Admin';
+const DEFAULT_DB_NAME = 'my_wiki';
+const DEFAULT_DB_USER = 'sqluser';
 // Status
 export function isBooted() {
     if (!existsSync(LOG_PATH)) {
@@ -58,7 +60,11 @@ export function getConfig(input = {}) {
         const configObject = {
             ...existingEnv,
             MW_ADMIN_NAME: existingEnv.MW_ADMIN_NAME && existingEnv.MW_ADMIN_NAME !== '' ?
-                existingEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME
+                existingEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
+            DB_NAME: existingEnv.DB_NAME && existingEnv.DB_NAME !== '' ?
+                existingEnv.DB_NAME : DEFAULT_DB_NAME,
+            DB_USER: existingEnv.DB_USER && existingEnv.DB_USER !== '' ?
+                existingEnv.DB_USER : DEFAULT_DB_USER
         };
         return { config: configObject, configText: makeConfigText(configObject) };
     }
@@ -70,6 +76,10 @@ export function getConfig(input = {}) {
                 input.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
             MW_ADMIN_PASS: input.MW_ADMIN_PASS && input.MW_ADMIN_PASS !== '' ?
                 input.MW_ADMIN_PASS : generatePassword(),
+            DB_NAME: input.DB_NAME && input.DB_NAME !== '' ?
+                input.DB_NAME : DEFAULT_DB_NAME,
+            DB_USER: input.DB_USER && input.DB_USER !== '' ?
+                input.DB_USER : DEFAULT_DB_USER,
             DB_PASS: input.DB_PASS && input.DB_PASS !== '' ?
                 input.DB_PASS : generatePassword()
         };
@@ -83,6 +93,10 @@ export function getConfig(input = {}) {
             MW_ADMIN_EMAIL: '',
             MW_ADMIN_NAME: templateEnv.MW_ADMIN_NAME && templateEnv.MW_ADMIN_NAME !== '' ?
                 templateEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
+            DB_NAME: templateEnv.DB_NAME && templateEnv.DB_NAME !== '' ?
+                templateEnv.DB_NAME : DEFAULT_DB_NAME,
+            DB_USER: templateEnv.DB_USER && templateEnv.DB_USER !== '' ?
+                templateEnv.DB_USER : DEFAULT_DB_USER,
             WIKIBASE_PUBLIC_HOST: isLocalhostSetup() ? 'wikibase.test' : '',
             WDQS_PUBLIC_HOST: isLocalhostSetup() ? 'query.wikibase.test' : '',
             MW_ADMIN_PASS: generatePassword(),

@@ -9,5 +9,5 @@
 		"outDir": "."
 	},
 	"exclude": ["node_modules", "client", "public/assets", "vite.config.ts"],
-	"include": ["server.ts", "serverHelpers.ts", "logStreamer.ts", "passwordPolicy.ts", "shared/**/*.ts"]
+	"include": ["cli.ts", "server.ts", "serverHelpers.ts", "logStreamer.ts", "passwordPolicy.ts", "shared/**/*.ts"]
 }

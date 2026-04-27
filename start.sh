@@ -7,7 +7,7 @@ echo
 echo "→ Installs Git if not already installed"
 echo "→ Checks-out the wikibase-release-pipeline repository"
 echo "→ Installs Docker if not already installed"
-echo "→ Starts a Web-based setup tool where you can complete configuration"
+echo "→ Starts a setup wizard where you can complete configuration"
 echo "→ Launches Wikibase Suite, notifying when the services are available"
 echo
 echo "Let's get started!"
@@ -20,7 +20,11 @@ for arg in "$@"; do
     --cli)
       CLI=true
       ;;
+    --web)
+      CLI=false
+      ;;
     --dev)
+      DEV=true
       LOCALHOST=true
       SKIP_DEPENDENCY_INSTALLS=true
       ;;
@@ -62,7 +66,8 @@ REPO_BRANCH="${REPO_BRANCH:-"deploy@6.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_DIR="${WBS_DIR:-$HOME/wbs}"
 
-export CLI="${CLI:-false}"
+export CLI="${CLI:-true}"
+export DEV="${DEV:-false}"
 export DEBUG="${DEBUG:-false}"
 export LOCALHOST="${LOCALHOST:-false}"
 export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"

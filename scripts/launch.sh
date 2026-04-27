@@ -4,6 +4,7 @@ set -euo pipefail
 # --- Expected Variables ---
 
 export DEBUG
+export CLI
 export LOCALHOST
 export LOG_PATH
 export DEPLOY_DIR
@@ -46,6 +47,9 @@ launch_wikibase() {
     run "docker compose ${compose_opts[*]} down --volumes"
   fi
 
+  status "Pulling Docker images..."
+  run "docker compose ${compose_opts[*]} pull"
+
   status "Starting Docker Compose services..."
   status "Waiting for services to start. Generally takes 2–6 minutes..."
 
@@ -83,10 +87,11 @@ final_message() {
       fi
 
       echo
-      echo "The following configuration was saved during setup."
-      echo "Please save these credentials and settings securely:"
+      echo "Your current configuration is saved at:"
+      echo "  $ENV_FILE_PATH"
       echo
-      sed 's/^/  /' "$ENV_FILE_PATH"
+      echo "It includes the saved passwords and other setup values."
+      echo "Keep it secure."
       echo
     else
       echo "⚠️ .env file not found at $ENV_FILE_PATH"
@@ -100,3 +105,17 @@ final_message() {
 wait_for_env_file
 launch_wikibase
 final_message
+
+if $CLI && [[ -t 0 ]] && [[ -f "$ENV_FILE_PATH" ]]; then
+  printf "Show the current saved configuration now, including passwords? [y/N]: "
+  read -r show_config
+  case "${show_config:-n}" in
+    y|Y)
+      echo
+      echo "Saved configuration (.env):"
+      echo
+      sed 's/^/  /' "$ENV_FILE_PATH"
+      echo
+      ;;
+  esac
+fi

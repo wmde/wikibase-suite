@@ -6,8 +6,8 @@ It supports review and discussion, but does not add or change ADR decisions.
 ## Purpose and Operating Model
 
 The current setup tool bootstraps and launches Wikibase Suite Deploy with two setup paths:
-- Web setup (default)
-- CLI setup (`--cli`)
+- CLI setup (default)
+- Web setup (`--web`)
 
 Both paths feed the same launch/deploy flow and are intended to reduce known first-run failure points (especially DNS/domain mapping and setup-value correctness).
 
@@ -22,7 +22,7 @@ Both paths feed the same launch/deploy flow and are intended to reduce known fir
    - Loads logging utilities.
    - Handles optional reset behavior.
    - Verifies/installs Docker, checks daemon and compose/tooling state.
-   - Starts config flow (`scripts/web-config.sh` or `scripts/cli-config.sh`).
+   - Starts config flow (`scripts/cli-config.sh` by default, or `scripts/web-config.sh` with `--web`).
    - Starts `scripts/launch.sh` (background in web mode; foreground in CLI mode).
 3. Configuration phase
    - Web mode:
@@ -30,7 +30,8 @@ Both paths feed the same launch/deploy flow and are intended to reduce known fir
      - Builds/runs setup web container on host port `8888`.
      - Writes deploy `.env` through API endpoint.
    - CLI mode:
-     - Prompts in terminal and writes deploy `.env` directly.
+     - Builds/runs the shared Node setup runtime in a terminal-attached container.
+     - Prompts in terminal and writes deploy `.env` through the same config helper layer used by the web API.
 4. Launch phase (`scripts/launch.sh`)
    - Waits for `.env`.
    - Optionally resets existing services/data.
@@ -42,13 +43,16 @@ Both paths feed the same launch/deploy flow and are intended to reduce known fir
 - `start.sh` - project bootstrap and repository clone entrypoint
 - `scripts/setup.sh` - setup orchestrator
 - `scripts/install-docker.sh` - docker install + version/daemon checks
-- `scripts/web-config.sh` - setup-web-server lifecycle and cert generation
-- `scripts/cli-config.sh` - terminal prompts and `.env` generation
+- `scripts/web-config.sh` - setup web server lifecycle and cert generation
+- `scripts/cli-config.sh` - Node-backed terminal setup runtime lifecycle
 - `scripts/launch.sh` - compose launch and final status output
 - `scripts/_logging.sh` - structured log helpers and command runner
-- `scripts/_prompt-ui.sh` - prompt validators and masked input behavior
+- `scripts/_prompt-ui.sh` - legacy prompt helpers retained for earlier terminal flows
+- `web/cli.ts` - Clack-based command-line setup adapter using shared TypeScript validation/config helpers
 - `web/server.ts` - HTTPS config app and control endpoints
 - `web/serverHelpers.ts` - `.env` read/write/default/sanitize helpers
+- `web/passwordPolicy.ts` - password policy helpers and common-password loading
+- `web/shared/validation.ts` - shared setup-value validators for CLI and web paths
 - `web/logStreamer.ts` - SSE log tailing
 - `web/client/` - Vue/Codex setup UI source
 - `web/public/setup.css` - setup UI layout refinements on top of Codex styles
@@ -74,15 +78,15 @@ This is the default host log path (`LOG_PATH`) used across bootstrap, configurat
 ## Configuration Collection Status
 
 Current Web and CLI core prompts include:
+- Admin email
 - Wikibase host
 - Query Service host
-- Admin email
-- Admin password (or generated secure default)
-- DB password (or generated secure default)
 - Metadata callback visibility choice
-
-Current gap:
-- `MW_ADMIN_NAME`, `DB_NAME`, and `DB_USER` remain template-defaulted in CLI (not interactive prompts).
+- Admin username
+- Admin password (or generated secure default)
+- Database name
+- Database username
+- DB password (or generated secure default)
 
 ## Verification Snapshot (latest documented pass)
 

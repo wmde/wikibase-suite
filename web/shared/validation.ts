@@ -4,6 +4,7 @@ export type ValidationResult = {
 };
 
 export const EMAIL_ADDRESS_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export const HOST_NAME_REGEX = /^(localhost|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
 
 const COMMON_PASSWORD_OVERRIDES = new Set( [
 	'change-this-password'
@@ -24,7 +25,7 @@ export function isValidEmailAddress( value: string ): boolean {
 
 export function isValidAdminUsername( value: string ): boolean {
 	const username = value.trim();
-	return username.length > 1 &&
+	return username.length > 3 &&
 		username.length <= 255 &&
 		!MEDIAWIKI_INVALID_USERNAME_CHARACTERS.test( username ) &&
 		!IPV4_ADDRESS_PATTERN.test( username );
@@ -36,7 +37,7 @@ export function isValidDatabaseName( value: string ): boolean {
 
 export function isValidDatabaseUser( value: string ): boolean {
 	const username = value.trim();
-	return username.length > 1 &&
+	return username.length > 3 &&
 		SAFE_DATABASE_USER_PATTERN.test( username );
 }
 

@@ -30,4 +30,8 @@ export type SetupProgressMarker = {
 	pattern: RegExp;
 	progress: number;
 	summary: string;
+	startTimer?: boolean;
+	stopTimer?: boolean;
+	timerTarget?: number;
+	timerMs?: number;
 };

@@ -4,6 +4,7 @@ set -euo pipefail
 # --- Expected Variables ---
 
 export DEPLOY_DIR
+export DEV
 export DEBUG
 export LOCALHOST
 export SCRIPTS_DIR
@@ -102,15 +103,30 @@ start_setup_webserver() {
   run "docker build $LOAD_FLAG -t $WEB_IMAGE_NAME -f $WEB_DIR/Dockerfile $WEB_DIR"
 
   # Run with volumes mapped as before
-  run "docker run -d \
-    --name $SETUP_CONTAINER_NAME \
-    -e SERVER_IP=$SERVER_IP \
-    -e LOCALHOST=$LOCALHOST \
-    -p $SETUP_PORT:443 \
-    -v $DEPLOY_DIR:/app/deploy \
-    -v $CERTS_DIR:/app/certs \
-    -v $LOG_PATH:/app/setup.log \
-    $WEB_IMAGE_NAME"
+  if $DEV; then
+    run "docker run -d \
+      --name $SETUP_CONTAINER_NAME \
+      -e SERVER_IP=$SERVER_IP \
+      -e LOCALHOST=$LOCALHOST \
+      -e DEV_SERVER=true \
+      -p $SETUP_PORT:443 \
+      -v $DEPLOY_DIR:/app/deploy \
+      -v $CERTS_DIR:/app/certs \
+      -v $LOG_PATH:/app/setup.log \
+      -v $WEB_DIR:/src \
+      $WEB_IMAGE_NAME \
+      sh -lc 'ln -sfn /app/node_modules /src/node_modules && cd /src && npm run dev:server'"
+  else
+    run "docker run -d \
+      --name $SETUP_CONTAINER_NAME \
+      -e SERVER_IP=$SERVER_IP \
+      -e LOCALHOST=$LOCALHOST \
+      -p $SETUP_PORT:443 \
+      -v $DEPLOY_DIR:/app/deploy \
+      -v $CERTS_DIR:/app/certs \
+      -v $LOG_PATH:/app/setup.log \
+      $WEB_IMAGE_NAME"
+  fi
 
   echo "To continue setup navigate to:"
   echo
@@ -126,7 +142,11 @@ start_setup_webserver() {
 }
 
 echo
-echo "🔧 Starting web-based configuration wizard..."
+if $DEV; then
+  echo "🔧 Starting web-based configuration wizard (dev mode with live reload)..."
+else
+  echo "🔧 Starting web-based configuration wizard..."
+fi
 echo
 
 debug "Starting setup page webserver container..."

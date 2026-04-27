@@ -26,6 +26,7 @@ const SSL_CERT_KEY_PATH = '/app/certs/key.pem';
 const SSL_CERT_PATH = '/app/certs/cert.pem';
 // 10 minutes
 const AUTO_FINALIZE_TIMEOUT_MS = 10 * 60 * 1000;
+const DEV_SERVER = process.env.DEV_SERVER === 'true';
 
 // Express setup
 const app = express();
@@ -46,7 +47,7 @@ function escapeJsonForHtml( value: unknown ): string {
 	return JSON.stringify( value ).replace( /</g, '\\u003c' );
 }
 
-function renderSetupShell(): string {
+function renderSetupShell( scriptSrc: string ): string {
 	const initialState = {
 		isConfigSaved: isConfigSaved(),
 		isBooted: isBooted(),
@@ -66,20 +67,10 @@ function renderSetupShell(): string {
 <body>
   <div id="app"></div>
   <script>window.__SETUP_STATE__ = ${ escapeJsonForHtml( initialState ) };</script>
-  <script type="module" src="/assets/setup-app.js"></script>
+  <script type="module" src="${ scriptSrc }"></script>
 </body>
 </html>`;
 }
-
-// ---------- Routes ----------
-app.get( '/', async ( req, res ) => {
-	try {
-		res.type( 'html' ).send( renderSetupShell() );
-	} catch ( err ) {
-		console.error( 'Failed to render template:', err );
-		res.status( 500 ).send( 'Template render error' );
-	}
-} );
 
 // create and start the log streamer
 const streamer = createLogStreamer( LOG_PATH );
@@ -162,8 +153,49 @@ const credentials = {
 	key: readFileSync( SSL_CERT_KEY_PATH )
 };
 
-https.createServer( credentials, app ).listen( 443, () => {
-	console.log( '✅ HTTPS server running at https://localhost:443' );
+const httpsServer = https.createServer( credentials, app );
+
+if ( DEV_SERVER ) {
+	const { createServer: createViteServer } = await import( 'vite' );
+	const vite = await createViteServer( {
+		root: dirName,
+		appType: 'custom',
+		server: {
+			middlewareMode: true,
+			hmr: {
+				server: httpsServer
+			}
+		}
+	} );
+
+	app.use( vite.middlewares );
+
+	app.get( '/', async ( req, res ) => {
+		try {
+			const html = await vite.transformIndexHtml(
+				req.originalUrl,
+				renderSetupShell( '/client/main.ts' )
+			);
+			res.type( 'html' ).send( html );
+		} catch ( err ) {
+			vite.ssrFixStacktrace( err as Error );
+			console.error( 'Failed to render dev template:', err );
+			res.status( 500 ).send( 'Template render error' );
+		}
+	} );
+} else {
+	app.get( '/', async ( req, res ) => {
+		try {
+			res.type( 'html' ).send( renderSetupShell( '/assets/setup-app.js' ) );
+		} catch ( err ) {
+			console.error( 'Failed to render template:', err );
+			res.status( 500 ).send( 'Template render error' );
+		}
+	} );
+}
+
+httpsServer.listen( 443, () => {
+	console.log( `✅ HTTPS server running at https://localhost:443${ DEV_SERVER ? ' (dev mode)' : '' }` );
 } );
 
 // Kick off finalize if booted and inactive

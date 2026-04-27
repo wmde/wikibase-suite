@@ -21,6 +21,7 @@ body {
 }
 
 .page-shell {
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
   padding: 28px 16px 48px;
@@ -159,7 +160,8 @@ body {
 }
 
 .wizard-panel__body--form .cdx-field {
-  max-width: 40rem;
+  width: 100%;
+  min-width: 0;
   margin-top: 0;
 }
 
@@ -214,6 +216,46 @@ body {
   line-height: 1.5;
 }
 
+.dns-help-inline {
+  margin: 0;
+}
+
+.dns-help-inline .cdx-message__content {
+  align-self: flex-start;
+  display: grid;
+  gap: 8px;
+}
+
+.dns-help-inline .cdx-message__icon {
+  margin-top: 2px;
+}
+
+.dns-help-inline__header {
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dns-help-inline__intro,
+.dns-help-inline__resources {
+  margin: 0;
+  color: var(--color-subtle, #54595d);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dns-help-inline__steps {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--color-subtle, #54595d);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dns-help-inline__check {
+  color: var(--color-success, #14866d);
+  vertical-align: text-bottom;
+}
+
 .cdx-field {
   width: 100%;
 }
@@ -224,8 +266,10 @@ body {
 }
 
 .cdx-field__control {
+  width: 100%;
   margin-top: 2px;
-  max-width: 680px;
+  max-width: min(680px, 100%);
+  min-width: 0;
 }
 
 .cdx-text-input,
@@ -276,13 +320,13 @@ body {
 }
 
 .password-field__control .cdx-text-input__input {
-  padding-right: 64px;
+  padding-right: 72px;
 }
 
 .password-field__validation-icon {
   position: absolute;
   top: 50%;
-  right: 36px;
+  right: 9px;
   z-index: 1;
   pointer-events: none;
   transform: translateY(-50%);
@@ -299,7 +343,7 @@ body {
 .password-toggle {
   position: absolute;
   top: 50%;
-  right: 7px;
+  right: 36px;
   z-index: 1;
   display: inline-flex;
   align-items: center;
@@ -349,6 +393,11 @@ body {
   cursor: pointer;
 }
 
+.inline-copy__button .cdx-icon {
+  width: 0.875em;
+  height: 0.875em;
+}
+
 .inline-copy__button:hover {
   background: var(--background-color-interactive-subtle--hover, #e1e4e8);
   color: var(--color-base, #202122);
@@ -366,18 +415,6 @@ body {
 
 .inline-copy__text {
   font-weight: 700;
-}
-
-.optional-setup.cdx-accordion {
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-  background: transparent;
-}
-
-.optional-setup .cdx-accordion__content {
-  padding: 12px 0 0;
 }
 
 .metadata-choice {
@@ -400,29 +437,7 @@ body {
 
 .review-status {
   display: grid;
-  gap: 12px;
-}
-
-.review-status__topline,
-.live-status__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 16px;
-}
-
-.review-status__topline h3,
-.live-status__header h3 {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.35;
-}
-
-.review-status__percent {
-  color: var(--color-subtle, #54595d);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  gap: 10px;
 }
 
 .review-status__summary,
@@ -433,28 +448,125 @@ body {
   line-height: 1.5;
 }
 
+.live-status {
+  display: grid;
+  gap: 6px;
+}
+
+.live-status__current {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.live-status__current-line {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--color-base, #202122);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .status-lines {
   display: grid;
-  gap: 8px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .status-line {
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--background-color-base, #fff);
+  padding: 0;
   color: var(--color-subtle, #54595d);
+  line-height: 1.35;
 }
 
-.complete-links {
+.status-lines--history .status-line {
+  font-size: 0.9375rem;
+}
+
+.setup-flow {
+  gap: 18px;
+}
+
+.setup-progress-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--background-color-neutral-subtle, #f8f9fa);
+}
+
+.setup-progress-panel__topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.setup-progress-panel__status {
+  flex: 1 1 auto;
   margin: 0;
-  padding-left: 20px;
+  color: var(--color-base, #202122);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
-.complete-links li {
-  margin-bottom: 8px;
+.setup-checklist {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--color-subtle, #54595d);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.setup-checklist__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.setup-checklist__item.is-complete {
+  color: var(--color-base, #202122);
+}
+
+.setup-checklist__item.is-complete .setup-checklist__icon {
+  color: var(--color-success, #14866d);
+}
+
+.setup-checklist__item.is-current {
+  color: var(--color-base, #202122);
+  font-weight: 700;
+}
+
+.setup-checklist__item.is-current .setup-checklist__icon {
+  color: var(--color-base, #202122);
+}
+
+.setup-checklist__item.is-upcoming .setup-checklist__icon {
+  color: var(--color-subtle, #72777d);
+}
+
+.setup-checklist__label {
+  display: inline-block;
 }
 
 #config-content,
@@ -471,10 +583,141 @@ body {
   white-space: pre-wrap;
 }
 
+.config-box {
+  position: relative;
+}
+
+.config-box__copy {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: transparent;
+  color: #f8f9fa;
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.config-box__copy .cdx-icon {
+  color: #f8f9fa;
+}
+
+.config-box__copy:hover {
+  color: #fff;
+}
+
+.config-box__copy:focus {
+  outline: 1px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.config-box__copy.is-copied {
+  color: #fff;
+}
+
 .complete-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 12px;
+  margin-top: 2px;
+}
+
+.setup-complete {
+  gap: 12px;
+}
+
+.complete-checklist {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: complete-steps;
+}
+
+.complete-checklist__item {
+  display: grid;
+  gap: 10px;
+}
+
+.complete-checklist__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.complete-checklist__header::before {
+  counter-increment: complete-steps;
+  content: counter(complete-steps);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--background-color-progressive, #36c);
+  color: var(--color-inverted-fixed, #fff);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.complete-checklist__description {
+  margin: 0;
+  color: var(--color-subtle, #54595d);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.complete-checklist__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.service-links {
+  display: grid;
+  gap: 10px;
+}
+
+.service-link {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color-subtle, #c8ccd1);
+  border-radius: 8px;
+  background: var(--background-color-neutral-subtle, #f8f9fa);
+  color: inherit;
+  text-decoration: none;
+}
+
+.service-link:hover {
+  border-color: var(--border-color-progressive, #6485d1);
+  background: var(--background-color-progressive-subtle, #eef3ff);
+}
+
+.service-link__label {
+  color: var(--color-base, #202122);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.service-link__value {
+  color: var(--color-progressive, #36c);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 .dns-help-dialog {
@@ -540,6 +783,11 @@ body {
 }
 
 @media (max-width: 720px) {
+  .page-shell {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
   .wizard-header {
     align-items: flex-start;
     flex-direction: column;
@@ -555,6 +803,8 @@ body {
   }
 
   .wizard-card {
+    width: calc(100vw - 32px);
+    max-width: 100%;
     padding: 16px;
   }
 }

@@ -1,74 +1,112 @@
 <template>
 	<section class="wizard-panel is-active">
-		<div v-if="complete" class="wizard-panel__body">
-			<div class="wizard-panel__header">
-				<h2>Setup completed</h2>
-				<p>Your services are up. Save the generated configuration somewhere secure now; this temporary setup session will close automatically and passwords will be removed after it closes.</p>
-			</div>
-
-			<cdx-message type="success">
-				<strong>Services started successfully.</strong> You can now open your Wikibase Suite services and save the final configuration.
-			</cdx-message>
-
-			<div>
-				<h3>Service links</h3>
-				<ul class="complete-links">
-					<li>Wikibase: <a :href="wikibaseUrl" target="_blank">{{ wikibaseUrl }}</a></li>
-					<li>Query Service: <a :href="queryServiceUrl" target="_blank">{{ queryServiceUrl }}</a></li>
-					<li>QuickStatements: <a :href="quickStatementsUrl" target="_blank">{{ quickStatementsUrl }}</a></li>
-				</ul>
-			</div>
-
-			<pre id="config-content">{{ configText }}</pre>
-
-			<div class="complete-actions">
-				<cdx-button @click="copyConfig">{{ copiedConfig ? 'Copied' : 'Copy configuration' }}</cdx-button>
-				<a
-					class="cdx-button cdx-button--weight-quiet cdx-button--action-progressive cdx-button--fake-button cdx-button--fake-button--enabled"
-					:href="configDownloadUrl"
-					download="wbs-deploy-setup.env"
-				>
-					Download env file
-				</a>
-			</div>
-		</div>
-
-		<div v-else>
-			<div class="wizard-panel__body">
-				<div class="review-status">
-					<div class="review-status__topline">
-						<h3>Setup progress</h3>
-						<span class="review-status__percent">{{ progress }}%</span>
-					</div>
-					<cdx-progress-bar :value="progress" :max="100" aria-hidden="true" />
-					<p class="review-status__summary">{{ summary }}</p>
-					<div class="live-status">
-						<div class="live-status__header">
-							<h3>Live status</h3>
-							<cdx-button
-								size="small"
-								weight="quiet"
-								action="progressive"
-								@click="emit( 'open-log' )"
-							>
-								Full log
-							</cdx-button>
-						</div>
-						<p v-if="!hasStatusLines" class="live-status__empty">Waiting for status updates.</p>
-						<ul v-else class="status-lines">
-							<li v-for="( line, index ) in statusLines" :key="`${ index }-${ line }`" class="status-line">
-								{{ line }}
-							</li>
-						</ul>
-					</div>
+		<div class="wizard-panel__body setup-flow">
+			<div v-if="complete" class="setup-complete">
+				<div class="wizard-panel__header">
+					<h2>Setup complete! 🎉</h2>
 				</div>
+
+				<ol class="complete-checklist">
+					<li class="complete-checklist__item">
+						<div class="complete-checklist__header">
+							<h3>Save your configuration</h3>
+						</div>
+						<p class="complete-checklist__description">
+							Your final configuration file is below. It includes your passwords. You can also copy or download the full configuration below, which can be used when you are upgrading or if you are setting up your server again
+							(see
+							<a
+								href="https://github.com/wmde/wikibase-release-pipeline/blob/main/deploy/README.md#resetting-the-configuration"
+								target="_blank"
+								rel="noreferrer"
+								>
+									Resetting
+								</a>
+								in Deploy documentation).
+						</p>
+						<p class="complete-checklist__description">
+							Please keep track of these passwords in a secure place, as they will be cleared from the setup configuration file now that the services have been setup.
+						</p>
+						<div class="config-box">
+							<pre id="config-content">{{ configText }}</pre>
+							<button
+								type="button"
+								class="config-box__copy"
+								:class="{ 'is-copied': copiedConfig }"
+								:aria-label="copiedConfig ? 'Copied' : 'Copy configuration'"
+								:title="copiedConfig ? 'Copied' : 'Copy configuration'"
+								@click="copyConfig"
+							>
+								<span v-if="copiedConfig">Copied</span>
+								<cdx-icon v-else :icon="cdxIconCopy" size="small" />
+							</button>
+						</div>
+						<div class="complete-actions">
+							<a
+								class="cdx-button cdx-button--action-progressive cdx-button--fake-button cdx-button--fake-button--enabled"
+								:href="configDownloadUrl"
+								download="wbs-deploy-setup.env"
+							>
+								Download configuration file
+							</a>
+						</div>
+					</li>
+					<li class="complete-checklist__item">
+						<div class="complete-checklist__header">
+							<h3>Start using your services</h3>
+						</div>
+						<p class="complete-checklist__description">
+							Your Wikibase Suite is now available at the links below.
+						</p>
+						<div class="service-links">
+							<a class="service-link" :href="wikibaseUrl" target="_blank">
+								<span class="service-link__label">Wikibase</span>
+								<span class="service-link__value">{{ wikibaseUrl }}</span>
+							</a>
+							<a class="service-link" :href="queryServiceUrl" target="_blank">
+								<span class="service-link__label">Query Service</span>
+								<span class="service-link__value">{{ queryServiceUrl }}</span>
+							</a>
+							<a class="service-link" :href="quickStatementsUrl" target="_blank">
+								<span class="service-link__label">QuickStatements</span>
+								<span class="service-link__value">{{ quickStatementsUrl }}</span>
+							</a>
+						</div>
+					</li>
+				</ol>
+			</div>
+
+			<div v-else class="setup-progress-panel surface-card">
+				<div class="setup-progress-panel__topline">
+					<p class="setup-progress-panel__status">{{ currentStatusLine }}</p>
+					<cdx-button
+						size="small"
+						weight="quiet"
+						action="progressive"
+						@click="emit( 'open-log' )"
+					>
+						Full setup log
+					</cdx-button>
+				</div>
+				<cdx-progress-bar :value="progress" :max="100" aria-hidden="true" />
+				<ol class="setup-checklist">
+					<li
+						v-for="item in progressChecklistItems"
+						:key="item.title"
+						class="setup-checklist__item"
+						:class="`is-${ item.state }`"
+					>
+						<span class="setup-checklist__icon" aria-hidden="true">{{ itemIcon( item.state ) }}</span>
+						<span class="setup-checklist__label">{{ item.title }}</span>
+					</li>
+				</ol>
 			</div>
 		</div>
 	</section>
 </template>
 
 <script setup lang="ts">
-import { CdxButton, CdxMessage, CdxProgressBar } from '@wikimedia/codex';
+import { CdxButton, CdxIcon, CdxProgressBar } from '@wikimedia/codex';
+import { cdxIconCopy } from '@wikimedia/codex-icons';
 import { computed, ref, watch } from 'vue';
 import type { ConfigForm } from '../types';
 
@@ -86,8 +124,32 @@ const emit = defineEmits<{
 	'open-log': [];
 }>();
 
+type ChecklistState = 'complete' | 'current' | 'upcoming';
+
 const copiedConfig = ref( false );
 const configDownloadUrl = ref( '#' );
+const currentStatusLine = computed( () => props.summary || 'Waiting for status updates.' );
+const progressChecklistItems = computed( () => {
+	const defineState = ( itemProgress: number, nextProgress?: number ): ChecklistState => {
+		if ( props.progress >= 100 || props.progress > itemProgress ) {
+			if ( nextProgress === undefined || props.progress >= nextProgress ) {
+				return 'complete';
+			}
+		}
+		if ( props.progress >= itemProgress && ( nextProgress === undefined || props.progress < nextProgress ) ) {
+			return 'current';
+		}
+		return 'upcoming';
+	};
+
+	return [
+		{ title: 'Saving your configuration', state: defineState( 6, 10 ) },
+		{ title: 'Preparing the server', state: defineState( 10, 15 ) },
+		{ title: 'Downloading Docker images for services', state: defineState( 15, 50 ) },
+		{ title: 'Starting services', state: defineState( 50, 95 ) },
+		{ title: 'Finishing setup', state: defineState( 95, 100 ) }
+	];
+} );
 
 const wikibaseUrl = computed( () => `https://${ props.form.WIKIBASE_PUBLIC_HOST }` );
 const queryServiceUrl = computed( () => `https://${ props.form.WDQS_PUBLIC_HOST }` );
@@ -114,5 +176,15 @@ async function copyConfig(): Promise<void> {
 	} catch {
 		alert( 'Failed to copy the configuration. Please copy it manually.' );
 	}
+}
+
+function itemIcon( state: ChecklistState ): string {
+	if ( state === 'complete' ) {
+		return '✓';
+	}
+	if ( state === 'current' ) {
+		return '⌛';
+	}
+	return '○';
 }
 </script>

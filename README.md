@@ -5,7 +5,7 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 1. **Checks/installs Git** – Installs Git if not already available.  
 2. **Clones repositories** – Downloads this setup tool and the current version of the Wikibase Suite code.
 3. **Checks/installs Docker** – Installs Docker unless already installed.  
-4. **Collects configuration** – Through a web interface (or CLI with `--cli`).
+4. **Collects configuration** – Through the command-line setup wizard by default, or through the web setup UI with `--web`.
 5. **Launches Wikibase Suite** – Shows you the finalized configuration and links to your services once complete.
 
 ## Installing on a new VPS instance
@@ -22,7 +22,7 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
    bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh)
    ```
 
-3. After some initial setup messages you'll be provided a web URL to access where you can complete configuration and launching your server.
+3. Follow the setup wizard prompts to complete configuration and launch your server.
 
 ## Troubleshooting
 

@@ -20,7 +20,8 @@ This document covers local testing, CLI options, and other details useful for de
 
 | Option           | Description |
 |------------------|-------------|
-| `--cli`          | Collects configuration details in terminal instead of web UI. |
+| `--cli`          | Explicitly uses the command-line setup wizard. This is currently the default. |
+| `--web`          | Collects configuration details through the browser-based setup UI. |
 | `--dev`          | Shortcut for local development: sets `LOCALHOST=true` and skips dependency installs. |
 | `--reset`        | Interactive reset. Optionally deletes `.env`, `LocalSettings.php`, and any existing services/data before relaunch. |
 | `--skip-clone`   | Don’t clone any repositories. Assumes they’re already present. |
@@ -42,8 +43,8 @@ To use these special localhost-only domains, you’ll need to add entries to you
 
 ## Notes & behavior
 
-- The setup web server runs on port 8888 (HTTPS).  
-- For non-localhost installs, setup will try to obtain a Let’s Encrypt cert on port 80. If that fails, it falls back to a self-signed cert (browser warning).  
+- The setup web server runs on port 8888 (HTTPS) when `--web` is used.
+- For non-localhost web installs, setup will try to obtain a Let’s Encrypt cert on port 80. If that fails, it falls back to a self-signed cert (browser warning).
 - If `docker-compose.local.yml` exists in `deploy/`, it will be merged automatically.  
-- Default `wikibase-release-pipeline` branch is `deploy@5.0.1` (can be overridden with `REPO_BRANCH`).  
+- Default `wikibase-release-pipeline` branch is `deploy@6.0.0` (can be overridden with `REPO_BRANCH`).
 - After launch, your saved `.env` config is displayed—be sure to store credentials securely.

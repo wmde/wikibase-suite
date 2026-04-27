@@ -5,4 +5,4 @@ export {
 	isValidEmailAddress,
 	isValidPassword,
 	validatePassword
-} from '../shared/validation';
+} from '../shared/validation.ts';

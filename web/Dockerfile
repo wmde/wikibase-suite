@@ -7,6 +7,7 @@ COPY client ./client
 COPY public ./public
 COPY shared ./shared
 COPY data ./data
+COPY cli.ts ./cli.ts
 COPY server.ts ./server.ts
 COPY logStreamer.ts ./logStreamer.ts
 COPY passwordPolicy.ts ./passwordPolicy.ts

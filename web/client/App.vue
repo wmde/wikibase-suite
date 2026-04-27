@@ -30,7 +30,6 @@
 					@update-field="updateField"
 					@touch="touchField"
 					@flush-host="flushHost"
-					@open-dns-help="dnsHelpOpen = true"
 					@continue="continueToPreferences"
 				/>
 
@@ -329,6 +328,7 @@ onMounted( async () => {
 } );
 
 onUnmounted( () => {
+	setupLog.stop();
 	if ( pollTimer ) {
 		window.clearInterval( pollTimer );
 	}

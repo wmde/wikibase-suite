@@ -4,6 +4,7 @@ set -euo pipefail
 # --- Expected Variables ---
 
 export CLI
+export DEV
 export DEBUG
 export LOCALHOST
 export SKIP_DEPENDENCY_INSTALLS
@@ -17,6 +18,24 @@ export SETUP_DIR
 
 # shellcheck disable=SC1091
 source "$SCRIPTS_DIR/_logging.sh"
+
+prompt_to_show_saved_config() {
+  if ! $CLI || [[ ! -t 0 ]] || [[ ! -f "$ENV_FILE_PATH" ]]; then
+    return
+  fi
+
+  printf "Show the current saved configuration now, including passwords? [y/N]: "
+  read -r show_config
+  case "${show_config:-n}" in
+    y|Y)
+      echo
+      echo "Saved configuration (.env):"
+      echo
+      sed 's/^/  /' "$ENV_FILE_PATH"
+      echo
+      ;;
+  esac
+}
 
 # --- Setup Phase ---
 
@@ -69,6 +88,7 @@ fi
 
 if $SKIP_LAUNCH; then
   status "SKIP_LAUNCH=true; not starting services."
+  prompt_to_show_saved_config
   exit 0
 fi
 
@@ -78,6 +98,7 @@ if ! $CLI; then
   nohup env \
     DEPLOY_DIR="$DEPLOY_DIR" \
     LOG_PATH="$LOG_PATH" \
+    DEV="$DEV" \
     DEBUG="$DEBUG" \
     LOCALHOST="$LOCALHOST" \
     bash "$SCRIPTS_DIR/launch.sh" \

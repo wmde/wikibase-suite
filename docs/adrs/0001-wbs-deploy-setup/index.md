@@ -17,15 +17,16 @@ The objective of this reference implementation is to reduce setup failure risk w
 The current implementation includes these key characteristics:
 
 - Shell-driven bootstrap that installs/verifies Git and Docker and downloads repository content
-- A secure web service for gathering from the user all the required configuration for instantiating a WBS instance
-- Configuration is gathered through a guided UI which highlights the most critical configurables, while making more granular or optional configuration available for those who need or want that
+- A command-line setup wizard for gathering from the user all the required configuration for instantiating a WBS instance
+- An optional secure web service for the same setup flow when a browser-based UI is preferred
+- Configuration is gathered through a guided flow which highlights the most critical configurables, while making more granular or optional configuration available for those who need or want that
 - Hostname validation against target server IP before save/launch
 - Password entry validation including randomly generated secure passwords by default
 - Friendly startup progress plus optional access to full logging
 - Completion view with service links and generated/final `.env` content
 - Post-completion teardown/sanitization behavior to reduce risk of passwords exposure in transient log files
 
-The current implementation also includes a CLI mode (`--cli`) that is functional end-to-end for core setup values and uses the same launch/deploy path as the web flow. It has been less tested or in focus to date. 
+The current implementation defaults to a CLI setup wizard and includes an optional web setup path (`--web`). Both paths use the same launch/deploy behavior and share setup-value validation logic where practical.
 
 In both the Web and CLI version the user is prompted for the following values:
 
@@ -44,14 +45,14 @@ In both the Web and CLI version the user is prompted for the following values:
 
 Adopt the existing setup tool implementation as the v1 reference baseline, with both install paths explicitly in scope:
 
-1. Web setup path (default): guided HTTPS UI for configuration, validation, launch status, and completion handoff.
-2. CLI setup path (`--cli`): terminal prompts for core required values, direct `.env` generation, and shared launch behavior.
+1. CLI setup path (default): terminal prompts for required and optional values, direct `.env` generation, and shared launch behavior.
+2. Web setup path (`--web`): guided HTTPS UI for configuration, validation, launch status, and completion handoff.
 
 The reference baseline behavior is:
 
 1. Prepare host prerequisites (install/verify Git and Docker, clone required repository content, verify runtime readiness).
-2. Start setup web service over HTTPS so sensitive values (passwords) are entered in a protected session.
-3. Collect required deploy `.env` values, with advanced options kept out of the default path.
+2. Collect required deploy `.env` values in the selected setup surface, with advanced options kept out of the default path.
+3. Use the web setup service over HTTPS when the optional browser-based flow is selected so sensitive values (passwords) are entered in a protected session.
 4. Enforce validation before save, including domain-to-server-IP checks.
 5. Launch deploy and provide user-facing status during startup, with optional full-log view.
 6. Present completion view with service URLs and resulting config; prompt user to store credentials securely.
@@ -66,7 +67,7 @@ The reference baseline behavior is:
   - reduces password-entry errors via generated secure defaults
 
 - Current known implementation gaps:
-  - CLI parity is partial: advanced values (`MW_ADMIN_NAME`, `DB_NAME`, `DB_USER`) are not interactively prompted in CLI and remain template-defaulted.
+  - CLI and web validation now share a common TypeScript validation layer, but full parity with MediaWiki server-side password policy is still incomplete.
   - Password checks cover setup-facing length/common-value validation but do not fully mirror MediaWiki server-side password policy, so late setup failure is still possible.
   - Auto-finalize is implemented as a fixed timer plus boot-state check; a user-visible countdown synchronized to actual teardown behavior is not yet implemented.
   - Release target selection remains pinned by default (`REPO_BRANCH=deploy@6.0.0`) and needs explicit product/engineering decision on long-term default behavior.

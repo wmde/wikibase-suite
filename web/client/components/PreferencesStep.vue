@@ -25,75 +25,72 @@
 					</p>
 				</div>
 
-				<cdx-accordion v-model="optionalOpen" separation="none" class="optional-setup">
-					<template #title>Show optional fields</template>
-					<div class="field-stack">
-						<validated-text-field
-							:model-value="form.MW_ADMIN_NAME"
-							label="Admin username"
-							description="This will be the username for the initial admin account."
-							name="MW_ADMIN_NAME"
-							autocomplete="username"
-							autocapitalize="off"
-							:status="textStatuses.MW_ADMIN_NAME"
-							:disabled="disabled"
-							@update:model-value="emit( 'update-field', 'MW_ADMIN_NAME', $event )"
-							@touch="emit( 'touch', 'MW_ADMIN_NAME' )"
-						/>
+				<div class="field-stack">
+					<validated-text-field
+						:model-value="form.MW_ADMIN_NAME"
+						label="Admin username"
+						description="Username for the initial admin account."
+						name="MW_ADMIN_NAME"
+						autocomplete="username"
+						autocapitalize="off"
+						:status="textStatuses.MW_ADMIN_NAME"
+						:disabled="disabled"
+						@update:model-value="emit( 'update-field', 'MW_ADMIN_NAME', $event )"
+						@touch="emit( 'touch', 'MW_ADMIN_NAME' )"
+					/>
 
-						<password-field
-							:model-value="form.MW_ADMIN_PASS"
-							label="Admin password"
-							description="At least 10 characters. Avoid common passwords."
-							name="MW_ADMIN_PASS"
-							placeholder="Password will be generated"
-							autocomplete="new-password"
-							:status="passwordStatuses.MW_ADMIN_PASS"
-							:disabled="disabled"
-							@update:model-value="emit( 'update-field', 'MW_ADMIN_PASS', $event )"
-							@touch="emit( 'touch', 'MW_ADMIN_PASS' )"
-						/>
+					<password-field
+						:model-value="form.MW_ADMIN_PASS"
+						label="Admin password"
+						description="Leave blank to generate a secure password, or enter at least 10 characters."
+						name="MW_ADMIN_PASS"
+						placeholder="Password will be generated"
+						autocomplete="new-password"
+						:status="passwordStatuses.MW_ADMIN_PASS"
+						:disabled="disabled"
+						@update:model-value="emit( 'update-field', 'MW_ADMIN_PASS', $event )"
+						@touch="emit( 'touch', 'MW_ADMIN_PASS' )"
+					/>
 
-						<validated-text-field
-							:model-value="form.DB_NAME"
-							label="Database name"
-							description="Default: <code>my_wiki</code>."
-							name="DB_NAME"
-							autocomplete="off"
-							autocapitalize="off"
-							:status="textStatuses.DB_NAME"
-							:disabled="disabled"
-							@update:model-value="emit( 'update-field', 'DB_NAME', $event )"
-							@touch="emit( 'touch', 'DB_NAME' )"
-						/>
+					<validated-text-field
+						:model-value="form.DB_NAME"
+						label="Database name"
+						description="Name of the database Wikibase will use."
+						name="DB_NAME"
+						autocomplete="off"
+						autocapitalize="off"
+						:status="textStatuses.DB_NAME"
+						:disabled="disabled"
+						@update:model-value="emit( 'update-field', 'DB_NAME', $event )"
+						@touch="emit( 'touch', 'DB_NAME' )"
+					/>
 
-						<validated-text-field
-							:model-value="form.DB_USER"
-							label="Database user"
-							description="Used by Wikibase to connect to the database. Default: <code>sqluser</code>."
-							name="DB_USER"
-							autocomplete="username"
-							autocapitalize="off"
-							:status="textStatuses.DB_USER"
-							:disabled="disabled"
-							@update:model-value="emit( 'update-field', 'DB_USER', $event )"
-							@touch="emit( 'touch', 'DB_USER' )"
-						/>
+					<validated-text-field
+						:model-value="form.DB_USER"
+						label="Database user"
+						description="Database user Wikibase will use to connect to the database."
+						name="DB_USER"
+						autocomplete="username"
+						autocapitalize="off"
+						:status="textStatuses.DB_USER"
+						:disabled="disabled"
+						@update:model-value="emit( 'update-field', 'DB_USER', $event )"
+						@touch="emit( 'touch', 'DB_USER' )"
+					/>
 
-						<password-field
-							:model-value="form.DB_PASS"
-							label="Database password"
-							description="At least 10 characters. Avoid common passwords."
-							name="DB_PASS"
-							placeholder="Password will be generated"
-							autocomplete="new-password"
-							:status="passwordStatuses.DB_PASS"
-							:disabled="disabled"
-							@update:model-value="emit( 'update-field', 'DB_PASS', $event )"
-							@touch="emit( 'touch', 'DB_PASS' )"
-						/>
-					</div>
-				</cdx-accordion>
+					<password-field
+						:model-value="form.DB_PASS"
+						label="Database password"
+						description="Leave blank to generate a secure password, or enter at least 10 characters."
+						name="DB_PASS"
+						placeholder="Password will be generated"
+						autocomplete="new-password"
+						:status="passwordStatuses.DB_PASS"
+						:disabled="disabled"
+						@update:model-value="emit( 'update-field', 'DB_PASS', $event )"
+						@touch="emit( 'touch', 'DB_PASS' )"
+					/>
+				</div>
 			</section>
 		</div>
 
@@ -118,8 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { CdxAccordion, CdxButton, CdxCheckbox } from '@wikimedia/codex';
-import { ref } from 'vue';
+	import { CdxButton, CdxCheckbox } from '@wikimedia/codex';
 import type { ConfigForm, FieldValidationStatus } from '../types';
 import PasswordField from './PasswordField.vue';
 import ValidatedTextField from './ValidatedTextField.vue';
@@ -143,6 +139,4 @@ const emit = defineEmits<{
 	back: [];
 	start: [];
 }>();
-
-const optionalOpen = ref( false );
 </script>

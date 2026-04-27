@@ -3,9 +3,6 @@
 		<template #label>
 			{{ label }}
 		</template>
-		<template #description>
-			{{ description }}
-		</template>
 
 		<div class="password-field__control" :data-validation-status="status">
 			<cdx-text-input
@@ -36,6 +33,10 @@
 				<cdx-icon :icon="visible ? cdxIconEyeClosed : cdxIconEye" size="medium" />
 			</button>
 		</div>
+
+		<template #help-text>
+			{{ description }}
+		</template>
 	</cdx-field>
 </template>
 

@@ -3,9 +3,6 @@
 		<template #label>
 			{{ label }}
 		</template>
-		<template v-if="description" #description>
-			<span v-html="description"></span>
-		</template>
 
 		<div class="validated-text-field__control" :data-validation-status="status">
 			<cdx-text-input
@@ -20,6 +17,10 @@
 			/>
 			<span v-if="status === 'pending'" class="host-input__spinner" aria-hidden="true"></span>
 		</div>
+
+		<template v-if="description" #help-text>
+			<span v-html="description"></span>
+		</template>
 	</cdx-field>
 </template>
 

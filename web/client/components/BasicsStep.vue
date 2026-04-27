@@ -16,22 +16,20 @@
 			/>
 
 			<section class="field-section">
-				<div class="field-section__header">
-					<h2>Domain names</h2>
-					<p>
-						Your server's IP address is:
-						<copyable-value :value="serverIp" label="Copy server IP address" />.
-						You can't proceed to the next step until both host names below resolve to this IP address.
-						For additional guidance or troubleshooting in this process see
-						<a href="#" @click.prevent="emit( 'open-dns-help' )">DNS help</a>.
-					</p>
-				</div>
+					<div class="field-section__header">
+						<h2>Configure domain names</h2>
+						<p>
+							Enter the web addresses for your Wikibase and its Query Service. Make sure DNS records for both host names point to this server:
+							<copyable-value :value="serverIp" label="Copy server IP address" />.
+							These fields will only validate once those DNS records are in place.
+						</p>
+					</div>
 
 				<div class="field-stack">
 					<validated-text-field
 						:model-value="form.WIKIBASE_PUBLIC_HOST"
 						label="Wikibase host"
-						description="Public address to your Wikibase (e.g. <code>mywikibase.com</code>)"
+						description="The address where your Wikibase will be accessible. Don’t include <code>http://</code> or a trailing slash."
 						name="WIKIBASE_PUBLIC_HOST"
 						placeholder="mywikibase.com"
 						autocomplete="off"
@@ -47,7 +45,7 @@
 					<validated-text-field
 						:model-value="form.WDQS_PUBLIC_HOST"
 						label="Query Service host"
-						description="Public address for your Wikibase Query Service (e.g. <code>query.mywikibase.com</code>)"
+						description="The address for the SPARQL query service. Must be different from the Wikibase host."
 						name="WDQS_PUBLIC_HOST"
 						placeholder="query.mywikibase.com"
 						autocomplete="off"
@@ -61,18 +59,40 @@
 					/>
 				</div>
 
-				<cdx-accordion v-model="helpOpen" separation="none" class="optional-setup">
-					<template #title>Need more help?</template>
-					<ol>
-						<li>If you have not already registered the domain used above you will need to register it.</li>
+				<cdx-message class="dns-help-inline">
+					<div class="dns-help-inline__header">Need help?</div>
+					<p class="dns-help-inline__intro">
+						You need a domain you control before continuing. In your domain provider’s DNS settings, add two
+						<strong>A</strong> records that point to this server.
+					</p>
+					<ol class="dns-help-inline__steps">
 						<li>
-							Create an <strong>A</strong> record in your DNS service for each of the host names you chose above.
-							Both should point to the IP address of this server:
-							<copyable-value :value="serverIp" label="Copy server IP address" />.
+							Set <strong>A</strong> records for both host names. They must be different from each other, and both must
+							point to this server’s IP address: <copyable-value :value="serverIp" label="Copy server IP address" />.
+							Most Wikibase Suite setups use <code>query</code> as the Query Service subdomain, but you can use any host name you control.
 						</li>
-						<li>Enter your chosen host names in the fields above.</li>
+						<li>
+							When entering the IP address, use only the IP address with nothing before or after it. Your provider may call
+							this field “value,” “content,” “address,” or “points to.”
+						</li>
+						<li>
+							In the fields above, enter only the host names, like <code>mywikibase.com</code> and
+							<code>query.mywikibase.com</code>.
+						</li>
+							<li>
+								DNS changes often work within a few minutes, but can take up to 24 hours. You can leave this page open;
+								it will keep checking every few seconds and show a
+								<cdx-icon :icon="cdxIconCheck" class="dns-help-inline__check" size="small" />
+								when each host is ready.
+							</li>
 					</ol>
-				</cdx-accordion>
+					<p class="dns-help-inline__resources">
+						For provider-specific steps, check the documentation for wherever your DNS is hosted. To generally learn more about DNS, see
+						<a href="https://developer.mozilla.org/en-US/docs/Glossary/DNS" target="_blank" rel="noreferrer">DNS basics</a>
+						and
+						<a href="https://learn.wordpress.org/lesson/domain-management-understanding-dns-records/" target="_blank" rel="noreferrer">understanding DNS records</a>.
+					</p>
+				</cdx-message>
 			</section>
 		</div>
 
@@ -93,8 +113,8 @@
 </template>
 
 <script setup lang="ts">
-import { CdxAccordion, CdxButton } from '@wikimedia/codex';
-import { ref } from 'vue';
+	import { CdxButton, CdxIcon, CdxMessage } from '@wikimedia/codex';
+	import { cdxIconCheck } from '@wikimedia/codex-icons';
 import type { ConfigForm, FieldValidationStatus } from '../types';
 import CopyableValue from './CopyableValue.vue';
 import ValidatedTextField from './ValidatedTextField.vue';
@@ -115,9 +135,6 @@ const emit = defineEmits<{
 	'update-field': [ name: BasicFieldName, value: string ];
 	touch: [ name: BasicFieldName ];
 	'flush-host': [ name: HostFieldName ];
-	'open-dns-help': [];
 	continue: [];
 }>();
-
-const helpOpen = ref( false );
 </script>
