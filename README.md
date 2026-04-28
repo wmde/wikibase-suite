@@ -3,9 +3,9 @@
 This script bootstraps a Wikibase Suite Deploy installation and guides you through:
 
 1. **Checks/installs Git** – Installs Git if not already available.  
-2. **Clones repositories** – Downloads this setup tool and the current version of the Wikibase Suite code.
+2. **Clones repositories** – Downloads this setup tool and the selected Wikibase Suite Deploy code.
 3. **Checks/installs Docker** – Installs Docker unless already installed.  
-4. **Collects configuration** – Through the command-line setup wizard by default, or through the web setup UI with `--web`.
+4. **Collects configuration** – Through the web setup UI, or through the command-line setup wizard if you omit `--web`.
 5. **Launches Wikibase Suite** – Shows you the finalized configuration and links to your services once complete.
 
 ## Installing on a new VPS instance
@@ -14,28 +14,28 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
    - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#1-requirements
    - Uses AMD64 (`x86_64`) architecture
    - Runs a supported Linux with `apt-get` or `dnf` available (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS Stream/RHEL/Rocky/Alma)  
-   - Lets you SSH in as root the user
+   - Lets you SSH in as the root user
 
-2. SSH in as root and run:
+2. SSH in as root and run the web setup:
 
    ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --web
    ```
 
    To install a specific Wikibase Suite Deploy branch or tag, pass it as a deploy ref:
 
    ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --deploy-ref deploy@6.0.0
+   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --web --deploy-ref deploy@7.0.0
    ```
 
-3. Follow the setup wizard prompts to complete configuration and launch your server.
+3. Open the setup URL printed in the terminal and follow the web setup steps.
 
 ## Troubleshooting
 
 - **Browser warns about certificate**  
-  - If Let’s Encrypt fails, setup falls back to a **self-signed certificate**. You should have been warned in the course of running setup that happened.
-  - In this case, your browser will show a warning such as **“Your connection is not private”** when you try and access the setup URL, and it is safe to bypass it to continue setup. 
-  - Here are browser-specific steps on how to bypass the warning, see [Vultr’s guide to bypassing HTTPS warnings for self-signed certificates](https://docs.vultr.com/how-to-bypass-the-https-warning-for-self-signed-ssl-tls-certificates).
+  - If Let’s Encrypt fails, setup falls back to a **self-signed certificate** and warns you in the terminal.
+  - In this case, your browser may show a warning such as **“Your connection is not private”** when you open the setup URL. It is safe to bypass that warning to continue setup.
+  - For browser-specific steps, see [Vultr’s guide to bypassing HTTPS warnings for self-signed certificates](https://docs.vultr.com/how-to-bypass-the-https-warning-for-self-signed-ssl-tls-certificates).
 
 ## More for developers and testers
 

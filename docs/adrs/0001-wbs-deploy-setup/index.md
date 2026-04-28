@@ -70,7 +70,7 @@ The reference baseline behavior is:
   - CLI and web validation now share a common TypeScript validation layer, but full parity with MediaWiki server-side password policy is still incomplete.
   - Password checks cover setup-facing length/common-value validation but do not fully mirror MediaWiki server-side password policy, so late setup failure is still possible.
   - Auto-finalize is implemented as a fixed timer plus boot-state check; a user-visible countdown synchronized to actual teardown behavior is not yet implemented.
-  - Release target selection remains pinned by default (`--deploy-ref deploy@6.0.0`) and needs explicit product/engineering decision on long-term default behavior.
+  - Release target selection remains pinned by default (`--deploy-ref deploy@7.0.0`) and needs explicit product/engineering decision on long-term default behavior.
 
 - Process consequence:
   - UX refinement work for this baseline continues inside the ADR 0001 sidecar files instead of creating a new ADR for every iteration.
