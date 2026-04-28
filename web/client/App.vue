@@ -1,6 +1,6 @@
 <template>
 	<main class="page-shell">
-		<section class="surface-card wizard-card">
+		<div class="wizard-layout">
 			<header class="wizard-header">
 				<div class="wizard-header__brand" aria-hidden="true">
 					<img :src="logoSrc" alt="" />
@@ -10,76 +10,78 @@
 				</div>
 			</header>
 
-			<div class="wizard-progress-area">
+			<section class="wizard-progress-area" aria-label="Setup progress">
 				<wizard-steps
 					:current-step="currentStep"
 					:locked="configLocked"
 					:steps="steps"
 				/>
-			</div>
+			</section>
 
-			<form @submit.prevent>
-				<basics-step
-					v-if="currentStep === 1"
-					:form="form"
-					:server-ip="initialState.serverIp"
-					:host-statuses="hostValidation.statuses"
-					:can-continue="domainReady"
-					:disabled="configLocked"
-					@update-field="updateField"
-					@touch="touchField"
-					@flush-host="flushHost"
-					@back="currentStep = 0"
-					@continue="continueToAccount"
-				/>
+			<section class="surface-card wizard-card">
+				<form @submit.prevent>
+					<basics-step
+						v-if="currentStep === 1"
+						:form="form"
+						:server-ip="initialState.serverIp"
+						:host-statuses="hostValidation.statuses"
+						:can-continue="domainReady"
+						:disabled="configLocked"
+						@update-field="updateField"
+						@touch="touchField"
+						@flush-host="flushHost"
+						@back="currentStep = 0"
+						@continue="continueToAccount"
+					/>
 
-				<welcome-step
-					v-else-if="currentStep === 0"
-					:disabled="configLocked"
-					@continue="currentStep = 1"
-				/>
+					<welcome-step
+						v-else-if="currentStep === 0"
+						:disabled="configLocked"
+						@continue="currentStep = 1"
+					/>
 
-				<account-step
-					v-else-if="currentStep === 2"
-					:form="form"
-					:text-status="adminNameStatus"
-					:email-status="emailStatus"
-					:password-status="passwordStatuses.MW_ADMIN_PASS"
-					:can-continue="accountReady"
-					:disabled="configLocked"
-					@update-field="updateField"
-					@update-checkbox="form.METADATA_CALLBACK = $event"
-					@touch="touchField"
-					@back="currentStep = 1"
-					@continue="continueToDatabase"
-				/>
+					<account-step
+						v-else-if="currentStep === 2"
+						:form="form"
+						:text-status="adminNameStatus"
+						:email-status="emailStatus"
+						:password-status="passwordStatuses.MW_ADMIN_PASS"
+						:can-continue="accountReady"
+						:disabled="configLocked"
+						@update-field="updateField"
+						@update-checkbox="form.METADATA_CALLBACK = $event"
+						@touch="touchField"
+						@back="currentStep = 1"
+						@continue="continueToDatabase"
+					/>
 
-				<database-step
-					v-else-if="currentStep === 3"
-					:form="form"
-					:text-statuses="databaseTextStatuses"
-					:password-status="passwordStatuses.DB_PASS"
-					:can-start="canStartSetup"
-					:disabled="configLocked"
-					@update-field="updateField"
-					@touch="touchField"
-					@back="currentStep = 2"
-					@start="startSetup"
-				/>
+					<database-step
+						v-else-if="currentStep === 3"
+						:form="form"
+						:text-statuses="databaseTextStatuses"
+						:password-status="passwordStatuses.DB_PASS"
+						:can-start="canStartSetup"
+						:disabled="configLocked"
+						@update-field="updateField"
+						@touch="touchField"
+						@back="currentStep = 2"
+						@start="startSetup"
+					/>
 
-				<setup-step
-					v-else
-					:complete="setupComplete"
-					:form="form"
-					:config-text="configText"
-					:progress="setupProgress"
-					:summary="setupSummary"
-					:status-lines="setupStatusLines"
-					:has-status-lines="setupHasStatusLines"
-					@open-log="logOpen = true"
-				/>
-			</form>
-		</section>
+					<setup-step
+						v-else
+						:complete="setupComplete"
+						:form="form"
+						:config-text="configText"
+						:progress="setupProgress"
+						:summary="setupSummary"
+						:status-lines="setupStatusLines"
+						:has-status-lines="setupHasStatusLines"
+						@open-log="logOpen = true"
+					/>
+				</form>
+			</section>
+		</div>
 
 		<domain-help
 			v-model:open="dnsHelpOpen"
