@@ -25,7 +25,7 @@ wait_for_env_file() {
   status "Configuration saved."
 }
 
-launch_wikibase() {
+launch_deploy() {
   pushd "$DEPLOY_DIR" >/dev/null || return 1
 
   local compose_opts=()
@@ -103,7 +103,7 @@ final_message() {
 # --- Execution ---
 
 wait_for_env_file
-launch_wikibase
+launch_deploy
 final_message
 
 if $CLI && [[ -t 0 ]] && [[ -f "$ENV_FILE_PATH" ]]; then
