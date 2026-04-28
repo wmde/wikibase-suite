@@ -22,6 +22,12 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
    bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh)
    ```
 
+   To install a specific Wikibase Suite Deploy branch or tag, pass it as a deploy ref:
+
+   ```bash
+   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --deploy-ref deploy@6.0.0
+   ```
+
 3. Follow the setup wizard prompts to complete configuration and launch your server.
 
 ## Troubleshooting

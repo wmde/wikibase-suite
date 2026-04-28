@@ -15,8 +15,10 @@ echo
 
 # --- Parse CLI Arguments ---
 
-for arg in "$@"; do
-  case "$arg" in
+START_ARGS=("$@")
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
     --cli)
       CLI=true
       ;;
@@ -40,6 +42,21 @@ for arg in "$@"; do
     --skip-launch)
       SKIP_LAUNCH=true
       ;;
+    --deploy-ref)
+      if [[ -z "${2:-}" ]]; then
+        echo "⚠️ --deploy-ref requires a branch or tag name."
+        exit 1
+      fi
+      DEPLOY_REF="$2"
+      shift
+      ;;
+    --deploy-ref=*)
+      DEPLOY_REF="${1#*=}"
+      if [[ -z "$DEPLOY_REF" ]]; then
+        echo "⚠️ --deploy-ref requires a branch or tag name."
+        exit 1
+      fi
+      ;;
     --debug)
       DEBUG=true
       ;;
@@ -47,6 +64,7 @@ for arg in "$@"; do
       LOCALHOST=true
       ;;
   esac
+  shift
 done
 
 # When a wikibase-release-pipeline checkout is available
@@ -62,7 +80,7 @@ fi
 
 SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/lorenjohnson/wbs-deploy-setup.git}"
 REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
-REPO_BRANCH="${REPO_BRANCH:-"deploy@6.0.0"}"
+DEPLOY_REF="${DEPLOY_REF:-"deploy@7.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_DIR="${WBS_DIR:-$HOME/wbs}"
 
@@ -114,7 +132,8 @@ clone_repo() {
   git clone --branch main --single-branch "$SETUP_REPO_URL" --depth 1 >/dev/null 2>&1
 
   if [ ! -d wikibase-release-pipeline/.git ]; then
-    git clone --branch "$REPO_BRANCH" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
+    echo "Checking out wikibase-release-pipeline at $DEPLOY_REF..."
+    git clone --branch "$DEPLOY_REF" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
   else
     echo "⚠️ An existing git repository found at $WBS_DIR/wikibase-release-pipeline, using what is there ..."
   fi
@@ -132,31 +151,4 @@ if ! $SKIP_CLONE; then
   clone_repo
 fi
 
-if $RESET; then
-  echo
-  if [[ -f "$ENV_FILE_PATH" ]]; then
-    printf "Delete the current configuration found in .env? [y/N]: "
-    read -n 1 -r reset_config
-    echo
-    case "${reset_config:-n}" in
-      y|Y)
-        rm -f "$ENV_FILE_PATH"
-        ;;
-    esac
-    echo 
-  fi
-
-  printf "⛔️ Delete any existing wbs-deploy services AND data? [y/N]: "
-  read -n 1 -r reset_data
-  echo
-  case "${reset_data:-n}" in
-    y|Y)
-      ;;
-    *)
-      export RESET=false
-      ;;
-  esac
-  echo
-fi
-
-exec bash "$SCRIPTS_DIR/setup.sh" "$@"
+exec bash "$SCRIPTS_DIR/setup.sh" "${START_ARGS[@]}"

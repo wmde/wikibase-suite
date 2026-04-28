@@ -27,6 +27,7 @@ This document covers local testing, CLI options, and other details useful for de
 | `--skip-clone`   | Don’t clone any repositories. Assumes they’re already present. |
 | `--skip-deps`    | Skip installing Git and Docker (assumes both are installed and Docker is running). |
 | `--skip-launch`  | Run through setup but exit before `docker compose up`. |
+| `--deploy-ref REF` | Checkout a specific `wikibase-release-pipeline` branch or tag. Defaults to `deploy@6.0.0`. |
 | `--debug`        | Enable verbose logging; disables quiet pulls during Docker builds. |
 | `--local`        | Configure for localhost: defaults hosts to `wikibase.test` and `query.wikibase.test`, avoids Let’s Encrypt. |
 
@@ -46,5 +47,6 @@ To use these special localhost-only domains, you’ll need to add entries to you
 - The setup web server runs on port 8888 (HTTPS) when `--web` is used.
 - For non-localhost web installs, setup will try to obtain a Let’s Encrypt cert on port 80. If that fails, it falls back to a self-signed cert (browser warning).
 - If `docker-compose.local.yml` exists in `deploy/`, it will be merged automatically.  
-- Default `wikibase-release-pipeline` branch is `deploy@6.0.0` (can be overridden with `REPO_BRANCH`).
+- Default `wikibase-release-pipeline` deploy ref is `deploy@6.0.0`.
+- Use `--deploy-ref REF` to checkout a specific `wikibase-release-pipeline` branch or tag.
 - After launch, your saved `.env` config is displayed—be sure to store credentials securely.
