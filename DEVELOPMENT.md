@@ -6,7 +6,7 @@ This document covers local testing, CLI options, and other details useful for de
 
 1. Clone this repo and change into the directory created for it:  
    ```
-   git clone https://github.com/lorenjohnson/wbs-deploy-setup
+   git clone https://github.com/wmde/wbs-deploy-setup
    cd wbs-deploy-setup
    ```
 

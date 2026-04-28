@@ -78,7 +78,7 @@ fi
 
 # --- Setup variables (including defaults) ---
 
-SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/lorenjohnson/wbs-deploy-setup.git}"
+SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/wmde/wbs-deploy-setup.git}"
 REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
 DEPLOY_REF="${DEPLOY_REF:-"deploy@7.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"

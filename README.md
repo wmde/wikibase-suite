@@ -19,13 +19,13 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 2. SSH in as root and run the web setup:
 
    ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --web
+   bash <(curl -fsSL https://raw.githubusercontent.com/wmde/wbs-deploy-setup/refs/heads/main/start.sh) --web
    ```
 
    To install a specific Wikibase Suite Deploy branch or tag, pass it as a deploy ref:
 
    ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/lorenjohnson/wbs-deploy-setup/refs/heads/main/start.sh) --web --deploy-ref deploy@7.0.0
+   bash <(curl -fsSL https://raw.githubusercontent.com/wmde/wbs-deploy-setup/refs/heads/main/start.sh) --web --deploy-ref deploy@7.0.0
    ```
 
 3. Open the setup URL printed in the terminal and follow the web setup steps.
