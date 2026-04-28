@@ -20,30 +20,50 @@
 
 			<form @submit.prevent>
 				<basics-step
-					v-if="currentStep === 0"
+					v-if="currentStep === 1"
 					:form="form"
 					:server-ip="initialState.serverIp"
-					:email-status="emailStatus"
 					:host-statuses="hostValidation.statuses"
-					:can-continue="basicsReady"
+					:can-continue="domainReady"
 					:disabled="configLocked"
 					@update-field="updateField"
 					@touch="touchField"
 					@flush-host="flushHost"
-					@continue="continueToPreferences"
+					@back="currentStep = 0"
+					@continue="continueToAccount"
 				/>
 
-				<preferences-step
-					v-else-if="currentStep === 1"
+				<welcome-step
+					v-else-if="currentStep === 0"
+					:disabled="configLocked"
+					@continue="currentStep = 1"
+				/>
+
+				<account-step
+					v-else-if="currentStep === 2"
 					:form="form"
-					:password-statuses="passwordStatuses"
-					:text-statuses="preferenceTextStatuses"
-					:can-start="canStartSetup"
+					:text-status="adminNameStatus"
+					:email-status="emailStatus"
+					:password-status="passwordStatuses.MW_ADMIN_PASS"
+					:can-continue="accountReady"
 					:disabled="configLocked"
 					@update-field="updateField"
 					@update-checkbox="form.METADATA_CALLBACK = $event"
 					@touch="touchField"
-					@back="currentStep = 0"
+					@back="currentStep = 1"
+					@continue="continueToDatabase"
+				/>
+
+				<database-step
+					v-else-if="currentStep === 3"
+					:form="form"
+					:text-statuses="databaseTextStatuses"
+					:password-status="passwordStatuses.DB_PASS"
+					:can-start="canStartSetup"
+					:disabled="configLocked"
+					@update-field="updateField"
+					@touch="touchField"
+					@back="currentStep = 2"
 					@start="startSetup"
 				/>
 
@@ -87,16 +107,19 @@ import {
 	isValidEmailAddress
 } from './validation';
 import type { ConfigForm, FieldValidationStatus, InitialSetupState, WizardStep } from './types';
+import AccountStep from './components/AccountStep.vue';
 import BasicsStep from './components/BasicsStep.vue';
+import DatabaseStep from './components/DatabaseStep.vue';
 import DomainHelp from './components/DomainHelp.vue';
 import LogDialog from './components/LogDialog.vue';
-import PreferencesStep from './components/PreferencesStep.vue';
 import SetupStep from './components/SetupStep.vue';
+import WelcomeStep from './components/WelcomeStep.vue';
 import WizardSteps from './components/WizardSteps.vue';
 
 type HostFieldName = 'WIKIBASE_PUBLIC_HOST' | 'WDQS_PUBLIC_HOST';
 type PasswordFieldName = 'MW_ADMIN_PASS' | 'DB_PASS';
 type PreferenceTextFieldName = 'MW_ADMIN_NAME' | 'DB_NAME' | 'DB_USER';
+type DatabaseTextFieldName = 'DB_NAME' | 'DB_USER';
 type FormFieldName = keyof ConfigForm;
 
 const fallbackState: InitialSetupState = {
@@ -108,7 +131,7 @@ const fallbackState: InitialSetupState = {
 
 const initialState = window.__SETUP_STATE__ || fallbackState;
 const logoSrc = '/Wikibase_Suite_(RGB).png';
-const currentStep = ref<WizardStep>( initialState.isConfigSaved ? 2 : 0 );
+const currentStep = ref<WizardStep>( initialState.isConfigSaved ? 4 : 0 );
 const configLocked = ref( initialState.isConfigSaved );
 const setupComplete = ref( initialState.isBooted );
 const form = reactive<ConfigForm>( configToForm( null ) );
@@ -129,8 +152,10 @@ const setupHasStatusLines = computed( () => setupLog.hasStatusLines.value );
 const setupLogText = computed( () => setupLog.logText.value );
 
 const steps = [
-	{ title: 'Basics' },
-	{ title: 'Preferences' },
+	{ title: 'Welcome' },
+	{ title: 'Domain' },
+	{ title: 'Account' },
+	{ title: 'Database' },
 	{ title: 'Setup' }
 ];
 
@@ -152,21 +177,31 @@ const preferenceTextStatuses = computed<Record<PreferenceTextFieldName, FieldVal
 	DB_USER: getPreferenceTextStatus( 'DB_USER' )
 } ) );
 
-const basicsReady = computed( () => (
-	isValidEmailAddress( form.MW_ADMIN_EMAIL ) &&
+const adminNameStatus = computed<FieldValidationStatus>( () => preferenceTextStatuses.value.MW_ADMIN_NAME );
+
+const databaseTextStatuses = computed<Record<DatabaseTextFieldName, FieldValidationStatus>>( () => ( {
+	DB_NAME: preferenceTextStatuses.value.DB_NAME,
+	DB_USER: preferenceTextStatuses.value.DB_USER
+} ) );
+
+const domainReady = computed( () => (
 	hostValidation.statuses.WIKIBASE_PUBLIC_HOST === 'valid' &&
 	hostValidation.statuses.WDQS_PUBLIC_HOST === 'valid'
 ) );
 
-const preferencesReady = computed( () => (
+const accountReady = computed( () => (
 	isValidAdminUsername( form.MW_ADMIN_NAME ) &&
-	isPasswordAccepted( 'MW_ADMIN_PASS' ) &&
+	isValidEmailAddress( form.MW_ADMIN_EMAIL ) &&
+	isPasswordAccepted( 'MW_ADMIN_PASS' )
+) );
+
+const databaseReady = computed( () => (
 	isValidDatabaseName( form.DB_NAME ) &&
 	isValidDatabaseUser( form.DB_USER ) &&
 	isPasswordAccepted( 'DB_PASS' )
 ) );
 
-const canStartSetup = computed( () => basicsReady.value && preferencesReady.value );
+const canStartSetup = computed( () => domainReady.value && accountReady.value && databaseReady.value );
 
 function isPasswordAccepted( name: PasswordFieldName ): boolean {
 	if ( form[ name ].trim() === '' ) {
@@ -221,8 +256,7 @@ async function flushHost( name: HostFieldName ): Promise<void> {
 	await hostValidation.validateNow( name, form[ name ] );
 }
 
-async function continueToPreferences(): Promise<void> {
-	touchField( 'MW_ADMIN_EMAIL' );
+async function continueToAccount(): Promise<void> {
 	touchField( 'WIKIBASE_PUBLIC_HOST' );
 	touchField( 'WDQS_PUBLIC_HOST' );
 	await Promise.all( [
@@ -230,8 +264,19 @@ async function continueToPreferences(): Promise<void> {
 		hostValidation.validateNow( 'WDQS_PUBLIC_HOST', form.WDQS_PUBLIC_HOST )
 	] );
 
-	if ( basicsReady.value ) {
-		currentStep.value = 1;
+	if ( domainReady.value ) {
+		currentStep.value = 2;
+	}
+}
+
+async function continueToDatabase(): Promise<void> {
+	touchField( 'MW_ADMIN_NAME' );
+	touchField( 'MW_ADMIN_EMAIL' );
+	touchField( 'MW_ADMIN_PASS' );
+	await passwordValidation.validateNow( 'MW_ADMIN_PASS', form.MW_ADMIN_PASS );
+
+	if ( accountReady.value ) {
+		currentStep.value = 3;
 	}
 }
 
@@ -252,7 +297,13 @@ async function startSetup(): Promise<void> {
 	] );
 
 	if ( !canStartSetup.value ) {
-		currentStep.value = basicsReady.value ? 1 : 0;
+		if ( !domainReady.value ) {
+			currentStep.value = 1;
+		} else if ( !accountReady.value ) {
+			currentStep.value = 2;
+		} else {
+			currentStep.value = 3;
+		}
 		return;
 	}
 
@@ -262,7 +313,7 @@ async function startSetup(): Promise<void> {
 		configText.value = response.configText || '';
 		configLocked.value = true;
 		setupComplete.value = false;
-		currentStep.value = 2;
+		currentStep.value = 4;
 		setupLog.resetForRun();
 	} catch ( error ) {
 		console.error( error );
@@ -278,7 +329,7 @@ async function handleSetupComplete(): Promise<void> {
 	}
 	setupLog.setProgress( 100, 'Setup complete. Your services are ready.' );
 	setupComplete.value = true;
-	currentStep.value = 2;
+	currentStep.value = 4;
 }
 
 async function hydrateInitialConfig(): Promise<void> {
@@ -307,7 +358,7 @@ async function hydrateInitialConfig(): Promise<void> {
 
 function startHostValidationPolling(): void {
 	pollTimer = window.setInterval( () => {
-		if ( currentStep.value !== 0 || configLocked.value ) {
+		if ( currentStep.value !== 1 || configLocked.value ) {
 			return;
 		}
 

@@ -6,10 +6,31 @@
 					<h2>Setup complete! 🎉</h2>
 				</div>
 
-				<ol class="complete-checklist">
-					<li class="complete-checklist__item">
-						<div class="complete-checklist__header">
-							<h3>Save your configuration</h3>
+				<div class="complete-checklist">
+					<div class="complete-services">
+						<p class="complete-checklist__description">
+							Your Wikibase Suite is now available at the links below.
+						</p>
+						<div class="service-links">
+							<a class="service-link" :href="wikibaseUrl" target="_blank">
+								<span class="service-link__label">Wikibase</span>
+								<span class="service-link__value">{{ wikibaseUrl }}</span>
+							</a>
+							<a class="service-link" :href="queryServiceUrl" target="_blank">
+								<span class="service-link__label">Query Service</span>
+								<span class="service-link__value">{{ queryServiceUrl }}</span>
+							</a>
+							<a class="service-link" :href="quickStatementsUrl" target="_blank">
+								<span class="service-link__label">QuickStatements</span>
+								<span class="service-link__value">{{ quickStatementsUrl }}</span>
+							</a>
+						</div>
+					</div>
+
+					<cdx-message class="setup-callout setup-callout--warning complete-checklist__item">
+						<div class="callout-heading">
+							<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
+							<h3 class="callout-title">Save your configuration</h3>
 						</div>
 						<p class="complete-checklist__description">
 							Your final configuration file is below. It includes your passwords. You can also copy or download the full configuration below, which can be used when you are upgrading or if you are setting up your server again
@@ -42,37 +63,15 @@
 						</div>
 						<div class="complete-actions">
 							<a
-								class="cdx-button cdx-button--action-progressive cdx-button--fake-button cdx-button--fake-button--enabled"
+								class="config-download-link"
 								:href="configDownloadUrl"
 								download="wbs-deploy-setup.env"
 							>
 								Download configuration file
 							</a>
 						</div>
-					</li>
-					<li class="complete-checklist__item">
-						<div class="complete-checklist__header">
-							<h3>Start using your services</h3>
-						</div>
-						<p class="complete-checklist__description">
-							Your Wikibase Suite is now available at the links below.
-						</p>
-						<div class="service-links">
-							<a class="service-link" :href="wikibaseUrl" target="_blank">
-								<span class="service-link__label">Wikibase</span>
-								<span class="service-link__value">{{ wikibaseUrl }}</span>
-							</a>
-							<a class="service-link" :href="queryServiceUrl" target="_blank">
-								<span class="service-link__label">Query Service</span>
-								<span class="service-link__value">{{ queryServiceUrl }}</span>
-							</a>
-							<a class="service-link" :href="quickStatementsUrl" target="_blank">
-								<span class="service-link__label">QuickStatements</span>
-								<span class="service-link__value">{{ quickStatementsUrl }}</span>
-							</a>
-						</div>
-					</li>
-				</ol>
+					</cdx-message>
+				</div>
 			</div>
 
 			<div v-else class="setup-progress-panel surface-card">
@@ -105,8 +104,8 @@
 </template>
 
 <script setup lang="ts">
-import { CdxButton, CdxIcon, CdxProgressBar } from '@wikimedia/codex';
-import { cdxIconCopy } from '@wikimedia/codex-icons';
+import { CdxButton, CdxIcon, CdxMessage, CdxProgressBar } from '@wikimedia/codex';
+import { cdxIconAlert, cdxIconCopy } from '@wikimedia/codex-icons';
 import { computed, ref, watch } from 'vue';
 import type { ConfigForm } from '../types';
 
