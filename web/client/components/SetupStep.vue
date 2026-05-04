@@ -28,47 +28,48 @@
 					</div>
 
 					<cdx-message class="setup-callout setup-callout--warning complete-checklist__item">
-						<div class="callout-heading">
-							<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
-							<h3 class="callout-title">Save your configuration</h3>
+						<div class="save-config-heading">
+							<div class="callout-heading">
+								<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
+								<h3 class="callout-title">Save this server configuration</h3>
+							</div>
 						</div>
 						<p class="complete-checklist__description">
-							Your final configuration file is below. It includes your passwords. You can also copy or download the full configuration below, which can be used when you are upgrading or if you are setting up your server again
-							(see
-							<a
-								href="https://github.com/wmde/wikibase-release-pipeline/blob/main/deploy/README.md#resetting-the-configuration"
-								target="_blank"
-								rel="noreferrer"
-								>
-									Resetting
-								</a>
-								in Deploy documentation).
+							After this step, the passwords for your admin account and database will be hidden from the setup file on the server. Download or copy this configuration file now and store it somewhere secure.
 						</p>
 						<p class="complete-checklist__description">
-							Please keep track of these passwords in a secure place, as they will be cleared from the setup configuration file now that the services have been setup.
+							You will need this file to re-create the same configuration during major upgrades or when setting up a replacement server.
 						</p>
-						<div class="config-box">
-							<pre id="config-content">{{ configText }}</pre>
-							<button
-								type="button"
-								class="config-box__copy"
-								:class="{ 'is-copied': copiedConfig }"
-								:aria-label="copiedConfig ? 'Copied' : 'Copy configuration'"
-								:title="copiedConfig ? 'Copied' : 'Copy configuration'"
-								@click="copyConfig"
-							>
-								<span v-if="copiedConfig">Copied</span>
-								<cdx-icon v-else :icon="cdxIconCopy" size="small" />
-							</button>
-						</div>
-						<div class="complete-actions">
+						<div class="save-config-actions">
 							<a
 								class="config-download-link"
 								:href="configDownloadUrl"
 								download="wbs-deploy-setup.env"
 							>
-								Download configuration file
+								Download config
 							</a>
+							<button
+								type="button"
+								class="config-copy-action"
+								:class="{ 'is-copied': copiedConfig }"
+								@click="copyConfig"
+							>
+								<cdx-icon :icon="cdxIconCopy" size="small" />
+								<span>{{ copiedConfig ? 'Copied' : 'Copy config' }}</span>
+							</button>
+						</div>
+						<button
+							type="button"
+							class="config-reveal-button"
+							:aria-expanded="configRevealed"
+							aria-controls="config-content"
+							@click="configRevealed = !configRevealed"
+						>
+							<cdx-icon :icon="configRevealed ? cdxIconEyeClosed : cdxIconEye" size="small" />
+							<span>{{ configRevealed ? 'Hide configuration' : 'Reveal configuration' }}</span>
+						</button>
+						<div v-if="configRevealed" class="config-box">
+							<pre id="config-content">{{ configText }}</pre>
 						</div>
 					</cdx-message>
 				</div>
@@ -105,7 +106,7 @@
 
 <script setup lang="ts">
 import { CdxButton, CdxIcon, CdxMessage, CdxProgressBar } from '@wikimedia/codex';
-import { cdxIconAlert, cdxIconCopy } from '@wikimedia/codex-icons';
+import { cdxIconAlert, cdxIconCopy, cdxIconEye, cdxIconEyeClosed } from '@wikimedia/codex-icons';
 import { computed, ref, watch } from 'vue';
 import type { ConfigForm } from '../types';
 
@@ -126,6 +127,7 @@ const emit = defineEmits<{
 type ChecklistState = 'complete' | 'current' | 'upcoming';
 
 const copiedConfig = ref( false );
+const configRevealed = ref( false );
 const configDownloadUrl = ref( '#' );
 const currentStatusLine = computed( () => props.summary || 'Waiting for status updates.' );
 const progressChecklistItems = computed( () => {
