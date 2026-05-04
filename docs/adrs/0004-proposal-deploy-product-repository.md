@@ -6,23 +6,9 @@ Date: 2026-05-04
 
 proposed
 
-## Decision
+## Context
 
-Move Wikibase Suite Deploy into its own repository on Github outside of `wmde/wikibase-release-pipeline`.
-
-The proposed repository shape is:
-
-```text
-deploy/
-setup-tool/
-README.md
-```
-
-The forthcoming Setup Tool is included with the understanding that it is part of the Deploy product offering.
-
-## Why
-
-The purpose of the move is to give Deploy a repository that matches its product boundary: a deployable configuration for creating a Wikibase instance along with its companion services, with related documentation and tooling for initial setup and ongoing maintenance and operations of the instance.
+We should move Deploy product into its own repository which matches its product boundary: a deployable configuration for creating a Wikibase instance along with its companion services, with related documentation and tooling for initial setup and ongoing maintenance and operations of the instance.
 
 The code and docs in `wikibase-release-pipeline` are primarily concerned with building, testing, and releasing Wikibase Suite Docker images. At this time, that is mostly internal Suite team workflow, even though the code remains open source and available for community use. Deploy uses the images produced by that workflow, but it consumes them as published images from Docker Hub. It does not depend on the image build pipeline being present in the same repository.
 
@@ -39,6 +25,20 @@ Moving Deploy into its own repository would make the product boundary clearer:
 - For contributors work on Deploy could happen in the context of Deploy itself, without requiring navigating around the additional unnecessary additional context of the build pipeline repository.
 
 This move can be prepared with low disruption. The existing `wikibase-release-pipeline/deploy` location can remain in place and be kept in parity until the change over is ready and the team comfortable making a update public announcement. After that users arriving at the old URL would be re-directed to the new location via a short note left at `wikibase-release-pipeline/deploy/README.md`.
+
+## Decision
+
+Move Wikibase Suite Deploy into its own repository on Github outside of `wmde/wikibase-release-pipeline`.
+
+The proposed repository shape is:
+
+```text
+deploy/
+setup-tool/
+README.md
+```
+
+The forthcoming Setup Tool is included with the understanding that it is part of the Deploy product offering.
 
 ## Work Plan
 
@@ -74,11 +74,11 @@ Rough engineering estimate: 1 focused engineering day for initial repository cre
    - merge the `wikibase-release-pipeline` branch created in the above step
    - announce the new location of Deploy along with the new Deploy Setup Tool
 
-## Decision Needed
+## Open Question
 
 What should the new repository be called?
 
-Good options include:
+Suggested options include:
 
 - `wmde/wikibase-suite`
 - `wmde/wikibase-suite-deploy`
