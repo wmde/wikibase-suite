@@ -4,12 +4,8 @@ This is the front door for evaluating WBS Deploy Setup.
 
 ## Start Here
 
-- [`adrs/0001-wbs-deploy-setup/index.md`](adrs/0001-wbs-deploy-setup/index.md)
-  - Primary context for the current setup-tool baseline and active product direction.
-- [`adrs/0001-wbs-deploy-setup/open-items.md`](adrs/0001-wbs-deploy-setup/open-items.md)
-  - Living queue for UX notes, bugs, copy questions, and follow-up decisions within ADR 0001.
-- [`adrs/0001-wbs-deploy-setup/technical-addendum.md`](adrs/0001-wbs-deploy-setup/technical-addendum.md) (optional deep detail)
-  - Use this for engineering and architecture evaluation of implementation specifics.
+- [`adrs/0001-setup-tool-eval1.md`](adrs/0001-setup-tool-eval1.md)
+  - Eval 1 review and response record for the setup tool.
 - [`adrs/0002-wbs-deploy-setup-dokploy.md`](adrs/0002-wbs-deploy-setup-dokploy.md)
   - Rejected Dokploy-based variant kept as reference.
 - [`adrs/0003-research-deploy-product-repository-proposal.md`](adrs/0003-research-deploy-product-repository-proposal.md)

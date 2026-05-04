@@ -32,6 +32,8 @@ web/public/assets/
 
 # misc
 npm-debug.log
+docs/eval-one-scraps.md
+new mockups/
 
 # System Files
 .DS_Store
