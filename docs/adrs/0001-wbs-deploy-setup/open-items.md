@@ -1,5 +1,7 @@
 # Open Items
 
+Deliverable spreadsheet: [WBS Deploy Setup Tool UI Notes](https://docs.google.com/spreadsheets/d/1WhroI0WnuB2AHr848sezBzHQNckSHlVH_VYZlwHv11w/edit?usp=sharing)
+
 This file tracks the live work queue for ADR 0001.
 
 Use this file for:
@@ -16,60 +18,39 @@ Create a new ADR only when we need a separate durable decision, not when we are 
 - Figma: [WBS Installation Wizard v1 evaluation notes](https://www.figma.com/design/GUWSDKbomRnGZiI5ZIusMl/-WBS--Installation-Wizard-v1-evaluation?node-id=0-1&t=Y8eH9VPeSd34IVSm-1) (requires access)
 - Google Sheets: [Actional digestion of notes from Figma](https://docs.google.com/spreadsheets/d/1WhroI0WnuB2AHr848sezBzHQNckSHlVH_VYZlwHv11w/edit?usp=sharing)
 
-## Current UX Review Batch
+## Current Follow-Up Memo
 
 Source: `WBS Deploy Setup Tool - UI Notes - wbs_installation_wizard_notes.csv`
 
 Not every note below is a straight implementation task. Some need copy, some need a design call, and some may overlap with broader product decisions.
 
-### Ready To Implement
+### Remaining Items
 
-- Add reveal/hide controls to password fields.
-- Update field labels so `MediaWiki` is not used where `Wikibase` or a neutral label would be clearer.
-- Restyle the `Advanced Options` disclosure affordance to use the expected left-aligned expansion caret treatment.
-- Improve host-field help text with concrete examples such as `yourwikibase.com` and `query.yourwikibase.com`.
-- Revisit spacing in the configuration form so fields breathe more and are easier to scan.
-- Change the password-removal text from "after the installation is complete" to wording that reflects the actual setup lifecycle, for example "after this setup is closed".
+- Metadata callback visibility copy needs to be defined and added to the UI.
+  - Explain what the setting means.
+  - Explain what information would be shared.
+  - Link to a place where users can read more before deciding.
+- Common DNS/domain validation errors need more specific supporting guidance.
+  - The UI should help users distinguish invalid hostname syntax from a hostname that does not resolve to the target server IP.
+  - When a hostname does not map to the target server IP, explain what that means and how a user can resolve it.
+- WBS Deploy target version selection needs product/engineering guidance.
+  - Desired direction is to default to the latest stable target.
+  - We still need a reliable mechanism for discovering or selecting the latest stable deploy ref.
+  - Keep support for an explicit pinned target, but clarify when users should choose a pinned target instead of the default.
+- Service boot progress could be more detailed.
+  - It would be helpful to show service-level progress such as waiting, container up, health check complete, or similar milestones.
+  - This is currently difficult because the web UI infers progress by matching text in setup logs, and different Docker or compose versions may report status differently.
+  - Any implementation should have a solid fallback path so missing extra status reports does not cause setup failures or confusing regressions.
 
-### Needs UX Or Product Shaping
+### Recently Resolved Or Superseded
 
-- Setup shutdown behavior needs clearer communication.
-  - If the setup service auto-closes after a fixed period, the UI should say so before and during that countdown.
-- Setup status after save should be broken into clearer steps instead of reading as a single undifferentiated process.
-  - This does not imply adopting a tabbed interface.
-- Setup progress visibility should be stronger.
-  - Consider a progress bar, step list, or similarly visible status treatment.
-- The duplicate domain help links are confusing because they open the same help content.
-  - Decide whether each field needs its own help entry or whether a single shared explanation should be presented differently.
-- The Wikibase Metadata project choice needs a clearer interaction model.
-  - The current feedback suggests this should likely be framed as an explicit checkbox-style consent/opt-in control.
-- Advanced Options help likely needs dedicated explanatory content.
-  - Users need to understand what "Advanced" means, whether changes are necessary, and what happens if they leave defaults unchanged.
-
-### Needs Copy
-
-- Metadata callback visibility choice needs user-facing copy that explains:
-  - what the setting means
-  - what information would be shared
-  - where users can read more before deciding
-- Common DNS/domain validation errors need supporting guidance.
-  - When a hostname does not map to the target server IP, the UI should explain what the error means and how a user can resolve it.
-
-### Recently Resolved
-
-- `MW_ADMIN_NAME` false blank-value issue in the web flow.
-  - Marked done in the source review notes.
-
-## Existing Bugs And Open Decisions
-
-- `MW_ADMIN_NAME` default, field placement, and preloaded-value validation
-  - `MW_ADMIN_NAME` now defaults to blank in `wikibase-release-pipeline/deploy/template.env` (it previously defaulted to `admin`).
-  - Because this setup tool currently uses that template as the source of truth for defaults, setup can proceed with an empty admin username.
-  - For current evaluation/testing, this tool should temporarily hard-code the default back to `admin`.
-  - If we keep strict alignment with upstream `template.env` and require explicit user choice, move MediaWiki admin name out of Advanced settings.
-  - Add a safeguard so values preloaded into the web form are validated on load (not only on user edits/submission), to prevent invalid pre-populated values from slipping through.
-
-- Open question/issue: WBS Deploy target version selection UX and guidance
-  - There is an open issue in how the setup tool selects which `wikibase-release-pipeline/deploy` version to install.
-  - A target can be set via environment variable, but this is not clear in the curl-based convenience entrypoint.
-  - Current guidance is unclear on when users should choose latest/default behavior vs a specific pinned target.
+- Password fields now have reveal/hide controls.
+- Field labels avoid `MediaWiki` where `Wikibase` or a neutral label is clearer.
+- `Advanced Options` is no longer part of the current setup flow, so related affordance and help-content notes are superseded.
+- Host fields now include concrete example placeholders such as `mywikibase.com` and `query.mywikibase.com`.
+- Configuration form spacing has been revisited in the current multi-step flow.
+- Final configuration copy now reflects the current setup lifecycle more directly.
+- Setup status after save now has clearer progress treatment with a progress bar, status summary, and step list.
+- The duplicate domain help links are no longer present in the current domain step.
+- The Wikibase Metadata project choice is now presented as a checkbox-style control.
+- `MW_ADMIN_NAME` false blank-value issue in the web flow is resolved.

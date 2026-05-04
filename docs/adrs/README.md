@@ -9,6 +9,8 @@ This folder stores decision records for significant product, UX, and technical c
 - [`0001-wbs-deploy-setup/technical-addendum.md`](0001-wbs-deploy-setup/technical-addendum.md) - implementation details and verification context supporting ADR 0001.
 - [`0001-wbs-deploy-setup/open-items.md`](0001-wbs-deploy-setup/open-items.md) - living UX review queue and open follow-up work for ADR 0001.
 - [`0002-wbs-deploy-setup-dokploy.md`](0002-wbs-deploy-setup-dokploy.md) - rejected Dokploy-based setup variant kept for reference.
+- [`0003-research-deploy-product-repository-proposal.md`](0003-research-deploy-product-repository-proposal.md) - decided proposal-writing work for evaluating a dedicated Deploy product repository.
+- [`0004-proposal-deploy-product-repository.md`](0004-proposal-deploy-product-repository.md) - draft proposal for moving Deploy and the setup tool into a dedicated product repository.
 
 ## Working Pattern
 
