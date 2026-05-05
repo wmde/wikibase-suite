@@ -1,6 +1,7 @@
 export type WizardStep = 0 | 1 | 2 | 3 | 4;
 
 export type FieldValidationStatus = 'neutral' | 'pending' | 'valid' | 'invalid';
+export type ExistingInstallState = 'none' | 'running' | 'previous';
 
 export type ConfigForm = {
 	MW_ADMIN_EMAIL: string;
@@ -22,12 +23,13 @@ export type ConfigResponse = {
 export type InitialSetupState = {
 	isConfigSaved: boolean;
 	isBooted: boolean;
+	isSetupStarted: boolean;
+	existingInstallState: ExistingInstallState;
 	isLocalhostSetup: boolean;
 	serverIp: string;
 };
 
-export type SetupProgressMarker = {
-	pattern: RegExp;
+export type SetupProgressEvent = {
 	progress: number;
 	summary: string;
 	startTimer?: boolean;

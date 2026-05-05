@@ -9,6 +9,7 @@ export LOCALHOST
 export LOG_PATH
 export DEPLOY_DIR
 export ENV_FILE_PATH
+export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
 export SETUP_DIR
 export RESET
@@ -20,9 +21,15 @@ source "$SCRIPTS_DIR/_logging.sh"
 
 # --- Functions ---
 
-wait_for_env_file() {
-  until [ -s "$ENV_FILE_PATH" ]; do sleep 2; done
-  status "Configuration saved."
+wait_for_launch_signal() {
+  if [[ -n "${LAUNCH_TRIGGER_PATH:-}" ]]; then
+    until [ -s "$LAUNCH_TRIGGER_PATH" ]; do sleep 2; done
+    rm -f "$LAUNCH_TRIGGER_PATH"
+  else
+    until [ -s "$ENV_FILE_PATH" ]; do sleep 2; done
+  fi
+
+  status "Configuration saved." "config_saved"
 }
 
 launch_deploy() {
@@ -40,21 +47,19 @@ launch_deploy() {
   fi
 
   if $RESET; then
-    status "Removing config/LocalSettings.php (RESET=true)"
+    status "Removing config/LocalSettings.php (RESET=true)" "reset_config_removed"
     run "rm -f config/LocalSettings.php"
 
-    status "Taking down any existing wbs-deploy services and data (RESET=true)"
+    status "Taking down any existing wbs-deploy services and data (RESET=true)" "reset_services_removed"
     run "docker compose ${compose_opts[*]} down --volumes"
   fi
 
-  status "Pulling Docker images..."
+  status "Pulling Docker images..." "images_pull_started"
   run "docker compose ${compose_opts[*]} pull"
 
-  status "Starting Docker Compose services..."
-  status "Waiting for services to start. Generally takes 2–6 minutes..."
-
+  status "Starting Docker Compose services. Generally takes 2–6 minutes..." "services_waiting"
   run "docker compose ${compose_opts[*]} up ${compose_up_opts[*]}"
-  status "Docker Compose services reported ready."
+  status "Docker Compose services reported ready." "services_ready"
 
   popd >/dev/null || return 1
 }
@@ -102,8 +107,9 @@ final_message() {
 
 # --- Execution ---
 
-wait_for_env_file
+wait_for_launch_signal
 launch_deploy
+status "Setup is complete." "setup_complete"
 final_message
 
 if $CLI && [[ -t 0 ]] && [[ -f "$ENV_FILE_PATH" ]]; then

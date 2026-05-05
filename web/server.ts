@@ -12,9 +12,12 @@ import {
 	LOG_PATH,
 	isBooted,
 	isConfigSaved,
+	isSetupStarted,
+	getExistingInstallState,
 	isLocalhostSetup,
 	getConfig,
 	saveConfigText,
+	markConfigReadyForLaunch,
 	clearLog,
 	sanitizeConfig
 } from './serverHelpers.js';
@@ -62,6 +65,8 @@ function renderSetupShell( scriptSrc: string ): string {
 	const initialState = {
 		isConfigSaved: isConfigSaved(),
 		isBooted: isBooted(),
+		isSetupStarted: isSetupStarted(),
+		existingInstallState: getExistingInstallState(),
 		isLocalhostSetup: isLocalhostSetup(),
 		serverIp: process.env.SERVER_IP || ''
 	};
@@ -100,6 +105,7 @@ app.post( '/config', async ( req, res ): Promise<void> => {
 		}
 
 		saveConfigText( configText );
+		markConfigReadyForLaunch();
 		console.log( '.env file written successfully' );
 		res.status( 200 ).json( { status: 'ok', config, configText } );
 	} catch ( err ) {

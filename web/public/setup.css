@@ -136,6 +136,16 @@ body {
   color: var(--color-inverted-fixed, #fff);
 }
 
+.wizard-progress__item.is-locked .wizard-progress__step {
+  border-color: var(--border-color-subtle, #c8ccd1);
+  background: var(--background-color-disabled-subtle, #eaecf0);
+  color: var(--color-disabled, #72777d);
+}
+
+.wizard-progress__item.is-locked:not(:last-child)::after {
+  background: var(--border-color-subtle, #c8ccd1);
+}
+
 .wizard-progress__step .cdx-icon {
   color: inherit;
 }

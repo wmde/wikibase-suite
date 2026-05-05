@@ -51,6 +51,7 @@
 					<welcome-step
 						v-else-if="currentStep === 0"
 						:disabled="configLocked"
+						:existing-install-state="initialState.existingInstallState"
 						@continue="currentStep = 1"
 					/>
 
@@ -144,15 +145,21 @@ type FormFieldName = keyof ConfigForm;
 const fallbackState: InitialSetupState = {
 	isConfigSaved: false,
 	isBooted: false,
+	isSetupStarted: false,
+	existingInstallState: 'none',
 	isLocalhostSetup: false,
 	serverIp: ''
 };
 
 const initialState = window.__SETUP_STATE__ || fallbackState;
 const logoSrc = '/Wikibase_Suite_(RGB).png';
-const currentStep = ref<WizardStep>( initialState.isConfigSaved ? 4 : 0 );
-const configLocked = ref( initialState.isConfigSaved );
-const setupComplete = ref( initialState.isBooted );
+const existingInstallIsRunning = initialState.existingInstallState === 'running';
+const existingInstallBlocksSetup = initialState.existingInstallState === 'previous';
+const initialSetupComplete = initialState.isBooted || existingInstallIsRunning;
+const initialSetupLocked = initialSetupComplete || initialState.isSetupStarted || existingInstallBlocksSetup;
+const currentStep = ref<WizardStep>( initialSetupComplete || initialState.isSetupStarted ? 4 : 0 );
+const configLocked = ref( initialSetupLocked );
+const setupComplete = ref( initialSetupComplete );
 const form = reactive<ConfigForm>( configToForm( null ) );
 const configText = ref( '' );
 const touchedFields = reactive<Record<string, boolean>>( {} );
@@ -172,13 +179,13 @@ const setupStatusLines = computed( () => setupLog.statusLines.value );
 const setupHasStatusLines = computed( () => setupLog.hasStatusLines.value );
 const setupLogText = computed( () => setupLog.logText.value );
 
-const steps = [
+const steps = computed( () => [
 	{ title: 'Welcome' },
 	{ title: 'Domain' },
 	{ title: 'Account' },
 	{ title: 'Database' },
-	{ title: 'Setup' }
-];
+	{ title: 'Setup', complete: setupComplete.value }
+] );
 
 const emailStatus = computed<FieldValidationStatus>( () => {
 	if ( !touchedFields.MW_ADMIN_EMAIL || form.MW_ADMIN_EMAIL.trim() === '' ) {
@@ -386,11 +393,7 @@ async function hydrateInitialConfig(): Promise<void> {
 		passwordValidation.validateNow( 'DB_PASS', form.DB_PASS )
 	] );
 
-	if ( initialState.isConfigSaved && !initialState.isBooted ) {
-		setupLog.setProgress( 0, 'Setup has started. Waiting for the first progress update.' );
-	}
-
-	if ( initialState.isBooted ) {
+	if ( initialSetupComplete ) {
 		await handleSetupComplete();
 	}
 }

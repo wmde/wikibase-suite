@@ -7,6 +7,8 @@ export DEPLOY_DIR
 export DEV
 export DEBUG
 export LOCALHOST
+export LAUNCH_TRIGGER_PATH
+export RESET
 export SCRIPTS_DIR
 export SETUP_DIR
 
@@ -26,6 +28,8 @@ WEB_IMAGE_NAME="${WEB_IMAGE_NAME:-wikibase/deploy-setup-webserver}"
 WEB_DIR="$SETUP_DIR/web"
 LE_DIR="$WEB_DIR/letsencrypt"
 CERTS_DIR="$WEB_DIR/certs"
+LAUNCH_TRIGGER_CONTAINER_PATH="/app/deploy/$(basename "${LAUNCH_TRIGGER_PATH:-.wbs-setup-launch-ready}")"
+EXISTING_INSTALL_STATE="${EXISTING_INSTALL_STATE:-none}"
 
 # --- Functions ---
 
@@ -86,6 +90,33 @@ remove_any_existing_setup_webserver() {
   fi
 }
 
+compose_services_are_running() {
+  pushd "$DEPLOY_DIR" >/dev/null || return 1
+
+  local compose_opts=()
+  if [ -f "docker-compose.local.yml" ]; then
+    compose_opts+=(-f docker-compose.yml -f docker-compose.local.yml)
+  fi
+
+  local running_services
+  running_services="$(docker compose "${compose_opts[@]}" ps --services --status running 2>/dev/null | sed '/^[[:space:]]*$/d' || true)"
+  popd >/dev/null || return 1
+
+  [ -n "$running_services" ]
+}
+
+detect_existing_install_state() {
+  if $RESET; then
+    echo "none"
+  elif compose_services_are_running; then
+    echo "running"
+  elif [ -f "$DEPLOY_DIR/config/LocalSettings.php" ]; then
+    echo "previous"
+  else
+    echo "none"
+  fi
+}
+
 start_setup_webserver() {
   # Ensure old container is gone before build/run
   remove_any_existing_setup_webserver
@@ -108,6 +139,8 @@ start_setup_webserver() {
       --name $SETUP_CONTAINER_NAME \
       -e SERVER_IP=$SERVER_IP \
       -e LOCALHOST=$LOCALHOST \
+      -e LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH \
+      -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
       -e DEV_SERVER=true \
       -p $SETUP_PORT:443 \
       -v $DEPLOY_DIR:/app/deploy \
@@ -121,6 +154,8 @@ start_setup_webserver() {
       --name $SETUP_CONTAINER_NAME \
       -e SERVER_IP=$SERVER_IP \
       -e LOCALHOST=$LOCALHOST \
+      -e LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH \
+      -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
       -p $SETUP_PORT:443 \
       -v $DEPLOY_DIR:/app/deploy \
       -v $CERTS_DIR:/app/certs \
@@ -143,13 +178,14 @@ start_setup_webserver() {
 
 echo
 if $DEV; then
-  echo "🔧 Starting web-based configuration wizard (dev mode with live reload)..."
+  echo "🔧 Starting web-based setup tool (dev mode with live reload)..."
 else
-  echo "🔧 Starting web-based configuration wizard..."
+  echo "🔧 Starting web-based setup tool..."
 fi
 echo
 
 debug "Starting setup page webserver container..."
+EXISTING_INSTALL_STATE="$(detect_existing_install_state)"
 
 # No need to cd; we reference absolute paths for build context and Dockerfile
 generate_cert_for_setup_webserver

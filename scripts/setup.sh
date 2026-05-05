@@ -9,8 +9,10 @@ export DEBUG
 export LOCALHOST
 export SKIP_DEPENDENCY_INSTALLS
 export SKIP_LAUNCH
+export RESET
 export DEPLOY_DIR
 export ENV_FILE_PATH
+export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
 export SETUP_DIR
 
@@ -81,13 +83,15 @@ confirm_docker_running
 if $CLI; then
   bash "$SCRIPTS_DIR/cli-config.sh"
 else
+  export LAUNCH_TRIGGER_PATH="${LAUNCH_TRIGGER_PATH:-$DEPLOY_DIR/.wbs-setup-launch-ready}"
+  rm -f "$LAUNCH_TRIGGER_PATH"
   bash "$SCRIPTS_DIR/web-config.sh"
 fi
 
 # --- Launch or exit ---
 
 if $SKIP_LAUNCH; then
-  status "SKIP_LAUNCH=true; not starting services."
+  status "SKIP_LAUNCH=true; not starting services." "launch_skipped"
   prompt_to_show_saved_config
   exit 0
 fi
@@ -101,6 +105,8 @@ if ! $CLI; then
     DEV="$DEV" \
     DEBUG="$DEBUG" \
     LOCALHOST="$LOCALHOST" \
+    LAUNCH_TRIGGER_PATH="$LAUNCH_TRIGGER_PATH" \
+    RESET="$RESET" \
     bash "$SCRIPTS_DIR/launch.sh" \
     >/dev/null 2>&1 &
 

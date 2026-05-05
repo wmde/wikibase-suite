@@ -1,11 +1,17 @@
 import { computed, ref } from 'vue';
 import {
-	BOOT_COMPLETE_REGEX,
+	DEBUG_LOG_SUFFIX_REGEX,
+	SETUP_PROGRESS_EVENTS,
 	SETUP_PROGRESS_TIMER_TICK_MS,
-	SETUP_PROGRESS_MARKERS,
 	SETUP_STATUS_LINE_LIMIT,
-	STATUS_LOG_ENTRY_REGEX
+	STATUS_CODE_SUFFIX_REGEX,
+	TIMESTAMPED_LOG_ENTRY_REGEX
 } from '../constants';
+
+type ParsedStatusLine = {
+	message: string;
+	code?: string;
+};
 
 export function useSetupLog( onComplete: () => Promise<void> | void ) {
 	const logText = ref( 'Loading logs...\n' );
@@ -42,7 +48,7 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 			const elapsed = Date.now() - progressTimerStartedAt;
 			const ratio = Math.min( 1, elapsed / durationMs );
 			const nextProgress = safeFrom + ( ( safeTarget - safeFrom ) * ratio );
-			setProgress( Math.round( nextProgress ) );
+			setProgress( nextProgress );
 
 			if ( ratio >= 1 ) {
 				stopProgressTimer();
@@ -61,17 +67,32 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 		}
 	}
 
-	function appendStatusLines( text: string ): void {
-		const nextLines = text
+	function parseStatusLines( text: string ): ParsedStatusLine[] {
+		return text
 			.split( '\n' )
-			.map( ( line ) => line.match( STATUS_LOG_ENTRY_REGEX )?.[ 1 ]?.trim() || '' )
-			.filter( Boolean );
+			.map( parseStatusLine )
+			.filter( ( line ): line is ParsedStatusLine => line !== null );
+	}
 
-		for ( const line of nextLines ) {
-			if ( statusLines.value.at( -1 ) === line ) {
+	function parseStatusLine( line: string ): ParsedStatusLine | null {
+		const message = line.match( TIMESTAMPED_LOG_ENTRY_REGEX )?.[ 1 ]?.trim();
+		if ( !message || DEBUG_LOG_SUFFIX_REGEX.test( message ) ) {
+			return null;
+		}
+
+		const code = message.match( STATUS_CODE_SUFFIX_REGEX )?.[ 1 ];
+		return {
+			message: code ? message.replace( STATUS_CODE_SUFFIX_REGEX, '' ).trim() : message,
+			code
+		};
+	}
+
+	function appendStatusLines( lines: ParsedStatusLine[] ): void {
+		for ( const line of lines ) {
+			if ( statusLines.value.at( -1 ) === line.message ) {
 				continue;
 			}
-			statusLines.value.push( line );
+			statusLines.value.push( line.message );
 		}
 
 		if ( statusLines.value.length > SETUP_STATUS_LINE_LIMIT ) {
@@ -79,8 +100,12 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 		}
 	}
 
-	function updateProgressFromLog( text: string ): void {
-		const marker = SETUP_PROGRESS_MARKERS.find( ( candidate ) => candidate.pattern.test( text ) );
+	function updateProgressFromStatusCode( code: string | undefined ): void {
+		if ( !code ) {
+			return;
+		}
+
+		const marker = SETUP_PROGRESS_EVENTS[ code ];
 		if ( marker ) {
 			if ( marker.startTimer ) {
 				startProgressTimer(
@@ -97,11 +122,14 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 	}
 
 	async function handleLogMessage( text: string ): Promise<void> {
-		appendStatusLines( text );
-		updateProgressFromLog( text );
+		const parsedStatusLines = parseStatusLines( text );
+		appendStatusLines( parsedStatusLines );
+		for ( const line of parsedStatusLines ) {
+			updateProgressFromStatusCode( line.code );
+		}
 		logText.value += text.endsWith( '\n' ) ? text : `${ text }\n`;
 
-		if ( !handledComplete && BOOT_COMPLETE_REGEX.test( text ) ) {
+		if ( !handledComplete && parsedStatusLines.some( ( line ) => line.code === 'setup_complete' ) ) {
 			handledComplete = true;
 			await onComplete();
 		}

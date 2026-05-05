@@ -1,11 +1,28 @@
 <template>
 	<section class="wizard-panel is-active">
-		<div class="wizard-panel__body wizard-panel__body--intro">
+		<div v-if="existingInstallState === 'previous'" class="wizard-panel__body wizard-panel__body--intro">
+			<header class="wizard-panel__header">
+				<h2>Setup already completed</h2>
+			</header>
+
+			<cdx-message class="setup-callout setup-callout--warning">
+				<div class="callout-heading">
+					<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
+					<div class="callout-title">Existing installation found</div>
+				</div>
+				<p>
+					This Wikibase Suite installation has already been set up. The setup tool cannot safely be
+					run again for this installation yet.
+				</p>
+			</cdx-message>
+		</div>
+
+		<div v-else class="wizard-panel__body wizard-panel__body--intro">
 			<header class="wizard-panel__header">
 				<h2>Welcome to Wikibase Suite</h2>
 				<p>
 					You're about to set up your own Wikibase instance, a platform for creating and managing
-					structured linked open data. This wizard will write your configuration and start the installation.
+					structured linked open data. This setup tool will write your configuration and start the installation.
 					It takes about 5 minutes.
 				</p>
 			</header>
@@ -44,7 +61,7 @@
 			</section>
 		</div>
 
-		<div class="wizard-actions">
+		<div v-if="existingInstallState !== 'previous'" class="wizard-actions">
 			<span></span>
 			<div class="wizard-actions__group">
 				<cdx-button action="progressive" weight="primary" :disabled="disabled" @click="emit( 'continue' )">
@@ -57,10 +74,19 @@
 
 <script setup lang="ts">
 import { CdxButton, CdxIcon, CdxMessage } from '@wikimedia/codex';
-import { cdxIconCheck, cdxIconDatabase, cdxIconGlobe, cdxIconInfoFilled, cdxIconLock } from '@wikimedia/codex-icons';
+import {
+	cdxIconAlert,
+	cdxIconCheck,
+	cdxIconDatabase,
+	cdxIconGlobe,
+	cdxIconInfoFilled,
+	cdxIconLock
+} from '@wikimedia/codex-icons';
+import type { ExistingInstallState } from '../types';
 
 defineProps<{
 	disabled: boolean;
+	existingInstallState: ExistingInstallState;
 }>();
 
 const emit = defineEmits<{

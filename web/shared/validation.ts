@@ -41,6 +41,7 @@ const SAFE_DATABASE_IDENTIFIER_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
 const SAFE_DATABASE_USER_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,79}$/;
 const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const ENV_LINE_PATTERN = /^([^#=\s]+)=(.*)$/;
+const SAFE_UNQUOTED_ENV_VALUE_PATTERN = /^[A-Za-z0-9_./:@%+=-]*$/;
 
 function normalizePassword( value: string ): string {
 	return value.trim().toLowerCase();
@@ -263,6 +264,10 @@ function serializeEnvKey( key: string ): string {
 }
 
 function serializeEnvValue( value: string ): string {
+	if ( SAFE_UNQUOTED_ENV_VALUE_PATTERN.test( value ) ) {
+		return value;
+	}
+
 	return `"${ value
 		.replace( /\\/g, '\\\\' )
 		.replace( /"/g, '\\"' )

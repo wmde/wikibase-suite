@@ -53,8 +53,9 @@ DB_PASS=LocalDevDatabasePass123!
 EOF
 
 cat > "$LOG_PATH" <<'EOF'
-2026-01-01T12:00:00Z [status] Configuration saved.
-2026-01-01T12:00:10Z [status] Waiting for services to start. Generally takes 2–6 minutes...
+2026-01-01T12:00:00Z Configuration saved. [config_saved]
+2026-01-01T12:00:10Z Starting Docker Compose services. Generally takes 2–6 minutes... [services_waiting]
+2026-01-01T12:04:00Z Setup is complete. [setup_complete]
 
 ✅ Setup is Complete!
 EOF

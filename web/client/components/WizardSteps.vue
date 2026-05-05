@@ -13,12 +13,7 @@
 			<div class="wizard-progress__topline">
 				<span class="wizard-progress__step">
 					<cdx-icon
-						v-if="locked && currentStep > index"
-						:icon="cdxIconLock"
-						size="small"
-					/>
-					<cdx-icon
-						v-else-if="currentStep > index"
+						v-if="step.complete || currentStep > index"
 						:icon="cdxIconCheck"
 						size="small"
 					/>
@@ -32,12 +27,12 @@
 
 <script setup lang="ts">
 import { CdxIcon } from '@wikimedia/codex';
-import { cdxIconCheck, cdxIconLock } from '@wikimedia/codex-icons';
+import { cdxIconCheck } from '@wikimedia/codex-icons';
 import type { WizardStep } from '../types';
 
 defineProps<{
 	currentStep: WizardStep;
 	locked: boolean;
-	steps: Array<{ title: string }>;
+	steps: Array<{ title: string; complete?: boolean }>;
 }>();
 </script>

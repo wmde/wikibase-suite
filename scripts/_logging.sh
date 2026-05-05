@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # Clean stdout, structured log:
-# - stdout: no timestamps / no [LEVEL]
-# - log   : ISO8601 timestamp + [LEVEL]
+# - stdout: no timestamps / no metadata
+# - log   : ISO8601 timestamp + message + optional trailing [code]
 # -----------------------------------------------------------------------------
 
 export LOG_PATH=${LOG_PATH:=/tmp/wbs-deploy-setup.log}
@@ -39,21 +39,27 @@ log_init() {
 # run init immediately
 log_init
 
-# status "Message..."
+# status "Message..." ["status_code"]
 # - stdout: "Message..."
-# - log   : "2025-08-12T10:00:00Z [status] Message..."
+# - log   : "2025-08-12T10:00:00Z Message... [status_code]"
 status() {
-  printf '%s [status] %s\n' "$(_timestamp)" "$*" >> "$LOG_PATH"
+  local message="$1"
+  local code="${2:-}"
+  if [ -n "$code" ]; then
+    printf '%s %s [%s]\n' "$(_timestamp)" "$message" "$code" >> "$LOG_PATH"
+  else
+    printf '%s %s\n' "$(_timestamp)" "$message" >> "$LOG_PATH"
+  fi
   if $INTERACTIVE; then
-    printf '%s\n' "$*"
+    printf '%s\n' "$message"
   fi
 }
 
 # debug "Message..."
 # - stdout: shown only if DEBUG=true (clean)
-# - log   : "2025-08-12T10:00:00Z [debug] Message..."
+# - log   : "2025-08-12T10:00:00Z Message... [debug]"
 debug() {
-  printf '%s [debug] %s\n' "$(_timestamp)" "$*" >> "$LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "$*" >> "$LOG_PATH"
   if [ "$DEBUG" = true ]; then
     printf '%s\n' "$*"
   fi
@@ -62,11 +68,11 @@ debug() {
 # run "command string"
 # Always logs. Mirrors to stdout only if INTERACTIVE && DEBUG.
 # Log format:
-#   2025-... [debug] $ command string
+#   2025-... BEGIN RUN: command string [debug]
 #   <raw command output...>
 run() {
   local cmd="$*"
-  printf '%s [debug] $ %s\n' "$(_timestamp)" "BEGIN RUN: $cmd" >> "$LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "BEGIN RUN: $cmd" >> "$LOG_PATH"
 
   if $INTERACTIVE && [ "$DEBUG" = true ]; then
     # output to screen and log
@@ -75,5 +81,6 @@ run() {
     # log only
     bash -c "$cmd" >>"$LOG_PATH" 2>&1
   fi
-  printf '%s [debug] $ %s\n' "$(_timestamp)" "END RUN" >> "$LOG_PATH"
+  printf '\n' >> "$LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "END RUN" >> "$LOG_PATH"
 }
