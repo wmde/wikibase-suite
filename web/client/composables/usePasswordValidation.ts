@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 import { PASSWORD_VALIDATION_DEBOUNCE_MS } from '../constants';
-import { validatePassword } from '../validation';
+import { validatePassword } from '../../shared/validation.ts';
 import type { FieldValidationStatus } from '../types';
 
 type PasswordFieldName = 'MW_ADMIN_PASS' | 'DB_PASS';

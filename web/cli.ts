@@ -21,11 +21,13 @@ import {
 } from './serverHelpers.js';
 import { validateSetupPassword } from './passwordPolicy.js';
 import {
-	HOST_NAME_REGEX,
+	areSetupHostsDistinct,
+	canSkipDnsValidation,
 	isValidAdminUsername,
 	isValidDatabaseName,
 	isValidDatabaseUser,
-	isValidEmailAddress
+	isValidEmailAddress,
+	isValidSetupHostname
 } from './shared/validation.js';
 
 type CliConfigInput = {
@@ -218,11 +220,11 @@ async function promptPasswordUntil( label: string ): Promise<string> {
 
 async function hostResolvesToServer( hostname: string ): Promise<boolean> {
 	const host = hostname.trim();
-	if ( !HOST_NAME_REGEX.test( host ) ) {
+	if ( !isValidSetupHostname( host, isLocalhostSetup() ) ) {
 		return false;
 	}
 
-	if ( isLocalhostSetup() && /\.test$/i.test( host ) ) {
+	if ( canSkipDnsValidation( host, isLocalhostSetup() ) ) {
 		return true;
 	}
 
@@ -260,8 +262,9 @@ async function gatherConfig(): Promise<CliConfigInput> {
 	const WDQS_PUBLIC_HOST = await promptUntil(
 		'Query Service host',
 		defaults.WDQS_PUBLIC_HOST || `query.${ WIKIBASE_PUBLIC_HOST }`,
-		hostResolvesToServer,
-		`Host must resolve to this server IP address (${ serverIp }).`,
+		async ( value ) => areSetupHostsDistinct( WIKIBASE_PUBLIC_HOST, value ) &&
+			await hostResolvesToServer( value ),
+		`Host must be different from the Wikibase host and resolve to this server IP address (${ serverIp }).`,
 		{ spinnerMessage: 'Checking DNS for Query Service host...' }
 	);
 

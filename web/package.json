@@ -1,16 +1,16 @@
 {
 	"name": "wbs-deploy-setup",
 	"description": "Wikibase Suite Deploy Setup",
-	"main": "server.js",
+	"main": "dist/server.js",
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"start": "node server.js",
+		"start": "node dist/server.js",
 		"dev:server": "tsx watch server.ts",
 		"build": "npm run typecheck:client && npm run build:client && npm run build:server",
 		"build:client": "vite build",
-		"build:server": "tsc",
-		"typecheck:client": "vue-tsc --noEmit -p tsconfig.client.json"
+		"build:server": "tsc -p tsconfig.server.json",
+		"typecheck:client": "vue-tsc --noEmit -p tsconfig.json"
 	},
 	"dependencies": {
 		"@clack/prompts": "^1.2.0",

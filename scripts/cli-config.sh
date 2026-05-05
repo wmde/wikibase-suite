@@ -47,7 +47,7 @@ run_cli_config() {
     -v "$DEPLOY_DIR:/app/deploy" \
     -v "$LOG_PATH:/app/setup.log" \
     "$SETUP_IMAGE_NAME" \
-    node cli.js
+    node dist/cli.js
 }
 
 echo

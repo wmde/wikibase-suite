@@ -9,6 +9,7 @@ This folder stores decision records for significant product, UX, and technical c
 - [`0002-wbs-deploy-setup-dokploy.md`](0002-wbs-deploy-setup-dokploy.md) - rejected Dokploy-based setup variant kept for reference.
 - [`0003-research-deploy-product-repository-proposal.md`](0003-research-deploy-product-repository-proposal.md) - decided proposal-writing work for evaluating a dedicated Deploy product repository.
 - [`0004-proposal-deploy-product-repository.md`](0004-proposal-deploy-product-repository.md) - draft proposal for moving Deploy and the setup tool into a dedicated product repository.
+- [`0005-existing-config-reset-and-upgrade-workflow.md`](0005-existing-config-reset-and-upgrade-workflow.md) - proposed future workflow for validating existing configuration, reset, backup, and major upgrades.
 
 ## Working Pattern
 

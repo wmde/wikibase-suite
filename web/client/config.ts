@@ -1,5 +1,12 @@
 import { DEFAULT_FORM } from './constants';
 import type { ConfigForm } from './types';
+import type { SetupConfigValidationIssue } from '../shared/validation.ts';
+
+export class SaveConfigError extends Error {
+	constructor( public readonly details: string[] = [] ) {
+		super( 'Failed to save configuration.' );
+	}
+}
 
 export function deriveWdqsHost( wikibaseHost: string ): string {
 	return wikibaseHost.trim() ? `query.${ wikibaseHost.trim() }` : '';
@@ -43,7 +50,18 @@ export async function saveConfig( form: ConfigForm ): Promise<{ config: Record<s
 	} );
 
 	if ( !response.ok ) {
-		throw new Error( `Failed to save configuration: HTTP ${ response.status }` );
+		let details: string[] = [];
+		try {
+			const body = await response.json();
+			if ( Array.isArray( body?.errors ) ) {
+				details = body.errors
+					.map( ( issue: SetupConfigValidationIssue ) => issue.message )
+					.filter( ( message: unknown ): message is string => typeof message === 'string' && message !== '' );
+			}
+		} catch {
+			// The setup screen can still show the generic recovery message.
+		}
+		throw new SaveConfigError( details.length ? details : [ `HTTP ${ response.status }` ] );
 	}
 
 	return await response.json();

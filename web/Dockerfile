@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json tsconfig.json tsconfig.client.json vite.config.ts ./
+COPY package.json package-lock.json tsconfig.json tsconfig.server.json vite.config.ts index.html ./
 COPY client ./client
 COPY public ./public
 COPY shared ./shared
@@ -16,4 +16,4 @@ COPY serverHelpers.ts ./serverHelpers.ts
 RUN apk add --no-cache bash
 RUN npm ci && npm run build
 
-CMD ["node", "server.js"]
+CMD ["node", "dist/server.js"]

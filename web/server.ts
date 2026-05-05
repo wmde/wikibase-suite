@@ -7,6 +7,7 @@ import readline from 'readline';
 import { fileURLToPath } from 'url';
 import { createLogStreamer } from './logStreamer.js';
 import { validateSetupPassword } from './passwordPolicy.js';
+import { validateSetupConfig } from './shared/validation.js';
 import {
 	LOG_PATH,
 	isBooted,
@@ -19,7 +20,7 @@ import {
 } from './serverHelpers.js';
 
 const fileName = fileURLToPath( import.meta.url );
-const dirName = dirname( fileName );
+const moduleDir = dirname( fileName );
 
 // Constants
 const SSL_CERT_KEY_PATH = '/app/certs/key.pem';
@@ -27,17 +28,19 @@ const SSL_CERT_PATH = '/app/certs/cert.pem';
 // 10 minutes
 const AUTO_FINALIZE_TIMEOUT_MS = 10 * 60 * 1000;
 const DEV_SERVER = process.env.DEV_SERVER === 'true';
+const APP_ROOT = DEV_SERVER ? moduleDir : dirname( moduleDir );
+const INDEX_TEMPLATE_PATH = join( APP_ROOT, 'index.html' );
 
 // Express setup
 const app = express();
-app.use( express.static( join( dirName, 'public' ) ) );
+app.use( express.static( join( APP_ROOT, 'public' ) ) );
 app.use(
 	'/codex-assets',
-	express.static( join( dirName, 'node_modules', '@wikimedia', 'codex', 'dist' ) )
+	express.static( join( APP_ROOT, 'node_modules', '@wikimedia', 'codex', 'dist' ) )
 );
 app.use(
 	'/codex-icons',
-	express.static( join( dirName, 'node_modules', '@wikimedia', 'codex-icons', 'dist', 'images' ) )
+	express.static( join( APP_ROOT, 'node_modules', '@wikimedia', 'codex-icons', 'dist', 'images' ) )
 );
 app.use( express.json() );
 
@@ -45,6 +48,14 @@ const logChannel = createChannel();
 
 function escapeJsonForHtml( value: unknown ): string {
 	return JSON.stringify( value ).replace( /</g, '\\u003c' );
+}
+
+function escapeHtmlAttribute( value: string ): string {
+	return value
+		.replace( /&/g, '&amp;' )
+		.replace( /"/g, '&quot;' )
+		.replace( /</g, '&lt;' )
+		.replace( />/g, '&gt;' );
 }
 
 function renderSetupShell( scriptSrc: string ): string {
@@ -55,21 +66,9 @@ function renderSetupShell( scriptSrc: string ): string {
 		serverIp: process.env.SERVER_IP || ''
 	};
 
-	return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Wikibase Suite Deploy Setup</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/codex-assets/codex.style.css" />
-  <link rel="stylesheet" href="/setup.css" />
-</head>
-<body>
-  <div id="app"></div>
-  <script>window.__SETUP_STATE__ = ${ escapeJsonForHtml( initialState ) };</script>
-  <script type="module" src="${ scriptSrc }"></script>
-</body>
-</html>`;
+	return readFileSync( INDEX_TEMPLATE_PATH, 'utf8' )
+		.replace( '%SETUP_STATE%', escapeJsonForHtml( initialState ) )
+		.replace( '%SCRIPT_SRC%', escapeHtmlAttribute( scriptSrc ) );
 }
 
 // create and start the log streamer
@@ -85,20 +84,21 @@ app.get( '/log/stream', async ( req, res ) => {
 
 app.post( '/config', async ( req, res ): Promise<void> => {
 	try {
-		const adminPasswordValidation = validateSetupPassword( String( req.body.MW_ADMIN_PASS ?? '' ) );
-		const databasePasswordValidation = validateSetupPassword( String( req.body.DB_PASS ?? '' ) );
-		if ( !adminPasswordValidation.valid || !databasePasswordValidation.valid ) {
+		const { config, configText } = getConfig( req.body );
+		const validationIssues = validateSetupConfig( config, {
+			isLocalhostSetup: isLocalhostSetup(),
+			passwordValidator: validateSetupPassword
+		} );
+
+		if ( validationIssues.length ) {
 			res.status( 400 ).json( {
 				status: 'invalid',
-				errors: {
-					MW_ADMIN_PASS: adminPasswordValidation.valid ? undefined : adminPasswordValidation.reason,
-					DB_PASS: databasePasswordValidation.valid ? undefined : databasePasswordValidation.reason
-				}
+				message: 'Configuration did not pass final validation.',
+				errors: validationIssues
 			} );
 			return;
 		}
 
-		const { config, configText } = getConfig( req.body );
 		saveConfigText( configText );
 		console.log( '.env file written successfully' );
 		res.status( 200 ).json( { status: 'ok', config, configText } );
@@ -158,7 +158,7 @@ const httpsServer = https.createServer( credentials, app );
 if ( DEV_SERVER ) {
 	const { createServer: createViteServer } = await import( 'vite' );
 	const vite = await createViteServer( {
-		root: dirName,
+		root: APP_ROOT,
 		appType: 'custom',
 		server: {
 			middlewareMode: true,

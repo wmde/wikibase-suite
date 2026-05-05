@@ -224,6 +224,23 @@ body {
   background: var(--background-color-warning-subtle, #fff3d6);
 }
 
+.setup-callout--error {
+  border-left-color: var(--border-color-error, #bf3c2c);
+  background: var(--background-color-error-subtle, #fee7e6);
+}
+
+.final-save-error {
+  margin-bottom: 24px;
+}
+
+.final-save-error__details {
+  margin: 10px 0 0;
+  padding-left: 1.25rem;
+  color: var(--color-base, #202122);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .intro-callout .cdx-message__icon,
 .dns-help-inline .cdx-message__icon,
 .setup-callout .cdx-message__icon,

@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"rootDir": ".",
+		"outDir": "dist"
+	},
+	"exclude": ["node_modules", "client", "dist", "public/assets", "vite.config.ts"],
+	"include": ["cli.ts", "server.ts", "serverHelpers.ts", "logStreamer.ts", "passwordPolicy.ts", "shared/**/*.ts"]
+}

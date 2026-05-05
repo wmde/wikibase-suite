@@ -19,12 +19,26 @@
 			</section>
 
 			<section class="surface-card wizard-card">
+				<cdx-message v-if="saveErrorMessage" class="setup-callout setup-callout--error final-save-error">
+					<div class="callout-heading">
+						<div class="callout-title">Configuration could not be saved</div>
+					</div>
+					<p class="setup-callout__text">
+						The final validation check found a problem before the setup file was written. Try starting over.
+						If this keeps happening, contact Wikibase Suite support.
+					</p>
+					<ul v-if="saveErrorDetails.length" class="final-save-error__details">
+						<li v-for="detail in saveErrorDetails" :key="detail">
+							{{ detail }}
+						</li>
+					</ul>
+				</cdx-message>
 				<form @submit.prevent>
 					<basics-step
 						v-if="currentStep === 1"
 						:form="form"
 						:server-ip="initialState.serverIp"
-						:host-statuses="hostValidation.statuses"
+						:host-statuses="displayedHostStatuses"
 						:can-continue="domainReady"
 						:disabled="configLocked"
 						@update-field="updateField"
@@ -96,18 +110,21 @@
 </template>
 
 <script setup lang="ts">
+import { CdxMessage } from '@wikimedia/codex';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { HOST_NAME_REGEX, HOST_VALIDATION_POLL_MS } from './constants';
-import { configToForm, deriveWdqsHost, fetchConfig, saveConfig } from './config';
+import { HOST_VALIDATION_POLL_MS } from './constants';
+import { SaveConfigError, configToForm, deriveWdqsHost, fetchConfig, saveConfig } from './config';
 import { useHostValidation } from './composables/useHostValidation';
 import { usePasswordValidation } from './composables/usePasswordValidation';
 import { useSetupLog } from './composables/useSetupLog';
 import {
+	areSetupHostsDistinct,
 	isValidAdminUsername,
 	isValidDatabaseName,
 	isValidDatabaseUser,
-	isValidEmailAddress
-} from './validation';
+	isValidEmailAddress,
+	isValidSetupHostname
+} from '../shared/validation.ts';
 import type { ConfigForm, FieldValidationStatus, InitialSetupState, WizardStep } from './types';
 import AccountStep from './components/AccountStep.vue';
 import BasicsStep from './components/BasicsStep.vue';
@@ -142,9 +159,11 @@ const touchedFields = reactive<Record<string, boolean>>( {} );
 const dnsHelpOpen = ref( false );
 const logOpen = ref( false );
 const wdqsDefaulted = ref( true );
+const saveErrorMessage = ref( '' );
+const saveErrorDetails = ref<string[]>( [] );
 let pollTimer: number | undefined;
 
-const hostValidation = useHostValidation( initialState.serverIp );
+const hostValidation = useHostValidation( initialState.serverIp, initialState.isLocalhostSetup );
 const passwordValidation = usePasswordValidation();
 const setupLog = useSetupLog( handleSetupComplete );
 const setupProgress = computed( () => setupLog.progress.value );
@@ -186,9 +205,19 @@ const databaseTextStatuses = computed<Record<DatabaseTextFieldName, FieldValidat
 	DB_USER: preferenceTextStatuses.value.DB_USER
 } ) );
 
+const displayedHostStatuses = computed<Record<HostFieldName, FieldValidationStatus>>( () => ( {
+	WIKIBASE_PUBLIC_HOST: hostValidation.statuses.WIKIBASE_PUBLIC_HOST,
+	WDQS_PUBLIC_HOST: !areSetupHostsDistinct( form.WIKIBASE_PUBLIC_HOST, form.WDQS_PUBLIC_HOST ) &&
+		hostValidation.statuses.WIKIBASE_PUBLIC_HOST === 'valid' &&
+		hostValidation.statuses.WDQS_PUBLIC_HOST === 'valid' ?
+		'invalid' :
+		hostValidation.statuses.WDQS_PUBLIC_HOST
+} ) );
+
 const domainReady = computed( () => (
 	hostValidation.statuses.WIKIBASE_PUBLIC_HOST === 'valid' &&
-	hostValidation.statuses.WDQS_PUBLIC_HOST === 'valid'
+	hostValidation.statuses.WDQS_PUBLIC_HOST === 'valid' &&
+	areSetupHostsDistinct( form.WIKIBASE_PUBLIC_HOST, form.WDQS_PUBLIC_HOST )
 ) );
 
 const accountReady = computed( () => (
@@ -231,6 +260,7 @@ function touchField( name: FormFieldName ): void {
 }
 
 function updateField( name: FormFieldName, value: string ): void {
+	clearSaveError();
 	form[ name ] = value as never;
 
 	if ( name === 'WIKIBASE_PUBLIC_HOST' ) {
@@ -283,6 +313,7 @@ async function continueToDatabase(): Promise<void> {
 }
 
 async function startSetup(): Promise<void> {
+	clearSaveError();
 	touchField( 'MW_ADMIN_EMAIL' );
 	touchField( 'WIKIBASE_PUBLIC_HOST' );
 	touchField( 'WDQS_PUBLIC_HOST' );
@@ -319,8 +350,14 @@ async function startSetup(): Promise<void> {
 		setupLog.resetForRun();
 	} catch ( error ) {
 		console.error( error );
-		alert( 'Failed to save the environment. See the browser console for details.' );
+		saveErrorMessage.value = 'Configuration could not be saved';
+		saveErrorDetails.value = error instanceof SaveConfigError ? error.details : [];
 	}
+}
+
+function clearSaveError(): void {
+	saveErrorMessage.value = '';
+	saveErrorDetails.value = [];
 }
 
 async function handleSetupComplete(): Promise<void> {
@@ -366,7 +403,10 @@ function startHostValidationPolling(): void {
 
 		( [ 'WIKIBASE_PUBLIC_HOST', 'WDQS_PUBLIC_HOST' ] as HostFieldName[] ).forEach( ( name ) => {
 			const value = form[ name ].trim();
-			if ( !value || !HOST_NAME_REGEX.test( value ) || hostValidation.statuses[ name ] === 'valid' ) {
+			if ( !value ||
+				!isValidSetupHostname( value, initialState.isLocalhostSetup ) ||
+				hostValidation.statuses[ name ] === 'valid'
+			) {
 				return;
 			}
 			void hostValidation.validateNow( name, value );
