@@ -82,10 +82,11 @@
 		<div class="wizard-actions">
 			<span></span>
 			<div class="wizard-actions__group">
-				<cdx-button weight="quiet" :disabled="disabled" @click="emit( 'back' )">
+				<cdx-button type="button" weight="quiet" :disabled="disabled" @click="emit( 'back' )">
 					Back
 				</cdx-button>
 				<cdx-button
+					type="button"
 					action="progressive"
 					weight="primary"
 					:disabled="disabled || !canContinue"

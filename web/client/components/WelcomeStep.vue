@@ -64,7 +64,7 @@
 		<div v-if="existingInstallState !== 'previous'" class="wizard-actions">
 			<span></span>
 			<div class="wizard-actions__group">
-				<cdx-button action="progressive" weight="primary" :disabled="disabled" @click="emit( 'continue' )">
+				<cdx-button type="button" action="progressive" weight="primary" :disabled="disabled" @click="emit( 'continue' )">
 					Get started
 				</cdx-button>
 			</div>

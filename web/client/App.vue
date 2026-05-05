@@ -33,7 +33,8 @@
 						</li>
 					</ul>
 				</cdx-message>
-				<form @submit.prevent>
+				<form @submit.prevent="submitCurrentStep">
+					<button class="form-submit-proxy" type="submit" aria-hidden="true" tabindex="-1"></button>
 					<basics-step
 						v-if="currentStep === 1"
 						:form="form"
@@ -359,6 +360,22 @@ async function startSetup(): Promise<void> {
 		console.error( error );
 		saveErrorMessage.value = 'Configuration could not be saved';
 		saveErrorDetails.value = error instanceof SaveConfigError ? error.details : [];
+	}
+}
+
+function submitCurrentStep(): void {
+	if ( configLocked.value ) {
+		return;
+	}
+
+	if ( currentStep.value === 0 && initialState.existingInstallState !== 'previous' ) {
+		currentStep.value = 1;
+	} else if ( currentStep.value === 1 ) {
+		void continueToAccount();
+	} else if ( currentStep.value === 2 ) {
+		void continueToDatabase();
+	} else if ( currentStep.value === 3 ) {
+		void startSetup();
 	}
 }
 
