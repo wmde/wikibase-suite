@@ -28,7 +28,7 @@ export type SetupConfigValidationOptions = {
 	passwordValidator?: ( value: string ) => ValidationResult;
 };
 
-export const EMAIL_ADDRESS_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export const EMAIL_ADDRESS_REGEX = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/;
 export const HOST_NAME_REGEX = /^(localhost|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
 
 const COMMON_PASSWORD_OVERRIDES = new Set( [
