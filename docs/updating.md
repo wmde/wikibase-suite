@@ -2,23 +2,23 @@
 
 WBS uses [semantic versioning](https://semver.org/spec/v2.0.0.html). WBS Deploy and each WBS image have individual version numbers.
 
-WBS Deploy always references the latest minor and patch releases of the compatible WBS images' major versions using the Docker images' major version tag. For example, WBS Deploy 2.0.1 might reference `wikibase/wikibase:3`, a tag that always points to the latest image Wikibase 3.x.x image.
+WBS Deploy references the latest minor and patch releases of compatible WBS image major versions using Docker image major-version tags. For example, WBS Deploy 2.0.1 might reference `wikibase/wikibase:3`, a tag that points to the latest Wikibase 3.x.x image.
 
 ## Minor and patch updates for WBS images
 
-Because WBS Deploy always references the latest minor and patch releases of compatible WBS images, non-breaking changes (including security updates) can be pulled at any time.
+Because WBS Deploy references the latest minor and patch releases of compatible WBS images, non-breaking changes, including security updates, can be pulled at any time.
 
-This is always safe to do. Simply run:
+For a production instance, take a backup first if you need a rollback point. Then run:
 
 ```sh
 docker compose down
 docker compose pull
-docker compose up
+docker compose up -d
 ```
 
 You can also choose to always pull WBS image updates when starting the stack. See [Managing updates](#managing-updates).
 
-If you installed User Defined Extensions in `config/extensions`, they might have updates too. Make sure to update them regularly too. See [User Defined Extension Docs](../config/extensions/README.md) for more information.
+If you installed user-defined extensions in `config/extensions`, update those regularly too. See [User-defined extension docs](../config/extensions/README.md) for more information.
 
 ## Minor and patch updates for WBS Deploy
 
@@ -37,15 +37,15 @@ Major version upgrades are performed by updating WBS Deploy's major version. Thi
 
 WBS only supports updating from one major version to the next version in sequence. In order to upgrade from 1.x.x to 3.x.x, you must first upgrade from 1.x.x to 2.x.x and then to 3.x.x.
 
-Major upgrades use the data-preserving reset procedure in [Resetting or removing an instance](./resetting-and-removing.md). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS Deploy tag when you reach its "Update setup values" step.
+Major upgrades use the data-preserving reset procedure in [Resetting an instance](./resetting-and-removing.md#resetting-an-instance). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS Deploy tag when you reach its "Update setup values" step.
 
 > 💡 If you made changes to `docker-compose.yml`, merge them as you see fit.
 
-Look for any additions or changes noted in `template.env` that you may need to apply to your `.env` file.
+Look for any new required values in `template.env` that you may need to add to your `.env` file.
 
-Note: With the exception of `METADATA_CALLBACK`, you should not change existing `.env` values, they are initial setup values and changing them from initial values can break your instance. `METADATA_CALLBACK` is the exception: it may be changed after initial setup and takes effect after restarting the services.
+Note: With the exception of `METADATA_CALLBACK`, do not change existing `.env` values during an upgrade. They are setup values, and changing them while preserving existing data can break your instance. `METADATA_CALLBACK` may be changed after initial setup and takes effect after restarting the services.
 
-Before the final start in the reset procedure, apply any relevant version-specific notes below and update any User Defined Extensions installed in `config/extensions`.
+Before the final start in the reset procedure, apply any relevant version-specific notes below and update any user-defined extensions installed in `config/extensions`.
 
 ### Version-specific notes
 
@@ -95,12 +95,12 @@ No Wikibase-specific migrations are necessary.
 You can automatically pull minor and patch updates for WBS images by starting the stack with:
 
 ```sh
-docker compose up --pull always
+docker compose up -d --pull always
 ```
 
 You can run that command manually, or schedule it with a systemd timer, cron job, or similar.
 
-This only covers minor and patch updates for the WBS images referenced by your current `docker-compose.yml`. It does not update your WBS Deploy git checkout, apply major upgrades, or update User Defined Extensions.
+This only covers minor and patch updates for the WBS images referenced by your current `docker-compose.yml`. It does not update your WBS Deploy git checkout, apply major upgrades, or update user-defined extensions.
 
 ## Downgrades
 

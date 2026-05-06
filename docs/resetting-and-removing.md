@@ -4,6 +4,9 @@ Resetting an instance deletes generated state so WBS Deploy can run MediaWiki se
 
 The backup step is optional if you are resetting a failed initial installation or otherwise do not want to keep existing data or local configuration changes.
 
+> [!WARNING]
+> If you are preserving existing data, do not change `DB_NAME`, `DB_USER`, or `DB_PASS` during reset unless you also know how to migrate the matching MariaDB credentials manually. The restored database volume keeps the old database credentials.
+
 ## 1. Back up data and configuration
 
 If you want to keep wiki data, uploaded files, query data, certificates, or QuickStatements data, follow [Back up your data](./backup-and-restore.md#back-up-your-data).
@@ -32,7 +35,7 @@ This tells the stack to run setup again using the current `.env` values and imag
 
 ## 3. Update setup values
 
-Make any needed changes to `.env` before starting the stack again.
+Make any needed changes to `.env` before starting the stack again. If you are restoring data from a backup, keep the database values aligned with the backed-up database volume.
 
 If you are resetting as part of a major version upgrade, switch to the new WBS Deploy version and pull the updated images before the next start:
 
@@ -66,19 +69,19 @@ If you backed up Docker volumes in step 1, follow [Restore from a backup](./back
 
 Skip this step if you are intentionally starting with empty data.
 
-## 6. Start the reset instance
+## 6. Start the instance again
 
 Start the stack again:
 
 ```sh
-docker compose up
+docker compose up -d
 ```
 
 ## Removing an instance completely
 
 If you want to throw away the instance and all of its data, skip the backup step unless there is anything you want to keep. Then follow step 2 above and skip the remaining reset steps.
 
-Removing the `traefik-letsencrypt-data` volume will request a new certificate from LetsEncrypt on the next launch of your instance. Certificate generation on LetsEncrypt is [rate-limited](https://letsencrypt.org/docs/rate-limits/); eventually you may be blocked from generating new certificates **for multiple days**. To avoid that outcome, change to the LetsEncrypt staging server by appending the following line to the `traefik` `command` stanza of your `docker-compose.yml` file:
+Removing the `traefik-letsencrypt-data` volume will request a new certificate from Let's Encrypt on the next launch of your instance. Certificate generation on Let's Encrypt is [rate-limited](https://letsencrypt.org/docs/rate-limits/); eventually you may be blocked from generating new certificates **for multiple days**. To avoid that outcome, change to the Let's Encrypt staging server by appending the following line to the `traefik` `command` stanza of your `docker-compose.yml` file:
 
 ```yml
 --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory

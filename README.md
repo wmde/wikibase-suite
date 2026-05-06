@@ -1,8 +1,8 @@
 # Wikibase Suite Deploy
 
-Wikibase Suite (WBS) Deploy is a containerized, production-ready [Wikibase](https://wikiba.se) system that allows you to self-host a knowledge graph similar to [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page). 
+Wikibase Suite (WBS) Deploy is a containerized [Wikibase](https://wikiba.se) system that allows you to self-host a knowledge graph similar to [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page).
 
-This installation guide walks you through how to set up a production-ready Wikibase. This guide isn't for hosting Wikibase locally.
+This installation guide walks you through how to set up Wikibase Suite on an internet-reachable server. This guide is not for hosting Wikibase on your local computer.
 
 WBS Deploy consists of the following services:
 
@@ -13,13 +13,13 @@ WBS Deploy consists of the following services:
 - **[WDQS](https://hub.docker.com/r/wikibase/wdqs):** Wikidata Query Service to process SPARQL queries.
 - **[WDQS Frontend](https://hub.docker.com/r/wikibase/wdqs-frontend)** Web front end for SPARQL queries.
 - **[WDQS Updater](https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#runUpdate.sh):** Keeps the WDQS data in sync with Wikibase.
-- **[Quickstatements](https://hub.docker.com/r/wikibase/quickstatements):** A web-based tool to import and manipulate large amounts of data.
+- **[QuickStatements](https://hub.docker.com/r/wikibase/quickstatements):** A web-based tool to import and manipulate large amounts of data.
 - **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
 
 The service orchestration is implemented using Docker Compose V2.
 
 > [!NOTE]
-> This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase). This document presumes familiarity with basic Linux administration tasks and with [Docker](https://docs.docker.com/get-started/) and [Docker Compose](https://docs.docker.com/compose/).
+> This document is for people wanting to self-host the full Wikibase Suite using Wikibase Suite Deploy. If you are looking for individual WBS images, head over to [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase). You will need to run commands on a Linux server, but the steps below include the Docker Compose commands you need for the normal install path.
 
 ### Index
 - [Installation](#installation)
@@ -35,16 +35,20 @@ The service orchestration is implemented using Docker Compose V2.
 
 ### 1. Provision a VPS
 
-Start by provisioning a VPS or cloud server for your Wikibase Suite instance. Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
+Start by provisioning a Linux VPS or cloud server for your Wikibase Suite instance. Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
 - [Hetzner](https://docs.hetzner.com/cloud/servers/getting-started/creating-a-server/)
 - [DigitalOcean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
 - [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
 - [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
 
+> [!IMPORTANT]
+> WBS Deploy is intended to run on a server, not on your laptop or desktop. The server must be reachable from the public internet so DNS and HTTPS certificate setup can succeed.
+
 The minimum requirements for your server are as follows:
-- 64-bit x86 architecture (`amd64` / `x86_64`)
+- 64-bit x86 architecture (`amd64` / `x86_64`); ARM servers are not currently supported by the published WBS images
 - 8 GB RAM
-- 4 GB free disk space
+- 20 GB free disk space to start, with more needed as your wiki data grows
+- inbound HTTP and HTTPS traffic allowed on ports 80 and 443
 
 ---
 
@@ -66,14 +70,14 @@ In your DNS provider's control panel, create two `A` records, one for each hostn
 
 Most bare VPS instances do not have current versions of Docker, Docker Compose, or git installed. Before continuing, install these dependencies on your server:
 
-- Install Docker 22.0 or greater, including the Docker Compose plugin 2.10 or greater: [installation documentation](https://docs.docker.com/engine/install/)
+- Install Docker Engine 22.0 or greater, including the Docker Compose plugin 2.10 or greater: [installation documentation](https://docs.docker.com/engine/install/)
 - Install git: [installation documentation](https://git-scm.com/install/)
 
 ---
 
 ### 4. Download WBS Deploy
 
-Check out the files from Github, then change to the subdirectory `deploy`.
+Check out the files from GitHub, then change to the subdirectory `deploy`.
 
 ```sh
 git clone https://github.com/wmde/wikibase-release-pipeline
@@ -135,7 +139,7 @@ Run the following command from within the `wikibase-release-pipeline/deploy` dir
 docker compose up -d
 ```
 
-The first start may take a couple of minutes. You can check the status of the stack by running `docker ps` from another terminal. When your WBS Deploy instance is ready, the `wbs-deploy-wikibase-1` container will be marked `healthy`.
+The first start may take a couple of minutes. You can check the status of the stack by running `docker compose ps` from another terminal. When your WBS Deploy instance is ready, the `wikibase` service will be marked `healthy`.
 
 You can now access your services using the hostnames you set in `.env`:
 
@@ -145,16 +149,22 @@ You can now access your services using the hostnames you set in `.env`:
 - QuickStatements: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements`
 
 > [!NOTE]
-> If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. Should you run into some issues in this step, make sure to [reset the instance](./docs/resetting-and-removing.md) after you fix the error.
+> If anything goes wrong, run `docker compose logs wikibase` to see the Wikibase startup logs. If the problem was caused by incorrect `.env` values, fix the values and then follow [Resetting an instance](./docs/resetting-and-removing.md#resetting-an-instance) before starting again.
 
 ---
 
-### 7. Stopping
+### 7. Stopping and restarting
 
-To stop Wikibase, run:
+To stop Wikibase Suite without deleting data, run:
 
 ```sh
-docker compose stop
+docker compose down
+```
+
+To restart it, run:
+
+```sh
+docker compose up -d
 ```
 
 ## Help and support

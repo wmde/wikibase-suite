@@ -13,11 +13,11 @@ The presence of `config/LocalSettings.php` controls whether WBS Deploy starts fr
 
 This is why changing `.env` and restarting is not a supported way to reconfigure an existing setup. With the exception of `METADATA_CALLBACK`, `.env` values are first-start inputs that were already written into `LocalSettings.php`, the database volume, or other generated state.
 
-If you need to reset, follow [Resetting or removing an instance](./resetting-and-removing.md). For a major version upgrade, follow the [major upgrade procedure](./updating.md#major-upgrades). Always keep a backup of your old `LocalSettings.php`, and copy local customizations into the file created during reset rather than restoring the old file wholesale.
+If you need to reset, follow [Resetting an instance](./resetting-and-removing.md#resetting-an-instance). For a major version upgrade, follow the [major upgrade procedure](./updating.md#major-upgrades). Always keep a backup of your old `LocalSettings.php`, and copy local customizations into the file created during reset rather than restoring the old file wholesale.
 
 ## `config/wikibase-php.ini`
 
-This is Wikibase's `php.ini` override file, a good place for tuning PHP configuration values. It gets loaded by the Mediawiki Wikibase web server's PHP interpreter.
+This is Wikibase's `php.ini` override file, a good place for tuning PHP configuration values. It gets loaded by the MediaWiki Wikibase web server's PHP interpreter.
 
 ## `config/wdqs-frontend-config.json`
 
@@ -31,7 +31,7 @@ Docker Compose automatically reads `docker-compose.override.yml` when you run th
 
 ```sh
 docker compose down
-docker compose up
+docker compose up -d
 ```
 
 This way, your changes are kept separate from the original WBS Deploy code. If you use a different override filename, pass both files explicitly with `-f`.
