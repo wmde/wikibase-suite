@@ -23,60 +23,55 @@ The service orchestration is implemented using Docker Compose V2.
 
 ### Index
 - [Installation](#installation)
-  - [Requirements](#1-requirements)
-  - [Setup](#2-setup)
-  - [Initial Configuration](#3-initial-configuration)
-  - [Editing environment variables](#4-editing-environment-variables)
-  - [Starting instance](#5-starting-wikibase)
-  - [Stopping instance](#6-stopping)
-  - [Resetting the configuration](#resetting-the-configuration)
-- [Call Back](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect)
-- [Updating and Versioning](./1-updating-and-versioning.md)
-- [Advanced Configuration](./2-advanced-configuration.md)
-- [Managing your data](./3-manage-your-data.md)
-- [Frequently Asked Questions](./4-FAQs.md)
-- [Removing Wikibase Suite Completely with all its Data](./5-removing-wikibase.md)
-- [WDQS](./6-wdqs.md)
+- [Updating](./docs/updating.md)
+- [Backup and restore](./docs/backup-and-restore.md)
+- [Resetting or removing an instance](./docs/resetting-and-removing.md)
+- [Advanced configuration](./docs/advanced-configuration.md)
+- [Help and support](#help-and-support)
 
 ---
 
 ## Installation
 
-### 1. Requirements
+### 1. Provision a VPS
 
-#### Hardware
-
-Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
+Start by provisioning a VPS or cloud server for your Wikibase Suite instance. Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
 - [Hetzner](https://docs.hetzner.com/cloud/servers/getting-started/creating-a-server/)
 - [DigitalOcean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
 - [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
 - [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
 
-The minimum requirements for your server are as follows: 
-- Network connection with a public IP address
-- x86_64 (AMD64) architecture
+The minimum requirements for your server are as follows:
+- 64-bit x86 architecture (`amd64` / `x86_64`)
 - 8 GB RAM
 - 4 GB free disk space
 
-#### Software
+---
 
-- Docker 22.0 or greater ([installation documentation](https://docs.docker.com/engine/install/ubuntu/#installation-methods))
-- Docker Compose 2.10 or greater ([installation documentation](https://docs.docker.com/compose/install/))
-- [git](https://git-scm.com/install/) 
+### 2. Prepare domain names
 
-#### Domain names
+You need a domain you own or control, and access to that domain provider's DNS settings.
 
-You'll need to configure two DNS records with fully qualified domain names that resolve to your server's IP address, one for Wikibase itself and one for the query service (WDQS). Many Wikibase users configure the query service as a subdomain of the main address:
+Choose two hostnames for your Wikibase Suite services: one for Wikibase itself and one for the query service (WDQS). Many Wikibase users configure the query service as a subdomain of the main address.
 
 Examples:
-- Wikibase: "yourdomain.example"
-- WDQS: "query.yourdomain.example"
+- Wikibase: `yourdomain.example`
+- WDQS: `query.yourdomain.example`
+
+In your DNS provider's control panel, create two `A` records, one for each hostname. Point both records to your server's IP address. DNS record changes may take a few minutes to propagate.
 
 ---
 
-### 2. Setup
+### 3. Install dependencies
 
-#### Download WBS Deploy
+Most bare VPS instances do not have current versions of Docker, Docker Compose, or git installed. Before continuing, install these dependencies on your server:
+
+- Install Docker 22.0 or greater, including the Docker Compose plugin 2.10 or greater: [installation documentation](https://docs.docker.com/engine/install/)
+- Install git: [installation documentation](https://git-scm.com/install/)
+
+---
+
+### 4. Download WBS Deploy
 
 Check out the files from Github, then change to the subdirectory `deploy`.
 
@@ -87,7 +82,7 @@ cd wikibase-release-pipeline/deploy
 
 ---
 
-### 3. Initial configuration
+### 5. Initial configuration
 
 Make a copy of the [configuration template](./template.env) in the `wikibase-release-pipeline/deploy` directory.
 
@@ -95,59 +90,66 @@ Make a copy of the [configuration template](./template.env) in the `wikibase-rel
 cp template.env .env
 ```
 
-Open the file in the text editor of your choice. (Options include but are not limited to vim, nano, kedit, Sublime Text, and VSCode.)
-
----
-
-### 4. Editing environment variables
+Edit `.env` and set the values below.
 
 #### Public hostnames
-The domain names for your Wikibase Suite services should be configured on your DNS host to point to the public IP address 
-of the server you are deploying to. Note that you need two distinct names, i.e., two different fully qualified domain names. Without them, the traefik reverse proxy cannot route properly.
+
+- `WIKIBASE_PUBLIC_HOST`
+  The public hostname for your Wikibase web interface. Use one of the hostnames from step 2, without `https://` and without a trailing slash.
+- `WDQS_PUBLIC_HOST`
+  The public hostname for the WDQS web interface and SPARQL endpoint. Use the other hostname from step 2, without `https://` and without a trailing slash. This must be different from `WIKIBASE_PUBLIC_HOST`.
 
 #### MediaWiki (Wikibase) user
-Please enter the username, email address and password you would like to use to log into the Wikibase web interface.
 
-> [!NOTE]
-> Password must be at least 10 characters, different from your username, and must not appear in the list of commonly used passwords 
-> this project uses. If these conditions are not met, the container won't run successfully.
+- `MW_ADMIN_NAME`
+  The username for the first MediaWiki administrator account.
+- `MW_ADMIN_EMAIL`
+  The email address for the first MediaWiki administrator account.
+- `MW_ADMIN_PASS`
+  The password for the first MediaWiki administrator account. It must be at least 10 characters, must be different from `MW_ADMIN_NAME`, and must not appear in the list of commonly used passwords checked by MediaWiki.
 
 #### Database configuration:
-These settings are used to configure the MariaDB container when creating a new database, and by MediaWiki when generating a new `LocalSettings.php` file. They won't be set on an existing database, nor will MediaWiki update those settings in your `LocalSettings.php`. To change those settings, adjust them manually in MariaDB and your `LocalSettings.php` file. Alternatively, delete your MariaDB volume `mysql-data` (all data will be lost) and the `LocalSettings.php` file from the `./config` directory, then restart.
 
-> [!NOTE]
-> These values do not need to be changed for the instance to successfully be set up.
+- `DB_NAME`
+  The name of the MariaDB database created for MediaWiki. The default value can be used for a new install.
+- `DB_USER`
+  The MariaDB user created for MediaWiki. The default value can be used for a new install.
+- `DB_PASS`
+  The MariaDB password for `DB_USER`. Set this to something other than the default value before first start.
 
 #### Callback
-The callback function allows for maintaining an index of Wikibases. You can find more information [here](./4-FAQs.md#what-are-the-future-plans-for-the-call-back-feature-and-what-information-does-it-collect). Set this variable to `true` to opt in or `false` to opt out.
 
-```sh
-METADATA_CALLBACK=true
-```
+- `METADATA_CALLBACK`
+  Set to `true` to opt into the Wikibase Suite metadata callback, or `false` to opt out. Unlike the other `.env` values, this value may be changed after initial setup; restart the services for the change to take effect.
 
-> [!NOTE]
-> If this variable is not set, the container will not run successfully.
+> [!WARNING]
+> With the exception of `METADATA_CALLBACK`, `.env` values are setup values. If you need to change them after first start, follow [Resetting an instance](./docs/resetting-and-removing.md#resetting-an-instance).
 
 ---
 
-### 5. Starting Wikibase
+### 6. Starting Wikibase
 
 Run the following command from within the `wikibase-release-pipeline/deploy` directory:
 
 ```sh
-docker compose up
+docker compose up -d
 ```
 
 The first start may take a couple of minutes. You can check the status of the stack by running `docker ps` from another terminal. When your WBS Deploy instance is ready, the `wbs-deploy-wikibase-1` container will be marked `healthy`.
 
-🎉 Congratulations! You can now access your instance via your domain name.
+You can now access your services using the hostnames you set in `.env`:
+
+- Wikibase: `https://<WIKIBASE_PUBLIC_HOST>`
+- WDQS web front end: `https://<WDQS_PUBLIC_HOST>`
+- WDQS SPARQL endpoint: `https://<WDQS_PUBLIC_HOST>/sparql`
+- QuickStatements: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements`
 
 > [!NOTE]
-> If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. Should you run into some issues in this step, make sure to [reset the configuration](#resetting-the-configuration) after you fix the error.
+> If anything goes wrong, you can run `docker logs <CONTAINER_NAME>` to see some helpful error messages. Should you run into some issues in this step, make sure to [reset the instance](./docs/resetting-and-removing.md) after you fix the error.
 
 ---
 
-### 6. Stopping
+### 7. Stopping
 
 To stop Wikibase, run:
 
@@ -155,20 +157,6 @@ To stop Wikibase, run:
 docker compose stop
 ```
 
----
+## Help and support
 
-### Resetting the configuration
-
-Most values set in `.env` are written into the respective containers after you run `docker compose up` for the first time.
-
-To reset the configuration while retaining your existing data:
-
-1. Make any needed changes to the values in `.env`.
-> [!NOTE] Do not change `DB_*` values unless you are also [re-creating the database](#removing-wikibase-suite-completely-with-all-its-data).
-2. Back up and then remove the `LocalSettings.php` file from the `deploy/config` directory.
-3. Remove and re-create the containers by running:
-
-```sh
-docker compose down
-docker compose up
-```
+If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.

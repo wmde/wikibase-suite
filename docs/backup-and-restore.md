@@ -1,6 +1,6 @@
-# Managing your data
+# Backup and restore
 
-Besides [your configuration](#advanced-configuration), it's your data that makes your instance unique. All instance data is stored in [Docker volumes](https://docs.docker.com/storage/volumes/).
+Besides [your configuration](./advanced-configuration.md), it's your data that makes your instance unique. All instance data is stored in [Docker volumes](https://docs.docker.com/storage/volumes/).
 
 - `wikibase-image-data`: MediaWiki image and media file uploads
 - `mysql-data`: MediaWiki/Wikibase MariaDB raw database
@@ -27,6 +27,16 @@ for v in \
   docker run --rm --volume $v:/backup debian:12-slim tar cz backup > $v.tar.gz
 done
 ```
+
+## Back up your configuration
+
+To back up local configuration changes, copy the `config` directory:
+
+```sh
+cp -r ./config ./config-$(date +%Y%m%d%H%M%S)
+```
+
+Keep this backup as a reference when resetting or upgrading. Do not restore old generated configuration files wholesale after reset; manually re-apply your local changes into the new files created during reset.
 
 ## Restore from a backup
 

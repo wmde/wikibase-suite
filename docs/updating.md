@@ -16,9 +16,9 @@ docker compose pull
 docker compose up
 ```
 
-> 💡 In order to automatically update images on every start, you can also use `docker compose up --pull always` to start your WBS Deploy stack.
+You can also choose to always pull WBS image updates when starting the stack. See [Managing updates](#managing-updates).
 
-If you installed User Defined Extensions in `config/extensions`, they might have updates too. Make sure to update them regularly too. See [User Defined Extension Docs](./config/extensions/README.md) for more information.
+If you installed User Defined Extensions in `config/extensions`, they might have updates too. Make sure to update them regularly too. See [User Defined Extension Docs](../config/extensions/README.md) for more information.
 
 ## Minor and patch updates for WBS Deploy
 
@@ -37,38 +37,17 @@ Major version upgrades are performed by updating WBS Deploy's major version. Thi
 
 WBS only supports updating from one major version to the next version in sequence. In order to upgrade from 1.x.x to 3.x.x, you must first upgrade from 1.x.x to 2.x.x and then to 3.x.x.
 
-### Bring down your instance
-
-```sh
-docker compose down
-```
-
-### Back up your data and config
-
-[Create a backup](#backup-your-data) of your data.
-
-Back up your `./config` directory as well using:
-
-```
-cp -r ./config ./config-$(date +%Y%M%d%H%M%S)
-```
-
-### Switch to new version
-
-WBS Deploy versions are tagged, such as `deploy@2.0.0` or `deploy@3.0.3`. To update, switch to a more recent tag.
-
-```sh
-git remote update
-git checkout deploy@3.0.3
-```
+Major upgrades use the data-preserving reset procedure in [Resetting or removing an instance](./resetting-and-removing.md). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS Deploy tag when you reach its "Update setup values" step.
 
 > 💡 If you made changes to `docker-compose.yml`, merge them as you see fit.
 
-### Apply any changes to .env
+Look for any additions or changes noted in `template.env` that you may need to apply to your `.env` file.
 
-Look for changes in the new `template.env` that you might want to apply to your `.env` file.
+Note: With the exception of `METADATA_CALLBACK`, you should not change existing `.env` values, they are initial setup values and changing them from initial values can break your instance. `METADATA_CALLBACK` is the exception: it may be changed after initial setup and takes effect after restarting the services.
 
-### Apply any migrations for your version
+Before the final start in the reset procedure, apply any relevant version-specific notes below and update any User Defined Extensions installed in `config/extensions`.
+
+### Version-specific notes
 
 <details><summary><strong>WBS Deploy 4.x.x to 5.x.x</strong></summary><p>
 
@@ -111,19 +90,17 @@ No Wikibase-specific migrations are necessary.
 
 </p></details>
 
-### Apply updates to User Defined Extension
+## Managing updates
 
-If you installed User Defined Extensions in `config/extensions`, they might require updates in order to be compatible with the new MediaWiki version too. See [User Defined Extension Docs](./config/extensions/README.md) for more information.
+You can automatically pull minor and patch updates for WBS images by starting the stack with:
 
-### Bring your instance back up
-
-```
-docker compose up
+```sh
+docker compose up --pull always
 ```
 
-## Automatic updates
+You can run that command manually, or schedule it with a systemd timer, cron job, or similar.
 
-At the moment, WBS Deploy does not support automatic updates. To automatically deploy minor and patch updates including security fixes to your WBS images, [restart your instance](#minor-and-patch-updates-for-wbs-service-containers) on a regular basis with a systemd timer, cron job, or similar.
+This only covers minor and patch updates for the WBS images referenced by your current `docker-compose.yml`. It does not update your WBS Deploy git checkout, apply major upgrades, or update User Defined Extensions.
 
 ## Downgrades
 
