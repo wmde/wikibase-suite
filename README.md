@@ -41,14 +41,14 @@ Start by provisioning a Linux VPS or cloud server for your Wikibase Suite instan
 - [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
 - [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
 
-> [!IMPORTANT]
-> WBS Deploy is intended to run on a server, not on your laptop or desktop. The server must be reachable from the public internet so DNS and HTTPS certificate setup can succeed.
-
 The minimum requirements for your server are as follows:
 - 64-bit x86 architecture (`amd64` / `x86_64`); ARM servers are not currently supported by the published WBS images
 - 8 GB RAM
 - 20 GB free disk space to start, with more needed as your wiki data grows
 - inbound HTTP and HTTPS traffic allowed on ports 80 and 443
+
+> [!IMPORTANT]
+> WBS Deploy is intended to run on a server, not on your laptop or desktop. The server must be reachable from the public internet so DNS and HTTPS certificate setup can succeed.
 
 ---
 
@@ -96,35 +96,17 @@ cp template.env .env
 
 Edit `.env` and set the values below.
 
-#### Public hostnames
-
-- `WIKIBASE_PUBLIC_HOST`
-  The public hostname for your Wikibase web interface. Use one of the hostnames from step 2, without `https://` and without a trailing slash.
-- `WDQS_PUBLIC_HOST`
-  The public hostname for the WDQS web interface and SPARQL endpoint. Use the other hostname from step 2, without `https://` and without a trailing slash. This must be different from `WIKIBASE_PUBLIC_HOST`.
-
-#### MediaWiki (Wikibase) user
-
-- `MW_ADMIN_NAME`
-  The username for the first MediaWiki administrator account.
-- `MW_ADMIN_EMAIL`
-  The email address for the first MediaWiki administrator account.
-- `MW_ADMIN_PASS`
-  The password for the first MediaWiki administrator account. It must be at least 10 characters, must be different from `MW_ADMIN_NAME`, and must not appear in the list of commonly used passwords checked by MediaWiki.
-
-#### Database configuration:
-
-- `DB_NAME`
-  The name of the MariaDB database created for MediaWiki. The default value can be used for a new install.
-- `DB_USER`
-  The MariaDB user created for MediaWiki. The default value can be used for a new install.
-- `DB_PASS`
-  The MariaDB password for `DB_USER`. Set this to something other than the default value before first start.
-
-#### Callback
-
-- `METADATA_CALLBACK`
-  Set to `true` to opt into the Wikibase Suite metadata callback, or `false` to opt out. Unlike the other `.env` values, this value may be changed after initial setup; restart the services for the change to take effect.
+| Setting | Default value | Description |
+| --- | --- | --- |
+| `WIKIBASE_PUBLIC_HOST` | None | The public hostname for your Wikibase web interface. Use one of the hostnames from step 2, without `https://` and without a trailing slash. |
+| `WDQS_PUBLIC_HOST` | None | The public hostname for the WDQS web interface and SPARQL endpoint. Use the other hostname from step 2, without `https://` and without a trailing slash. This must be different from `WIKIBASE_PUBLIC_HOST`. |
+| `MW_ADMIN_NAME` | None | The username for the first MediaWiki administrator account. |
+| `MW_ADMIN_EMAIL` | None | The email address for the first MediaWiki administrator account. |
+| `MW_ADMIN_PASS` | None | The password for the first MediaWiki administrator account. It must be at least 10 characters, must be different from `MW_ADMIN_NAME`, and must not appear in the list of commonly used passwords checked by MediaWiki. |
+| `DB_NAME` | `my_wiki` | The name of the MariaDB database created for MediaWiki. The default value can be used for a new install. |
+| `DB_USER` | `sqluser` | The MariaDB user created for MediaWiki. The default value can be used for a new install. |
+| `DB_PASS` | `change-this-password` | The MariaDB password for `DB_USER`. Set this to something other than the default value before first start. |
+| `METADATA_CALLBACK` | `true` | Set to `true` to opt into the Wikibase Suite metadata callback, or `false` to opt out. Unlike the other `.env` values, this value may be changed after initial setup; restart the services for the change to take effect. |
 
 > [!WARNING]
 > With the exception of `METADATA_CALLBACK`, `.env` values are setup values. If you need to change them after first start, follow [Resetting an instance](./docs/resetting-and-removing.md#resetting-an-instance).
