@@ -11,8 +11,13 @@
 					<div class="callout-title">Existing installation found</div>
 				</div>
 				<p>
-					This Wikibase Suite installation has already been set up. The setup tool cannot safely be
-					run again for this installation yet.
+					This Wikibase Suite has already been set up. The setup tool cannot safely be run again
+					for this installation. To start over with a new configuration, see
+					<a
+						href="https://github.com/wmde/wikibase-release-pipeline/blob/docs/critical-refinements/deploy/docs/resetting-and-removing.md"
+						target="_blank"
+						rel="noreferrer"
+					>Resetting an instance</a>.
 				</p>
 			</cdx-message>
 		</div>

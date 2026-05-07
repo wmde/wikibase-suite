@@ -1,19 +1,21 @@
 # Wikibase Suite Deploy Setup
 
-This script bootstraps a Wikibase Suite Deploy installation and guides you through:
+This setup tool installs [Wikibase Suite Deploy](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server.
 
-1. **Checks/installs Git** – Installs Git if not already available.  
-2. **Clones repositories** – Downloads this setup tool and the selected Wikibase Suite Deploy code.
-3. **Checks/installs Docker** – Installs Docker unless already installed.  
-4. **Collects configuration** – Through the web setup UI, or through the command-line setup wizard if you omit `--web`.
-5. **Launches Wikibase Suite** – Shows you the finalized configuration and links to your services once complete.
+During setup, it:
 
-## Installing on a new VPS instance
+1. Checks for and installs Git if it is not already available.
+2. Downloads this setup tool and the selected Wikibase Suite Deploy code.
+3. Checks for and installs Docker unless it is already installed.
+4. Opens the web setup UI, or the command-line setup wizard if you omit `--web`.
+5. Shows the finalized configuration and links to your services once complete.
+
+## Install on a new VPS
 
 1. Provision a new VPS that:
    - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#1-requirements
    - Uses AMD64 (`x86_64`) architecture
-   - Runs a supported Linux with `apt-get` or `dnf` available (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS Stream/RHEL/Rocky/Alma)  
+   - Runs a supported Linux with `apt-get` or `dnf` available (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS Stream/RHEL/Rocky/Alma)
    - Lets you SSH in as the root user
 
 2. SSH in as root and run the web setup:
@@ -32,15 +34,11 @@ This script bootstraps a Wikibase Suite Deploy installation and guides you throu
 
 ## Troubleshooting
 
-- **Browser warns about certificate**  
-  - If Let’s Encrypt fails, setup falls back to a **self-signed certificate** and warns you in the terminal.
-  - In this case, your browser may show a warning such as **“Your connection is not private”** when you open the setup URL. It is safe to bypass that warning to continue setup.
-  - For browser-specific steps, see [Vultr’s guide to bypassing HTTPS warnings for self-signed certificates](https://docs.vultr.com/how-to-bypass-the-https-warning-for-self-signed-ssl-tls-certificates).
+**Browser warns about certificate.** If Let’s Encrypt fails, setup falls back to a **self-signed certificate** and warns you in the terminal. Your browser may then show a warning such as **“Your connection is not private”** when you open the setup URL. It is safe to bypass that warning to continue setup. For browser-specific steps, see [Vultr’s guide to bypassing HTTPS warnings for self-signed certificates](https://docs.vultr.com/how-to-bypass-the-https-warning-for-self-signed-ssl-tls-certificates).
 
-## More for developers and testers
+## Development
 
-If you are testing this setup utility locally, developing on it, or need non‑standard setups of the Wikibase Suite stack, see [DEVELOPMENT.md](DEVELOPMENT.md) in this repository for detailed guidance on local runs, CLI options, and localhost defaults.
+Use this section only when you are developing, reviewing, or testing this setup tool.
 
-## Project docs
-
-Additional implementation and project notes live in [docs/README.md](docs/README.md).
+- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost setup, reset flags, deploy refs, and other non-standard setup paths.
+- [docs/README.md](docs/README.md) links to additional implementation and project notes.
