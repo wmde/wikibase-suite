@@ -1,6 +1,6 @@
 # Wikibase Suite Deploy Setup
 
-This setup tool installs [Wikibase Suite Deploy](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server.
+This setup tool installs [Wikibase Suite Deploy](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server and guides you through configuration.
 
 During setup, it:
 
@@ -12,23 +12,15 @@ During setup, it:
 
 ## Install on a new VPS
 
-1. Provision a new VPS that:
-   - Meets the minimum hardware requirements: https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#1-requirements
-   - Uses AMD64 (`x86_64`) architecture
-   - Runs a supported Linux with `apt-get` or `dnf` available (Ubuntu 22.04/24.04, Debian 11/12, Fedora, CentOS Stream/RHEL/Rocky/Alma)
-   - Lets you SSH in as the root user
+1. Provision a new VPS that meets the [minimum hardware requirements](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy#1-requirements)
 
-2. SSH in as root and run the web setup:
+2. SSH in as root of the VPS and run the web setup:
 
    ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/wmde/wbs-deploy-setup/refs/heads/main/start.sh) --web
+   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/start.sh) --web
    ```
 
-   To install a specific Wikibase Suite Deploy branch or tag, pass it as a deploy ref:
-
-   ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/wmde/wbs-deploy-setup/refs/heads/main/start.sh) --web --deploy-ref deploy@7.0.0
-   ```
+   *To install a specific Wikibase Suite Deploy branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
 
 3. Open the setup URL printed in the terminal and follow the web setup steps.
 
