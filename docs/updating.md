@@ -1,12 +1,14 @@
-# Updating and versioning
+# Upgrading
 
-WBS uses [semantic versioning](https://semver.org/spec/v2.0.0.html). WBS Deploy and each WBS image have individual version numbers.
+Wikibase Suite (WBS) uses [semantic versioning](https://semver.org/spec/v2.0.0.html). WBS and each WBS image have individual version numbers.
 
-WBS Deploy references the latest minor and patch releases of compatible WBS image major versions using Docker image major-version tags. For example, WBS Deploy 2.0.1 might reference `wikibase/wikibase:3`, a tag that points to the latest Wikibase 3.x.x image.
+WBS references the latest minor and patch releases of compatible WBS image major versions using Docker image major-version tags. For example, WBS 2.0.1 might reference `wikibase/wikibase:3`, a tag that points to the latest Wikibase 3.x.x image.
+
+For the tag formats used by WBS images, see [Wikibase Suite image versioning](../../docs/versioning.md).
 
 ## Minor and patch updates for WBS images
 
-Because WBS Deploy references the latest minor and patch releases of compatible WBS images, non-breaking changes, including security updates, can be pulled at any time.
+Because WBS references the latest minor and patch releases of compatible WBS images, non-breaking changes, including security updates, can be pulled at any time.
 
 For a production instance, take a backup first if you need a rollback point. Then run:
 
@@ -20,9 +22,9 @@ You can also choose to always pull WBS image updates when starting the stack. Se
 
 If you installed user-defined extensions in `config/extensions`, update those regularly too. See [User-defined extension docs](../config/extensions/README.md) for more information.
 
-## Minor and patch updates for WBS Deploy
+## Minor and patch updates for WBS
 
-WBS Deploy versions are tagged in git with tags such as `deploy@2.0.1`. Switching to a tag with the same major version will never trigger breaking changes. These updates are **always** considered safe. If you made no changes to `docker-compose.yml`, you may update simply by switching the git tag.
+WBS versions are tagged in git with tags such as `deploy@2.0.1`. Switching to a tag with the same major version will never trigger breaking changes. These updates are **always** considered safe. If you made no changes to `docker-compose.yml`, you may update simply by switching the git tag.
 
 ```sh
 git remote update
@@ -33,11 +35,11 @@ git checkout deploy@2.0.2
 
 ## Major upgrades
 
-Major version upgrades are performed by updating WBS Deploy's major version. This is done by changing your git checkout to the new major version tag. This may reference new major versions of WBS images and involve breaking changes. In turn, those may require additional steps as described below.
+Major version upgrades are performed by updating the WBS major version. This is done by changing your git checkout to the new major version tag. This may reference new major versions of WBS images and involve breaking changes. In turn, those may require additional steps as described below.
 
 WBS only supports updating from one major version to the next version in sequence. In order to upgrade from 1.x.x to 3.x.x, you must first upgrade from 1.x.x to 2.x.x and then to 3.x.x.
 
-Major upgrades use the data-preserving reset procedure in [Resetting an instance](./resetting-and-removing.md#resetting-an-instance). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS Deploy tag when you reach its "Update setup values" step.
+Major upgrades use the data-preserving reset procedure in [Resetting an instance](./resetting.md). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS version tag when you reach its "Update setup values" step.
 
 > 💡 If you made changes to `docker-compose.yml`, merge them as you see fit.
 
@@ -49,32 +51,32 @@ Before the final start in the reset procedure, apply any relevant version-specif
 
 ### Version-specific notes
 
-<details><summary><strong>WBS Deploy 4.x.x to 5.x.x</strong></summary><p>
+<details><summary><strong>WBS 4.x.x to 5.x.x</strong></summary><p>
 
-Wikibase Image switched from version 4.x.x to 5.x.x; this upgrades MediaWiki from 1.43 to 1.44. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_44/UPGRADE).
+The Wikibase image switched from version 4.x.x to 5.x.x. This upgrades the MediaWiki version used by Wikibase from 1.43 to 1.44. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_44/UPGRADE).
 
 Please, note that the `.env` file now requires setting `METADATA_CALLBACK`. Find more details about it in `template.env`.
 
 </p></details>
 
-<details><summary><strong>WBS Deploy 3.x.x to 4.x.x</strong></summary><p>
+<details><summary><strong>WBS 3.x.x to 4.x.x</strong></summary><p>
 
-Wikibase Image switched from version 3.x.x to 4.x.x; this upgrades MediaWiki from 1.42 to 1.43. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_43/UPGRADE).
+The Wikibase image switched from version 3.x.x to 4.x.x. This upgrades the MediaWiki version used by Wikibase from 1.42 to 1.43. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_43/UPGRADE).
 
 Note that URLs changed with Deploy 4 to the following defaults:
 - https://wikibase.example MediaWiki with Wikibase extension
 - https://wikibase.example/w/rest.php MediaWiki REST API including Wikibase REST API
-- https://query.wikibase.example Front end for WDQS (Query GUI)
-- https://query.wikibase.example/sparql SPARQL API endpoint for WDQS
+- https://query.wikibase.example query service web interface
+- https://query.wikibase.example/sparql query service SPARQL endpoint
 - https://wikibase.example/tools/quickstatements QuickStatements tool
 
-Note that the `wdqs-proxy` image has been removed. Routing of WDQS HTTP traffic is now done by central Traefik.
+Note that the `wdqs-proxy` image has been removed. Routing of query service HTTP traffic is now done by central Traefik.
 
 Note that `wdqs-frontend` environment variables changed. Read more on https://github.com/wmde/wikibase-release-pipeline/tree/main/build/wdqs-frontend#environment-variables
 
 </p></details>
 
-<details><summary><strong>WBS Deploy 2.x.x to 3.x.x</strong></summary><p>
+<details><summary><strong>WBS 2.x.x to 3.x.x</strong></summary><p>
 
 Read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_42/UPGRADE).
 
@@ -82,7 +84,7 @@ No Wikibase-specific migrations are necessary.
 
 </p></details>
 
-<details><summary><strong>WBS Deploy 1.x.x to 2.x.x</strong></summary><p>
+<details><summary><strong>WBS 1.x.x to 2.x.x</strong></summary><p>
 
 Read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_41/UPGRADE).
 
@@ -100,7 +102,7 @@ docker compose up -d --pull always
 
 You can run that command manually, or schedule it with a systemd timer, cron job, or similar.
 
-This only covers minor and patch updates for the WBS images referenced by your current `docker-compose.yml`. It does not update your WBS Deploy git checkout, apply major upgrades, or update user-defined extensions.
+This only covers minor and patch updates for the WBS images referenced by your current `docker-compose.yml`. It does not update your WBS version tag, apply major upgrades, or update user-defined extensions.
 
 ## Downgrades
 

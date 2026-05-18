@@ -53,7 +53,7 @@ You can verify that your extension was loaded by visiting `https://<WIKIBASE_PUB
 
 ## Updating the extension
 
-When you install extensions manually as described above, you are responsible for updating those extensions. Extensions can contain security vulnerabilities that are fixed in later releases. When you upgrade MediaWiki, for example from 1.42 to 1.43 during a WBS Deploy major upgrade, the extension might need an update too in order to remain compatible.
+When you install extensions manually as described above, you are responsible for updating those extensions. Extensions can contain security vulnerabilities that are fixed in later releases. When you upgrade MediaWiki, for example from 1.42 to 1.43 during a Wikibase Suite major upgrade, the extension might need an update too in order to remain compatible.
 
 ## More information
 
