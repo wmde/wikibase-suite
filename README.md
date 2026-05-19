@@ -1,6 +1,6 @@
 # Wikibase Suite Installer
 
-This setup tool installs [Wikibase Suite Deploy](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server and guides you through configuration.
+This setup tool installs [Wikibase Suite](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server and guides you through configuration.
 
 During setup, it:
 
@@ -20,7 +20,7 @@ During setup, it:
    bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/start.sh) --web
    ```
 
-   *To install a specific Wikibase Suite Deploy branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
+   *To install a specific Wikibase Suite branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
 
 3. Open the setup URL printed in the terminal and follow the web setup steps.
 
