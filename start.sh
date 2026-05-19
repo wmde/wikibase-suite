@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo
-echo "Wikibase Suite Deploy Setup"
+echo "Wikibase Suite Installer"
 echo
 echo "→ Installs Git if not already installed"
 echo "→ Checks-out the wikibase-release-pipeline repository"

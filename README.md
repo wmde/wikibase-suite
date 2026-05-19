@@ -1,11 +1,11 @@
-# Wikibase Suite Deploy Setup
+# Wikibase Suite Installer
 
 This setup tool installs [Wikibase Suite Deploy](https://github.com/wmde/wikibase-release-pipeline/tree/main/deploy) on a new Linux VPS or cloud server and guides you through configuration.
 
 During setup, it:
 
 1. Checks for and installs Git if it is not already available.
-2. Downloads this setup tool and the selected Wikibase Suite Deploy code.
+2. Downloads this installation tool along wit the Wikibase Suite code.
 3. Checks for and installs Docker unless it is already installed.
 4. Opens the web setup UI, or the command-line setup wizard if you omit `--web`.
 5. Shows the finalized configuration and links to your services once complete.

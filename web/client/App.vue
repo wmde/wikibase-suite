@@ -6,7 +6,7 @@
 					<img :src="logoSrc" alt="" />
 				</div>
 				<div class="wizard-header__identity">
-					<h1>Deploy Setup</h1>
+					<h1>Installer</h1>
 				</div>
 			</header>
 
