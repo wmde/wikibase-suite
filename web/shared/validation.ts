@@ -55,7 +55,7 @@ export function isValidEmailAddress( value: string ): boolean {
 		return false;
 	}
 
-	const domain = emailAddress.slice( emailAddress.lastIndexOf( '@' ) + 1 );
+	const domain = emailAddress.slice( emailAddress.lastIndexOf( '@' ) + 1 ).toLowerCase();
 	const parsedDomain = parseDomain( domain, { extractHostname: false } );
 	return parsedDomain.hostname !== null && parsedDomain.isIcann === true;
 }
