@@ -1,3 +1,5 @@
+import { parse as parseDomain } from 'tldts';
+
 export type ValidationResult = {
 	valid: boolean;
 	reason?: string;
@@ -48,7 +50,14 @@ function normalizePassword( value: string ): string {
 }
 
 export function isValidEmailAddress( value: string ): boolean {
-	return EMAIL_ADDRESS_REGEX.test( value.trim() );
+	const emailAddress = value.trim();
+	if ( !EMAIL_ADDRESS_REGEX.test( emailAddress ) ) {
+		return false;
+	}
+
+	const domain = emailAddress.slice( emailAddress.lastIndexOf( '@' ) + 1 );
+	const parsedDomain = parseDomain( domain, { extractHostname: false } );
+	return parsedDomain.hostname !== null && parsedDomain.isIcann === true;
 }
 
 export function isLocalTestHostname( value: string ): boolean {
