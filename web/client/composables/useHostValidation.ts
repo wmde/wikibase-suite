@@ -6,8 +6,11 @@ import type { FieldValidationStatus } from '../types';
 type HostFieldName = 'WIKIBASE_PUBLIC_HOST' | 'WDQS_PUBLIC_HOST';
 
 type HostStatusMap = Record<HostFieldName, FieldValidationStatus>;
+type HostValidationResponse = {
+	valid?: boolean;
+};
 
-export function useHostValidation( serverIp: string, isLocalhostSetup = false ) {
+export function useHostValidation( isLocalhostSetup = false ) {
 	const statuses = reactive<HostStatusMap>( {
 		WIKIBASE_PUBLIC_HOST: 'neutral',
 		WDQS_PUBLIC_HOST: 'neutral'
@@ -34,15 +37,16 @@ export function useHostValidation( serverIp: string, isLocalhostSetup = false ) 
 		}
 
 		try {
-			const response = await fetch(
-				`https://dns.google/resolve?name=${ encodeURIComponent( hostname ) }&type=A`
-			);
+			const response = await fetch( '/validate/hostname', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify( { hostname } )
+			} );
 			if ( !response.ok ) {
 				return false;
 			}
-			const json = await response.json();
-			const answers = Array.isArray( json?.Answer ) ? json.Answer : [];
-			return answers.some( ( answer ) => answer.type === 1 && answer.data === serverIp );
+			const json = await response.json() as HostValidationResponse;
+			return json.valid === true;
 		} catch {
 			return false;
 		}

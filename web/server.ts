@@ -1,4 +1,5 @@
 import { createSession, createChannel } from 'better-sse';
+import { promises as dns } from 'dns';
 import express from 'express';
 import { existsSync, readFileSync, createReadStream } from 'fs';
 import https, { request } from 'https';
@@ -7,7 +8,11 @@ import readline from 'readline';
 import { fileURLToPath } from 'url';
 import { createLogStreamer } from './logStreamer.js';
 import { validateSetupPassword } from './passwordPolicy.js';
-import { validateSetupConfig } from './shared/validation.js';
+import {
+	canSkipDnsValidation,
+	isValidSetupHostname,
+	validateSetupConfig
+} from './shared/validation.js';
 import {
 	LOG_PATH,
 	isBooted,
@@ -122,6 +127,50 @@ app.post( '/validate/password', async ( req, res ): Promise<void> => {
 	} catch ( err ) {
 		console.error( 'Failed to validate password:', err );
 		res.status( 500 ).json( { valid: false, reason: 'validation-error' } );
+	}
+} );
+
+app.post( '/validate/hostname', async ( req, res ): Promise<void> => {
+	const hostname = typeof req.body?.hostname === 'string' ? req.body.hostname.trim() : '';
+	const serverIp = process.env.SERVER_IP || '';
+	const localhostSetup = isLocalhostSetup();
+
+	if ( !hostname ) {
+		res.status( 200 ).json( { valid: false, reason: 'empty-hostname' } );
+		return;
+	}
+
+	if ( !isValidSetupHostname( hostname, localhostSetup ) ) {
+		res.status( 200 ).json( { valid: false, reason: 'invalid-hostname' } );
+		return;
+	}
+
+	if ( canSkipDnsValidation( hostname, localhostSetup ) ) {
+		res.status( 200 ).json( { valid: true, addresses: [ hostname ], expected: hostname } );
+		return;
+	}
+
+	if ( !serverIp ) {
+		res.status( 200 ).json( { valid: false, reason: 'missing-server-ip' } );
+		return;
+	}
+
+	try {
+		const addresses = await dns.resolve4( hostname );
+		res.status( 200 ).json( {
+			valid: addresses.includes( serverIp ),
+			addresses,
+			expected: serverIp,
+			reason: addresses.includes( serverIp ) ? undefined : 'address-mismatch'
+		} );
+	} catch ( error ) {
+		console.error( `Failed to resolve hostname ${ hostname }:`, error );
+		res.status( 200 ).json( {
+			valid: false,
+			addresses: [],
+			expected: serverIp,
+			reason: 'dns-lookup-failed'
+		} );
 	}
 } );
 

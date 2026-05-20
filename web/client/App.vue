@@ -171,7 +171,7 @@ const saveErrorMessage = ref( '' );
 const saveErrorDetails = ref<string[]>( [] );
 let pollTimer: number | undefined;
 
-const hostValidation = useHostValidation( initialState.serverIp, initialState.isLocalhostSetup );
+const hostValidation = useHostValidation( initialState.isLocalhostSetup );
 const passwordValidation = usePasswordValidation();
 const setupLog = useSetupLog( handleSetupComplete );
 const setupProgress = computed( () => setupLog.progress.value );
