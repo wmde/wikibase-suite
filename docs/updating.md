@@ -43,7 +43,7 @@ Major upgrades use the data-preserving reset procedure in [Resetting an instance
 
 > 💡 If you made changes to `docker-compose.yml`, merge them as you see fit.
 
-Look for any new required values in `template.env` that you may need to add to your `.env` file.
+Look for any new required values in `.env.example` that you may need to add to your `.env` file.
 
 Note: With the exception of `METADATA_CALLBACK`, do not change existing `.env` values during an upgrade. They are setup values, and changing them while preserving existing data can break your instance. `METADATA_CALLBACK` may be changed after initial setup and takes effect after restarting the services.
 
@@ -55,7 +55,7 @@ Before the final start in the reset procedure, apply any relevant version-specif
 
 The Wikibase image switched from version 4.x.x to 5.x.x. This upgrades the MediaWiki version used by Wikibase from 1.43 to 1.44. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_44/UPGRADE).
 
-Please, note that the `.env` file now requires setting `METADATA_CALLBACK`. Find more details about it in `template.env`.
+Please, note that the `.env` file now requires setting `METADATA_CALLBACK`. Find more details about it in `.env.example`.
 
 </p></details>
 

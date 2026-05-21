@@ -84,10 +84,10 @@ cd wikibase-release-pipeline/deploy
 
 ### 5. Initial configuration
 
-Make a copy of the [configuration template](./template.env) in the `wikibase-release-pipeline/deploy` directory.
+Make a copy of the [example environment file](./.env.example) in the `wikibase-release-pipeline/deploy` directory.
 
 ```sh
-cp template.env .env
+cp .env.example .env
 ```
 
 Edit `.env` and set the values below.
