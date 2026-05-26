@@ -7,10 +7,10 @@ import {
 
 export const ENV_FILE_PATH = '/app/deploy/.env';
 export const ENV_TEMPLATE_FILE_PATH = '/app/deploy/template.env';
+export const DOT_ENV_EXAMPLE_FILE_PATH = '/app/deploy/.env.example';
 export const LOCAL_SETTINGS_FILE_PATH = '/app/deploy/config/LocalSettings.php';
 export const LAUNCH_TRIGGER_PATH = process.env.LAUNCH_TRIGGER_PATH || '';
 export const LOG_PATH = '/app/setup.log';
-const DEFAULT_MW_ADMIN_NAME = 'Admin';
 const DEFAULT_DB_NAME = 'my_wiki';
 const DEFAULT_DB_USER = 'sqluser';
 const EXISTING_INSTALL_STATES = new Set( [ 'none', 'running', 'previous' ] );
@@ -75,7 +75,20 @@ function getEnv(): Record<string, string> | null {
 }
 
 function getTemplateEnv(): Record<string, string> {
-	return parseEnvContent( readFileSync( ENV_TEMPLATE_FILE_PATH, 'utf8' ) );
+	const templatePath = [
+		ENV_TEMPLATE_FILE_PATH,
+		DOT_ENV_EXAMPLE_FILE_PATH
+	].find( ( path ) => existsSync( path ) );
+	if ( !templatePath ) {
+		throw new Error(
+			`No environment template found. Checked: ${ [
+				ENV_TEMPLATE_FILE_PATH,
+				DOT_ENV_EXAMPLE_FILE_PATH
+			].join( ', ' ) }`
+		);
+	}
+
+	return parseEnvContent( readFileSync( templatePath, 'utf8' ) );
 }
 
 function hasAnyInput( input: Record<string, unknown> ): boolean {
@@ -88,6 +101,19 @@ const generatePassword = (): string => crypto.randomBytes( 12 ).toString( 'base6
 function makeConfigText( configObject: Record<string, string> ): string {
 	return serializeEnvContent( configObject );
 }
+
+type ConfigGenerationOptions = {
+	generateMissingPasswords?: boolean;
+};
+
+function resolvePasswordInput( value: unknown, shouldGenerate: boolean ): string {
+	if ( value && value !== '' ) {
+		return String( value );
+	}
+
+	return shouldGenerate ? generatePassword() : '';
+}
+
 export function saveConfigText( configText: string ): void {
 	return writeFileSync( ENV_FILE_PATH, configText );
 }
@@ -100,29 +126,30 @@ export function markConfigReadyForLaunch(): void {
 	writeFileSync( LAUNCH_TRIGGER_PATH, new Date().toISOString() );
 }
 
-export function getConfig( input: Record<string, unknown> = {} ): {
+export function getConfig(
+	input: Record<string, unknown> = {},
+	options: ConfigGenerationOptions = {}
+): {
 	config: Record<string, string>;
 	configText: string;
 } {
-	// 1) User input present: use exactly; passwords autogenerate if blank/missing.
+	// 1) User input present: use exactly. CLI can opt into password generation for blank prompt answers.
 	if ( hasAnyInput( input ) ) {
 		const templateEnv = getTemplateEnv();
+		const shouldGeneratePasswords = options.generateMissingPasswords === true;
 		const configObject: Record<string, string> = {
 			...templateEnv,
 			MW_ADMIN_EMAIL: String( input.MW_ADMIN_EMAIL ?? '' ).trim(),
 			WIKIBASE_PUBLIC_HOST: String( input.WIKIBASE_PUBLIC_HOST ?? '' ).trim(),
 			WDQS_PUBLIC_HOST: String( input.WDQS_PUBLIC_HOST ?? '' ).trim(),
 			METADATA_CALLBACK: String( input.METADATA_CALLBACK ?? 'true' ).trim(),
-			MW_ADMIN_NAME: input.MW_ADMIN_NAME && input.MW_ADMIN_NAME !== '' ?
-				String( input.MW_ADMIN_NAME ).trim() : DEFAULT_MW_ADMIN_NAME,
-			MW_ADMIN_PASS: input.MW_ADMIN_PASS && input.MW_ADMIN_PASS !== '' ?
-				String( input.MW_ADMIN_PASS ) : generatePassword(),
+			MW_ADMIN_NAME: String( input.MW_ADMIN_NAME ?? '' ).trim(),
+			MW_ADMIN_PASS: resolvePasswordInput( input.MW_ADMIN_PASS, shouldGeneratePasswords ),
 			DB_NAME: input.DB_NAME && input.DB_NAME !== '' ?
 				String( input.DB_NAME ).trim() : DEFAULT_DB_NAME,
 			DB_USER: input.DB_USER && input.DB_USER !== '' ?
 				String( input.DB_USER ).trim() : DEFAULT_DB_USER,
-			DB_PASS: input.DB_PASS && input.DB_PASS !== '' ?
-				String( input.DB_PASS ) : generatePassword()
+			DB_PASS: resolvePasswordInput( input.DB_PASS, shouldGeneratePasswords )
 		};
 
 		return { config: configObject, configText: makeConfigText( configObject ) };
@@ -133,8 +160,6 @@ export function getConfig( input: Record<string, unknown> = {} ): {
 	if ( existingEnv ) {
 		const configObject = {
 			...existingEnv,
-			MW_ADMIN_NAME: existingEnv.MW_ADMIN_NAME && existingEnv.MW_ADMIN_NAME !== '' ?
-				existingEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
 			DB_NAME: existingEnv.DB_NAME && existingEnv.DB_NAME !== '' ?
 				existingEnv.DB_NAME : DEFAULT_DB_NAME,
 			DB_USER: existingEnv.DB_USER && existingEnv.DB_USER !== '' ?
@@ -143,21 +168,20 @@ export function getConfig( input: Record<string, unknown> = {} ): {
 		return { config: configObject, configText: makeConfigText( configObject ) };
 	}
 
-	// 3) No .env and no input: template + localhost defaults + generated passwords.
+	// 3) No .env and no input: template + localhost defaults.
 	const templateEnv = getTemplateEnv();
 	const configObject: Record<string, string> = {
 		...templateEnv,
 		MW_ADMIN_EMAIL: '',
-		MW_ADMIN_NAME: templateEnv.MW_ADMIN_NAME && templateEnv.MW_ADMIN_NAME !== '' ?
-			templateEnv.MW_ADMIN_NAME : DEFAULT_MW_ADMIN_NAME,
+		MW_ADMIN_NAME: '',
 		DB_NAME: templateEnv.DB_NAME && templateEnv.DB_NAME !== '' ?
 			templateEnv.DB_NAME : DEFAULT_DB_NAME,
 		DB_USER: templateEnv.DB_USER && templateEnv.DB_USER !== '' ?
 			templateEnv.DB_USER : DEFAULT_DB_USER,
 		WIKIBASE_PUBLIC_HOST: isLocalhostSetup() ? 'wikibase.test' : '',
 		WDQS_PUBLIC_HOST: isLocalhostSetup() ? 'query.wikibase.test' : '',
-		MW_ADMIN_PASS: generatePassword(),
-		DB_PASS: generatePassword(),
+		MW_ADMIN_PASS: '',
+		DB_PASS: '',
 		METADATA_CALLBACK: 'true'
 	};
 

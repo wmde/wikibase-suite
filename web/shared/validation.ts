@@ -114,7 +114,7 @@ export function validatePassword(
 ): ValidationResult {
 	const password = value.trim();
 	if ( password.length === 0 ) {
-		return { valid: true };
+		return { valid: false, reason: 'empty-password' };
 	}
 
 	if ( password.length < 10 ) {
@@ -199,7 +199,7 @@ export function validateSetupConfig(
 		issues.push( {
 			field: 'MW_ADMIN_PASS',
 			code: adminPasswordValidation.reason || 'invalid-password',
-			message: 'Admin password must be blank for generation or meet the password policy.'
+			message: 'Admin password must be entered or generated and meet the password policy.'
 		} );
 	}
 
@@ -224,7 +224,7 @@ export function validateSetupConfig(
 		issues.push( {
 			field: 'DB_PASS',
 			code: databasePasswordValidation.reason || 'invalid-password',
-			message: 'Database password must be blank for generation or meet the password policy.'
+			message: 'Database password must be entered or generated and meet the password policy.'
 		} );
 	}
 

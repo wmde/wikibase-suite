@@ -2,33 +2,23 @@
 	<cdx-dialog
 		:open="open"
 		title="DNS help"
-		subtitle="Use this if you need a fuller walkthrough or help troubleshooting why a host is not validating."
+		subtitle="Resources for learning about DNS records and managing records with common providers."
 		use-close-button
 		class="dns-help-dialog"
 		:default-action="{ label: 'Close' }"
 		@update:open="emit( 'update:open', $event )"
 		@default="emit( 'update:open', false )"
 	>
-		<ol class="dialog-steps">
-			<li>Register the domain with your preferred registrar if you do not already have one.</li>
-			<li>Open the DNS settings for that domain.</li>
-			<li>
-				Create an <strong>A</strong> record for your main Wikibase host pointing to
-				<copyable-value :value="serverIp" label="Copy server IP address" />.
-			</li>
-			<li>Create another <strong>A</strong> record for the query host, usually <code>query</code>, pointing to the same IP.</li>
-			<li>Wait for DNS propagation, then return here and try continuing again.</li>
-		</ol>
-
 		<cdx-message>
-			If a host still fails validation, the most common causes are an incorrect A record,
-			propagation still being in progress, or the host pointing somewhere other than
+			If a host fails validation, it may still be propagating or may resolve somewhere other than
 			<copyable-value :value="serverIp" label="Copy server IP address" />.
 		</cdx-message>
 
 		<div class="dialog__resources">
-			<h4>Common provider guides</h4>
+			<h4>Learn more</h4>
 			<ul>
+				<li><a href="https://developer.mozilla.org/en-US/docs/Glossary/DNS" target="_blank" rel="noreferrer">DNS basics</a></li>
+				<li><a href="https://learn.wordpress.org/lesson/domain-management-understanding-dns-records/" target="_blank" rel="noreferrer">Understanding DNS records</a></li>
 				<li><a href="https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/" target="_blank" rel="noreferrer">Cloudflare: create DNS records</a></li>
 				<li><a href="https://www.godaddy.com/help/add-an-a-record-19238" target="_blank" rel="noreferrer">GoDaddy: add an A record</a></li>
 				<li><a href="https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-an-a-address-record-for-my-domain/" target="_blank" rel="noreferrer">Namecheap: set up an A record</a></li>

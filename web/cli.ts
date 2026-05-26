@@ -166,23 +166,28 @@ async function promptYesNo( label: string, defaultValue: boolean ): Promise<bool
 }
 
 function validatePasswordMessage( value: string | undefined ): ValidationMessage {
-	const validation = validateSetupPassword( value ?? '' );
+	const passwordValue = value ?? '';
+	if ( passwordValue.length === 0 ) {
+		return undefined;
+	}
+
+	const validation = validateSetupPassword( passwordValue );
 	if ( validation.valid ) {
 		return undefined;
 	}
 
 	if ( validation.reason === 'common-password' ) {
-		return 'That password is too common. Leave it blank to use the generated password, or choose another password.';
+		return 'That password is too common. Press Enter to use a generated password, or choose another password.';
 	}
 
-	return 'Password must be at least 10 characters, or blank to use the generated password.';
+	return 'Password must be at least 10 characters. Press Enter to use a generated password.';
 }
 
 async function promptPasswordUntil( label: string ): Promise<string> {
 	const hasSavedConfig = isConfigSaved();
 	const promptHelp = hasSavedConfig ?
 		'press Enter to keep existing password' :
-		'leave blank to use generated password';
+		'press Enter to use generated password';
 	const promptLabel = `${ label } (${ promptHelp })`;
 
 	if ( !input.isTTY ) {
@@ -214,7 +219,7 @@ async function promptPasswordUntil( label: string ): Promise<string> {
 			return value;
 		}
 
-		log.error( 'Passwords do not match. Try again, or leave the password blank to generate one.' );
+		log.error( 'Passwords do not match. Try again, or press Enter to generate one.' );
 	}
 }
 
@@ -275,7 +280,7 @@ async function gatherConfig(): Promise<CliConfigInput> {
 
 	const MW_ADMIN_NAME = await promptUntil(
 		'Admin username',
-		defaults.MW_ADMIN_NAME || 'Admin',
+		defaults.MW_ADMIN_NAME || '',
 		isValidAdminUsername,
 		'Admin username must be at least 4 characters and use MediaWiki-compatible characters.'
 	);
@@ -314,7 +319,7 @@ async function gatherConfig(): Promise<CliConfigInput> {
 async function main(): Promise<void> {
 	showIntro();
 	const inputConfig = await gatherConfig();
-	const { configText } = getConfig( inputConfig );
+	const { configText } = getConfig( inputConfig, { generateMissingPasswords: true } );
 	saveConfigText( configText );
 
 	if ( input.isTTY ) {

@@ -5,17 +5,31 @@
 				<h2>Set up database credentials</h2>
 				<p>
 					Wikibase stores data in a MariaDB database. These credentials are used internally between
-					services. You can leave the generated passwords as they are.
+					services.
 				</p>
 			</header>
 
 			<div class="field-stack">
+				<password-field
+					:model-value="form.DB_PASS"
+					label="Database password"
+					description="Select Generate to create a secure unique password, or enter your own. Passwords must be at least 10 characters."
+					name="DB_PASS"
+					autocomplete="new-password"
+					:status="passwordStatus"
+					:disabled="disabled"
+					show-generate-button
+					@update:model-value="emit( 'update-field', 'DB_PASS', $event )"
+					@generate="emit( 'generate-password', 'DB_PASS' )"
+					@touch="emit( 'touch', 'DB_PASS' )"
+				/>
+
 				<validated-text-field
 					:model-value="form.DB_NAME"
 					label="Database name"
 					description="The name of the database that will store your Wikibase data."
 					name="DB_NAME"
-					placeholder="my_wiki"
+					placeholder="e.g. my_wiki"
 					autocomplete="off"
 					autocapitalize="off"
 					:status="textStatuses.DB_NAME"
@@ -29,26 +43,13 @@
 					label="Database user"
 					description="The username that Wikibase will use to connect to the database."
 					name="DB_USER"
-					placeholder="sqluser"
+					placeholder="e.g. sqluser"
 					autocomplete="username"
 					autocapitalize="off"
 					:status="textStatuses.DB_USER"
 					:disabled="disabled"
 					@update:model-value="emit( 'update-field', 'DB_USER', $event )"
 					@touch="emit( 'touch', 'DB_USER' )"
-				/>
-
-				<password-field
-					:model-value="form.DB_PASS"
-					label="Database password"
-					description="Leave blank to generate a secure password, or enter at least 10 characters."
-					name="DB_PASS"
-					placeholder="Password will be generated"
-					autocomplete="new-password"
-					:status="passwordStatus"
-					:disabled="disabled"
-					@update:model-value="emit( 'update-field', 'DB_PASS', $event )"
-					@touch="emit( 'touch', 'DB_PASS' )"
 				/>
 			</div>
 
@@ -104,6 +105,7 @@ defineProps<{
 
 const emit = defineEmits<{
 	'update-field': [ name: DatabaseFieldName, value: string ];
+	'generate-password': [ name: 'DB_PASS' ];
 	touch: [ name: DatabaseFieldName ];
 	back: [];
 	start: [];

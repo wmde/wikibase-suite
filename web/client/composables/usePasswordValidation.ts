@@ -45,8 +45,8 @@ export function usePasswordValidation() {
 
 		const password = value.trim();
 		if ( password === '' ) {
-			setStatus( name, 'valid' );
-			return 'valid';
+			setStatus( name, 'invalid' );
+			return 'invalid';
 		}
 
 		const localResult = validatePassword( password );
@@ -72,7 +72,7 @@ export function usePasswordValidation() {
 
 		const password = value.trim();
 		if ( password === '' ) {
-			setStatus( name, 'valid' );
+			setStatus( name, 'invalid' );
 			return;
 		}
 

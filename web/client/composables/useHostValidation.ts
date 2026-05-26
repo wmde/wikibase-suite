@@ -57,8 +57,8 @@ export function useHostValidation( isLocalhostSetup = false ) {
 
 		const hostname = value.trim();
 		if ( !hostname ) {
-			setStatus( name, 'neutral' );
-			return 'neutral';
+			setStatus( name, 'invalid' );
+			return 'invalid';
 		}
 
 		if ( !isValidSetupHostname( hostname, isLocalhostSetup ) ) {
@@ -83,7 +83,7 @@ export function useHostValidation( isLocalhostSetup = false ) {
 
 		const hostname = value.trim();
 		if ( !hostname ) {
-			setStatus( name, 'neutral' );
+			setStatus( name, 'invalid' );
 			return;
 		}
 

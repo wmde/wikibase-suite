@@ -8,10 +8,6 @@ export class SaveConfigError extends Error {
 	}
 }
 
-export function deriveWdqsHost( wikibaseHost: string ): string {
-	return wikibaseHost.trim() ? `query.${ wikibaseHost.trim() }` : '';
-}
-
 export function configToForm( config: Record<string, string> | null | undefined ): ConfigForm {
 	return {
 		...DEFAULT_FORM,

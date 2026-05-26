@@ -66,6 +66,7 @@
 						:disabled="configLocked"
 						@update-field="updateField"
 						@update-checkbox="form.METADATA_CALLBACK = $event"
+						@generate-password="generatePasswordForField"
 						@touch="touchField"
 						@back="currentStep = 1"
 						@continue="continueToDatabase"
@@ -79,6 +80,7 @@
 						:can-start="canStartSetup"
 						:disabled="configLocked"
 						@update-field="updateField"
+						@generate-password="generatePasswordForField"
 						@touch="touchField"
 						@back="currentStep = 2"
 						@start="startSetup"
@@ -115,7 +117,7 @@
 import { CdxMessage } from '@wikimedia/codex';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { HOST_VALIDATION_POLL_MS } from './constants';
-import { SaveConfigError, configToForm, deriveWdqsHost, fetchConfig, saveConfig } from './config';
+import { SaveConfigError, configToForm, fetchConfig, saveConfig } from './config';
 import { useHostValidation } from './composables/useHostValidation';
 import { usePasswordValidation } from './composables/usePasswordValidation';
 import { useSetupLog } from './composables/useSetupLog';
@@ -139,7 +141,7 @@ import WizardSteps from './components/WizardSteps.vue';
 
 type HostFieldName = 'WIKIBASE_PUBLIC_HOST' | 'WDQS_PUBLIC_HOST';
 type PasswordFieldName = 'MW_ADMIN_PASS' | 'DB_PASS';
-type PreferenceTextFieldName = 'MW_ADMIN_NAME' | 'DB_NAME' | 'DB_USER';
+type TextValidationFieldName = 'MW_ADMIN_NAME' | 'DB_NAME' | 'DB_USER';
 type DatabaseTextFieldName = 'DB_NAME' | 'DB_USER';
 type FormFieldName = keyof ConfigForm;
 
@@ -163,10 +165,8 @@ const configLocked = ref( initialSetupLocked );
 const setupComplete = ref( initialSetupComplete );
 const form = reactive<ConfigForm>( configToForm( null ) );
 const configText = ref( '' );
-const touchedFields = reactive<Record<string, boolean>>( {} );
 const dnsHelpOpen = ref( false );
 const logOpen = ref( false );
-const wdqsDefaulted = ref( true );
 const saveErrorMessage = ref( '' );
 const saveErrorDetails = ref<string[]>( [] );
 let pollTimer: number | undefined;
@@ -189,9 +189,6 @@ const steps = computed( () => [
 ] );
 
 const emailStatus = computed<FieldValidationStatus>( () => {
-	if ( !touchedFields.MW_ADMIN_EMAIL || form.MW_ADMIN_EMAIL.trim() === '' ) {
-		return 'neutral';
-	}
 	return isValidEmailAddress( form.MW_ADMIN_EMAIL ) ? 'valid' : 'invalid';
 } );
 
@@ -200,17 +197,17 @@ const passwordStatuses = computed<Record<PasswordFieldName, FieldValidationStatu
 	DB_PASS: passwordValidation.statuses.DB_PASS
 } ) );
 
-const preferenceTextStatuses = computed<Record<PreferenceTextFieldName, FieldValidationStatus>>( () => ( {
-	MW_ADMIN_NAME: getPreferenceTextStatus( 'MW_ADMIN_NAME' ),
-	DB_NAME: getPreferenceTextStatus( 'DB_NAME' ),
-	DB_USER: getPreferenceTextStatus( 'DB_USER' )
+const textStatuses = computed<Record<TextValidationFieldName, FieldValidationStatus>>( () => ( {
+	MW_ADMIN_NAME: getTextStatus( 'MW_ADMIN_NAME' ),
+	DB_NAME: getTextStatus( 'DB_NAME' ),
+	DB_USER: getTextStatus( 'DB_USER' )
 } ) );
 
-const adminNameStatus = computed<FieldValidationStatus>( () => preferenceTextStatuses.value.MW_ADMIN_NAME );
+const adminNameStatus = computed<FieldValidationStatus>( () => textStatuses.value.MW_ADMIN_NAME );
 
 const databaseTextStatuses = computed<Record<DatabaseTextFieldName, FieldValidationStatus>>( () => ( {
-	DB_NAME: preferenceTextStatuses.value.DB_NAME,
-	DB_USER: preferenceTextStatuses.value.DB_USER
+	DB_NAME: textStatuses.value.DB_NAME,
+	DB_USER: textStatuses.value.DB_USER
 } ) );
 
 const displayedHostStatuses = computed<Record<HostFieldName, FieldValidationStatus>>( () => ( {
@@ -243,18 +240,11 @@ const databaseReady = computed( () => (
 const canStartSetup = computed( () => domainReady.value && accountReady.value && databaseReady.value );
 
 function isPasswordAccepted( name: PasswordFieldName ): boolean {
-	if ( form[ name ].trim() === '' ) {
-		return true;
-	}
 	return passwordValidation.statuses[ name ] === 'valid';
 }
 
-function getPreferenceTextStatus( name: PreferenceTextFieldName ): FieldValidationStatus {
-	if ( form[ name ].trim() === '' ) {
-		return touchedFields[ name ] ? 'invalid' : 'neutral';
-	}
-
-	const validators: Record<PreferenceTextFieldName, ( value: string ) => boolean> = {
+function getTextStatus( name: TextValidationFieldName ): FieldValidationStatus {
+	const validators: Record<TextValidationFieldName, ( value: string ) => boolean> = {
 		MW_ADMIN_NAME: isValidAdminUsername,
 		DB_NAME: isValidDatabaseName,
 		DB_USER: isValidDatabaseUser
@@ -263,8 +253,7 @@ function getPreferenceTextStatus( name: PreferenceTextFieldName ): FieldValidati
 	return validators[ name ]( form[ name ] ) ? 'valid' : 'invalid';
 }
 
-function touchField( name: FormFieldName ): void {
-	touchedFields[ name ] = true;
+function touchField( _name: FormFieldName ): void {
 }
 
 function updateField( name: FormFieldName, value: string ): void {
@@ -273,23 +262,29 @@ function updateField( name: FormFieldName, value: string ): void {
 
 	if ( name === 'WIKIBASE_PUBLIC_HOST' ) {
 		hostValidation.scheduleValidation( name, value );
-		if ( wdqsDefaulted.value ) {
-			form.WDQS_PUBLIC_HOST = deriveWdqsHost( value );
-			hostValidation.scheduleValidation( 'WDQS_PUBLIC_HOST', form.WDQS_PUBLIC_HOST );
-		}
 	}
 
 	if ( name === 'WDQS_PUBLIC_HOST' ) {
-		wdqsDefaulted.value = value.trim() === '';
-		if ( wdqsDefaulted.value ) {
-			form.WDQS_PUBLIC_HOST = deriveWdqsHost( form.WIKIBASE_PUBLIC_HOST );
-		}
 		hostValidation.scheduleValidation( 'WDQS_PUBLIC_HOST', form.WDQS_PUBLIC_HOST );
 	}
 
 	if ( name === 'MW_ADMIN_PASS' || name === 'DB_PASS' ) {
 		passwordValidation.scheduleValidation( name, value );
 	}
+}
+
+function generateSecurePassword(): string {
+	const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+	const bytes = new Uint8Array( 24 );
+	window.crypto.getRandomValues( bytes );
+	return Array.from( bytes, ( byte ) => alphabet[ byte % alphabet.length ] ).join( '' );
+}
+
+function generatePasswordForField( name: PasswordFieldName ): void {
+	const password = generateSecurePassword();
+	touchField( name );
+	updateField( name, password );
+	void passwordValidation.validateNow( name, password );
 }
 
 async function flushHost( name: HostFieldName ): Promise<void> {
@@ -400,7 +395,6 @@ async function hydrateInitialConfig(): Promise<void> {
 	if ( response ) {
 		Object.assign( form, configToForm( response.config ) );
 		configText.value = response.configText || '';
-		wdqsDefaulted.value = form.WDQS_PUBLIC_HOST.trim() === '';
 	}
 
 	await Promise.all( [

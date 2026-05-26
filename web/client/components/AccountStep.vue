@@ -11,11 +11,25 @@
 
 			<div class="field-stack">
 				<validated-text-field
+					:model-value="form.MW_ADMIN_EMAIL"
+					label="Email address"
+					description="Used for password resets and system notifications."
+					input-type="email"
+					name="MW_ADMIN_EMAIL"
+					placeholder="e.g. admin@example.org"
+					autocomplete="email"
+					:status="emailStatus"
+					:disabled="disabled"
+					@update:model-value="emit( 'update-field', 'MW_ADMIN_EMAIL', $event )"
+					@touch="emit( 'touch', 'MW_ADMIN_EMAIL' )"
+				/>
+
+				<validated-text-field
 					:model-value="form.MW_ADMIN_NAME"
 					label="Username"
-					description="Publicly visible as the author of edits. Can contain letters, numbers, and spaces."
+					description="At least 4 characters. Publicly visible as the author of edits."
 					name="MW_ADMIN_NAME"
-					placeholder="Admin"
+					placeholder="e.g. admin"
 					autocomplete="username"
 					autocapitalize="off"
 					:status="textStatus"
@@ -24,30 +38,17 @@
 					@touch="emit( 'touch', 'MW_ADMIN_NAME' )"
 				/>
 
-				<validated-text-field
-					:model-value="form.MW_ADMIN_EMAIL"
-					label="Email address"
-					description="Used for password resets and system notifications."
-					input-type="email"
-					name="MW_ADMIN_EMAIL"
-					placeholder="admin@example.org"
-					autocomplete="email"
-					:status="emailStatus"
-					:disabled="disabled"
-					@update:model-value="emit( 'update-field', 'MW_ADMIN_EMAIL', $event )"
-					@touch="emit( 'touch', 'MW_ADMIN_EMAIL' )"
-				/>
-
 				<password-field
 					:model-value="form.MW_ADMIN_PASS"
 					label="Password"
-					description="Leave blank to generate a secure password, or enter at least 10 characters."
+					description="Select Generate to create a secure unique password, or enter your own. Passwords must be at least 10 characters."
 					name="MW_ADMIN_PASS"
-					placeholder="Password will be generated"
 					autocomplete="new-password"
 					:status="passwordStatus"
 					:disabled="disabled"
+					show-generate-button
 					@update:model-value="emit( 'update-field', 'MW_ADMIN_PASS', $event )"
+					@generate="emit( 'generate-password', 'MW_ADMIN_PASS' )"
 					@touch="emit( 'touch', 'MW_ADMIN_PASS' )"
 				/>
 			</div>
@@ -107,6 +108,7 @@ defineProps<{
 const emit = defineEmits<{
 	'update-field': [ name: AccountFieldName, value: string ];
 	'update-checkbox': [ value: boolean ];
+	'generate-password': [ name: 'MW_ADMIN_PASS' ];
 	touch: [ name: AccountFieldName ];
 	back: [];
 	continue: [];

@@ -35,10 +35,10 @@
 							</div>
 						</div>
 						<p class="complete-checklist__description">
-							After this step, the passwords for your admin account and database will be hidden from the setup file on the server. Download or copy this configuration file now and store it somewhere secure.
+							This configuration file is the <code>.env</code> file used to start your Wikibase Suite services. It contains the hostnames and passwords entered or generated during setup.
 						</p>
 						<p class="complete-checklist__description">
-							You will need this file to re-create the same configuration during major upgrades or when setting up a replacement server.
+							Download or copy it now and store it somewhere secure. You may need it for recovery, migration, troubleshooting, or setting up a replacement server.
 						</p>
 						<div class="save-config-actions">
 							<a

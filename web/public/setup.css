@@ -8,6 +8,7 @@
 
 body {
   min-height: 100vh;
+  min-width: 600px;
   margin: 0;
   background-color: #fff;
   background-image:
@@ -359,34 +360,6 @@ body {
   gap: 18px;
 }
 
-.field-section {
-  display: grid;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--border-color-subtle, #c8ccd1);
-  border-radius: 10px;
-  background: var(--background-color-neutral-subtle, #f8f9fa);
-}
-
-.field-section__header {
-  display: grid;
-  gap: 6px;
-}
-
-.field-section__header h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  line-height: 1.3;
-}
-
-.field-section__header p {
-  max-width: 46rem;
-  margin: 0;
-  color: var(--color-subtle, #54595d);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
 .dns-help-inline {
   margin: 0;
   border: 0;
@@ -495,8 +468,16 @@ body {
   }
 }
 
+.password-field__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
 .password-field__control {
   position: relative;
+  min-width: 0;
 }
 
 .password-field__control .cdx-text-input__input {
@@ -553,6 +534,43 @@ body {
 
 .password-toggle:disabled {
   color: var(--color-disabled, #a2a9b1);
+  cursor: default;
+}
+
+.password-generate-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  margin: 0;
+  border: 1px solid var(--border-color-base, #72777d);
+  border-radius: 2px;
+  padding: 5px 10px;
+  background: var(--background-color-interactive-subtle, #f8f9fa);
+  color: var(--color-base, #202122);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.password-generate-button:hover,
+.password-generate-button:focus {
+  background: var(--background-color-interactive-subtle--hover, #eaecf0);
+}
+
+.password-generate-button:focus {
+  outline: 1px solid transparent;
+  box-shadow: inset 0 0 0 1px var(--box-shadow-color-progressive--focus, #36c);
+}
+
+.password-generate-button:disabled {
+  border-color: var(--border-color-disabled, #c8ccd1);
+  background: var(--background-color-disabled-subtle, #eaecf0);
+  color: var(--color-disabled, #72777d);
   cursor: default;
 }
 
@@ -1003,14 +1021,17 @@ body {
     width: 132px;
   }
 
-  .wizard-card,
-  .wizard-progress {
-    grid-template-columns: 1fr;
+  .wizard-progress-area {
+    padding-right: 16px;
+    padding-left: 16px;
   }
 
   .wizard-card {
-    width: calc(100vw - 32px);
-    max-width: 100%;
+    width: 100%;
     padding: 16px;
+  }
+
+  .password-field__row {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
