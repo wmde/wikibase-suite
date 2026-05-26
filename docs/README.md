@@ -1,17 +1,17 @@
 # Documentation Overview
 
-This is the front door for evaluating WBS Deploy Setup.
+This is the front door for evaluating the Wikibase Suite Installer.
 
 ## Start Here
 
 - [`adrs/0001-setup-tool-eval1.md`](adrs/0001-setup-tool-eval1.md)
-  - Eval 1 review and response record for the setup tool.
+  - Eval 1 review and response record for the installer UI.
 - [`adrs/0002-wbs-deploy-setup-dokploy.md`](adrs/0002-wbs-deploy-setup-dokploy.md)
   - Rejected Dokploy-based variant kept as reference.
 - [`adrs/0003-research-deploy-product-repository-proposal.md`](adrs/0003-research-deploy-product-repository-proposal.md)
   - Decision to research and write a proposal for a dedicated Deploy product repository.
 - [`adrs/0004-proposal-deploy-product-repository.md`](adrs/0004-proposal-deploy-product-repository.md)
-  - Draft proposal for moving Deploy and the setup tool into one product repository.
+  - Draft proposal for moving Deploy and the installer into one product repository.
 
 ## ADR Structure Rules
 

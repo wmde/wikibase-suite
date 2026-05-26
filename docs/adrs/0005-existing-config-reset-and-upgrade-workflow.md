@@ -8,9 +8,9 @@ proposed
 
 ## Context
 
-The setup tool currently focuses on first-time installation: collect values, write the Deploy `.env` file, start services, and then hide passwords from the server-side setup file after completion.
+The Wikibase Suite Installer currently focuses on first-time installation: collect values, write the Deploy `.env` file, start services, and then hide passwords from the server-side configuration file after completion.
 
-The same setup tool could solve a larger operational problem if it understood an existing `.env` file as a reusable server configuration. That file is not only a record of the user's choices; it is the configuration needed to recreate the same server shape for a major upgrade, replacement server, or reset.
+The same installer could solve a larger operational problem if it understood an existing `.env` file as a reusable server configuration. That file is not only a record of the user's choices; it is the configuration needed to recreate the same server shape for a major upgrade, replacement server, or reset.
 
 There are two related product problems:
 
@@ -18,19 +18,19 @@ There are two related product problems:
 
 2. A user may need an orchestrated major-upgrade path where the tool can back up existing data, reset the running installation, recreate the configured service layout, and potentially restore data afterward.
 
-Today, the destructive reset steps are operationally real but not yet represented as a guided product workflow. A full reset means stopping services with Docker Compose, removing volumes, and removing `config/LocalSettings.php` from the Deploy directory. This removes the existing database data and also removes any local configuration that was added to `LocalSettings.php` outside the setup values.
+Today, the destructive reset steps are operationally real but not yet represented as a guided product workflow. A full reset means stopping services with Docker Compose, removing volumes, and removing `config/LocalSettings.php` from the Deploy directory. This removes the existing database data and also removes any local configuration that was added to `LocalSettings.php` outside the first-start values.
 
 Changing values in `.env` also has a significant implication: some changes cannot safely apply to an already-running install without fully resetting the installation. Users need a clearer path that explains when existing data and local configuration will be removed, and what backup or restore steps are available.
 
 ## Decision
 
-Treat existing configuration detection, validation, reset, and upgrade orchestration as a future setup-tool workflow.
+Treat existing configuration detection, validation, reset, and upgrade orchestration as a future installer workflow.
 
-The setup tool should eventually detect whether a `.env` file already exists in the expected location. After the welcome screen, or as part of the welcome screen, it should validate that file and make the user's situation explicit.
+The installer should eventually detect whether a `.env` file already exists in the expected location. After the welcome screen, or as part of the welcome screen, it should validate that file and make the user's situation explicit.
 
-If no `.env` file exists, the setup tool should continue through the current first-time setup flow.
+If no `.env` file exists, the installer should continue through the current first-time installation flow.
 
-If a valid `.env` file exists, the setup tool should be able to offer a controlled path for using that configuration again. A minimal first version may only validate and display that an existing configuration was found, then ask whether the user wants to continue using it.
+If a valid `.env` file exists, the installer should be able to offer a controlled path for using that configuration again. A minimal first version may only validate and display that an existing configuration was found, then ask whether the user wants to continue using it.
 
 A later version should support a deliberate reset path. Before any destructive action, the UI must present a loud confirmation step explaining that the reset will stop services, remove Docker volumes, remove `config/LocalSettings.php`, remove existing data, and recreate the instance from the `.env` configuration.
 
@@ -39,7 +39,7 @@ The reset path should not be treated as only an installation convenience. It is 
 - identify the existing configuration
 - validate it
 - detect whether related Docker Compose services are running
-- detect whether containers or services already exist that would conflict with setup
+- detect whether containers or services already exist that would conflict with installation
 - back up databases before destructive reset
 - clearly tell the user where backups are stored
 - reset the installation
