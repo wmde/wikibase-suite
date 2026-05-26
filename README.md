@@ -53,7 +53,7 @@ Examples:
 - Wikibase: `yourdomain.example`
 - Query service: `query.yourdomain.example`
 
-In your DNS provider's control panel, create two `A` records, one for each hostname. Point both records to your server's public IP address. Note that DNS record changes may take a few minutes to propagate.
+In your DNS provider's control panel, create two records of either `A` or `CNAME` type, one for each hostname. Point both records to your server's public IP address. Note that DNS record changes may take a few minutes to propagate.
 
 > [!NOTE]
 > Your DNS provider may call the IP address field `value`, `content`, `address`, or `points to`. Use only the server's public IP address as the value.
