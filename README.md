@@ -56,53 +56,40 @@ in `installer/`.
 ### Initial Setup
 
 - [x] Create the transition repository.
-
 - [x] Import Deploy from `wmde/wikibase-release-pipeline/deploy` into `deploy/`.
-
 - [x] Import the installer from `wmde/wbs-deploy-setup` into `installer/`.
-
 - [x] Preserve upstream links during transition so both source projects can still receive
   active changes.
-  
 - [x] Add a source-update script for pulling ongoing Deploy and installer changes.
-
 - [x] Rename the imported installer directory from `install/` to `installer/`.
-
 - [ ] Continue running `update-from-sources.sh` until the upstream Deploy and installer
   changes are settled.
-
 - [ ] Flatten `deploy/` into the repository root once source synchronization from
   `wikibase-release-pipeline/deploy` is no longer needed, including moving
   `deploy/docs/` to root `docs/`.
 
-  ### Documentation Updates
+### Documentation Updates
 
 - [ ] Move the manual Deploy installation flow out of the root README and into its own
-	documentation page as the alternate installation path.
-
+  documentation page as the alternate installation path.
 - [ ] Fold the useful content from `installer/README.md` into the final root README forwarding the installer path as the suggested installation method and the Manual Installation as an alternative option.
-
 - [ ] Update any internal document links that may point at `wikibase-release-pipeline/deploy`
 
-	### Release Process Updates
+### Release Process Updates
 
 - [ ] Update the `wikibase-release-pipeline` release process so Deploy releases are
-	derived from and tagged on the new repository location.
-
+  derived from and tagged on the new repository location.
 - [ ] Update the `wikibase-release-pipeline` integration test harness to pull Deploy
   configuration from this repository instead of reading from a local `deploy/` directory.
-
 - [ ] In a transition branch of `wikibase-release-pipeline`, replace the old `deploy/` content with a short
   `deploy/README.md` notice that points users to the new repository.
 
-  ### Initial Release
-  
+### Initial Release
+
 - [ ] Update public install instructions and any other references to the old Deploy
   location.
-
 - [ ] Coordinate the merge of the release-pipeline transition branch with communication
-	about the new Deploy and installer location.
-
+  about the new Deploy and installer location.
 - [ ] Announce the new repository location when the final repository shape, release
   process, and documentation links are ready.
 
@@ -110,4 +97,3 @@ in `installer/`.
 
 - Does the Installer need it own `package.json` so it can be versioned independent of WBS versions? If not do we move WBS versions (presumably always and only PATCH or MINOR updates) when we make Installer updates.
 - Does the `wikibase-suite` repo want its own versioning scripts, tests, or Github Actions / release workflow?
-
