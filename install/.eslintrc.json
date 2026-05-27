@@ -1,0 +1,68 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/selenium",
+		"wikimedia/language/es2019",
+		"@wmde/wikimedia-typescript"
+	],
+	"ignorePatterns": [
+		"node_modules",
+		"**/results/result.json",
+		"!.github/**/**",
+		"deploy/config/extensions",
+		"deploy/setup/letsencrypt",
+		"deploy/setup/certs",
+		"cloud-init.yml",
+		"package-lock.json",
+		"pnpm/**/**",
+		"pnpm-lock.yaml",
+		"*.properties"
+	],
+	"parserOptions": {
+		"sourceType": "module",
+		"allowImportExportEverywhere": true,
+		"ecmaVersion": "latest"
+	},
+	"rules": {
+		"mocha/no-setup-in-describe": "warn",
+		"node/no-missing-import": "off",
+		"wdio/no-pause": "warn",
+		"es-x/no-import-meta": "off",
+		"es-x/no-nullish-coalescing-operators": "off",
+		"es-x/no-class-fields": "off",
+		"no-mixed-spaces-and-tabs": [ "error", "smart-tabs" ],
+		"eol-last": [ "error", "always" ]
+	},
+	"overrides": [
+		{
+			"files": [ "*.json" ],
+			"rules": {
+				"array-bracket-spacing": "off",
+				"quotes": "off",
+				"quote-props": [ "error", "consistent" ],
+				"@typescript-eslint/semi": "off",
+				"no-unused-expressions": "off"
+			}
+		},
+		{
+			"files": [ "*.yaml", "*.yml" ],
+			"parser": "yaml-eslint-parser",
+			"rules": {
+				"max-len": "off",
+				"spaced-comment": "off",
+				"yml/block-sequence": 1,
+				"yml/no-empty-mapping-value": 1,
+				"yml/plain-scalar": 1
+			}
+		},
+		{
+			"files": [ "docker-compose*.yaml", "docker-compose*.yml" ],
+			"parser": "yaml-eslint-parser",
+			"rules": {
+				"yml/indent": 1,
+				"yml/no-empty-mapping-value": "off",
+				"yml/plain-scalar": "off"
+			}
+		}
+	]
+}

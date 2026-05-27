@@ -1,0 +1,44 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+pnpm
+.pnpm-store
+*.swp
+.direnv
+
+local.env
+**/.env
+
+deploy/log
+deploy/config/*.ini
+deploy/config/*.json
+deploy/config/*.php
+deploy/config/extensions
+
+test/log
+test/mwlog
+test/suites/config
+test/suites/**/results/
+
+# dependencies
+node_modules
+web/dist/
+web/public/assets/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+npm-debug.log
+docs/eval-one-scraps.md
+new mockups/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.nx/cache
+.nx/workspace-data

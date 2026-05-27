@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo
+echo "Wikibase Suite Installer"
+echo
+echo "→ Installs Git if not already installed"
+echo "→ Checks-out the wikibase-release-pipeline repository"
+echo "→ Installs Docker if not already installed"
+echo "→ Starts a setup wizard where you can complete configuration"
+echo "→ Launches Wikibase Suite, notifying when the services are available"
+echo
+echo "Let's get started!"
+echo
+
+# --- Parse CLI Arguments ---
+
+START_ARGS=("$@")
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --cli)
+      CLI=true
+      ;;
+    --web)
+      CLI=false
+      ;;
+    --dev)
+      DEV=true
+      LOCALHOST=true
+      SKIP_DEPENDENCY_INSTALLS=true
+      ;;
+    --reset)
+      RESET=true
+      ;;
+    --skip-clone)
+      SKIP_CLONE=true
+      ;;
+    --skip-deps)
+      SKIP_DEPENDENCY_INSTALLS=true
+      ;;
+    --skip-launch)
+      SKIP_LAUNCH=true
+      ;;
+    --deploy-ref)
+      if [[ -z "${2:-}" ]]; then
+        echo "⚠️ --deploy-ref requires a branch or tag name."
+        exit 1
+      fi
+      DEPLOY_REF="$2"
+      shift
+      ;;
+    --deploy-ref=*)
+      DEPLOY_REF="${1#*=}"
+      if [[ -z "$DEPLOY_REF" ]]; then
+        echo "⚠️ --deploy-ref requires a branch or tag name."
+        exit 1
+      fi
+      ;;
+    --debug)
+      DEBUG=true
+      ;;
+    --local)
+      LOCALHOST=true
+      ;;
+  esac
+  shift
+done
+
+# When a wikibase-release-pipeline checkout is available
+# in the parent directory use the parent directory as WBS_DIR
+# and use the repo there instead of cloning again
+if [[ -d "$(dirname "${BASH_SOURCE[0]}")/../wikibase-release-pipeline/.git" ]]; then
+  WBS_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+  SKIP_CLONE=true
+  echo "⚠️ Using an existing checkout of wikibase-release-pipeline (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
+fi
+
+# --- Setup variables (including defaults) ---
+
+SETUP_REPO_URL="${SETUP_REPO_URL:-https://github.com/wmde/wbs-deploy-setup.git}"
+REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
+DEPLOY_REF="${DEPLOY_REF:-"deploy@7.0.0"}"
+SKIP_CLONE="${SKIP_CLONE:-false}"
+WBS_DIR="${WBS_DIR:-$HOME/wbs}"
+
+export CLI="${CLI:-true}"
+export DEV="${DEV:-false}"
+export DEBUG="${DEBUG:-false}"
+export LOCALHOST="${LOCALHOST:-false}"
+export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"
+export SKIP_LAUNCH="${SKIP_LAUNCH:-false}"
+export RESET="${RESET:-false}"
+
+export SETUP_DIR="${SETUP_DIR:-$WBS_DIR/wbs-deploy-setup}"
+export DEPLOY_DIR="${DEPLOY_DIR:-$WBS_DIR/wikibase-release-pipeline/deploy}"
+export ENV_FILE_PATH="$DEPLOY_DIR/.env"
+export SCRIPTS_DIR="$SETUP_DIR/scripts"
+
+# --- Functions ---
+
+install_git() {
+  if command -v git >/dev/null 2>&1; then
+    return
+  fi
+
+  echo "Installing Git..."
+
+  if command -v apt-get >/dev/null 2>&1; then
+    # Debian / Ubuntu
+    apt-get update >/dev/null 2>&1 || true
+    apt-get install -y git >/dev/null 2>&1
+  elif command -v dnf >/dev/null 2>&1; then
+    # Fedora / RHEL 8+ / Rocky / Alma
+    dnf install -y git >/dev/null 2>&1
+  elif command -v yum >/dev/null 2>&1; then
+    # CentOS 7 / Amazon Linux 2 / older RHEL-family (yum-based)
+    # - Legacy yum path; installs Git from the default repos.
+    #   On older CentOS 7 this will be an older Git version, but usually fine.
+    yum install -y git >/dev/null 2>&1
+  else
+    echo "⚠️ Unsupported package manager. Please install Git manually."
+    exit 1
+  fi
+}
+
+clone_repo() {
+  echo "Cloning repository to $WBS_DIR..."
+  mkdir -p "$WBS_DIR"
+  pushd "$WBS_DIR" >/dev/null || return 1
+
+  git clone --branch main --single-branch "$SETUP_REPO_URL" --depth 1 >/dev/null 2>&1
+
+  if [ ! -d wikibase-release-pipeline/.git ]; then
+    echo "Checking out wikibase-release-pipeline at $DEPLOY_REF..."
+    git clone --branch "$DEPLOY_REF" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
+  else
+    echo "⚠️ An existing git repository found at $WBS_DIR/wikibase-release-pipeline, using what is there ..."
+  fi
+
+  popd >/dev/null || return 1
+}
+
+# --- Execution ---
+
+if ! $SKIP_DEPENDENCY_INSTALLS; then
+  install_git
+fi
+
+if ! $SKIP_CLONE; then
+  clone_repo
+fi
+
+exec bash "$SCRIPTS_DIR/setup.sh" "${START_ARGS[@]}"
