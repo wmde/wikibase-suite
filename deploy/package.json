@@ -1,0 +1,12 @@
+{
+	"name": "deploy",
+	"version": "7.0.0",
+	"nx": {
+		"targets": {
+			"lint": {},
+			"nx-release-publish": {
+				"command": "echo \"⚠️ Make sure to updated related documentation to point to new Deploy release (nothing changed)\""
+			}
+		}
+	}
+}

@@ -1,0 +1,212 @@
+name: wbs-deploy
+
+services:
+  # --------------------------------------------------
+  # A. CORE WIKIBASE SUITE SERVICES
+  # --------------------------------------------------
+
+  wikibase:
+    image: wikibase/wikibase:7
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./config:/config:z
+      - ./config/extensions:/var/www/html/extensions/extensions:z
+      - ./config/Extensions.php:/var/www/html/LocalSettings.d/90_UserDefinedExtensions.php:z
+      - wikibase-image-data:/var/www/html/images
+      - quickstatements-data:/quickstatements/data
+    environment:
+      # Keep in sync with deploy/package.json version
+      DEPLOY_VERSION: "7.0.0"
+      METADATA_CALLBACK: ${METADATA_CALLBACK}
+      MW_ADMIN_NAME: ${MW_ADMIN_NAME}
+      MW_ADMIN_PASS: ${MW_ADMIN_PASS}
+      MW_ADMIN_EMAIL: ${MW_ADMIN_EMAIL}
+      MW_WG_SERVER: https://${WIKIBASE_PUBLIC_HOST}
+      DB_SERVER: mysql:3306
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      ELASTICSEARCH_HOST: elasticsearch
+      QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
+      WDQS_PUBLIC_ENDPOINT_URL: https://${WDQS_PUBLIC_HOST}/sparql
+      WDQS_PUBLIC_FRONTEND_URL: https://${WDQS_PUBLIC_HOST}
+    healthcheck:
+      test: curl --silent --fail localhost/wiki/Main_Page
+      interval: 10s
+      start_period: 5m
+
+  wikibase-jobrunner:
+    image: wikibase/wikibase:7
+    command: /jobrunner-entrypoint.sh
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes_from:
+      - wikibase
+
+  mysql:
+    image: mariadb:10.11
+    restart: unless-stopped
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_RANDOM_ROOT_PASSWORD: yes
+    healthcheck:
+      test: healthcheck.sh --connect --innodb_initialized
+      start_period: 1m
+      interval: 20s
+      timeout: 5s
+
+  # --------------------------------------------------
+  # B. EXTRA WIKIBASE SUITE SERVICES
+  # --------------------------------------------------
+
+  # To disable Elasticsearch and use default MediaWiki search functionality remove
+  # the elasticsearch service, and the MW_ELASTIC_* vars from wikibase_variables
+  # at the top of this file.
+  elasticsearch:
+    image: wikibase/elasticsearch:1
+    restart: unless-stopped
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true
+    healthcheck:
+      test: curl --silent --fail localhost:9200
+      interval: 10s
+      start_period: 2m
+
+  wdqs:
+    image: wikibase/wdqs:2
+    command: /runBlazegraph.sh
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: unless-stopped
+    # Set number of files ulimit high enough, otherwise blazegraph will abort with:
+    # library initialization failed - unable to allocate file descriptor table - out of memory
+    # Appeared on Docker 24.0.5, containerd 1.7.9, Linux 6.6.6, NixOS 23.11
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    volumes:
+      - wdqs-data:/wdqs/data
+    healthcheck:
+      test: curl --silent --fail localhost:9999/bigdata/namespace/wdq/sparql
+      interval: 10s
+      start_period: 2m
+
+  wdqs-updater:
+    image: wikibase/wdqs:2
+    command: /runUpdate.sh
+    depends_on:
+      wdqs:
+        condition: service_healthy
+    restart: unless-stopped
+    # Set number of files ulimit high enough, otherwise blazegraph will abort with:
+    # library initialization failed - unable to allocate file descriptor table - out of memory
+    # Appeared on Docker 24.0.5, containerd 1.7.9, Linux 6.6.6, NixOS 23.11
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    environment:
+      WIKIBASE_CONCEPT_URI: https://${WIKIBASE_PUBLIC_HOST}
+
+  wdqs-frontend:
+    image: wikibase/wdqs-frontend:2
+    restart: unless-stopped
+    volumes:
+      - ./config:/config:z
+    environment:
+      WDQS_PUBLIC_URL: https://${WDQS_PUBLIC_HOST}/sparql
+      WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/w/api.php
+    healthcheck:
+      test: curl --silent --fail localhost
+      interval: 10s
+      start_period: 2m
+
+  quickstatements:
+    image: wikibase/quickstatements:1
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - quickstatements-data:/quickstatements/data
+    environment:
+      QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
+      WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}
+    healthcheck:
+      test: curl --silent --fail localhost
+      interval: 10s
+      start_period: 2m
+
+  # --------------------------------------------------
+  # C. REVERSE PROXY AND SSL SERVICES
+  # --------------------------------------------------
+
+  # This is the reverse proxy and SSL service
+  traefik:
+    image: traefik:3
+    command:
+      # traefik static configuration via command line
+      # enable accesslog
+      - "--accesslog.format=common"
+      # http endpoint
+      - "--entrypoints.web.address=:80"
+      # https endpoint
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.asdefault"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      # http to https redirect
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      # ACME SSL certificate generation
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${MW_ADMIN_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # additionial traefik dynamic configuration via config file
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      # Uncomment this line to only test ssl generation first, makes sure you don't run into letsencrypt rate limits
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # Uncomment the following line for debugging, also expose port 8080 below
+      # - "--api.dashboard=true"
+      # - "--api.insecure=true"
+      # - "--log.level=DEBUG"
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      # traefik dashboard
+      # - 8080:8080
+    volumes:
+      - ./config/traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - traefik-letsencrypt-data:/letsencrypt
+    environment:
+      WIKIBASE_PUBLIC_HOST: ${WIKIBASE_PUBLIC_HOST}
+      WDQS_PUBLIC_HOST: ${WDQS_PUBLIC_HOST}
+
+volumes:
+  # A. CORE WIKIBASE SUITE SERVICES DATA
+  wikibase-image-data:
+  mysql-data:
+  # B. EXTRA WIKIBASE SUITE SERVICES DATA
+  wdqs-data:
+  elasticsearch-data:
+  quickstatements-data:
+  # C. REVERSE PROXY AND SSL SERVICES DATA
+  traefik-letsencrypt-data:

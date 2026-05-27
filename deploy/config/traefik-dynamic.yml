@@ -1,0 +1,76 @@
+# traefik dynamic configuration
+
+http:
+  services:
+    wikibase:
+      loadBalancer:
+        servers:
+          - url: "http://wikibase:80"
+
+    wdqs:
+      loadBalancer:
+        servers:
+          - url: "http://wdqs:9999"
+
+    wdqs-frontend:
+      loadBalancer:
+        servers:
+          - url: "http://wdqs-frontend:80"
+
+    quickstatements:
+      loadBalancer:
+        servers:
+          - url: "http://quickstatements:80"
+
+  routers:
+    wikibase-router:
+      rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && !PathPrefix(`/tools`)'
+      service: wikibase
+
+    wdqs-router:
+      rule: 'Host(`{{ env "WDQS_PUBLIC_HOST" }}`) && PathPrefix(`/sparql`) && (Method(`GET`) || Method(`OPTIONS`) || Method(`POST`))'
+      service: wdqs
+      middlewares: [ wdqs-prefix, wdqs-headers, wdqs-cors-headers, wdqs-rate-limit ]
+
+    wdqs-frontend-router:
+      rule: 'Host(`{{ env "WDQS_PUBLIC_HOST" }}`) && !PathPrefix(`/sparql`)'
+      service: wdqs-frontend
+
+    quickstatements-router:
+      rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && PathPrefix(`/tools/quickstatements`)'
+      service: quickstatements
+      middlewares: [ quickstatements-redirectregex, quickstatements-stripprefix ]
+
+  middlewares:
+    wdqs-prefix:
+      addPrefix:
+        prefix: /bigdata/namespace/wdq/
+
+    wdqs-headers:
+      headers:
+        accessControlAllowMethods: "GET,OPTIONS,POST"
+        customResponseHeaders:
+          VARY: Accept
+        customRequestHeaders:
+          X-BIGDATA-READ-ONLY: yes
+          X-BIGDATA-MAX-QUERY-MILLIS: "300000"
+
+    wdqs-cors-headers:
+      headers:
+        accessControlAllowHeaders: "*"
+
+    wdqs-rate-limit:
+      rateLimit:
+        burst: 30
+        average: 60
+        period: 1m
+
+    quickstatements-redirectregex:
+      redirectRegex:
+        regex: /tools/quickstatements$
+        replacement: /tools/quickstatements/
+        permanent: true
+
+    quickstatements-stripprefix:
+      stripPrefix:
+        prefixes: [ /tools/quickstatements ]
