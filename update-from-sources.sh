@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INSTALL_REMOTE="${INSTALL_REMOTE:-installer}"
-INSTALL_BRANCH="${INSTALL_BRANCH:-main}"
+INSTALLER_REMOTE="${INSTALLER_REMOTE:-${INSTALL_REMOTE:-installer}}"
+INSTALLER_BRANCH="${INSTALLER_BRANCH:-${INSTALL_BRANCH:-main}}"
 DEPLOY_REMOTE="${DEPLOY_REMOTE:-deploy}"
 DEPLOY_BRANCH="${DEPLOY_BRANCH:-docs/critical-refinements}"
 DEPLOY_SPLIT_BRANCH="${DEPLOY_SPLIT_BRANCH:-import/deploy-split}"
-INSTALL_SYNC_REF="${INSTALL_SYNC_REF:-refs/source-sync/install}"
+INSTALLER_SYNC_REF="${INSTALLER_SYNC_REF:-${INSTALL_SYNC_REF:-refs/source-sync/installer}}"
+LEGACY_INSTALL_SYNC_REF="${LEGACY_INSTALL_SYNC_REF:-refs/source-sync/install}"
 DEPLOY_SYNC_REF="${DEPLOY_SYNC_REF:-refs/source-sync/deploy}"
 
 repo_root="$(git rev-parse --show-toplevel)"
@@ -36,26 +37,32 @@ last_subtree_split() {
 		head -n 1
 }
 
-echo "Fetching install source from $INSTALL_REMOTE/$INSTALL_BRANCH..."
-install_ref="refs/remotes/$INSTALL_REMOTE/$INSTALL_BRANCH"
-git fetch "$INSTALL_REMOTE" "refs/heads/$INSTALL_BRANCH:$install_ref"
-install_commit="$(git rev-parse --verify "$install_ref")"
-last_install_commit=""
-if git rev-parse --verify --quiet "$INSTALL_SYNC_REF" >/dev/null; then
-	last_install_commit="$(git rev-parse --verify "$INSTALL_SYNC_REF")"
+echo "Fetching installer source from $INSTALLER_REMOTE/$INSTALLER_BRANCH..."
+installer_ref="refs/remotes/$INSTALLER_REMOTE/$INSTALLER_BRANCH"
+git fetch "$INSTALLER_REMOTE" "refs/heads/$INSTALLER_BRANCH:$installer_ref"
+installer_commit="$(git rev-parse --verify "$installer_ref")"
+last_installer_commit=""
+if git rev-parse --verify --quiet "$INSTALLER_SYNC_REF" >/dev/null; then
+	last_installer_commit="$(git rev-parse --verify "$INSTALLER_SYNC_REF")"
+elif git rev-parse --verify --quiet "$LEGACY_INSTALL_SYNC_REF" >/dev/null; then
+	last_installer_commit="$(git rev-parse --verify "$LEGACY_INSTALL_SYNC_REF")"
 else
-	last_install_commit="$(last_subtree_split install)"
+	last_installer_commit="$(last_subtree_split installer)"
+	if [[ -z "$last_installer_commit" ]]; then
+		last_installer_commit="$(last_subtree_split install)"
+	fi
 fi
 
-if [[ "$last_install_commit" == "$install_commit" ]]; then
-	echo "No install changes since last successful sync; skipping install/."
+if [[ "$last_installer_commit" == "$installer_commit" ]]; then
+	echo "No installer changes since last successful sync; skipping installer/."
+	git update-ref "$INSTALLER_SYNC_REF" "$installer_commit"
 else
-	echo "Updating install/ from $INSTALL_REMOTE/$INSTALL_BRANCH..."
+	echo "Updating installer/ from $INSTALLER_REMOTE/$INSTALLER_BRANCH..."
 	git subtree pull \
-		--prefix=install \
-		"$INSTALL_REMOTE" "$INSTALL_BRANCH" \
-		-m "chore: update install from installer"
-	git update-ref "$INSTALL_SYNC_REF" "$install_commit"
+		--prefix=installer \
+		"$INSTALLER_REMOTE" "$INSTALLER_BRANCH" \
+		-m "chore: update installer from source"
+	git update-ref "$INSTALLER_SYNC_REF" "$installer_commit"
 fi
 
 echo

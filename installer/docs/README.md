@@ -10,8 +10,6 @@ This is the front door for evaluating the Wikibase Suite Installer.
   - Rejected Dokploy-based variant kept as reference.
 - [`adrs/0003-research-deploy-product-repository-proposal.md`](adrs/0003-research-deploy-product-repository-proposal.md)
   - Decision to research and write a proposal for a dedicated Deploy product repository.
-- [`adrs/0004-proposal-deploy-product-repository.md`](adrs/0004-proposal-deploy-product-repository.md)
-  - Draft proposal for moving Deploy and the installer into one product repository.
 
 ## ADR Structure Rules
 
