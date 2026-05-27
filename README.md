@@ -1,12 +1,7 @@
 # Wikibase Suite
 
-> [!IMPORTANT]
-> This repository is the working transition home for moving Wikibase Suite Deploy out of
-`wmde/wikibase-release-pipeline` and placing it beside the installer currently developed in `wmde/wbs-deploy-setup`.
-
-The intended product boundary is a focused Wikibase Suite repository containing the
-deployable configuration, installation tooling, and user-facing documentation for
-running a Wikibase Suite instance.
+This repository is the working transition home for moving Wikibase Suite Deploy out of
+`wmde/wikibase-release-pipeline` and placing it beside the installer currently developed in `wmde/wbs-deploy-setup`. The intended product boundary is a focused Wikibase Suite repository containing the deployable configuration, installation tooling, and user-facing documentation for running a Wikibase Suite instance.
 
 ## Why this move is happening
 
@@ -67,24 +62,27 @@ in `installer/`.
 - [ ] Flatten `deploy/` into the repository root once source synchronization from
   `wikibase-release-pipeline/deploy` is no longer needed, including moving
   `deploy/docs/` to root `docs/`.
+- [ ] Update installer runtime paths for the final repository layout: `DEPLOY_DIR` should point to the repository root, `SETUP_DIR` should point to `installer/`, cloning should target `wikibase-suite`, and local checkout detection should work from the new layout.
 
 ### Documentation Updates
 
 - [ ] Move the manual Deploy installation flow out of the root README and into its own
   documentation page as the alternate installation path.
-- [ ] Fold the useful content from `installer/README.md` into the final root README forwarding the installer path as the suggested installation method and the Manual Installation as an alternative option.
+- [ ] Fold the useful content from `installer/README.md` into the final root README, making the installer the recommended installation path and linking manual installation as the alternate path.
 - [ ] Update any internal document links that may point at `wikibase-release-pipeline/deploy`
+- [ ] In a transition branch of `wikibase-release-pipeline`, replace the old `deploy/` content with a short
+	`deploy/README.md` notice that points users to the new repository.
+- [ ] Document migration for existing Deploy users to update their git remote from `https://github.com/wmde/wikibase-suite` to `https://github.com/wmde/wikibase-suite`
 
 ### Release Process Updates
 
+- [ ] Rename product from "deploy" to "wikibase-suite" in `package.json`
 - [ ] Update the `wikibase-release-pipeline` release process so Deploy releases are
   derived from and tagged on the new repository location.
 - [ ] Update the `wikibase-release-pipeline` integration test harness to pull Deploy
   configuration from this repository instead of reading from a local `deploy/` directory.
-- [ ] In a transition branch of `wikibase-release-pipeline`, replace the old `deploy/` content with a short
-  `deploy/README.md` notice that points users to the new repository.
 
-### Initial Release
+### Release
 
 - [ ] Update public install instructions and any other references to the old Deploy
   location.
@@ -95,5 +93,6 @@ in `installer/`.
 
 ## Open Questions
 
-- Does the Installer need it own `package.json` so it can be versioned independent of WBS versions? If not do we move WBS versions (presumably always and only PATCH or MINOR updates) when we make Installer updates.
-- Does the `wikibase-suite` repo want its own versioning scripts, tests, or Github Actions / release workflow?
+- Does the Installer need its own `package.json` so it can be versioned independent of WBS versions? If not do we move WBS versions (presumably always and only PATCH or MINOR updates) when we make Installer updates.
+- Does the `wikibase-suite` repo want its own versioning scripts, tests, or GitHub Actions / release workflow?
+- Installer CLI ergonomics/naming is it called `installer` or `wbs` (preferred), and if `wbs` is the installer ran as `wbs install <--args>`. And should we reconsider the root directory name for all of that including the Installer Web UI to be something other than `installer/`?
