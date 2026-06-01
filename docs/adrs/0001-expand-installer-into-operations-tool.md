@@ -1,10 +1,10 @@
-# 4) Expand the Installer into an Operations Tool {#adr_0004}
+# 1) Expand the Installer into an Operations Tool {#adr_0001}
 
 Date: 2026-05-05
 
 ## Status
 
-proposed
+draft
 
 ## Context
 

@@ -33,4 +33,4 @@ During installation, it:
 Use this section only when you are developing, reviewing, or testing the installer.
 
 - [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, deploy refs, and other non-standard installation paths.
-- [docs/README.md](docs/README.md) links to additional implementation and project notes.
+- [docs/adrs/README.md](docs/adrs/README.md) lists architecture decision records.
