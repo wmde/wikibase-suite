@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Expected Variables ---
 
-export DEPLOY_DIR
+export WBS_DIR
 export DEBUG
 export LOCALHOST
 export LOG_PATH
@@ -17,7 +17,7 @@ source "$SCRIPTS_DIR/_logging.sh"
 # -- Script Specific Variables --
 
 SERVER_IP=$(curl --silent --show-error --fail https://api.ipify.org || echo "127.0.0.1")
-INSTALLER_IMAGE_NAME="${INSTALLER_IMAGE_NAME:-${SETUP_IMAGE_NAME:-wikibase/suite-installer-runtime}}"
+INSTALLER_IMAGE_NAME="${INSTALLER_IMAGE_NAME:-wikibase/suite-installer-runtime}"
 WEB_DIR="$INSTALLER_DIR/web"
 
 build_installer_runtime() {
@@ -44,7 +44,7 @@ run_cli_config() {
   docker run $TTY_FLAGS --rm \
     -e SERVER_IP="$SERVER_IP" \
     -e LOCALHOST="$LOCALHOST" \
-    -v "$DEPLOY_DIR:/app/deploy" \
+    -v "$WBS_DIR:/app/wbs" \
     -v "$LOG_PATH:/app/installation.log" \
     "$INSTALLER_IMAGE_NAME" \
     node dist/cli.js

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Expected Variables ---
 
-export DEPLOY_DIR
+export WBS_DIR
 export DEV
 export DEBUG
 export LOCALHOST
@@ -28,7 +28,7 @@ WEB_IMAGE_NAME="${WEB_IMAGE_NAME:-wikibase/suite-installer-webserver}"
 WEB_DIR="$INSTALLER_DIR/web"
 LE_DIR="$WEB_DIR/letsencrypt"
 CERTS_DIR="$WEB_DIR/certs"
-LAUNCH_TRIGGER_CONTAINER_PATH="/app/deploy/$(basename "${LAUNCH_TRIGGER_PATH:-.wbs-installer-launch-ready}")"
+LAUNCH_TRIGGER_CONTAINER_PATH="/app/wbs/$(basename "${LAUNCH_TRIGGER_PATH:-.wbs-installer-launch-ready}")"
 EXISTING_INSTALL_STATE="${EXISTING_INSTALL_STATE:-none}"
 
 # --- Functions ---
@@ -79,8 +79,8 @@ generate_cert_for_installer_webserver() {
 }
 
 remove_any_existing_installer_webserver() {
-  # Remove current and legacy installer containers with fixed names (running or exited).
-  run "docker rm -fv $INSTALLER_CONTAINER_NAME wbs-deploy-setup-webserver >/dev/null 2>&1 || true"
+  # Remove any existing installer container with our fixed name (running or exited).
+  run "docker rm -fv $INSTALLER_CONTAINER_NAME >/dev/null 2>&1 || true"
 
   # Optional: warn if the host port is already taken (by something else)
   if command -v lsof >/dev/null 2>&1; then
@@ -91,7 +91,7 @@ remove_any_existing_installer_webserver() {
 }
 
 compose_services_are_running() {
-  pushd "$DEPLOY_DIR" >/dev/null || return 1
+  pushd "$WBS_DIR" >/dev/null || return 1
 
   local compose_opts=()
   if [ -f "docker-compose.local.yml" ]; then
@@ -110,7 +110,7 @@ detect_existing_install_state() {
     echo "none"
   elif compose_services_are_running; then
     echo "running"
-  elif [ -f "$DEPLOY_DIR/config/LocalSettings.php" ]; then
+  elif [ -f "$WBS_DIR/config/LocalSettings.php" ]; then
     echo "previous"
   else
     echo "none"
@@ -143,7 +143,7 @@ start_installer_webserver() {
       -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
       -e DEV_SERVER=true \
       -p $INSTALLER_PORT:443 \
-      -v $DEPLOY_DIR:/app/deploy \
+      -v $WBS_DIR:/app/wbs \
       -v $CERTS_DIR:/app/certs \
       -v $LOG_PATH:/app/installation.log \
       -v $WEB_DIR:/src \
@@ -157,7 +157,7 @@ start_installer_webserver() {
       -e LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH \
       -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
       -p $INSTALLER_PORT:443 \
-      -v $DEPLOY_DIR:/app/deploy \
+      -v $WBS_DIR:/app/wbs \
       -v $CERTS_DIR:/app/certs \
       -v $LOG_PATH:/app/installation.log \
       $WEB_IMAGE_NAME"

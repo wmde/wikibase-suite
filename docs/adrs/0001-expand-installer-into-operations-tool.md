@@ -8,7 +8,7 @@ draft
 
 ## Context
 
-The Wikibase Suite Installer currently focuses on first-time installation. It provides CLI and web flows for collecting and validating configuration, writing a Deploy `.env` file, and starting services.
+The Wikibase Suite Installer currently focuses on first-time installation. It provides CLI and web flows for collecting and validating configuration, writing a Wikibase Suite `.env` file, and starting services.
 
 The same framework could support an existing Wikibase Suite installation. Operational tasks such as backup, repair, reset, reconfiguration, and major upgrades can require guided procedures and clear warnings. Some of these tasks are destructive or difficult to perform safely by hand.
 

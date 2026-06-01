@@ -20,7 +20,7 @@ During installation, it:
    bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/install)
    ```
 
-   *To install a specific Wikibase Suite branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
+   *To install a specific Wikibase Suite branch or tag, add `--wbs-ref REF`, for example `--wbs-ref deploy@7.0.0`.*
 
 3. Open the installer URL printed in the terminal and follow the browser steps.
 
@@ -32,5 +32,5 @@ During installation, it:
 
 Use this section only when you are developing, reviewing, or testing the installer.
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, deploy refs, and other non-standard installation paths.
+- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, WBS refs, and other non-standard installation paths.
 - [docs/adrs/README.md](docs/adrs/README.md) lists architecture decision records.

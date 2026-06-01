@@ -5,7 +5,7 @@ echo
 echo "Wikibase Suite Installer"
 echo
 echo "→ Installs Git if not already installed"
-echo "→ Checks-out the wikibase-release-pipeline repository"
+echo "→ Downloads Wikibase Suite"
 echo "→ Installs Docker if not already installed"
 echo "→ Starts an installer wizard where you can complete configuration"
 echo "→ Launches Wikibase Suite, notifying when the services are available"
@@ -42,18 +42,18 @@ while [[ $# -gt 0 ]]; do
     --skip-launch)
       SKIP_LAUNCH=true
       ;;
-    --deploy-ref)
+    --wbs-ref)
       if [[ -z "${2:-}" ]]; then
-        echo "⚠️ --deploy-ref requires a branch or tag name."
+        echo "⚠️ --wbs-ref requires a branch or tag name."
         exit 1
       fi
-      DEPLOY_REF="$2"
+      WBS_REF="$2"
       shift
       ;;
-    --deploy-ref=*)
-      DEPLOY_REF="${1#*=}"
-      if [[ -z "$DEPLOY_REF" ]]; then
-        echo "⚠️ --deploy-ref requires a branch or tag name."
+    --wbs-ref=*)
+      WBS_REF="${1#*=}"
+      if [[ -z "$WBS_REF" ]]; then
+        echo "⚠️ --wbs-ref requires a branch or tag name."
         exit 1
       fi
       ;;
@@ -68,21 +68,21 @@ while [[ $# -gt 0 ]]; do
 done
 
 # When a wikibase-release-pipeline checkout is available
-# in the parent directory use the parent directory as WBS_DIR
+# in the parent directory use the parent directory as WBS_ROOT_DIR
 # and use the repo there instead of cloning again
 if [[ -d "$(dirname "${BASH_SOURCE[0]}")/../wikibase-release-pipeline/.git" ]]; then
-  WBS_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+  WBS_ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
   SKIP_CLONE=true
-  echo "⚠️ Using an existing checkout of wikibase-release-pipeline (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
+  echo "⚠️ Using an existing Wikibase Suite checkout (SKIP_CLONE=true, WBS_ROOT_DIR=$WBS_ROOT_DIR)"
 fi
 
 # --- Installer variables (including defaults) ---
 
-INSTALLER_REPO_URL="${INSTALLER_REPO_URL:-${SETUP_REPO_URL:-https://github.com/wmde/wbs-deploy-setup.git}}"
-REPO_URL="${REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
-DEPLOY_REF="${DEPLOY_REF:-"deploy@7.0.0"}"
+INSTALLER_REPO_URL="${INSTALLER_REPO_URL:-https://github.com/wmde/wbs-deploy-setup.git}"
+WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
+WBS_REF="${WBS_REF:-"deploy@7.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
-WBS_DIR="${WBS_DIR:-$HOME/wbs}"
+WBS_ROOT_DIR="${WBS_ROOT_DIR:-$HOME/wbs}"
 
 export CLI="${CLI:-false}"
 export DEV="${DEV:-false}"
@@ -92,9 +92,9 @@ export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"
 export SKIP_LAUNCH="${SKIP_LAUNCH:-false}"
 export RESET="${RESET:-false}"
 
-export INSTALLER_DIR="${INSTALLER_DIR:-${SETUP_DIR:-$WBS_DIR/wbs-deploy-setup}}"
-export DEPLOY_DIR="${DEPLOY_DIR:-$WBS_DIR/wikibase-release-pipeline/deploy}"
-export ENV_FILE_PATH="$DEPLOY_DIR/.env"
+export INSTALLER_DIR="${INSTALLER_DIR:-$WBS_ROOT_DIR/wbs-deploy-setup}"
+export WBS_DIR="${WBS_DIR:-$WBS_ROOT_DIR/wikibase-release-pipeline/deploy}"
+export ENV_FILE_PATH="$WBS_DIR/.env"
 export SCRIPTS_DIR="$INSTALLER_DIR/scripts"
 
 # --- Functions ---
@@ -125,17 +125,17 @@ install_git() {
 }
 
 clone_repo() {
-  echo "Cloning repository to $WBS_DIR..."
-  mkdir -p "$WBS_DIR"
-  pushd "$WBS_DIR" >/dev/null || return 1
+  echo "Cloning repositories to $WBS_ROOT_DIR..."
+  mkdir -p "$WBS_ROOT_DIR"
+  pushd "$WBS_ROOT_DIR" >/dev/null || return 1
 
   git clone --branch main --single-branch "$INSTALLER_REPO_URL" --depth 1 >/dev/null 2>&1
 
   if [ ! -d wikibase-release-pipeline/.git ]; then
-    echo "Checking out wikibase-release-pipeline at $DEPLOY_REF..."
-    git clone --branch "$DEPLOY_REF" --single-branch "$REPO_URL" --depth 1 >/dev/null 2>&1
+    echo "Checking out Wikibase Suite at $WBS_REF..."
+    git clone --branch "$WBS_REF" --single-branch "$WBS_REPO_URL" --depth 1 >/dev/null 2>&1
   else
-    echo "⚠️ An existing git repository found at $WBS_DIR/wikibase-release-pipeline, using what is there ..."
+    echo "⚠️ An existing Wikibase Suite repository found at $WBS_ROOT_DIR/wikibase-release-pipeline, using what is there ..."
   fi
 
   popd >/dev/null || return 1

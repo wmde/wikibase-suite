@@ -5,10 +5,10 @@ import {
 	serializeEnvContent
 } from './shared/validation.js';
 
-export const ENV_FILE_PATH = '/app/deploy/.env';
-export const ENV_TEMPLATE_FILE_PATH = '/app/deploy/template.env';
-export const DOT_ENV_EXAMPLE_FILE_PATH = '/app/deploy/.env.example';
-export const LOCAL_SETTINGS_FILE_PATH = '/app/deploy/config/LocalSettings.php';
+export const ENV_FILE_PATH = '/app/wbs/.env';
+export const ENV_TEMPLATE_FILE_PATH = '/app/wbs/template.env';
+export const DOT_ENV_EXAMPLE_FILE_PATH = '/app/wbs/.env.example';
+export const LOCAL_SETTINGS_FILE_PATH = '/app/wbs/config/LocalSettings.php';
 export const LAUNCH_TRIGGER_PATH = process.env.LAUNCH_TRIGGER_PATH || '';
 export const LOG_PATH = '/app/installation.log';
 const DEFAULT_DB_NAME = 'my_wiki';

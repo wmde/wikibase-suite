@@ -10,7 +10,7 @@ export LOCALHOST
 export SKIP_DEPENDENCY_INSTALLS
 export SKIP_LAUNCH
 export RESET
-export DEPLOY_DIR
+export WBS_DIR
 export ENV_FILE_PATH
 export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
@@ -54,7 +54,7 @@ if $RESET; then
     echo
   fi
 
-  printf "⛔️ Delete any existing wbs-deploy services AND data? [y/N]: "
+  printf "⛔️ Delete any existing Wikibase Suite services AND data? [y/N]: "
   read -n 1 -r reset_data
   case "${reset_data:-n}" in
     y|Y)
@@ -83,7 +83,7 @@ confirm_docker_running
 if $CLI; then
   bash "$SCRIPTS_DIR/cli-installer.sh"
 else
-  export LAUNCH_TRIGGER_PATH="${LAUNCH_TRIGGER_PATH:-$DEPLOY_DIR/.wbs-installer-launch-ready}"
+  export LAUNCH_TRIGGER_PATH="${LAUNCH_TRIGGER_PATH:-$WBS_DIR/.wbs-installer-launch-ready}"
   rm -f "$LAUNCH_TRIGGER_PATH"
   bash "$SCRIPTS_DIR/web-installer.sh"
 fi
@@ -100,7 +100,7 @@ fi
 if ! $CLI; then
   debug "Starting background process..."
   nohup env \
-    DEPLOY_DIR="$DEPLOY_DIR" \
+    WBS_DIR="$WBS_DIR" \
     LOG_PATH="$LOG_PATH" \
     DEV="$DEV" \
     DEBUG="$DEBUG" \
