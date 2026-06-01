@@ -21,8 +21,8 @@ This document covers local testing, CLI options, and other details useful for de
 
 | Option           | Description |
 |------------------|-------------|
-| `--cli`          | Explicitly uses the command-line wizard. This is currently the default. |
-| `--web`          | Collects configuration details through the browser UI. |
+| `--cli`          | Collects configuration details through the command-line wizard. |
+| `--web`          | Explicitly uses the browser UI. This is currently the default. |
 | `--dev`          | Shortcut for local development: sets `LOCALHOST=true` and skips dependency installs. |
 | `--reset`        | Interactive reset. Optionally deletes `.env`, `LocalSettings.php`, and any existing services/data before relaunch. |
 | `--skip-clone`   | Don't clone any repositories. Assumes they are already present. |
@@ -45,7 +45,7 @@ To use these special localhost-only domains, add entries to your system's hosts 
 
 ## Notes & behavior
 
-- The installer web server runs on port 8888 (HTTPS) when `--web` is used.
+- The installer web server runs on port 8888 (HTTPS) for browser UI installations.
 - For non-localhost web installs, the installer will try to obtain a Let's Encrypt cert on port 80. If that fails, it falls back to a self-signed cert and your browser will warn.
 - If `docker-compose.local.yml` exists in `deploy/`, it will be merged automatically.
 - Default `wikibase-release-pipeline` deploy ref is `deploy@7.0.0`.

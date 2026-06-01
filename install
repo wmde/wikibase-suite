@@ -84,7 +84,7 @@ DEPLOY_REF="${DEPLOY_REF:-"deploy@7.0.0"}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_DIR="${WBS_DIR:-$HOME/wbs}"
 
-export CLI="${CLI:-true}"
+export CLI="${CLI:-false}"
 export DEV="${DEV:-false}"
 export DEBUG="${DEBUG:-false}"
 export LOCALHOST="${LOCALHOST:-false}"

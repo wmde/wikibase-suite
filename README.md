@@ -7,7 +7,7 @@ During installation, it:
 1. Checks for and installs Git if it is not already available.
 2. Downloads this installation tool along with the selected Wikibase Suite code.
 3. Checks for and installs Docker unless it is already installed.
-4. Opens the browser UI, or the command-line wizard if you omit `--web`.
+4. Opens the browser UI to guide you through configuration.
 5. Shows the finalized configuration and links to your services once complete.
 
 ## Install on a new VPS
@@ -17,7 +17,7 @@ During installation, it:
 2. SSH in as root of the VPS and run the web installer:
 
    ```bash
-   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/install) --web
+   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/install)
    ```
 
    *To install a specific Wikibase Suite branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
