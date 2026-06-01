@@ -3,7 +3,7 @@
 		<div class="wizard-panel__body setup-flow">
 			<div v-if="complete" class="setup-complete">
 				<div class="wizard-panel__header">
-					<h2>Setup complete! 🎉</h2>
+					<h2>Installation complete! 🎉</h2>
 				</div>
 
 				<div class="complete-checklist">
@@ -42,7 +42,7 @@
 							</div>
 						</div>
 						<p class="complete-checklist__description">
-							This configuration file is the <code>.env</code> file used to start your Wikibase Suite services. It contains the hostnames and passwords entered or generated during setup.
+							This configuration file is the <code>.env</code> file used to start your Wikibase Suite services. It contains the hostnames and passwords entered or generated during installation.
 						</p>
 						<p class="complete-checklist__description">
 							Download or copy it now and store it somewhere secure. You may need it for recovery, migration, troubleshooting, or setting up a replacement server.
@@ -51,7 +51,7 @@
 							<a
 								class="config-download-link"
 								:href="configDownloadUrl"
-								download="wbs-deploy-setup.env"
+								download="wikibase-suite.env"
 							>
 								<cdx-icon :icon="cdxIconDownload" size="small" />
 								<span>Download configuration</span>
@@ -156,7 +156,7 @@ const progressChecklistItems = computed( () => {
 		{ title: 'Preparing the server', state: defineState( 10, 15 ) },
 		{ title: 'Downloading Docker images for services', state: defineState( 15, 50 ) },
 		{ title: 'Starting services', state: defineState( 50, 95 ) },
-		{ title: 'Finishing setup', state: defineState( 95, 100 ) }
+		{ title: 'Finishing installation', state: defineState( 95, 100 ) }
 	];
 } );
 

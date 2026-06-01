@@ -11,10 +11,10 @@ This document covers local testing, CLI options, and other details useful for de
    cd wbs-deploy-setup
    ```
 
-2. Run from the directory that contains `start.sh`:
+2. Run from the directory that contains `install`:
 
    ```bash
-   ./start.sh [OPTIONS]
+   ./install [OPTIONS]
    ```
 
 ## CLI options

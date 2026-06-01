@@ -11,7 +11,7 @@ export DEPLOY_DIR
 export ENV_FILE_PATH
 export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
-export SETUP_DIR
+export INSTALLER_DIR
 export RESET
 
 # --- Bootstrap Logging ---
@@ -69,7 +69,7 @@ launch_deploy() {
 final_message() {
   {
     echo
-    echo "✅ Setup is Complete!"
+    echo "✅ Installation is complete!"
     echo
     if [[ -f "$ENV_FILE_PATH" ]]; then
       # shellcheck disable=SC1090
@@ -95,7 +95,7 @@ final_message() {
       echo "Your current configuration is saved at:"
       echo "  $ENV_FILE_PATH"
       echo
-      echo "It includes the saved passwords and other setup values."
+      echo "It includes the saved passwords and other installation values."
       echo "Keep it secure."
       echo
     else
@@ -109,7 +109,7 @@ final_message() {
 
 wait_for_launch_signal
 launch_deploy
-status "Setup is complete." "setup_complete"
+status "Installation is complete." "setup_complete"
 final_message
 
 if $CLI && [[ -t 0 ]] && [[ -f "$ENV_FILE_PATH" ]]; then

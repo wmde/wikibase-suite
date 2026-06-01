@@ -190,12 +190,12 @@ app.post( '/finalize-setup', async ( req, res ): Promise<void> => {
 		clearLog();
 
 		res.status( 200 ).json( { status: 'finalized' } );
-		console.log( '💤 Setup finalized. Exiting...' );
+		console.log( '💤 Installation finalized. Exiting...' );
 		// eslint-disable-next-line n/no-process-exit
 		setTimeout( () => process.exit( 0 ), 300 ); // allow response to finish
 	} catch ( err ) {
 		console.error( '❌ Finalize error:', err );
-		res.status( 500 ).send( 'Failed to finalize setup' );
+		res.status( 500 ).send( 'Failed to finalize installation' );
 	}
 } );
 
@@ -241,7 +241,7 @@ if ( DEV_SERVER ) {
 } else {
 	app.get( '/', async ( req, res ) => {
 		try {
-			res.type( 'html' ).send( renderSetupShell( '/assets/setup-app.js' ) );
+			res.type( 'html' ).send( renderSetupShell( '/assets/installer-app.js' ) );
 		} catch ( err ) {
 			console.error( 'Failed to render template:', err );
 			res.status( 500 ).send( 'Template render error' );
@@ -256,7 +256,7 @@ httpsServer.listen( 443, () => {
 // Kick off finalize if booted and inactive
 setTimeout( () => {
 	if ( isBooted() ) {
-		console.log( '⏱️ Auto-finalizing setup after timeout...' );
+		console.log( '⏱️ Auto-finalizing installation after timeout...' );
 
 		const req = request(
 			{

@@ -10,8 +10,8 @@ export default defineConfig( {
 		rollupOptions: {
 			input: 'client/main.ts',
 			output: {
-				assetFileNames: 'setup-app[extname]',
-				entryFileNames: 'setup-app.js'
+				assetFileNames: 'installer-app[extname]',
+				entryFileNames: 'installer-app.js'
 			}
 		}
 	}

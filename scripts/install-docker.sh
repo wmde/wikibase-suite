@@ -19,7 +19,7 @@ install_docker() {
   debug "Checking for Docker..."
 
   if command -v docker >/dev/null 2>&1; then
-    # This script is sourced by setup.sh, so returning avoids exiting setup early.
+    # This script is sourced by install.sh, so returning avoids exiting installation early.
     return 0
   fi
 

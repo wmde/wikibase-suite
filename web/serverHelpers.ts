@@ -10,7 +10,7 @@ export const ENV_TEMPLATE_FILE_PATH = '/app/deploy/template.env';
 export const DOT_ENV_EXAMPLE_FILE_PATH = '/app/deploy/.env.example';
 export const LOCAL_SETTINGS_FILE_PATH = '/app/deploy/config/LocalSettings.php';
 export const LAUNCH_TRIGGER_PATH = process.env.LAUNCH_TRIGGER_PATH || '';
-export const LOG_PATH = '/app/setup.log';
+export const LOG_PATH = '/app/installation.log';
 const DEFAULT_DB_NAME = 'my_wiki';
 const DEFAULT_DB_USER = 'sqluser';
 const EXISTING_INSTALL_STATES = new Set( [ 'none', 'running', 'previous' ] );
@@ -24,7 +24,7 @@ export function isBooted(): boolean {
 		return false;
 	}
 	const log = readFileSync( LOG_PATH, 'utf8' );
-	return /Setup is Complete!/i.test( log );
+	return /(?:Setup|Installation) is complete!/i.test( log );
 }
 
 export function isSetupStarted(): boolean {

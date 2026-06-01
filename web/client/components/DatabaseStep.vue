@@ -59,8 +59,8 @@
 					<div class="callout-title">Before you start</div>
 				</div>
 				<p class="setup-callout__text">
-					Once setup has started, the database name, user, and password can’t be easily changed without
-					starting the setup over fresh.
+					Once installation has started, the database name, user, and password can’t be easily changed without
+					starting the installation over.
 				</p>
 			</cdx-message>
 		</div>
@@ -78,7 +78,7 @@
 					:disabled="disabled || !canStart"
 					@click="emit( 'start' )"
 				>
-					Start Setup
+					Start installation
 				</cdx-button>
 			</div>
 		</div>

@@ -5,7 +5,7 @@
 # - log   : ISO8601 timestamp + message + optional trailing [code]
 # -----------------------------------------------------------------------------
 
-export LOG_PATH=${LOG_PATH:=/tmp/wbs-deploy-setup.log}
+export LOG_PATH=${LOG_PATH:=/tmp/wikibase-suite-installer.log}
 
 DEBUG=${DEBUG:=false}
 

@@ -55,7 +55,7 @@ export async function saveConfig( form: ConfigForm ): Promise<{ config: Record<s
 					.filter( ( message: unknown ): message is string => typeof message === 'string' && message !== '' );
 			}
 		} catch {
-			// The setup screen can still show the generic recovery message.
+			// The installer screen can still show the generic recovery message.
 		}
 		throw new SaveConfigError( details.length ? details : [ `HTTP ${ response.status }` ] );
 	}

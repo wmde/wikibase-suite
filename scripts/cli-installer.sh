@@ -7,7 +7,7 @@ export DEPLOY_DIR
 export DEBUG
 export LOCALHOST
 export LOG_PATH
-export SETUP_DIR
+export INSTALLER_DIR
 
 # --- Bootstrap Logging ---
 
@@ -17,10 +17,10 @@ source "$SCRIPTS_DIR/_logging.sh"
 # -- Script Specific Variables --
 
 SERVER_IP=$(curl --silent --show-error --fail https://api.ipify.org || echo "127.0.0.1")
-SETUP_IMAGE_NAME="${SETUP_IMAGE_NAME:-wikibase/deploy-setup-runtime}"
-WEB_DIR="$SETUP_DIR/web"
+INSTALLER_IMAGE_NAME="${INSTALLER_IMAGE_NAME:-${SETUP_IMAGE_NAME:-wikibase/suite-installer-runtime}}"
+WEB_DIR="$INSTALLER_DIR/web"
 
-build_setup_runtime() {
+build_installer_runtime() {
   # BuildKit (via buildx with the docker-container driver) does not load images
   # into the local Docker image store by default. --load ensures it's available
   # to `docker run`.
@@ -31,7 +31,7 @@ build_setup_runtime() {
     LOAD_FLAG=""
   fi
 
-  run "docker build $LOAD_FLAG -t $SETUP_IMAGE_NAME -f $WEB_DIR/Dockerfile $WEB_DIR"
+  run "docker build $LOAD_FLAG -t $INSTALLER_IMAGE_NAME -f $WEB_DIR/Dockerfile $WEB_DIR"
 }
 
 run_cli_config() {
@@ -45,15 +45,15 @@ run_cli_config() {
     -e SERVER_IP="$SERVER_IP" \
     -e LOCALHOST="$LOCALHOST" \
     -v "$DEPLOY_DIR:/app/deploy" \
-    -v "$LOG_PATH:/app/setup.log" \
-    "$SETUP_IMAGE_NAME" \
+    -v "$LOG_PATH:/app/installation.log" \
+    "$INSTALLER_IMAGE_NAME" \
     node dist/cli.js
 }
 
 echo
-echo "🔧 Starting command-line configuration wizard..."
+echo "🔧 Starting command-line installer..."
 echo
 
-debug "Starting setup runtime container..."
-build_setup_runtime
+debug "Starting installer runtime container..."
+build_installer_runtime
 run_cli_config

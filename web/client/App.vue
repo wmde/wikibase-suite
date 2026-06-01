@@ -10,7 +10,7 @@
 				</div>
 			</header>
 
-			<section class="wizard-progress-area" aria-label="Setup progress">
+			<section class="wizard-progress-area" aria-label="Installation progress">
 				<wizard-steps
 					:current-step="currentStep"
 					:locked="configLocked"
@@ -24,7 +24,7 @@
 						<div class="callout-title">Configuration could not be saved</div>
 					</div>
 					<p class="setup-callout__text">
-						The final validation check found a problem before the setup file was written. Try starting over.
+						The final validation check found a problem before the configuration file was written. Try starting over.
 						If this keeps happening, contact Wikibase Suite support.
 					</p>
 					<ul v-if="saveErrorDetails.length" class="final-save-error__details">
@@ -185,7 +185,7 @@ const steps = computed( () => [
 	{ title: 'Domain' },
 	{ title: 'Account' },
 	{ title: 'Database' },
-	{ title: 'Setup', complete: setupComplete.value }
+	{ title: 'Installation', complete: setupComplete.value }
 ] );
 
 const emailStatus = computed<FieldValidationStatus>( () => {
@@ -385,7 +385,7 @@ async function handleSetupComplete(): Promise<void> {
 		Object.assign( form, configToForm( response.config ) );
 		configText.value = response.configText || '';
 	}
-	setupLog.setProgress( 100, 'Setup complete. Your services are ready.' );
+	setupLog.setProgress( 100, 'Installation complete. Your services are ready.' );
 	setupComplete.value = true;
 	currentStep.value = 4;
 }

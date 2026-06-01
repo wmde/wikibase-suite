@@ -14,7 +14,7 @@ export DEPLOY_DIR
 export ENV_FILE_PATH
 export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
-export SETUP_DIR
+export INSTALLER_DIR
 
 # --- Bootstrap Logging ---
 
@@ -39,7 +39,7 @@ prompt_to_show_saved_config() {
   esac
 }
 
-# --- Setup Phase ---
+# --- Installation Phase ---
 
 if $RESET; then
   echo
@@ -51,7 +51,7 @@ if $RESET; then
         rm -f "$ENV_FILE_PATH"
         ;;
     esac
-    echo 
+    echo
   fi
 
   printf "⛔️ Delete any existing wbs-deploy services AND data? [y/N]: "
@@ -81,11 +81,11 @@ confirm_docker_compose_version
 confirm_docker_running
 
 if $CLI; then
-  bash "$SCRIPTS_DIR/cli-config.sh"
+  bash "$SCRIPTS_DIR/cli-installer.sh"
 else
-  export LAUNCH_TRIGGER_PATH="${LAUNCH_TRIGGER_PATH:-$DEPLOY_DIR/.wbs-setup-launch-ready}"
+  export LAUNCH_TRIGGER_PATH="${LAUNCH_TRIGGER_PATH:-$DEPLOY_DIR/.wbs-installer-launch-ready}"
   rm -f "$LAUNCH_TRIGGER_PATH"
-  bash "$SCRIPTS_DIR/web-config.sh"
+  bash "$SCRIPTS_DIR/web-installer.sh"
 fi
 
 # --- Launch or exit ---

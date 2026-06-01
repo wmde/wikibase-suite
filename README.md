@@ -17,7 +17,7 @@ During installation, it:
 2. SSH in as root of the VPS and run the web installer:
 
    ```bash
-   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/start.sh) --web
+   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/install) --web
    ```
 
    *To install a specific Wikibase Suite branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*

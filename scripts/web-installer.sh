@@ -10,7 +10,7 @@ export LOCALHOST
 export LAUNCH_TRIGGER_PATH
 export RESET
 export SCRIPTS_DIR
-export SETUP_DIR
+export INSTALLER_DIR
 
 # --- Bootstrap Logging ---
 
@@ -20,32 +20,32 @@ source "$SCRIPTS_DIR/_logging.sh"
 # -- Script Specific Variables --
 
 CERT_EMAIL="${CERT_EMAIL:-wbs-setup@wikimedia.de}"
-SETUP_CONTAINER_NAME=wbs-deploy-setup-webserver
-SETUP_PORT=8888
+INSTALLER_CONTAINER_NAME=wikibase-suite-installer-webserver
+INSTALLER_PORT=8888
 SERVER_IP=$(curl --silent --show-error --fail https://api.ipify.org || echo "127.0.0.1")
 CERTBOT_IMAGE="${CERTBOT_IMAGE:-certbot/certbot:v4.2.0}"
-WEB_IMAGE_NAME="${WEB_IMAGE_NAME:-wikibase/deploy-setup-webserver}"
-WEB_DIR="$SETUP_DIR/web"
+WEB_IMAGE_NAME="${WEB_IMAGE_NAME:-wikibase/suite-installer-webserver}"
+WEB_DIR="$INSTALLER_DIR/web"
 LE_DIR="$WEB_DIR/letsencrypt"
 CERTS_DIR="$WEB_DIR/certs"
-LAUNCH_TRIGGER_CONTAINER_PATH="/app/deploy/$(basename "${LAUNCH_TRIGGER_PATH:-.wbs-setup-launch-ready}")"
+LAUNCH_TRIGGER_CONTAINER_PATH="/app/deploy/$(basename "${LAUNCH_TRIGGER_PATH:-.wbs-installer-launch-ready}")"
 EXISTING_INSTALL_STATE="${EXISTING_INSTALL_STATE:-none}"
 
 # --- Functions ---
 
-generate_cert_for_setup_webserver() {
-  debug "Requesting a trusted HTTPS certificate for the setup page (ACME via Let’s Encrypt)..."
+generate_cert_for_installer_webserver() {
+  debug "Requesting a trusted HTTPS certificate for the installer page (ACME via Let’s Encrypt)..."
 
   if $LOCALHOST; then
-    SETUP_HOST="localhost"
+    INSTALLER_HOST="localhost"
   else
     # Extra random suffix helps avoid LE rate limits during repeated runs
-    SETUP_SUBDOMAIN="wbs-setup-$(hexdump -n 3 -v -e '/1 "%02x"' /dev/urandom)"
-    SETUP_HOST="$SETUP_SUBDOMAIN.$SERVER_IP.nip.io"
+    INSTALLER_SUBDOMAIN="wbs-installer-$(hexdump -n 3 -v -e '/1 "%02x"' /dev/urandom)"
+    INSTALLER_HOST="$INSTALLER_SUBDOMAIN.$SERVER_IP.nip.io"
   fi
 
   run "mkdir -p $LE_DIR $CERTS_DIR"
-  debug "Using domain: $SETUP_HOST"
+  debug "Using domain: $INSTALLER_HOST"
 
   if ! $LOCALHOST; then
     if run "docker run --rm \
@@ -58,9 +58,9 @@ generate_cert_for_setup_webserver() {
         --preferred-challenges http \
         --agree-tos \
         --email $CERT_EMAIL \
-        -d $SETUP_HOST"; then
+        -d $INSTALLER_HOST"; then
 
-      LE_CERT_PATH="$LE_DIR/live/$SETUP_HOST"
+      LE_CERT_PATH="$LE_DIR/live/$INSTALLER_HOST"
 
       if [ -f "$LE_CERT_PATH/fullchain.pem" ] && [ -f "$LE_CERT_PATH/privkey.pem" ]; then
         cp "$LE_CERT_PATH/fullchain.pem" "$CERTS_DIR/cert.pem"
@@ -74,18 +74,18 @@ generate_cert_for_setup_webserver() {
   run "openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -out $CERTS_DIR/cert.pem \
     -keyout $CERTS_DIR/key.pem \
-    -subj /CN=$SETUP_HOST"
+    -subj /CN=$INSTALLER_HOST"
   SELF_SIGNED_CERT=true
 }
 
-remove_any_existing_setup_webserver() {
-  # Remove any existing container with our fixed name (running or exited)
-  run "docker rm -fv $SETUP_CONTAINER_NAME >/dev/null 2>&1 || true"
+remove_any_existing_installer_webserver() {
+  # Remove current and legacy installer containers with fixed names (running or exited).
+  run "docker rm -fv $INSTALLER_CONTAINER_NAME wbs-deploy-setup-webserver >/dev/null 2>&1 || true"
 
   # Optional: warn if the host port is already taken (by something else)
   if command -v lsof >/dev/null 2>&1; then
-    if lsof -iTCP:"$SETUP_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-      status "⛔️ Port $SETUP_PORT required for setup appears already in use on this server"
+    if lsof -iTCP:"$INSTALLER_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+      status "⛔️ Port $INSTALLER_PORT required by the installer appears already in use on this server"
     fi
   fi
 }
@@ -117,9 +117,9 @@ detect_existing_install_state() {
   fi
 }
 
-start_setup_webserver() {
+start_installer_webserver() {
   # Ensure old container is gone before build/run
-  remove_any_existing_setup_webserver
+  remove_any_existing_installer_webserver
 
   # BuildKit (via buildx with the docker-container driver) does not load images
   # into the local Docker image store by default. --load ensures it's available
@@ -136,41 +136,41 @@ start_setup_webserver() {
   # Run with volumes mapped as before
   if $DEV; then
     run "docker run -d \
-      --name $SETUP_CONTAINER_NAME \
+      --name $INSTALLER_CONTAINER_NAME \
       -e SERVER_IP=$SERVER_IP \
       -e LOCALHOST=$LOCALHOST \
       -e LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH \
       -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
       -e DEV_SERVER=true \
-      -p $SETUP_PORT:443 \
+      -p $INSTALLER_PORT:443 \
       -v $DEPLOY_DIR:/app/deploy \
       -v $CERTS_DIR:/app/certs \
-      -v $LOG_PATH:/app/setup.log \
+      -v $LOG_PATH:/app/installation.log \
       -v $WEB_DIR:/src \
       $WEB_IMAGE_NAME \
       sh -lc 'ln -sfn /app/node_modules /src/node_modules && cd /src && npm run dev:server'"
   else
     run "docker run -d \
-      --name $SETUP_CONTAINER_NAME \
+      --name $INSTALLER_CONTAINER_NAME \
       -e SERVER_IP=$SERVER_IP \
       -e LOCALHOST=$LOCALHOST \
       -e LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH \
       -e EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE \
-      -p $SETUP_PORT:443 \
+      -p $INSTALLER_PORT:443 \
       -v $DEPLOY_DIR:/app/deploy \
       -v $CERTS_DIR:/app/certs \
-      -v $LOG_PATH:/app/setup.log \
+      -v $LOG_PATH:/app/installation.log \
       $WEB_IMAGE_NAME"
   fi
 
-  echo "To continue setup navigate to:"
+  echo "To continue installation, navigate to:"
   echo
-  echo "  https://$SETUP_HOST:$SETUP_PORT"
+  echo "  https://$INSTALLER_HOST:$INSTALLER_PORT"
   echo
   if [[ "${SELF_SIGNED_CERT:-false}" == true ]]; then
-    echo "⚠️ This setup page is using a temporary self-signed HTTPS certificate."
+    echo "⚠️ This installer page is using a temporary self-signed HTTPS certificate."
     echo "Your browser will likely show a warning before loading the page."
-    echo "See the Troubleshooting section of the Deploy Setup README for help"
+    echo "See the Troubleshooting section of the installer README for help"
     echo "if you want to bypass the warning or replace it with a trusted cert."
     echo
   fi
@@ -178,15 +178,15 @@ start_setup_webserver() {
 
 echo
 if $DEV; then
-  echo "🔧 Starting web-based setup tool (dev mode with live reload)..."
+  echo "🔧 Starting web-based installer (dev mode with live reload)..."
 else
-  echo "🔧 Starting web-based setup tool..."
+  echo "🔧 Starting web-based installer..."
 fi
 echo
 
-debug "Starting setup page webserver container..."
+debug "Starting installer webserver container..."
 EXISTING_INSTALL_STATE="$(detect_existing_install_state)"
 
 # No need to cd; we reference absolute paths for build context and Dockerfile
-generate_cert_for_setup_webserver
-start_setup_webserver
+generate_cert_for_installer_webserver
+start_installer_webserver
