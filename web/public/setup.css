@@ -958,6 +958,10 @@ body {
   min-height: 240px;
 }
 
+.setup-log-dialog__frame {
+  position: relative;
+}
+
 .setup-log-dialog__scroll {
   box-sizing: border-box;
   width: 100%;
@@ -967,6 +971,22 @@ body {
   overflow: auto;
   border-radius: 8px;
   background: #101418;
+  scrollbar-color: #72777d #202830;
+}
+
+.setup-log-dialog__scroll::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.setup-log-dialog__scroll::-webkit-scrollbar-track {
+  background: #202830;
+}
+
+.setup-log-dialog__scroll::-webkit-scrollbar-thumb {
+  border: 3px solid #202830;
+  border-radius: 999px;
+  background: #72777d;
 }
 
 .setup-log-dialog #log-content {
@@ -975,6 +995,54 @@ body {
   flex-shrink: 0;
   overflow: visible;
   white-space: pre;
+}
+
+.setup-log-dialog__actions {
+  position: absolute;
+  right: 20px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.setup-log-dialog__action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color-base, #72777d);
+  border-radius: 50%;
+  background: rgba(248, 249, 250, 0.94);
+  color: var(--color-base, #202122);
+  cursor: pointer;
+}
+
+.setup-log-dialog__action:hover,
+.setup-log-dialog__action:focus {
+  background: #fff;
+}
+
+.setup-log-dialog__action:focus {
+  outline: 2px solid var(--box-shadow-color-progressive--focus, #36c);
+  outline-offset: 2px;
+}
+
+.setup-log-dialog__action.is-copied {
+  color: var(--color-success, #14866d);
+}
+
+.setup-log-dialog__action.has-new-entries::after {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: var(--background-color-progressive, #36c);
+  content: "";
 }
 
 .dialog-steps {
