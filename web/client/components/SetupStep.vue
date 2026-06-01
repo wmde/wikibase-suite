@@ -8,9 +8,16 @@
 
 				<div class="complete-checklist">
 					<div class="complete-services">
-						<p class="complete-checklist__description">
-							Your Wikibase Suite is now available at the links below.
-						</p>
+							<p class="complete-checklist__description">
+								Your Wikibase Suite is now available at the links below.
+								<button
+									type="button"
+									class="setup-log-link"
+									@click="emit( 'open-log' )"
+								>
+									View log
+								</button>
+							</p>
 						<div class="service-links">
 							<a class="service-link" :href="wikibaseUrl" target="_blank">
 								<span class="service-link__label">Wikibase</span>
@@ -31,7 +38,7 @@
 						<div class="save-config-heading">
 							<div class="callout-heading">
 								<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
-								<h3 class="callout-title">Save this server configuration</h3>
+								<h3 class="callout-title">Save your Wikibase server configuration</h3>
 							</div>
 						</div>
 						<p class="complete-checklist__description">
@@ -46,7 +53,8 @@
 								:href="configDownloadUrl"
 								download="wbs-deploy-setup.env"
 							>
-								Download config
+								<cdx-icon :icon="cdxIconDownload" size="small" />
+								<span>Download configuration</span>
 							</a>
 							<button
 								type="button"
@@ -55,25 +63,25 @@
 								@click="copyConfig"
 							>
 								<cdx-icon :icon="cdxIconCopy" size="small" />
-								<span>{{ copiedConfig ? 'Copied' : 'Copy config' }}</span>
+								<span>{{ copiedConfig ? 'Configuration copied' : 'Copy configuration' }}</span>
+							</button>
+							<button
+								type="button"
+								class="config-reveal-button"
+								:aria-expanded="configRevealed"
+								aria-controls="config-content"
+								@click="configRevealed = !configRevealed"
+							>
+								<cdx-icon :icon="configRevealed ? cdxIconEyeClosed : cdxIconEye" size="small" />
+								<span>{{ configRevealed ? 'Hide configuration' : 'Show configuration' }}</span>
 							</button>
 						</div>
-						<button
-							type="button"
-							class="config-reveal-button"
-							:aria-expanded="configRevealed"
-							aria-controls="config-content"
-							@click="configRevealed = !configRevealed"
-						>
-							<cdx-icon :icon="configRevealed ? cdxIconEyeClosed : cdxIconEye" size="small" />
-							<span>{{ configRevealed ? 'Hide configuration' : 'Reveal configuration' }}</span>
-						</button>
 						<div v-if="configRevealed" class="config-box">
 							<pre id="config-content">{{ configText }}</pre>
 						</div>
 					</cdx-message>
 				</div>
-			</div>
+				</div>
 
 			<div v-else class="setup-progress-panel surface-card">
 				<div class="setup-progress-panel__topline">
@@ -84,7 +92,7 @@
 						action="progressive"
 						@click="emit( 'open-log' )"
 					>
-						Full setup log
+							View log
 					</cdx-button>
 				</div>
 				<cdx-progress-bar :value="progress" :max="100" aria-hidden="true" />
@@ -106,7 +114,7 @@
 
 <script setup lang="ts">
 import { CdxButton, CdxIcon, CdxMessage, CdxProgressBar } from '@wikimedia/codex';
-import { cdxIconAlert, cdxIconCopy, cdxIconEye, cdxIconEyeClosed } from '@wikimedia/codex-icons';
+import { cdxIconAlert, cdxIconCopy, cdxIconDownload, cdxIconEye, cdxIconEyeClosed } from '@wikimedia/codex-icons';
 import { computed, ref, watch } from 'vue';
 import type { ConfigForm } from '../types';
 

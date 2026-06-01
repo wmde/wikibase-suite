@@ -1,7 +1,7 @@
 <template>
 	<cdx-dialog
 		:open="open"
-		title="Setup log"
+		title="Installation log"
 		subtitle="Use the live log when you need more detail than the step-by-step status summary provides."
 		use-close-button
 		class="setup-log-dialog"

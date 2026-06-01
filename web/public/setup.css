@@ -820,9 +820,14 @@ body {
 }
 
 .config-download-link {
+  gap: 6px;
   border: 1px solid var(--background-color-progressive, #36c);
   padding: 7px 14px;
   background: var(--background-color-progressive, #36c);
+  color: var(--color-inverted-fixed, #fff);
+}
+
+.config-download-link .cdx-icon {
   color: var(--color-inverted-fixed, #fff);
 }
 
@@ -852,16 +857,33 @@ body {
 }
 
 .config-reveal-button {
-  width: fit-content;
+  margin-left: auto;
   gap: 6px;
-  border: 0;
-  padding: 4px 0;
-  background: transparent;
-  color: var(--color-progressive, #36c);
+  border: 1px solid var(--border-color-base, #72777d);
+  padding: 7px 12px;
+  background: var(--background-color-base, #fff);
+  color: var(--color-base, #202122);
 }
 
 .config-reveal-button:hover,
 .config-reveal-button:focus {
+  background: var(--background-color-neutral-subtle, #eaecf0);
+}
+
+.setup-log-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-progressive, #36c);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.setup-log-link:hover,
+.setup-log-link:focus {
   color: var(--color-progressive--hover, #3056a9);
   text-decoration: underline;
 }
