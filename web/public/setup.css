@@ -958,11 +958,22 @@ body {
   min-height: 240px;
 }
 
-.setup-log-dialog #log-content {
+.setup-log-dialog__scroll {
   box-sizing: border-box;
   width: 100%;
   height: min(52vh, 420px);
+  display: flex;
+  flex-direction: column-reverse;
   overflow: auto;
+  border-radius: 8px;
+  background: #101418;
+}
+
+.setup-log-dialog #log-content {
+  box-sizing: border-box;
+  width: 100%;
+  flex-shrink: 0;
+  overflow: visible;
   white-space: pre;
 }
 

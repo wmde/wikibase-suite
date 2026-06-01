@@ -9,7 +9,9 @@
 		@update:open="emit( 'update:open', $event )"
 		@default="emit( 'update:open', false )"
 	>
-		<pre id="log-content">{{ logText }}</pre>
+		<div class="setup-log-dialog__scroll">
+			<pre id="log-content">{{ logText }}</pre>
+		</div>
 
 		<template #footer>
 			<div class="shutdown-panel">
