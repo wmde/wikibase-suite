@@ -45,7 +45,8 @@ Then restart the Wikibase service:
 docker compose restart wikibase
 ```
 
-Some extensions might ask you to run `update.php` as part of the installation process. The Wikibase image runs `update.php` during startup, so you do not need to run it manually.
+> [!NOTE]
+> Some extensions might ask you to run `update.php` as part of the installation process. The Wikibase image runs `update.php` during startup, so you do not need to run it manually.
 
 ## Testing your extension
 

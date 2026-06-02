@@ -18,7 +18,8 @@ Remove containers and Docker volumes:
 docker compose down --volumes
 ```
 
-Warning: this deletes the live Docker volumes. Do not run this command unless your backup is complete or you do not need to keep existing data.
+> [!WARNING]  
+> This deletes the live Docker volumes. Do not run this command unless your backup is complete or you do not need to keep existing data.
 
 Remove the generated configuration files:
 
