@@ -17,7 +17,7 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 	const logText = ref( 'Loading logs...\n' );
 	const statusLines = ref<string[]>( [] );
 	const progress = ref( 0 );
-	const summary = ref( 'Setup has started. Waiting for the first progress update.' );
+	const summary = ref( 'Installation has started. Waiting for the first progress update.' );
 	const hasStatusLines = computed( () => statusLines.value.length > 0 );
 	let eventSource: EventSource | null = null;
 	let handledComplete = false;
@@ -166,7 +166,7 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 		logText.value = 'Loading logs...\n';
 		statusLines.value = [];
 		progress.value = 0;
-		summary.value = 'Setup has started. Waiting for the first progress update.';
+		summary.value = 'Installation has started. Waiting for the first progress update.';
 		handledComplete = false;
 	}
 

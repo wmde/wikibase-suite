@@ -7,7 +7,7 @@ During installation, it:
 1. Checks for and installs Git if it is not already available.
 2. Downloads this installation tool along with the selected Wikibase Suite code.
 3. Checks for and installs Docker unless it is already installed.
-4. Opens the browser UI, or the command-line wizard if you omit `--web`.
+4. Opens the browser UI to guide you through configuration.
 5. Shows the finalized configuration and links to your services once complete.
 
 ## Install on a new VPS
@@ -17,10 +17,10 @@ During installation, it:
 2. SSH in as root of the VPS and run the web installer:
 
    ```bash
-   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/start.sh) --web
+   bash <(curl -fsSL https://github.com/wmde/wbs-deploy-setup/raw/main/install)
    ```
 
-   *To install a specific Wikibase Suite branch or tag, add `--deploy-ref REF`, for example `--deploy-ref deploy@7.0.0`.*
+   *To install a specific Wikibase Suite branch or tag, add `--wbs-ref REF`, for example `--wbs-ref deploy@7.0.0`.*
 
 3. Open the installer URL printed in the terminal and follow the browser steps.
 
@@ -32,5 +32,5 @@ During installation, it:
 
 Use this section only when you are developing, reviewing, or testing the installer.
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, deploy refs, and other non-standard installation paths.
-- [docs/README.md](docs/README.md) links to additional implementation and project notes.
+- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, WBS refs, and other non-standard installation paths.
+- [docs/adrs/README.md](docs/adrs/README.md) lists architecture decision records.

@@ -2,7 +2,7 @@
 	<section class="wizard-panel is-active">
 		<div v-if="existingInstallState === 'previous'" class="wizard-panel__body wizard-panel__body--intro">
 			<header class="wizard-panel__header">
-				<h2>Setup already completed</h2>
+				<h2>Installation already completed</h2>
 			</header>
 
 			<cdx-message class="setup-callout setup-callout--warning">
@@ -11,7 +11,7 @@
 					<div class="callout-title">Existing installation found</div>
 				</div>
 				<p>
-					This Wikibase Suite has already been set up. The setup tool cannot safely be run again
+					This Wikibase Suite has already been installed. The installer cannot safely be run again
 					for this installation. To start over with a new configuration, see
 					<a
 						href="https://github.com/wmde/wikibase-release-pipeline/blob/docs/critical-refinements/deploy/docs/resetting-and-removing.md"
@@ -27,7 +27,7 @@
 				<h2>Welcome to Wikibase Suite</h2>
 				<p>
 					You're about to set up your own Wikibase instance, a platform for creating and managing
-					structured linked open data. This setup tool will write your configuration and start the installation.
+					structured linked open data. The installer will write your configuration and start the installation.
 					It takes about 5 minutes.
 				</p>
 			</header>

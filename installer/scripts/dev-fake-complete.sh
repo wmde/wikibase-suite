@@ -3,20 +3,20 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PARENT_DIR="$(cd "$ROOT_DIR/.." && pwd)"
-WBS_DIR="${WBS_DIR:-$PARENT_DIR}"
-DEPLOY_DIR="${DEPLOY_DIR:-$WBS_DIR/wikibase-release-pipeline/deploy}"
-ENV_FILE_PATH="${ENV_FILE_PATH:-$DEPLOY_DIR/.env}"
-LOG_PATH="${LOG_PATH:-/tmp/wbs-deploy-setup.log}"
+WBS_ROOT_DIR="${WBS_ROOT_DIR:-$PARENT_DIR}"
+WBS_DIR="${WBS_DIR:-$WBS_ROOT_DIR/wikibase-release-pipeline/deploy}"
+ENV_FILE_PATH="${ENV_FILE_PATH:-$WBS_DIR/.env}"
+LOG_PATH="${LOG_PATH:-/tmp/wikibase-suite-installer.log}"
 
 usage() {
   cat <<EOF
 Usage:
-  $(basename "$0")            Seed a fake completed setup state for local UI testing
+  $(basename "$0")            Seed a fake completed installation state for local UI testing
   $(basename "$0") --reset    Remove the fake state
 
 Environment overrides:
+  WBS_ROOT_DIR
   WBS_DIR
-  DEPLOY_DIR
   ENV_FILE_PATH
   LOG_PATH
 EOF
@@ -30,7 +30,7 @@ fi
 if [[ "${1:-}" == "--reset" ]]; then
   rm -f "$ENV_FILE_PATH"
   : > "$LOG_PATH"
-  echo "Reset fake setup state:"
+  echo "Reset fake installation state:"
   echo "  removed $ENV_FILE_PATH"
   echo "  cleared $LOG_PATH"
   exit 0
@@ -55,13 +55,13 @@ EOF
 cat > "$LOG_PATH" <<'EOF'
 2026-01-01T12:00:00Z Configuration saved. [config_saved]
 2026-01-01T12:00:10Z Starting Docker Compose services. Generally takes 2–6 minutes... [services_waiting]
-2026-01-01T12:04:00Z Setup is complete. [setup_complete]
+2026-01-01T12:04:00Z Installation is complete. [setup_complete]
 
-✅ Setup is Complete!
+✅ Installation is complete!
 EOF
 
-echo "Seeded fake completed setup state:"
+echo "Seeded fake completed installation state:"
 echo "  wrote $ENV_FILE_PATH"
 echo "  wrote $LOG_PATH"
 echo
-echo "Reload the setup page and it should show the completion screen."
+echo "Reload the installer page and it should show the completion screen."

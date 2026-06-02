@@ -53,17 +53,17 @@ export const SETUP_PROGRESS_EVENTS: Record<string, SetupProgressEvent> = {
 	},
 	services_ready: {
 		progress: 95,
-		summary: 'Services reported ready. Finishing setup details.',
+		summary: 'Services reported ready. Finishing installation details.',
 		stopTimer: true
 	},
 	launch_skipped: {
 		progress: 60,
-		summary: 'Setup stopped before service launch because skip-launch mode is enabled. No services were started.',
+		summary: 'Installation stopped before service launch because skip-launch mode is enabled. No services were started.',
 		stopTimer: true
 	},
 	setup_complete: {
 		progress: 100,
-		summary: 'Setup complete. Your services are ready.',
+		summary: 'Installation complete. Your services are ready.',
 		stopTimer: true
 	}
 };

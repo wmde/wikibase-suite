@@ -1,6 +1,6 @@
 {
-	"name": "wbs-deploy-setup",
-	"description": "Wikibase Suite Deploy Setup",
+	"name": "wikibase-suite-installer",
+	"description": "Wikibase Suite Installer",
 	"main": "dist/server.js",
 	"private": true,
 	"type": "module",

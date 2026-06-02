@@ -48,7 +48,7 @@ const serverIp = process.env.SERVER_IP || '';
 const pipedAnswers = input.isTTY ? [] : readFileSync( 0, 'utf8' ).split( /\r?\n/ );
 
 function abortSetup(): never {
-	cancel( 'Setup canceled.' );
+	cancel( 'Installation canceled.' );
 	process.exit( 130 );
 }
 
@@ -79,14 +79,14 @@ function readPipedSecret( label: string, placeholder: string ): string {
 
 function showIntro(): void {
 	if ( input.isTTY ) {
-		intro( 'Configure Wikibase Suite Deploy' );
+		intro( 'Configure Wikibase Suite Installer' );
 		if ( !isLocalhostSetup() ) {
 			note( serverIp, 'Public IP of this server' );
 		}
 		return;
 	}
 
-	console.log( '\nConfigure Wikibase Suite Deploy\n' );
+	console.log( '\nConfigure Wikibase Suite Installer\n' );
 	if ( !isLocalhostSetup() ) {
 		console.log( `Public IP of this server: ${ serverIp }\n` );
 	}

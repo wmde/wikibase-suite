@@ -7,11 +7,11 @@ export DEBUG
 export CLI
 export LOCALHOST
 export LOG_PATH
-export DEPLOY_DIR
+export WBS_DIR
 export ENV_FILE_PATH
 export LAUNCH_TRIGGER_PATH
 export SCRIPTS_DIR
-export SETUP_DIR
+export INSTALLER_DIR
 export RESET
 
 # --- Bootstrap Logging ---
@@ -32,8 +32,8 @@ wait_for_launch_signal() {
   status "Configuration saved." "config_saved"
 }
 
-launch_deploy() {
-  pushd "$DEPLOY_DIR" >/dev/null || return 1
+launch_wbs() {
+  pushd "$WBS_DIR" >/dev/null || return 1
 
   local compose_opts=()
   local compose_up_opts=(-d)
@@ -50,7 +50,7 @@ launch_deploy() {
     status "Removing config/LocalSettings.php (RESET=true)" "reset_config_removed"
     run "rm -f config/LocalSettings.php"
 
-    status "Taking down any existing wbs-deploy services and data (RESET=true)" "reset_services_removed"
+    status "Taking down any existing Wikibase Suite services and data (RESET=true)" "reset_services_removed"
     run "docker compose ${compose_opts[*]} down --volumes"
   fi
 
@@ -69,7 +69,7 @@ launch_deploy() {
 final_message() {
   {
     echo
-    echo "✅ Setup is Complete!"
+    echo "✅ Installation is complete!"
     echo
     if [[ -f "$ENV_FILE_PATH" ]]; then
       # shellcheck disable=SC1090
@@ -95,7 +95,7 @@ final_message() {
       echo "Your current configuration is saved at:"
       echo "  $ENV_FILE_PATH"
       echo
-      echo "It includes the saved passwords and other setup values."
+      echo "It includes the saved passwords and other installation values."
       echo "Keep it secure."
       echo
     else
@@ -108,8 +108,8 @@ final_message() {
 # --- Execution ---
 
 wait_for_launch_signal
-launch_deploy
-status "Setup is complete." "setup_complete"
+launch_wbs
+status "Installation is complete." "setup_complete"
 final_message
 
 if $CLI && [[ -t 0 ]] && [[ -f "$ENV_FILE_PATH" ]]; then
