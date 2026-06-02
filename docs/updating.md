@@ -45,7 +45,8 @@ Major upgrades use the data-preserving reset procedure in [Resetting an instance
 
 Look for any new required values in `.env.example` that you may need to add to your `.env` file.
 
-Note: With the exception of `METADATA_CALLBACK`, do not change existing `.env` values during an upgrade. They are setup values, and changing them while preserving existing data can break your instance. `METADATA_CALLBACK` may be changed after initial setup and takes effect after restarting the services.
+> [!NOTE]  
+> With the exception of `METADATA_CALLBACK`, do not change existing `.env` values during an upgrade. They are setup values, and changing them while preserving existing data can break your instance. `METADATA_CALLBACK` may be changed after initial setup and takes effect after restarting the services.
 
 Before the final start in the reset procedure, apply any relevant version-specific notes below and update any user-defined extensions installed in `config/extensions`.
 
