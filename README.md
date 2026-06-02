@@ -31,11 +31,7 @@ WBS is a supported and tested Docker Compose configuration that facilitates depl
 
 ### 1. Provision a VPS
 
-Start by provisioning a Linux VPS or cloud server for your WBS instance. Most Wikibase production installs are on cloud-based servers. Below we list the official installation guides for some commonly used hosting providers:
-- [Hetzner](https://docs.hetzner.com/cloud/servers/getting-started/creating-a-server/)
-- [DigitalOcean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)
-- [Akamai](https://techdocs.akamai.com/cloud-computing/docs/set-up-and-secure-a-compute-instance)
-- [Vultr](https://docs.vultr.com/products/compute/cloud-compute/provisioning)
+Start by provisioning a Linux VPS or cloud server for your WBS instance. Most Wikibase production installs are on cloud-based servers. Follow your provider's documentation to create a server that meets the requirements below.
 
 The minimum requirements for your server are as follows:
 - 64-bit x86 architecture (`amd64` / `x86_64`); ARM servers are not currently supported by the published WBS images

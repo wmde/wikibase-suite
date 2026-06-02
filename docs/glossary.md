@@ -1,27 +1,23 @@
 # Glossary
 
+## Query service
+
+The SPARQL service for a Wikibase instance. It is often referred to as WDQS, short for Wikidata Query Service.
+
+## QuickStatements
+
+A web-based tool for importing and editing Wikibase data in batches.
+
 ## Wikibase
 
 Wikibase is the MediaWiki extension used to build a structured data repository.
 
-In WBS, the main Wikibase service runs on MediaWiki. These docs usually say "Wikibase" for the user-facing service and "MediaWiki" only when referring to upstream MediaWiki concepts such as `LocalSettings.php`, extensions, version upgrades, or maintenance scripts.
+In Wikibase Suite, the main Wikibase service runs on MediaWiki. These docs usually say "Wikibase" for the user-facing service and "MediaWiki" only when referring to upstream MediaWiki configuration, such as `LocalSettings.php`, version upgrades, maintenance scripts, or extensions other than Wikibase.
 
-## Wikibase Suite
+## Wikibase Suite (WBS)
 
-Wikibase Suite (WBS) is the base name for this product line: the full deployable Wikibase setup, the related Docker images, and the team at Wikimedia Deutschland that maintains them. On its own, WBS usually means the full deployable setup.
-
-## Wikibase Suite Deploy
-
-Wikibase Suite Deploy is the Docker Compose setup in the `deploy` directory. It runs a full WBS instance using the published WBS images. This name is used when the documentation needs to refer specifically to the deployment files or setup mechanism.
+The full deployable Wikibase setup, the related Docker images, and the team at Wikimedia Deutschland that maintains them.
 
 ## Wikibase Suite images
 
-Wikibase Suite images are the published Docker images used by WBS Deploy, including the Wikibase, query service, query service frontend, Elasticsearch, and QuickStatements images.
-
-## Query service
-
-The query service is the SPARQL service for a Wikibase instance. In the Docker Compose service names, image names, and environment variables, it is often referred to as WDQS, short for Wikidata Query Service.
-
-## QuickStatements
-
-QuickStatements is a web-based tool for importing and editing Wikibase data in batches.
+The published Docker images used by Wikibase Suite, including Wikibase, query service, query service frontend, Elasticsearch, and QuickStatements.
