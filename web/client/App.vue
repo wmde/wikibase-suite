@@ -288,6 +288,10 @@ function generatePasswordForField( name: PasswordFieldName ): void {
 }
 
 async function flushHost( name: HostFieldName ): Promise<void> {
+	if ( hostValidation.statuses[ name ] === 'valid' ) {
+		return;
+	}
+
 	await hostValidation.validateNow( name, form[ name ] );
 }
 
