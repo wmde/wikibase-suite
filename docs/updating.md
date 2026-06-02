@@ -37,7 +37,8 @@ git checkout deploy@2.0.2
 
 Major version upgrades are performed by updating the WBS major version. This is done by changing your git checkout to the new major version tag. This may reference new major versions of WBS images and involve breaking changes. In turn, those may require additional steps as described below.
 
-WBS only supports updating from one major version to the next version in sequence. In order to upgrade from 1.x.x to 3.x.x, you must first upgrade from 1.x.x to 2.x.x and then to 3.x.x.
+> [!NOTE]  
+> WBS only supports updating from one major version to the next version in sequence. In order to upgrade from 1.x.x to 3.x.x, you must first upgrade from 1.x.x to 2.x.x and then to 3.x.x.
 
 Major upgrades use the data-preserving reset procedure in [Resetting an instance](./resetting.md). Read the version-specific notes below before starting that procedure, then follow the reset procedure and use the target WBS version tag when you reach its "Update setup values" step.
 
