@@ -31,6 +31,7 @@ You need a registered domain and subdomain for your Wikibase and the Query Servi
 - Enter the password generated for your server, or use your personal SSH key, depending on your server provider.
 
 <br clear="right">
+<br>
 
 ```sh
 ssh root@SERVER_IP_ADDRESS
@@ -47,6 +48,7 @@ ssh root@SERVER_IP_ADDRESS
 - Open the printed link in your web browser to start the Wikibase Suite Installer.
 
 <br clear="right">
+<br>
 
 ```sh
 bash <(curl -fsSL https://github.com/wmde/wikibase-suite/raw/main/install) --web
