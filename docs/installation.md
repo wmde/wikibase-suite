@@ -59,22 +59,7 @@ The Wikibase Suite Installer walks you through the steps to configure and instal
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-43-50.png.webp" alt="Domain configuration screen">
 
-You need a domain you own or control, and access to that domain provider's DNS settings.
-
-Choose two hostnames for your WBS services: one for Wikibase itself and one for the query service. These are the web addresses where people will access your Wikibase and query service. Many Wikibase users configure the query service as a subdomain of the main address.
-
-Examples:
-- Wikibase: `yourdomain.example`
-- Query service: `query.yourdomain.example`
-
-In your DNS provider's control panel, create two records of either `A` or `CNAME` type, one for each hostname. Point both records to your server's public IP address. Note that DNS record changes may take a few minutes to propagate.
-
-> [!NOTE]
-> Your DNS provider may call the IP address field `value`, `content`, `address`, or `points to`. Use only the server's public IP address as the value.
-
-To learn more about DNS records, see [DNS basics](https://developer.mozilla.org/en-US/docs/Glossary/DNS) or [Understanding DNS records](https://learn.wordpress.org/lesson/domain-management-understanding-dns-records/). Common provider guides are also available for [Cloudflare](https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/), [GoDaddy](https://www.godaddy.com/help/add-an-a-record-19238), and [Namecheap](https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-an-a-address-record-for-my-domain/).
-
-Enter those hostnames in the installer:
+Configure your domain and subdomain:
 
 - Main domain for public access to your Wikibase.
 - Subdomain for the Query Service software.
