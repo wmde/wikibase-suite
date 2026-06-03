@@ -18,12 +18,12 @@ For a new server, start with the [Wikibase Suite installation guide](./docs/inst
 
 Use [Updating](./docs/updating.md) for minor updates, patch updates, and major version upgrades.
 
-> [!NOTE]
+> [!IMPORTANT]
 > If you are moving an existing installation from the old Wikibase Suite Deploy repository location, see [Migrating from Wikibase Suite Deploy to Wikibase Suite](./docs/migrating-from-wikibase-suite-deploy-to-wikibase-suite.md) before updating.
 
 ## Operating Wikibase Suite
 
-Use these guides to maintain and operate an existing Wikibase Suite instance:
+Use these guides for help in maintaining, operating, and customizing an existing Wikibase Suite instance:
 
 - [Advanced configuration](./docs/advanced-configuration.md)
 - [Backup and restore](./docs/backup-and-restore.md)
@@ -42,9 +42,3 @@ Use these guides to maintain and operate an existing Wikibase Suite instance:
 - [Wikibase Suite team email](mailto:wikibase-suite-support@wikimedia.de)
 
 If something is not working as expected, start with [Troubleshooting](./docs/troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.
-
-## Repository Development
-
-This repository contains the deployable Wikibase Suite configuration, documentation, and installer tooling. The main Docker Compose setup lives at the repository root, and the installer implementation lives in [installer](./installer).
-
-For installer development notes, see [installer/README.md](./installer/README.md) and [installer/DEVELOPMENT.md](./installer/DEVELOPMENT.md).
