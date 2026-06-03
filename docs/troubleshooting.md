@@ -26,7 +26,7 @@ docker compose logs wdqs-updater
 
 This can happen on a fresh or empty instance if the updater is restarted before query service has synced any entity data. The updater can enter a restart loop and needs a manual `--init --start` run before the regular updater can continue.
 
-Follow the recovery procedure in the WDQS image README: [Updater keeps restarting](../../build/wdqs/README.md#updater-keeps-restarting).
+Follow the recovery procedure in the WDQS image README: [Updater keeps restarting](https://github.com/wmde/wikibase-release-pipeline/tree/main/build/wdqs#updater-keeps-restarting).
 
 Once the updater has synced the first entity from Wikibase, normal restarts should not trigger this same failure mode.
 

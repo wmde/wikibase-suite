@@ -3,7 +3,7 @@
 This directory is for additional MediaWiki or Wikibase extensions. To load an additional extension, three things need to be done:
 
 - Put the extension in this directory
-- Load the extension via `deploy/config/Extensions.php`
+- Load the extension via `config/Extensions.php`
 - Restart Wikibase so MediaWiki can update itself
 
 ## Downloading the extension
@@ -13,7 +13,7 @@ To download additional MediaWiki extensions, you can use https://www.mediawiki.o
 Once the file is downloaded, unpack it to `config/extensions`:
 
 ```
-deploy
+wikibase-suite
 |
 +- config
    |
@@ -26,14 +26,14 @@ deploy
 ```
 
 ```sh
-tar -xzf MyExtension.tar.gz -C path/to/deploy/config/extensions
+tar -xzf MyExtension.tar.gz -C path/to/wikibase-suite/config/extensions
 ```
 
-Verify that you created `deploy/config/extensions/MyExtension` and that this directory contains an `extension.json` file.
+Verify that you created `config/extensions/MyExtension` and that this directory contains an `extension.json` file.
 
 ## Load the extension
 
-To load the extension into MediaWiki, follow the installation instructions of your extension. In many cases, you only need to add the following line to `deploy/config/Extensions.php`:
+To load the extension into MediaWiki, follow the installation instructions of your extension. In many cases, you only need to add the following line to `config/Extensions.php`:
 
 ```php
 wfLoadExtension( 'extensions/MyExtension' );

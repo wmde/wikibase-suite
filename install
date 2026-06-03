@@ -67,20 +67,21 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# When a wikibase-release-pipeline checkout is available
-# in the parent directory use the parent directory as WBS_ROOT_DIR
-# and use the repo there instead of cloning again
-if [[ -d "$(dirname "${BASH_SOURCE[0]}")/../wikibase-release-pipeline/.git" ]]; then
-  WBS_ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
+# When this script is run from a Wikibase Suite checkout, use that checkout
+# instead of cloning again.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_WBS_DIR="$SCRIPT_DIR"
+if [[ -d "$LOCAL_WBS_DIR/.git" && -d "$LOCAL_WBS_DIR/installer" ]]; then
+  WBS_ROOT_DIR="$(dirname "$LOCAL_WBS_DIR")"
+  WBS_DIR="$LOCAL_WBS_DIR"
   SKIP_CLONE=true
-  echo "⚠️ Using an existing Wikibase Suite checkout (SKIP_CLONE=true, WBS_ROOT_DIR=$WBS_ROOT_DIR)"
+  echo "⚠️ Using an existing Wikibase Suite checkout (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
 fi
 
 # --- Installer variables (including defaults) ---
 
-INSTALLER_REPO_URL="${INSTALLER_REPO_URL:-https://github.com/wmde/wbs-deploy-setup.git}"
-WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-release-pipeline.git}"
-WBS_REF="${WBS_REF:-"deploy@7.0.0"}"
+WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
+WBS_REF="${WBS_REF:-main}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 WBS_ROOT_DIR="${WBS_ROOT_DIR:-$HOME/wbs}"
 
@@ -92,8 +93,8 @@ export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"
 export SKIP_LAUNCH="${SKIP_LAUNCH:-false}"
 export RESET="${RESET:-false}"
 
-export INSTALLER_DIR="${INSTALLER_DIR:-$WBS_ROOT_DIR/wbs-deploy-setup}"
-export WBS_DIR="${WBS_DIR:-$WBS_ROOT_DIR/wikibase-release-pipeline/deploy}"
+export WBS_DIR="${WBS_DIR:-$WBS_ROOT_DIR/wikibase-suite}"
+export INSTALLER_DIR="${INSTALLER_DIR:-$WBS_DIR/installer}"
 export ENV_FILE_PATH="$WBS_DIR/.env"
 export SCRIPTS_DIR="$INSTALLER_DIR/scripts"
 
@@ -125,17 +126,15 @@ install_git() {
 }
 
 clone_repo() {
-  echo "Cloning repositories to $WBS_ROOT_DIR..."
+  echo "Cloning Wikibase Suite to $WBS_ROOT_DIR..."
   mkdir -p "$WBS_ROOT_DIR"
   pushd "$WBS_ROOT_DIR" >/dev/null || return 1
 
-  git clone --branch main --single-branch "$INSTALLER_REPO_URL" --depth 1 >/dev/null 2>&1
-
-  if [ ! -d wikibase-release-pipeline/.git ]; then
+  if [ ! -d wikibase-suite/.git ]; then
     echo "Checking out Wikibase Suite at $WBS_REF..."
     git clone --branch "$WBS_REF" --single-branch "$WBS_REPO_URL" --depth 1 >/dev/null 2>&1
   else
-    echo "⚠️ An existing Wikibase Suite repository found at $WBS_ROOT_DIR/wikibase-release-pipeline, using what is there ..."
+    echo "⚠️ An existing Wikibase Suite repository found at $WBS_ROOT_DIR/wikibase-suite, using what is there ..."
   fi
 
   popd >/dev/null || return 1

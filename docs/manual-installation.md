@@ -1,30 +1,6 @@
-# Wikibase Suite
+# Manual installation
 
-Wikibase Suite (WBS) helps you run your own [Wikibase](https://wikiba.se) on a server.
-
-WBS is a supported and tested Docker Compose configuration that facilitates deployment of the following services to a public Internet server:
-
-- **[Wikibase](../build/wikibase/README.md):** MediaWiki service with the Wikibase extension included for creating and managing your Wikibase data.
-- **Job Runner:** Background job service used by Wikibase.
-- **[MariaDB](https://hub.docker.com/_/mariadb):** Database service used by Wikibase.
-- **[Elasticsearch](../build/elasticsearch/README.md):** Search service used by Wikibase.
-- **[Query service](../build/wdqs/README.md):** SPARQL service for querying Wikibase data.
-- **[Query service frontend](../build/wdqs-frontend/README.md):** Web interface for SPARQL queries.
-- **[Query service updater](../build/wdqs/README.md):** Keeps query service data in sync with Wikibase.
-- **[QuickStatements](../build/quickstatements/README.md):** A web-based tool to import and manipulate large amounts of data.
-- **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
-
-### Index
-- [Installation](#installation)
-- [Upgrading](./docs/updating.md)
-- [Uninstalling](./docs/uninstalling.md)
-- [Glossary](./docs/glossary.md)
-- [Troubleshooting](./docs/troubleshooting.md)
-- [Support](#support)
-
----
-
-## Installation
+This page describes the manual path for installing Wikibase Suite (WBS) with Docker Compose. For the recommended browser-based setup flow, see [Installation](./installation.md).
 
 > [!IMPORTANT]
 > This guide is for setting up WBS on an internet-reachable Linux server, not on your laptop or desktop. WBS needs public DNS records and HTTPS certificate setup to work correctly. If you are looking for individual WBS images instead of the full setup, see [hub.docker.com/u/wikibase](https://hub.docker.com/u/wikibase).
@@ -69,18 +45,18 @@ Most bare VPS instances do not have current versions of Docker, Docker Compose, 
 
 ### 4. Download WBS
 
-Check out the files from GitHub, then change to the subdirectory `deploy`.
+Check out the files from GitHub, then change to the repository directory.
 
 ```sh
-git clone https://github.com/wmde/wikibase-release-pipeline
-cd wikibase-release-pipeline/deploy
+git clone https://github.com/wmde/wikibase-suite
+cd wikibase-suite
 ```
 
 ---
 
 ### 5. Initial configuration
 
-Make a copy of the [example environment file](./.env.example) in the `wikibase-release-pipeline/deploy` directory.
+Make a copy of the [example environment file](../.env.example) in the Wikibase Suite directory.
 
 ```sh
 cp .env.example .env
@@ -101,13 +77,13 @@ Edit `.env` and set the values below.
 | `METADATA_CALLBACK` | `true` | Set to `true` to opt into the WBS metadata callback, or `false` to opt out. Unlike the other `.env` values, this value may be changed after initial setup; restart the services for the change to take effect. |
 
 > [!WARNING]
-> With the exception of `METADATA_CALLBACK`, `.env` values are setup values. If you need to change them after first start, you also need to reset WBS (see [Resetting an instance](./docs/resetting.md)).
+> With the exception of `METADATA_CALLBACK`, `.env` values are setup values. If you need to change them after first start, you also need to reset WBS (see [Resetting an instance](./resetting.md)).
 
 ---
 
 ### 6. Starting Wikibase
 
-Run the following command from within the `wikibase-release-pipeline/deploy` directory:
+Run the following command from within the Wikibase Suite directory:
 
 ```sh
 docker compose up -d
@@ -123,7 +99,7 @@ You can now access your services using the hostnames you set in `.env`:
 - QuickStatements: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements`
 
 > [!NOTE]
-> If anything goes wrong, see [Troubleshooting](./docs/troubleshooting.md).
+> If anything goes wrong, see [Troubleshooting](./troubleshooting.md).
 
 ---
 
@@ -143,4 +119,4 @@ docker compose up -d
 
 ## Support
 
-If something is not working as expected, start with [Troubleshooting](./docs/troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.
+If something is not working as expected, start with [Troubleshooting](./troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.

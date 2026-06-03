@@ -4,7 +4,7 @@ Uninstalling removes the containers, Docker volumes, and generated configuration
 
 If there is anything you want to keep, follow [Back up your data](./backup-and-restore.md#back-up-your-data) or [Back up your configuration](./backup-and-restore.md#back-up-your-configuration) before continuing.
 
-Run these commands from the `wikibase-release-pipeline/deploy` directory:
+Run these commands from the Wikibase Suite directory:
 
 ```sh
 docker compose down --volumes

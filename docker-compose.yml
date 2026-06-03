@@ -20,7 +20,7 @@ services:
       - wikibase-image-data:/var/www/html/images
       - quickstatements-data:/quickstatements/data
     environment:
-      # Keep in sync with deploy/package.json version
+      # Keep in sync with package.json version
       DEPLOY_VERSION: "7.0.0"
       METADATA_CALLBACK: ${METADATA_CALLBACK}
       MW_ADMIN_NAME: ${MW_ADMIN_NAME}

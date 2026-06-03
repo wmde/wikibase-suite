@@ -1,6 +1,6 @@
 <?php
 // ************************************************************************
-// Wikibase Suite Deploy Extensions.php
+// Wikibase Suite Extensions.php
 // ************************************************************************
 //
 // File to load MediaWiki extension in the Wikibase image.
@@ -8,7 +8,7 @@
 // This file will be loaded after all other extensions and LocalSettings.php 
 // have loaded.
 //
-// For extensions added via deploy/config/extensions, prefix the name with
+// For extensions added via config/extensions, prefix the name with
 // "extensions/".
 // e.g. wfLoadExtension( 'WikibaseLexeme' ); becomes
 //      wfLoadExtension( 'extensions/WikibaseLexeme' );

@@ -11,7 +11,7 @@ Besides [your configuration](./advanced-configuration.md), your data is what mak
 
 ## Back up your data
 
-Run these commands from the `wikibase-release-pipeline/deploy` directory. To back up your data, shut down the instance and dump the contents of all Docker volumes into `.tar.gz` files.
+Run these commands from the Wikibase Suite directory. To back up your data, shut down the instance and dump the contents of all Docker volumes into `.tar.gz` files.
 
 ```sh
 docker compose down
@@ -40,7 +40,7 @@ Keep this backup as a reference when resetting or upgrading. It may contain pass
 
 ## Restore from a backup
 
-Run these commands from the `wikibase-release-pipeline/deploy` directory. To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from your `.tar.gz` files.
+Run these commands from the Wikibase Suite directory. To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from your `.tar.gz` files.
 
 Warning: the restore commands remove the existing Docker volumes before restoring the backup files.
 

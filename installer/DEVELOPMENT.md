@@ -7,8 +7,8 @@ This document covers local testing, CLI options, and other details useful for de
 1. Clone this repo and change into the directory created for it:
 
    ```bash
-   git clone https://github.com/wmde/wbs-deploy-setup
-   cd wbs-deploy-setup
+   git clone https://github.com/wmde/wikibase-suite
+   cd wikibase-suite
    ```
 
 2. Run from the directory that contains `install`:
@@ -28,7 +28,7 @@ This document covers local testing, CLI options, and other details useful for de
 | `--skip-clone`   | Don't clone any repositories. Assumes they are already present. |
 | `--skip-deps`    | Skip installing Git and Docker. Assumes both are installed and Docker is running. |
 | `--skip-launch`  | Run through configuration but exit before `docker compose up`. |
-| `--wbs-ref REF`   | Checkout a specific Wikibase Suite branch or tag. Defaults to `deploy@7.0.0`. |
+| `--wbs-ref REF`   | Checkout a specific Wikibase Suite branch or tag. Defaults to `main`. |
 | `--debug`        | Enable verbose logging; disables quiet pulls during Docker builds. |
 | `--local`        | Configure for localhost: defaults hosts to `wikibase.test` and `query.wikibase.test`, avoids Let's Encrypt. |
 
@@ -48,6 +48,6 @@ To use these special localhost-only domains, add entries to your system's hosts 
 - The installer web server runs on port 8888 (HTTPS) for browser UI installations.
 - For non-localhost web installs, the installer will try to obtain a Let's Encrypt cert on port 80. If that fails, it falls back to a self-signed cert and your browser will warn.
 - If `docker-compose.local.yml` exists in the Wikibase Suite directory, it will be merged automatically.
-- Default Wikibase Suite ref is `deploy@7.0.0`.
+- Default Wikibase Suite ref is `main`.
 - Use `--wbs-ref REF` to checkout a specific Wikibase Suite branch or tag.
 - After launch, your saved `.env` config is displayed. Store credentials securely.

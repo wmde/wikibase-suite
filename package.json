@@ -1,0 +1,12 @@
+{
+	"name": "wikibase-suite",
+	"version": "7.0.0",
+	"nx": {
+		"targets": {
+			"lint": {},
+			"nx-release-publish": {
+				"command": "echo \"⚠️ Make sure to update related documentation to point to new Wikibase Suite release (nothing changed)\""
+			}
+		}
+	}
+}

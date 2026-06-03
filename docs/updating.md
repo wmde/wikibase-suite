@@ -4,7 +4,9 @@ Wikibase Suite (WBS) uses [semantic versioning](https://semver.org/spec/v2.0.0.h
 
 WBS references the latest minor and patch releases of compatible WBS image major versions using Docker image major-version tags. For example, WBS 2.0.1 might reference `wikibase/wikibase:3`, a tag that points to the latest Wikibase 3.x.x image.
 
-For the tag formats used by WBS images, see [Wikibase Suite image versioning](../../docs/versioning.md).
+For the tag formats used by WBS images, see [Wikibase Suite image versioning](https://github.com/wmde/wikibase-release-pipeline/blob/main/docs/versioning.md).
+
+If you are moving an existing installation from the old `wikibase-release-pipeline/deploy` checkout to the new `wikibase-suite` repository, see [Migrating from Wikibase Suite Deploy to Wikibase Suite](./migrating-from-wikibase-suite-deploy-to-wikibase-suite.md).
 
 ## Minor and patch updates for WBS images
 
@@ -65,7 +67,7 @@ Please, note that the `.env` file now requires setting `METADATA_CALLBACK`. Find
 
 The Wikibase image switched from version 3.x.x to 4.x.x. This upgrades the MediaWiki version used by Wikibase from 1.42 to 1.43. Please read the [MediaWiki UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_43/UPGRADE).
 
-Note that URLs changed with Deploy 4 to the following defaults:
+Note that URLs changed with WBS 4 to the following defaults:
 - https://wikibase.example MediaWiki with Wikibase extension
 - https://wikibase.example/w/rest.php MediaWiki REST API including Wikibase REST API
 - https://query.wikibase.example query service web interface
