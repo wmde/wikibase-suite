@@ -2,15 +2,23 @@
 
 Wikibase Suite is a production-ready Wikibase software bundle for self-hosting a public knowledge graph similar to Wikidata. It includes MediaWiki, Wikibase, Query Service, QuickStatements, and HTTPS routing for a public instance.
 
-## 1. Provision a VPS
+## 1. Requirements: What You Need to Install Wikibase Suite
 
-Start by provisioning a Linux VPS or cloud server for your WBS instance. Most Wikibase production installs are on cloud-based servers. Follow your provider's documentation to create a server that meets the requirements below.
+### Server (VPS)
 
-The minimum requirements for your server are as follows:
-- 64-bit x86 architecture (`amd64` / `x86_64`); ARM servers are not currently supported by the published WBS images
-- 8 GB RAM
-- 20 GB free disk space to start, with more needed as your wiki data grows
-- inbound HTTP and HTTPS traffic allowed on ports 80 and 443
+You need to have access to a Virtual Private Server (VPS) to install Wikibase Suite. Either your organization can provide a server or you rent from a provider. The minimum criteria must be fulfilled:
+
+- Server with a public IP address
+- Architecture: x86 (AMD/Intel)
+- RAM: min. 8 GB
+- Storage: min. 4 GB
+
+### Domain registration
+
+You need a registered domain and subdomain for your Wikibase and the Query Service software:
+
+- Main domain for your Wikibase: `yourdomain.com`
+- Subdomain for Query Service: `query.yourdomain.com`
 
 ## 2. Start the Wikibase Suite Installer
 

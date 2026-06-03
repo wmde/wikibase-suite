@@ -163,7 +163,7 @@ start_installer_webserver() {
       $WEB_IMAGE_NAME"
   fi
 
-  echo "To continue installation, navigate to:"
+  echo "Open the following URL in your browser to continue the installation:"
   echo
   echo "  https://$INSTALLER_HOST:$INSTALLER_PORT"
   echo
