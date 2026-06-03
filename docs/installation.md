@@ -30,11 +30,13 @@ You need a registered domain and subdomain for your Wikibase and the Query Servi
 - Access your server by entering the command below.
 - Enter the password generated for your server, or use your personal SSH key, depending on your server provider.
 
+<br clear="right">
+
 ```sh
 ssh root@SERVER_IP_ADDRESS
 ```
 
-<br clear="right">
+<br>
 
 ### Start the Installer
 
@@ -44,11 +46,13 @@ ssh root@SERVER_IP_ADDRESS
 - Wait for the initial setup to finish. This can take about a minute.
 - Open the printed link in your web browser to start the Wikibase Suite Installer.
 
+<br clear="right">
+
 ```sh
 bash <(curl -fsSL https://github.com/wmde/wikibase-suite/raw/main/install) --web
 ```
 
-<br clear="right">
+<br>
 
 ## 3. Configure and Install Wikibase Suite
 
@@ -57,6 +61,7 @@ bash <(curl -fsSL https://github.com/wmde/wikibase-suite/raw/main/install) --web
 The Wikibase Suite Installer walks you through the steps to configure and install your Wikibase instance.
 
 <br clear="right">
+<br>
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-43-50.png.webp" alt="Domain configuration screen">
 
@@ -66,6 +71,7 @@ Configure your domain and subdomain:
 - Subdomain for the Query Service software.
 
 <br clear="right">
+<br>
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-44-57.png.webp" alt="Administrator account screen">
 
@@ -76,6 +82,7 @@ Create an administrator account for your Wikibase:
 - Password
 
 <br clear="right">
+<br>
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-46-13.png.webp" alt="Database configuration screen">
 
@@ -84,6 +91,7 @@ Create an administrator account for your Wikibase:
 The installer provides a default database configuration if you do not enter custom credentials.
 
 <br clear="right">
+<br>
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-25-01.png.webp" alt="Installation progress screen">
 
@@ -92,6 +100,7 @@ Run the installation for all Wikibase Suite components.
 This might take a few minutes.
 
 <br clear="right">
+<br>
 
 <img align="right" width="300" src="https://wikiba.se/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/sites/7/2026/05/Bildschirmfoto-vom-2026-05-19-11-27-26.png.webp" alt="Completed installation screen">
 
