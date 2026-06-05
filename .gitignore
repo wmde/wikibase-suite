@@ -1,0 +1,34 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+pnpm
+.pnpm-store
+*.swp
+.direnv
+
+local.env
+**/.env
+
+docker-compose.local.yml
+
+log
+config/*.ini
+config/*.json
+config/*.php
+config/extensions
+
+# dependencies
+node_modules
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+npm-debug.log
+
+# System Files
+.DS_Store
+Thumbs.db
