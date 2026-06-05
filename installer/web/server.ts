@@ -212,9 +212,13 @@ const httpsServer = https.createServer( credentials, app );
 
 if ( DEV_SERVER ) {
 	const { createServer: createViteServer } = await import( 'vite' );
+	const { default: vue } = await import( '@vitejs/plugin-vue' );
 	const vite = await createViteServer( {
+		configFile: false,
 		root: APP_ROOT,
 		appType: 'custom',
+		plugins: [ vue() ],
+		publicDir: false,
 		server: {
 			middlewareMode: true,
 			hmr: {
