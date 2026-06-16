@@ -1,97 +1,108 @@
-# Wikibase Suite
+# Move Wikibase Suite Deploy Into Wikibase Suite
 
-This repository is the working transition home for moving Wikibase Suite Deploy out of
-`wmde/wikibase-release-pipeline` and placing it beside the installer currently developed in `wmde/wbs-deploy-setup`. The intended product boundary is a focused Wikibase Suite repository containing the deployable configuration, installation tooling, and user-facing documentation for running a Wikibase Suite instance.
+This is the working transition document for moving Wikibase Suite Deploy out of `wmde/wikibase-release-pipeline` and into `wmde/wikibase-suite`, beside the installer formerly developed in `wmde/wbs-deploy-setup`.
 
-## Why this move is happening
+Last updated: 2026-06-16
 
-`wikibase-release-pipeline` is primarily build, test, and release-pipeline tooling for
-Wikibase Suite Docker images. Deploy consumes those images from Docker Hub or another
-registry, but it does not need to live beside the image build pipeline.
+## Goal
+
+Make the product boundary clear:
+
+- `wmde/wikibase-suite` owns the deployable Wikibase Suite product: Docker Compose configuration, user-facing documentation, changelog, migration guidance, and the installer.
+- `wmde/wikibase-release-pipeline` owns build, test, publish, and release tooling for Wikibase Suite Docker images.
+
+After the move, the old `wikibase-release-pipeline/deploy` location should no longer own Deploy source code or documentation. It should keep only a short redirect notice at `deploy/README.md` for users who follow old links.
+
+## Why This Move Is Happening
+
+`wikibase-release-pipeline` is primarily build, test, and release-pipeline tooling for Wikibase Suite Docker images. Deploy consumes those images from Docker Hub or another registry, but it does not need to live beside the image build pipeline.
+
+Deploy is a user-facing product: a deployable configuration for creating a Wikibase instance with companion services, plus documentation and tooling for setup, maintenance, and operations.
+
+The installer belongs in `wikibase-suite` because it is part of the Deploy product experience: it guides users through configuring and launching the Wikibase Suite stack.
 
 Deploy still has two ongoing relationships with `wikibase-release-pipeline`:
 
 - The release pipeline uses Deploy configuration as the basis for integration tests.
 - Deploy consumes image tags produced by the release pipeline.
 
-Both relationships can continue after Deploy moves. The release-pipeline test harness
-should pull Deploy configuration from this repository, and Deploy should continue to use
-published image tags rather than depending on the build-pipeline repository layout.
+Both relationships should continue after Deploy moves. The release-pipeline test harness should use Deploy configuration from `wikibase-suite`, and Deploy should continue to use published image tags rather than depending on the build-pipeline repository layout.
 
-The installer belongs here because it is part of the Deploy product experience: it guides
-users through configuring and launching the Wikibase Suite stack.
+## Current Wikibase Suite Repository Shape
 
-## Current repository shape
-
-This repository now keeps Wikibase Suite deploy configuration at the repository root and
-the installer implementation in `installer/`:
+`wikibase-suite` now keeps Wikibase Suite deploy configuration at the repository root and the installer implementation in `installer/`:
 
 ```text
 .env.example
+CHANGELOG.md
 config/
 docker-compose.yml
 docs/
 install
 installer/
+package.json
 README.md
-update-from-sources.sh
 ```
 
-`update-from-sources.sh` remains in place during the transition, but the deploy files have
-been flattened out of the imported `deploy/` directory.
+The deploy files have been flattened out of the originally imported `deploy/` directory. `update-from-sources.sh` was used during the transition to pull ongoing Deploy and installer changes, but was removed once those sources were fully merged into this repository.
 
-```sh
-./update-from-sources.sh
-```
-
-## Transition checklist
-
-### Initial Setup
+## Completed Work
 
 - [x] Create the transition repository.
-- [x] Import Deploy from `wmde/wikibase-release-pipeline/deploy` into `deploy/`.
-- [x] Import the installer from `wmde/wbs-deploy-setup` into `installer/`.
-- [x] Preserve upstream links during transition so both source projects can still receive
-  active changes.
-- [x] Add a source-update script for pulling ongoing Deploy and installer changes.
+- [x] Select `wmde/wikibase-suite` as the new product repository.
+- [x] Import Deploy from `wmde/wikibase-release-pipeline/deploy`.
+- [x] Import the installer from `wmde/wbs-deploy-setup`.
+- [x] Preserve upstream links during transition so both source projects can still receive active changes.
+- [x] Add `update-from-sources.sh` for pulling ongoing Deploy and installer changes.
 - [x] Rename the imported installer directory from `install/` to `installer/`.
-- [ ] Continue running `update-from-sources.sh` until the upstream Deploy and installer
-  changes are settled.
-- [x] Flatten `deploy/` into the repository root once source synchronization from
-  `wikibase-release-pipeline/deploy` is no longer needed, including moving
-  `deploy/docs/` to root `docs/`.
-- [x] Update installer runtime paths for the final repository layout: root paths should point to the repository root, installer paths should point to `installer/`, cloning should target `wikibase-suite`, and local checkout detection should work from the new layout.
+- [x] Flatten imported Deploy files into the repository root, including moving `deploy/docs/` to root `docs/`.
+- [x] Update installer runtime paths for the final repository layout.
+- [x] Move the manual Deploy installation flow out of the root README and into its own documentation page as the alternate installation path.
+- [x] Fold useful content from `installer/README.md` into `docs/installation.md`, making the installer the recommended installation path.
+- [x] Update repo-local internal document links that pointed at `wikibase-release-pipeline/deploy`.
+- [x] Rename product metadata from `deploy` to `wikibase-suite` in root `package.json`.
+- [x] Add an initial migration document for existing Deploy users moving from the old `wikibase-release-pipeline/deploy` checkout to `wikibase-suite`.
+- [x] Manually compare current `wikibase-release-pipeline` Deploy documentation against flattened `wikibase-suite` documentation after source synchronization ended.
+- [x] Remove `update-from-sources.sh` after source synchronization ended.
+- [x] Finish the migration guide at `docs/migrating-from-wikibase-suite-deploy-to-wikibase-suite.md`; it keeps the core flow of cloning `wmde/wikibase-suite`, copying the existing `.env` and `config/` directory from the old `wikibase-release-pipeline/deploy` checkout, stopping services from the old checkout, and starting services from the new checkout. It warns existing users not to run the installer, explains that the Docker Compose project name remains `wbs-deploy` so existing containers and volumes can continue to be found, separates repository-location migration from updating to a newer version, links backup guidance, explains how to verify that existing volumes are being used, mentions `.env` secrets/file attributes/hidden files, includes recovery guidance if fresh volumes are created unexpectedly, and mentions certificate data and Traefik/Let's Encrypt volumes.
+- [x] Create a transition branch from current `main` in `wmde/wikibase-release-pipeline`.
+- [x] Remove old Deploy source from `wmde/wikibase-release-pipeline`, leaving only `deploy/README.md`; remove all other tracked files under `deploy/`, including compose files, `.env.example`, `package.json`, `CHANGELOG.md`, `config/`, and `docs/`.
+- [x] Update release-pipeline docs and public-facing links so `wmde/wikibase-release-pipeline` is described as image build, test, publish, and release tooling, not the Deploy product home. This includes `README.md`, `DEVELOPMENT.md`, `docs/versioning.md`, `build/*/README.md`, and `build/*/dockerhub.md`. Remove or replace references to `deploy/README.md`, `deploy/docs/*`, `deploy/config/*`, `deploy/docker-compose.yml`, `deploy/package.json`, and `Wikibase Suite Deploy` as the old repo-local product location. Write the redirect notice at `deploy/README.md` in `wmde/wikibase-release-pipeline/deploy/README.md`.
+- [x] Update release-process notes so Wikibase Suite releases are handled separately from image releases and tagged in the new repository location.
 
-### Documentation Updates
+## Remaining Work
 
-- [x] Move the manual Deploy installation flow out of the root README and into its own
-  documentation page as the alternate installation path.
-- [x] Fold the useful content from `installer/README.md` into `docs/installation.md`, making the installer the recommended installation path and linking manual installation as the alternate path from the root README.
-- [x] Update repo-local internal document links that may point at `wikibase-release-pipeline/deploy`
-- [ ] In a transition branch of `wikibase-release-pipeline`, replace the old `deploy/` content with a short
-	`deploy/README.md` notice that points users to the new repository.
-- [x] Document migration for existing Deploy users moving from the old `wikibase-release-pipeline/deploy` checkout to the new `wikibase-suite` repository.
+### Docs
 
-### Release Process Updates
+- [ ] Initial Installation page now mirrors the website installation page with screenshots of the Installer tool, confirm this is correct, and otherwise internally test and review the installation documentation and process in this new merged location.
+- [ ] Confirm that docs send new installations to `docs/installation.md`, and have clear note for those with existing installations to migrate `docs/migrating-from-wikibase-suite-deploy-to-wikibase-suite.md` before updating.
+- [ ] Document Wikibase Suite release process, see "Document Wikibase Suite Release Process" ref. below
 
-- [x] Rename product from "deploy" to "wikibase-suite" in `package.json`
-- [ ] Update the `wikibase-release-pipeline` release process so Deploy releases are
-  derived from and tagged on the new repository location.
-- [ ] Update the `wikibase-release-pipeline` integration test harness to pull Deploy
-  configuration from this repository instead of reading from a local `deploy/` directory.
+### Wikibase Release Pipeline Tests
 
-### Release
+- [ ] Update the release-pipeline integration test harness to use Deploy configuration from `wmde/wikibase-suite` instead of reading from a local `deploy/` directory. Known dependencies are `test/setup/make-test-settings.ts`, which reads `../deploy/.env.example` and `../deploy/docker-compose.yml`; `test/suites/docker-compose.override.yml`, which mounts `../../deploy/config/traefik-dynamic.yml`; `test/specs/repo/wikibase-suite-versions.ts`, which reads `deploy/package.json` and checks Deploy version parity; and `lint.sh`, which excludes `deploy/config/extensions`. Preferred starting point: CI checks out `wmde/wikibase-suite` as a sibling or known workspace path, and local tests use an environment variable such as `WIKIBASE_SUITE_PATH`. Decide the CI checkout path, whether local tests fail clearly when `WIKIBASE_SUITE_PATH` is not set and no sibling checkout exists, whether release-pipeline tests still assert `DEPLOY_VERSION`/Wikibase Suite version parity, and whether tests should only assert runtime/API consistency if the version API still exposes a deploy/suite version.
 
-- [ ] Update public install instructions and any other references to the old Deploy
-  location.
-- [ ] Coordinate the merge of the release-pipeline transition branch with communication
-  about the new Deploy and installer location.
-- [ ] Announce the new repository location when the final repository shape, release
-  process, and documentation links are ready.
+### Final Clean-up
 
-## Open Questions
+- [ ] Remove or update lint/test exclusions that only existed because Deploy lived in `wmde/wikibase-release-pipeline`.
 
-- Does the Installer need its own `package.json` so it can be versioned independent of WBS versions? If not do we move WBS versions (presumably always and only PATCH or MINOR updates) when we make Installer updates.
-- Does the `wikibase-suite` repo want its own versioning scripts, tests, or GitHub Actions / release workflow?
-- Installer CLI ergonomics/naming is it called `installer` or `wbs` (preferred), and if `wbs` is the installer ran as `wbs install <--args>`. And should we reconsider the root directory name for all of that including the Installer Web UI to be something other than `installer/`?
-- Where should Deploy and installer development documentation live after the move? This includes ADRs, implementation notes, and other contributor-facing documentation for both the Deploy configuration and the installer. One option is to keep this material in `wikibase-release-pipeline` when it mainly concerns release engineering, CI, or image-pipeline integration. Another option is to carry relevant development documentation into this repository so product decisions and implementation context stay beside the user-facing Deploy and installer code. If it stays here, we need to decide where it belongs and how to separate contributor-facing docs from user-facing documentation.
+### Finalize and Announce Release
+
+- [ ] Prepare public install-link updates for GitHub, Docker Hub, and any other places that currently link to `wikibase-release-pipeline/deploy`.
+- [ ] Coordinate merging the release-pipeline transition branch (https://github.com/wmde/wikibase-release-pipeline/pull/931) with communication about the new Deploy and installer location.
+- [ ] Announce the new repository location when the final repository shape, release process, test harness, and documentation links are ready.
+- [ ] Decide whether contributor-facing transition docs and ADRs should stay under `installer/docs/adrs/`, move to another location, or be split between product and release-engineering docs.
+
+## Ref. Document Wikibase Suite Release Process
+
+Image releases and Wikibase Suite releases are separate release processes. Releasing images remains part of `wmde/wikibase-release-pipeline`. Releasing Wikibase Suite happens in `wmde/wikibase-suite`.
+
+The initial Wikibase Suite release process is manual:
+
+1. Create a release branch in `wmde/wikibase-suite`.
+2. Prepare the release changes on that branch, including the version number and changelog update.
+3. Keep the branch open for review until approved.
+4. Merge the release branch.
+5. Tag the new Wikibase Suite version after merge.
+
+A release script may be added later, but the move does not depend on one.
