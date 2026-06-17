@@ -15,6 +15,7 @@ You will need:
 - a new checkout of `https://github.com/wmde/wikibase-suite`
 - your existing `.env` file
 - your existing `config/` directory
+- any local changes you made to `docker-compose.yml` or `docker-compose.override.yml`
 
 ## Migration steps
 
@@ -25,7 +26,17 @@ You will need:
    cd wikibase-suite
    ```
 
-2. Copy your existing configuration from the old deploy directory.
+2. Check out the same Wikibase Suite version that your existing installation uses.
+
+   Replace `7.0.0` with your current Wikibase Suite version:
+
+   ```sh
+   git checkout 7.0.0
+   ```
+
+   If you are intentionally moving to a newer version at the same time, stop here and read [Updating](./updating.md) before continuing. For the lowest-risk migration, move to the same version first and update later.
+
+3. Copy your existing configuration from the old deploy directory.
 
    Replace `/path/to/wikibase-release-pipeline/deploy` with the path to your old checkout:
 
@@ -34,28 +45,26 @@ You will need:
    cp -a /path/to/wikibase-release-pipeline/deploy/config/. ./config/
    ```
 
-3. Stop the services from the old deploy directory.
+4. Reapply local Docker Compose changes if you have any.
+
+   If you changed `docker-compose.yml` in the old checkout, review those changes and reapply only the parts that are still needed in the new checkout. If you used a `docker-compose.override.yml` file, copy or recreate it in the new checkout as appropriate.
+
+5. Stop the services from the old deploy directory.
 
    ```sh
    cd /path/to/wikibase-release-pipeline/deploy
    docker compose down
    ```
 
-4. Start the services from the new repository directory.
+6. Start the services from the new repository directory.
 
    ```sh
    cd /path/to/wikibase-suite
    docker compose up -d
    ```
 
-5. Check that the services are running.
+7. Check that the services are running.
 
    ```sh
    docker compose ps
    ```
-
-## Notes
-
-- The Docker Compose project name is currently kept as `wbs-deploy` so that existing containers and volumes can continue to be found by the new checkout.
-- If you made local changes to `docker-compose.yml`, review and reapply those changes in the new checkout before starting services.
-- If you installed custom extensions under `config/extensions`, confirm they were copied with the rest of the `config/` directory.
