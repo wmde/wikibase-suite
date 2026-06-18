@@ -57,8 +57,8 @@ The deploy files have been flattened out of the originally imported `deploy/` di
 - [x] Rename the imported installer directory from `install/` to `installer/`.
 - [x] Flatten imported Deploy files into the repository root, including moving `deploy/docs/` to root `docs/`.
 - [x] Update installer runtime paths for the final repository layout.
-- [x] Move the manual Deploy installation flow out of the root README and into its own documentation page as the alternate installation path.
-- [x] Fold useful content from `installer/README.md` into `docs/installation.md`, making the installer the recommended installation path.
+- [x] Move the Docker Compose installation flow into the root README as the public installation path.
+- [x] Fold useful installation content into the root `README.md` and keep installer implementation documentation under `installer/`.
 - [x] Update repo-local internal document links that pointed at `wikibase-release-pipeline/deploy`.
 - [x] Rename product metadata from `deploy` to `wikibase-suite` in root `package.json`.
 - [x] Add an initial migration document for existing Deploy users moving from the old `wikibase-release-pipeline/deploy` checkout to `wikibase-suite`.
@@ -74,8 +74,8 @@ The deploy files have been flattened out of the originally imported `deploy/` di
 
 ### Docs
 
-- [ ] Initial Installation page now mirrors the website installation page with screenshots of the Installer tool, confirm this is correct, and otherwise internally test and review the installation documentation and process in this new merged location.
-- [ ] Confirm that docs send new installations to `docs/installation.md`, and have clear note for those with existing installations to migrate `docs/migrating-from-wikibase-suite-deploy-to-wikibase-suite.md` before updating.
+- [ ] Confirm that the root README installation instructions are the correct public installation path in this new merged location.
+- [ ] Confirm that docs send new installations to the root `README.md` installation section, and have clear note for those with existing installations to migrate `docs/migrating-from-wikibase-suite-deploy-to-wikibase-suite.md` before updating.
 - [ ] Document Wikibase Suite release process, see "Document Wikibase Suite Release Process" ref. below
 
 ### Wikibase Release Pipeline Tests
