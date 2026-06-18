@@ -1,6 +1,6 @@
 # Wikibase Suite Installer
 
-This directory contains the installer implementation used by the root [install](../install) script. For normal installation instructions, start with [Installation](../docs/installation.md).
+This directory contains the installer implementation used by the root [install](../install) script. For public installation instructions, start with the root [README](../README.md#installation).
 
 During installation, the installer:
 
