@@ -25,7 +25,7 @@ This document covers local testing, CLI options, and other details useful for de
 | `--web`          | Explicitly uses the browser UI. This is currently the default. |
 | `--dev`          | Shortcut for local development: sets `LOCALHOST=true` and skips dependency installs. |
 | `--reset`        | Interactive reset. Optionally deletes `.env`, `LocalSettings.php`, and any existing services/data before relaunch. |
-| `--skip-clone`   | Don't clone any repositories. Assumes they are already present. |
+| `--skip-clone`   | Don't clone the Wikibase Suite repository. Assumes it is already present. |
 | `--skip-deps`    | Skip installing Git and Docker. Assumes both are installed and Docker is running. |
 | `--skip-launch`  | Run through configuration but exit before `docker compose up`. |
 | `--wbs-ref REF`   | Checkout a specific Wikibase Suite branch or tag. Defaults to `main`. |
@@ -47,6 +47,7 @@ To use these special localhost-only domains, add entries to your system's hosts 
 
 - The installer web server runs on port 8888 (HTTPS) for browser UI installations.
 - For non-localhost web installs, the installer will try to obtain a Let's Encrypt cert on port 80. If that fails, it falls back to a self-signed cert and your browser will warn.
+- When run from the remote `install` script, the installer clones Wikibase Suite to `~/wikibase-suite` by default. Set `WBS_DIR` to use a custom checkout path.
 - If `docker-compose.local.yml` exists in the Wikibase Suite directory, it will be merged automatically.
 - Default Wikibase Suite ref is `main`.
 - Use `--wbs-ref REF` to checkout a specific Wikibase Suite branch or tag.

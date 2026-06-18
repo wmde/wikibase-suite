@@ -72,7 +72,6 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_WBS_DIR="$SCRIPT_DIR"
 if [[ -d "$LOCAL_WBS_DIR/.git" && -d "$LOCAL_WBS_DIR/installer" ]]; then
-  WBS_ROOT_DIR="$(dirname "$LOCAL_WBS_DIR")"
   WBS_DIR="$LOCAL_WBS_DIR"
   SKIP_CLONE=true
   echo "⚠️ Using an existing Wikibase Suite checkout (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
@@ -83,7 +82,8 @@ fi
 WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
 WBS_REF="${WBS_REF:-main}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
-WBS_ROOT_DIR="${WBS_ROOT_DIR:-$HOME/wbs}"
+
+export WBS_DIR="${WBS_DIR:-$HOME/wikibase-suite}"
 
 export CLI="${CLI:-false}"
 export DEV="${DEV:-false}"
@@ -93,7 +93,6 @@ export SKIP_DEPENDENCY_INSTALLS="${SKIP_DEPENDENCY_INSTALLS:-false}"
 export SKIP_LAUNCH="${SKIP_LAUNCH:-false}"
 export RESET="${RESET:-false}"
 
-export WBS_DIR="${WBS_DIR:-$WBS_ROOT_DIR/wikibase-suite}"
 export INSTALLER_DIR="${INSTALLER_DIR:-$WBS_DIR/installer}"
 export ENV_FILE_PATH="$WBS_DIR/.env"
 export SCRIPTS_DIR="$INSTALLER_DIR/scripts"
@@ -126,15 +125,21 @@ install_git() {
 }
 
 clone_repo() {
-  echo "Cloning Wikibase Suite to $WBS_ROOT_DIR..."
-  mkdir -p "$WBS_ROOT_DIR"
-  pushd "$WBS_ROOT_DIR" >/dev/null || return 1
+  local wbs_parent_dir
+  local wbs_target_dir
 
-  if [ ! -d wikibase-suite/.git ]; then
+  wbs_parent_dir="$(dirname "$WBS_DIR")"
+  wbs_target_dir="$(basename "$WBS_DIR")"
+
+  echo "Cloning Wikibase Suite to $WBS_DIR..."
+  mkdir -p "$wbs_parent_dir"
+  pushd "$wbs_parent_dir" >/dev/null || return 1
+
+  if [ ! -d "$wbs_target_dir/.git" ]; then
     echo "Checking out Wikibase Suite at $WBS_REF..."
-    git clone --branch "$WBS_REF" --single-branch "$WBS_REPO_URL" --depth 1 >/dev/null 2>&1
+    git clone --branch "$WBS_REF" --single-branch --depth 1 "$WBS_REPO_URL" "$wbs_target_dir" >/dev/null 2>&1
   else
-    echo "⚠️ An existing Wikibase Suite repository found at $WBS_ROOT_DIR/wikibase-suite, using what is there ..."
+    echo "⚠️ An existing Wikibase Suite repository found at $WBS_DIR, using what is there ..."
   fi
 
   popd >/dev/null || return 1

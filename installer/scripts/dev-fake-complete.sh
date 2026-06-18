@@ -3,7 +3,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PARENT_DIR="$(cd "$ROOT_DIR/.." && pwd)"
-WBS_ROOT_DIR="${WBS_ROOT_DIR:-$PARENT_DIR}"
 WBS_DIR="${WBS_DIR:-$PARENT_DIR}"
 ENV_FILE_PATH="${ENV_FILE_PATH:-$WBS_DIR/.env}"
 LOG_PATH="${LOG_PATH:-/tmp/wikibase-suite-installer.log}"
@@ -15,7 +14,6 @@ Usage:
   $(basename "$0") --reset    Remove the fake state
 
 Environment overrides:
-  WBS_ROOT_DIR
   WBS_DIR
   ENV_FILE_PATH
   LOG_PATH
