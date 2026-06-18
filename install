@@ -67,8 +67,7 @@ fi
 # --- Installer variables (including defaults) ---
 
 WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
-# Keep the default ref in sync with the version in package.json when cutting a release.
-WBS_REF="${WBS_REF:-7.0.0}"
+WBS_REF="${WBS_REF:-main}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 
 export WBS_DIR="${WBS_DIR:-$HOME/wikibase-suite}"
@@ -96,6 +95,31 @@ display_path() {
     printf '~/%s' "${path#"$HOME/"}"
   else
     printf '%s' "$path"
+  fi
+}
+
+suite_version() {
+  if [[ ! -f "$WBS_DIR/package.json" ]]; then
+    return
+  fi
+
+  sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$WBS_DIR/package.json" | head -n 1
+}
+
+checkout_status() {
+  local version
+  local ref_name="$WBS_REF"
+
+  version="$(suite_version)"
+
+  if [[ "$ref_name" == "main" ]]; then
+    ref_name="main branch"
+  fi
+
+  if [[ -n "$version" ]]; then
+    echo "✅ Checked out $ref_name (Wikibase Suite $version)"
+  else
+    echo "✅ Checked out $ref_name"
   fi
 }
 
@@ -138,7 +162,7 @@ clone_repo() {
   if [ ! -d "$wbs_target_dir/.git" ]; then
     git clone --branch "$WBS_REF" --single-branch --depth 1 "$WBS_REPO_URL" "$wbs_target_dir" >/dev/null 2>&1
     echo "✅ https://github.com/wmde/wikibase-suite cloned to $(display_path "$WBS_DIR")"
-    echo "✅ Checked out $WBS_REF"
+    checkout_status
   else
     echo "✅ https://github.com/wmde/wikibase-suite already present at $(display_path "$WBS_DIR")"
   fi

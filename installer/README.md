@@ -14,5 +14,5 @@ During installation, the installer:
 
 Use this section only when developing, reviewing, or testing the installer.
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) covers local runs, CLI options, localhost installation, reset flags, WBS refs, and other custom installation paths.
+- [docs/README.md](docs/README.md) covers local runs, CLI options, localhost installation, reset flags, WBS refs, and other custom installation paths.
 - [docs/adrs/README.md](docs/adrs/README.md) lists architecture decision records.

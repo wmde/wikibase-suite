@@ -97,12 +97,17 @@ The deploy files have been flattened out of the originally imported `deploy/` di
 
 Image releases and Wikibase Suite releases are separate release processes. Releasing images remains part of `wmde/wikibase-release-pipeline`. Releasing Wikibase Suite happens in `wmde/wikibase-suite`.
 
+The branch and tag model is:
+
+- `main` is the latest stable public install channel. Public installation docs point to `raw/main/install`.
+- `dev` is the integration branch for the next release.
+- Semantic version tags such as `7.0.0` are immutable release snapshots.
+
 The initial Wikibase Suite release process is manual:
 
-1. Create a release branch in `wmde/wikibase-suite`.
-2. Prepare the release changes on that branch, including the version number and changelog update.
-3. Keep the branch open for review until approved.
-4. Merge the release branch.
-5. Tag the new Wikibase Suite version after merge.
+1. Prepare release changes on `dev` or a release branch, including the version number and changelog update.
+2. Keep the branch open for review until approved.
+3. Merge the tested release changes to `main`.
+4. Tag the new Wikibase Suite version on `main` after merge.
 
 A release script may be added later, but the move does not depend on one.
