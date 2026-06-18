@@ -163,9 +163,9 @@ start_installer_webserver() {
       $WEB_IMAGE_NAME"
   fi
 
-  echo "Open the following URL in your browser to continue the installation:"
+  echo "Open the following URL in your browser to continue:"
   echo
-  echo "  https://$INSTALLER_HOST:$INSTALLER_PORT"
+  echo "https://$INSTALLER_HOST:$INSTALLER_PORT"
   echo
   if [[ "${SELF_SIGNED_CERT:-false}" == true ]]; then
     echo "⚠️ This installer page is using a temporary self-signed HTTPS certificate."
@@ -178,13 +178,13 @@ start_installer_webserver() {
 
 echo
 if $DEV; then
-  echo "🔧 Starting web-based installer (dev mode with live reload)..."
+  echo "🔧 Launching web-based installer (dev mode with live reload)..."
 else
-  echo "🔧 Starting web-based installer..."
+  echo "🔧 Launching web-based installer..."
 fi
 echo
 
-debug "Starting installer webserver container..."
+debug "Launching installer webserver container..."
 EXISTING_INSTALL_STATE="$(detect_existing_install_state)"
 
 # No need to cd; we reference absolute paths for build context and Dockerfile

@@ -69,7 +69,6 @@ install_docker() {
 
   debug "Enabling and starting Docker..."
   run "systemctl enable --now docker"
-  status "Docker installation complete."
   run "docker --version" || true
   run "docker compose version" || true
 }

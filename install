@@ -1,18 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo
-echo "Wikibase Suite Installer"
-echo
-echo "→ Installs Git if not already installed"
-echo "→ Downloads Wikibase Suite"
-echo "→ Installs Docker if not already installed"
-echo "→ Starts an installer wizard where you can complete configuration"
-echo "→ Launches Wikibase Suite, notifying when the services are available"
-echo
-echo "Let's get started!"
-echo
-
 # --- Parse CLI Arguments ---
 
 INSTALL_ARGS=("$@")
@@ -74,7 +62,6 @@ LOCAL_WBS_DIR="$SCRIPT_DIR"
 if [[ -d "$LOCAL_WBS_DIR/.git" && -d "$LOCAL_WBS_DIR/installer" ]]; then
   WBS_DIR="$LOCAL_WBS_DIR"
   SKIP_CLONE=true
-  echo "⚠️ Using an existing Wikibase Suite checkout (SKIP_CLONE=true, WBS_DIR=$WBS_DIR)"
 fi
 
 # --- Installer variables (including defaults) ---
@@ -99,12 +86,23 @@ export SCRIPTS_DIR="$INSTALLER_DIR/scripts"
 
 # --- Functions ---
 
+display_path() {
+  local path="$1"
+
+  if [[ "$path" == "$HOME" ]]; then
+    printf '~'
+  elif [[ "$path" == "$HOME/"* ]]; then
+    printf '~/%s' "${path#"$HOME/"}"
+  else
+    printf '%s' "$path"
+  fi
+}
+
 install_git() {
   if command -v git >/dev/null 2>&1; then
+    echo "✅ Git installed"
     return
   fi
-
-  echo "Installing Git..."
 
   if command -v apt-get >/dev/null 2>&1; then
     # Debian / Ubuntu
@@ -122,6 +120,8 @@ install_git() {
     echo "⚠️ Unsupported package manager. Please install Git manually."
     exit 1
   fi
+
+  echo "✅ Git installed"
 }
 
 clone_repo() {
@@ -131,21 +131,29 @@ clone_repo() {
   wbs_parent_dir="$(dirname "$WBS_DIR")"
   wbs_target_dir="$(basename "$WBS_DIR")"
 
-  echo "Cloning Wikibase Suite to $WBS_DIR..."
   mkdir -p "$wbs_parent_dir"
   pushd "$wbs_parent_dir" >/dev/null || return 1
 
   if [ ! -d "$wbs_target_dir/.git" ]; then
-    echo "Checking out Wikibase Suite at $WBS_REF..."
     git clone --branch "$WBS_REF" --single-branch --depth 1 "$WBS_REPO_URL" "$wbs_target_dir" >/dev/null 2>&1
+    echo "✅ https://github.com/wmde/wikibase-suite cloned to $(display_path "$WBS_DIR")"
+    echo "✅ Checked out $WBS_REF"
   else
-    echo "⚠️ An existing Wikibase Suite repository found at $WBS_DIR, using what is there ..."
+    echo "✅ https://github.com/wmde/wikibase-suite already present at $(display_path "$WBS_DIR")"
   fi
 
   popd >/dev/null || return 1
 }
 
 # --- Execution ---
+
+echo
+echo "Wikibase Suite"
+echo
+if ! $SKIP_DEPENDENCY_INSTALLS; then
+  echo "🔧 Installing dependencies..."
+  echo
+fi
 
 if ! $SKIP_DEPENDENCY_INSTALLS; then
   install_git

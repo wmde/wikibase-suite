@@ -79,6 +79,7 @@ fi
 confirm_docker_version
 confirm_docker_compose_version
 confirm_docker_running
+status "✅ Docker installed"
 
 if $CLI; then
   bash "$SCRIPTS_DIR/cli-installer.sh"
