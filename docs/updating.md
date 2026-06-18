@@ -26,11 +26,11 @@ If you installed user-defined extensions in `config/extensions`, update those re
 
 ## Minor and patch updates for WBS
 
-WBS versions are tagged in git with tags such as `deploy@2.0.1`. Switching to a tag with the same major version will never trigger breaking changes. These updates are **always** considered safe. If you made no changes to `docker-compose.yml`, you may update simply by switching the git tag.
+WBS versions are tagged in git with semantic version tags such as `2.0.1`. Switching to a tag with the same major version will never trigger breaking changes. These updates are **always** considered safe. If you made no changes to `docker-compose.yml`, you may update simply by switching the git tag.
 
 ```sh
 git remote update
-git checkout deploy@2.0.2
+git checkout 2.0.2
 ```
 
 > 💡 If you made any changes to `docker-compose.yml`, commit them. Merge with upstream changes as you see fit.

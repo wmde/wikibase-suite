@@ -40,11 +40,11 @@ If you are resetting as part of a major version upgrade, switch to the new WBS v
 
 ```sh
 git remote update
-git checkout deploy@3.0.3
+git checkout 3.0.3
 docker compose pull
 ```
 
-Replace `deploy@3.0.3` with the version you are upgrading to. See [Major upgrades](./updating.md#major-upgrades) for version-specific notes.
+Replace `3.0.3` with the version you are upgrading to. See [Major upgrades](./updating.md#major-upgrades) for version-specific notes.
 
 ## 4. Start once to run setup again
 

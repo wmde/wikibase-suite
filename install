@@ -67,7 +67,8 @@ fi
 # --- Installer variables (including defaults) ---
 
 WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
-WBS_REF="${WBS_REF:-main}"
+# Keep the default ref in sync with the version in package.json when cutting a release.
+WBS_REF="${WBS_REF:-7.0.0}"
 SKIP_CLONE="${SKIP_CLONE:-false}"
 
 export WBS_DIR="${WBS_DIR:-$HOME/wikibase-suite}"
@@ -153,9 +154,6 @@ echo
 if ! $SKIP_DEPENDENCY_INSTALLS; then
   echo "🔧 Installing dependencies..."
   echo
-fi
-
-if ! $SKIP_DEPENDENCY_INSTALLS; then
   install_git
 fi
 
