@@ -1,3 +1,7 @@
+# Next
+
+- Adds ConfirmAccount to the bundled extensions and enables account-request approval by default.
+
 # 8.0.0 (2026-07-20)
 
 - Upgrades MediaWiki from 1.45.4 to 1.46.0.

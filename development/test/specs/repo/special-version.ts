@@ -37,7 +37,7 @@ describe( 'Special:Version', function () {
 		parserhook: [ 'Babel', 'Scribunto' ],
 		editor: [ 'VisualEditor' ],
 		antispam: [ 'ConfirmEdit' ],
-		specialpage: [ 'Echo', 'Linter', 'Nuke' ]
+		specialpage: [ 'Confirm User Accounts', 'Echo', 'Linter', 'Nuke' ]
 	};
 
 	// should be disabled for dynamic tests
