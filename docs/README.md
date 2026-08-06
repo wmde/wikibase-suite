@@ -4,10 +4,9 @@ Use these pages to set up, customize, and maintain a WBS instance. Reference mat
 
 ## Install
 
-Set up a new WBS instance with the browser-based installer or manual procedure, or remove an existing installation.
+Install or uninstall a WBS instance.
 
-- [Install with the browser-based installer](./install/README.md)
-- [Install manually](./install/manual-install.md)
+- [Install](./install/README.md)
 - [Uninstall](./install/uninstall.md)
 
 ## Configure
@@ -15,8 +14,8 @@ Set up a new WBS instance with the browser-based installer or manual procedure, 
 Manage configuration files, connect WBS to other services, or install additional extensions.
 
 - [Configuration files](./configure/README.md)
-- [Login with Wikimedia](./configure/login-with-wikimedia.md)
-- [Extensions](./configure/extensions.md)
+- [Enable Login with Wikimedia](./configure/login-with-wikimedia.md)
+- [Add Extensions](./configure/extensions.md)
 
 ## Operate
 
