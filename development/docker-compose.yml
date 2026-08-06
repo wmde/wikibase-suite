@@ -31,7 +31,7 @@ services:
       # Keep Linux dependencies out of the host checkout so host-side pnpm can
       # maintain its own platform-specific installation.
       - node-modules:/workspace/development/node_modules
-      - wbs-tools-node-modules:/workspace/development/images/wbs-tools/node_modules
+      - wbs-tools-node-modules:/workspace/docker-images/wbs-tools/node_modules
       # Preserve named-builder metadata alongside its persistent BuildKit container.
       - buildx:/root/.docker/buildx
     privileged: true

@@ -101,7 +101,7 @@ Use the documentation according to the task:
 | Prepare and submit a change | [Contributor guide](../CONTRIBUTING.md) |
 | Run build, test, lint, update, or publish commands | `./wbs-dev <command> --help` |
 | Add or debug an integration test | [Integration test suites](./tests/README.md) |
-| Develop or test the installer and operations tools | [WBS tools development guide](./images/wbs-tools/docs/README.md) |
+| Develop or test the installer and operations tools | [WBS tools development guide](../docker-images/wbs-tools/docs/README.md) |
 | Write end-user or developer documentation | [Documentation guide](./docs/document/README.md) |
 | Find contributor guides and engineering records | [Contributor documentation](./docs/README.md) |
 | Prepare and publish a release | [Release process](./docs/release.md) |
@@ -109,7 +109,7 @@ Use the documentation according to the task:
 
 ## Repository layout
 
-- [`images/`](./images): Dockerfiles and supporting source for the published WBS Docker Images
+- [`docker-images/`](../docker-images): Dockerfiles and supporting source for the published WBS Docker Images
 - [`tests/`](./tests): integration test runner, suites, and specifications
 - [`commands/`](./commands): implementations of the `wbs-dev` command families
 - [`lib/`](./lib): shared process, repository, selection, and task infrastructure
@@ -119,4 +119,4 @@ Use the documentation according to the task:
 - [`wbs`](./wbs): experimental developer entry point for emerging Suite lifecycle commands
 - [`docker-compose.local-images.yml`](./docker-compose.local-images.yml): product override selecting images built from the current checkout
 
-Canonical image usage documentation is indexed in [WBS Docker Images](../docs/docker-images.md) and maintained beside each image's source.
+Canonical image usage documentation is indexed in [WBS Docker Images](../docker-images/README.md) and maintained beside each image's source.

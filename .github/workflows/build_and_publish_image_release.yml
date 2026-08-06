@@ -66,4 +66,4 @@ jobs:
           username: wmdetravisbot
           password: ${{ secrets.WBS_PUBLISH_TOKEN }}
           repository: wikibase/${{ env.IMAGE_NAME }}
-          readme-filepath: development/images/${{ env.IMAGE_NAME }}/README.md
+          readme-filepath: docker-images/${{ env.IMAGE_NAME }}/README.md

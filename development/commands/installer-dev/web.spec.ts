@@ -35,7 +35,7 @@ describe( 'installer-dev web environment', () => {
 		const context: RepositoryContext = {
 			developmentRoot: '/container/repo/development',
 			hostRepositoryRoot: '/host/repo',
-			imagesRoot: '/container/repo/development/images',
+			imagesRoot: '/container/repo/docker-images',
 			repositoryRoot: '/container/repo',
 			testRoot: '/container/repo/development/tests'
 		};
@@ -84,7 +84,7 @@ describe( 'installer-dev web environment', () => {
 		const context: RepositoryContext = {
 			developmentRoot: '/container/repo/development',
 			hostRepositoryRoot: '/host/repo',
-			imagesRoot: '/container/repo/development/images',
+			imagesRoot: '/container/repo/docker-images',
 			repositoryRoot: '/container/repo',
 			testRoot: '/container/repo/development/tests'
 		};

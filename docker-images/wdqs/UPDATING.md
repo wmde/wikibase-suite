@@ -1,6 +1,6 @@
 # Updating Query Service (`wikibase/wdqs`)
 
-[Back to the release guide](../../docs/release.md#1-update-images-from-upstream-sources-optional)
+[Back to the release guide](../../development/docs/release.md#1-update-images-from-upstream-sources-optional)
 
 Use this guide when the release refreshes Query Service.
 
@@ -20,4 +20,4 @@ Check for incompatible API, configuration, Java, Blazegraph, storage, or data re
 - **Minor:** backward-compatible functionality.
 - **Major:** incompatible APIs, configuration, stored data, or operator actions.
 
-[Continue with testing](../../docs/release.md#3-test-and-fix)
+[Continue with testing](../../development/docs/release.md#3-test-and-fix)

@@ -13,19 +13,19 @@ import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
 const nodeFiles = [
-	'wbs-dev.ts',
-	'wbs-dev.spec.ts',
-	'commands/**/*.ts',
-	'lib/**/*.ts',
-	'tests/**/*.{cjs,js,mjs,ts}',
-	'images/wbs-tools/{wbs.ts,commands/**/*.ts,cli/**/*.ts,lib/**/*.ts,web/*.ts}'
+	'development/wbs-dev.ts',
+	'development/wbs-dev.spec.ts',
+	'development/commands/**/*.ts',
+	'development/lib/**/*.ts',
+	'development/tests/**/*.{cjs,js,mjs,ts}',
+	'docker-images/wbs-tools/{wbs.ts,commands/**/*.ts,cli/**/*.ts,lib/**/*.ts,web/*.ts}'
 ];
 
 const testFiles = [
-	'wbs-dev.spec.ts',
-	'commands/**/*.spec.ts',
-	'lib/**/*.spec.ts',
-	'tests/**/*.spec.ts'
+	'development/wbs-dev.spec.ts',
+	'development/commands/**/*.spec.ts',
+	'development/lib/**/*.spec.ts',
+	'development/tests/**/*.spec.ts'
 ];
 
 export default defineConfigWithVueTs(
@@ -34,10 +34,10 @@ export default defineConfigWithVueTs(
 		'**/dist/**',
 		'**/results/**',
 		'**/tmp/**',
-		'images/wbs-tools/web/public/assets/**',
-		'pnpm-lock.yaml',
-		'../config/extensions/**',
-		'../.git/**'
+		'docker-images/wbs-tools/web/public/assets/**',
+		'development/pnpm-lock.yaml',
+		'config/extensions/**',
+		'.git/**'
 	] ),
 	js.configs.recommended,
 	vue.configs[ 'flat/essential' ],
@@ -74,7 +74,7 @@ export default defineConfigWithVueTs(
 	},
 	{
 		name: 'wbs/browser',
-		files: [ 'images/wbs-tools/web/client/**/*.{ts,vue}' ],
+		files: [ 'docker-images/wbs-tools/web/client/**/*.{ts,vue}' ],
 		languageOptions: {
 			globals: globals.browser
 		}
@@ -93,15 +93,15 @@ export default defineConfigWithVueTs(
 	{
 		...wdio.configs[ 'flat/recommended' ],
 		name: 'wbs/webdriverio',
-		files: [ 'tests/**/*.ts' ],
+		files: [ 'development/tests/**/*.ts' ],
 		rules: {
 			...wdio.configs[ 'flat/recommended' ].rules,
 			'wdio/no-pause': 'warn'
 		}
 	},
 	{
-		name: 'wbs/compose-yaml',
-		files: [ '**/docker-compose*.{yaml,yml}' ],
+		name: 'wbs/yaml-empty-mapping',
+		files: [ '**/docker-compose*.{yaml,yml}', '.github/workflows/*.{yaml,yml}' ],
 		rules: {
 			'yml/no-empty-mapping-value': 'off'
 		}

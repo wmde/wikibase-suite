@@ -123,7 +123,7 @@ Official releases of this image can be found on [Docker Hub wikibase/wikibase](h
 
 See the [image changelog](./CHANGELOG.md) for release notes. Documentation at previous releases is preserved in the repository under the corresponding [`wikibase@…` tag](https://github.com/wmde/wikibase-suite/tags).
 
-This image uses the shared tag format for WBS Docker Images. See [WBS Versions](../../../docs/versions.md).
+This image uses the shared tag format for WBS Docker Images. See [WBS Versions](../../docs/versions.md).
 
 In addition to the standard tags, this image also publishes a tag that includes the bundled MediaWiki version.
 

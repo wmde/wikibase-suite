@@ -16,7 +16,7 @@ export function createRepositoryContext(
 		developmentRoot,
 		repositoryRoot,
 		hostRepositoryRoot: resolve( process.env.HOST_PWD ?? repositoryRoot ),
-		imagesRoot: join( developmentRoot, 'images' ),
+		imagesRoot: join( repositoryRoot, 'docker-images' ),
 		testRoot: join( developmentRoot, 'tests' )
 	};
 }

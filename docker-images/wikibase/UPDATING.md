@@ -1,6 +1,6 @@
 # Updating Wikibase (`wikibase/wikibase`)
 
-[Back to the release guide](../../docs/release.md#1-update-images-from-upstream-sources-optional)
+[Back to the release guide](../../development/docs/release.md#1-update-images-from-upstream-sources-optional)
 
 Use this guide when the release refreshes MediaWiki or bundled extensions.
 
@@ -26,4 +26,4 @@ Review the MediaWiki release notes, community-extension changes, local patches, 
 - **Minor:** backward-compatible bundled functionality.
 - **Major:** a new MediaWiki line or another incompatible change.
 
-[Continue with testing](../../docs/release.md#3-test-and-fix)
+[Continue with testing](../../development/docs/release.md#3-test-and-fix)

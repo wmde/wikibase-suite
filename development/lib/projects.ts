@@ -69,7 +69,7 @@ export function discoverReleaseProjects(
 				name,
 				packagePath: join( context.imagesRoot, name, 'package.json' ),
 				changelogPath: join( context.imagesRoot, name, 'CHANGELOG.md' ),
-				pathspecs: [ `development/images/${ name }` ],
+				pathspecs: [ `docker-images/${ name }` ],
 				legacyTagNames: [],
 				isImage: true
 			} )

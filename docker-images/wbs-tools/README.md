@@ -1,8 +1,8 @@
 # Wikibase Suite (WBS) Tools
 
-This directory contains the containerized Wikibase Suite configuration, installation, and lifecycle application. The downloaded [install](../../../install) bootstrap hands off to the internal host launcher, while [`development/wbs`](../../wbs) provides an explicitly experimental developer entry point.
+This directory contains the containerized Wikibase Suite configuration, installation, and lifecycle application. The downloaded [install](../../install) bootstrap hands off to the internal host launcher, while [`development/wbs`](../../development/wbs) provides an explicitly experimental developer entry point.
 
-For normal installation instructions, start with [Install Wikibase Suite](../../../docs/install/README.md).
+For normal installation instructions, start with [Install Wikibase Suite](../../docs/install/README.md).
 
 During a new installation:
 
@@ -14,7 +14,7 @@ During a new installation:
 
 The same image also implements the terminal configurator and the currently internal, experimental `wbs up`, `down`, `status`, and `reset` commands. They are available for development and architectural testing but are not yet an announced end-user operations interface. Its source is organized by responsibility: [`wbs.ts`](wbs.ts) assembles the application, [`commands/`](commands) registers command verbs, [`lib/`](lib) contains reusable configuration and Docker operations, [`cli/`](cli) contains terminal interaction, and [`web/`](web) contains the server and browser client.
 
-Most users do not need to run this image directly. Use the [WBS Installation Guide](../../../docs/install/README.md), which selects a compatible tools image and supplies the required mounts and environment variables.
+Most users do not need to run this image directly. Use the [WBS Installation Guide](../../docs/install/README.md), which selects a compatible tools image and supplies the required mounts and environment variables.
 
 ## Releases
 
@@ -22,7 +22,7 @@ Official releases of this image are available on [Docker Hub as `wikibase/wbs-to
 
 See the [image changelog](./CHANGELOG.md) for release notes. Documentation at previous releases is preserved in the repository under the corresponding [`wbs-tools@…` tag](https://github.com/wmde/wikibase-suite/tags).
 
-This image uses the shared tag format for WBS Docker Images. See [WBS Versions](../../../docs/versions.md).
+This image uses the shared tag format for WBS Docker Images. See [WBS Versions](../../docs/versions.md).
 
 WBS releases select a compatible tools major version. Minor and patch tools releases within that major version must remain compatible with the mounted WBS checkout and its host-side scripts.
 

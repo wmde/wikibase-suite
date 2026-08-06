@@ -32,8 +32,8 @@ If something is not working as expected, start with [Troubleshooting](./docs/ope
 
 ## WBS Docker Images
 
-WBS uses a set of published Docker images which can also be used independently. See [Wikibase Suite (WBS) Docker Images](./docs/docker-images.md) for their configuration options and release notes.
+WBS uses a set of published Docker images which can also be used independently. See [Wikibase Suite (WBS) Docker Images](./docker-images/README.md) for their configuration options and release notes.
 
 ## Development
 
-Image sources and the build, integration-test, and release tooling are maintained in [`development/`](./development/README.md). Most WBS users do not need these tools. They are available for contributors and advanced users who want to build customized images.
+Image sources are maintained under [`docker-images/`](./docker-images/README.md). Build, integration-test, and release tooling is documented in [`development/`](./development/README.md). Most WBS users do not need these resources.

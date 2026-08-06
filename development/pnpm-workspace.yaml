@@ -1,5 +1,5 @@
 packages:
-  - "images/*"
+  - "../docker-images/*"
 
 allowBuilds:
   edgedriver: true

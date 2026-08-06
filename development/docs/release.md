@@ -14,15 +14,15 @@ The starting point for a release is the unreleased development work already comp
 
 To update one or more images from upstream sources, follow the corresponding guides:
 
-- [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
-- [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
-- [Query Service frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
-- [QuickStatements (`quickstatements`)](../images/quickstatements/UPDATING.md)
-- [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
+- [Wikibase (`wikibase`)](../../docker-images/wikibase/UPDATING.md)
+- [Query Service (`wdqs`)](../../docker-images/wdqs/UPDATING.md)
+- [Query Service frontend (`wdqs-frontend`)](../../docker-images/wdqs-frontend/UPDATING.md)
+- [QuickStatements (`quickstatements`)](../../docker-images/quickstatements/UPDATING.md)
+- [OpenSearch (`opensearch`)](../../docker-images/opensearch/UPDATING.md)
 
 ### 2. Complete the product changes
 
-Ensure that the intended development work and any compatibility changes required by image updates are complete. When WBS is in scope, update its selected image major versions and any required operating or migration documentation. For WBS tools, follow the [product-specific preparation guide](../images/wbs-tools/UPDATING.md).
+Ensure that the intended development work and any compatibility changes required by image updates are complete. When WBS is in scope, update its selected image major versions and any required operating or migration documentation. For WBS tools, follow the [product-specific preparation guide](../../docker-images/wbs-tools/UPDATING.md).
 
 ### 3. Test and fix
 

@@ -14,7 +14,7 @@ set -eu
 if ! [ -v METADATA_CALLBACK  ] || [ -z "$METADATA_CALLBACK" ]; then
   echo "*** ERROR ***"
   echo "METADATA_CALLBACK not configured."
-  echo "https://github.com/wmde/wikibase-suite/blob/main/development/images/wikibase/README.md"
+  echo "https://github.com/wmde/wikibase-suite/blob/main/docker-images/wikibase/README.md"
   echo "Exiting Wikibase container now."
   exit 1
 fi

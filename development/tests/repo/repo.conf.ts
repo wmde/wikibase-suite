@@ -9,7 +9,7 @@ export const testEnv = TestEnv.create( {
 	specs: [ 'repo/*.spec.ts' ],
 	envFiles: [
 		...defaultSettings.envFiles,
-		'../images/wikibase/build.env' // to compare actual MediaWiki version to build
+		'../../docker-images/wikibase/build.env' // to compare actual MediaWiki version to build
 	]
 } );
 

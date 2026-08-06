@@ -55,23 +55,24 @@ function createFixture(): Fixture {
 	run( 'git', [ 'init', '--bare', '--initial-branch=main', remote ], parent );
 	run( 'git', [ 'init', '--initial-branch=main', root ], parent );
 	const fixture = { root, development: join( root, 'development' ), remote };
+	mkdirSync( fixture.development, { recursive: true } );
 	git( fixture, 'config', 'user.name', 'Test Operator' );
 	git( fixture, 'config', 'user.email', 'test@example.test' );
 	git( fixture, 'remote', 'add', 'origin', remote );
-	write( fixture, 'development/images/wikibase/Dockerfile', 'FROM scratch\n' );
+	write( fixture, 'docker-images/wikibase/Dockerfile', 'FROM scratch\n' );
 	write(
 		fixture,
-		'development/images/wikibase/package.json',
+		'docker-images/wikibase/package.json',
 		'{\n\t"name": "wikibase",\n\t"version": "1.0.0"\n}\n'
 	);
 	write(
 		fixture,
-		'development/images/wikibase/CHANGELOG.md',
+		'docker-images/wikibase/CHANGELOG.md',
 		'# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
 	);
 	write(
 		fixture,
-		'development/images/wikibase/build.env',
+		'docker-images/wikibase/build.env',
 		'WIKIBASE_COMMIT=aaa\n'
 	);
 	write(
@@ -132,7 +133,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/feature.txt',
+				'docker-images/wikibase/feature.txt',
 				'new behavior\n'
 			);
 			commitAll( fixture, 'feat(wikibase): add useful behavior' );
@@ -143,7 +144,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join( fixture.root, 'docker-images/wikibase/package.json' ),
 						'utf8'
 					)
 				).version,
@@ -151,7 +152,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			);
 			assert.match(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+					join( fixture.root, 'docker-images/wikibase/CHANGELOG.md' ),
 					'utf8'
 				),
 				/^# 1\.1\.0 \(\d{4}-\d{2}-\d{2}\)\n\n- feat\(wikibase\): add useful behavior/u
@@ -162,7 +163,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join( fixture.root, 'docker-images/wikibase/package.json' ),
 						'utf8'
 					)
 				).version,
@@ -174,24 +175,24 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/feature.txt',
+				'docker-images/wikibase/feature.txt',
 				'new behavior\n'
 			);
 			write(
 				fixture,
-				'development/images/wikibase/package.json',
+				'docker-images/wikibase/package.json',
 				'{\n\t"name": "wikibase",\n\t"version": "1.2.0"\n}\n'
 			);
 			write(
 				fixture,
-				'development/images/wikibase/CHANGELOG.md',
+				'docker-images/wikibase/CHANGELOG.md',
 				'# Unreleased\n\nA carefully edited explanation.\n\n# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
 			);
 			commitAll( fixture, 'feat(wikibase): draft a larger release' );
 			const result = cli( fixture, 'update-versions', 'wikibase' );
 			assert.equal( result.status, 0, result.stderr );
 			const changelog = readFileSync(
-				join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+				join( fixture.root, 'docker-images/wikibase/CHANGELOG.md' ),
 				'utf8'
 			);
 			assert.match( changelog, /^# 1\.2\.0 \(\d{4}-\d{2}-\d{2}\)/u );
@@ -202,7 +203,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/build.env',
+				'docker-images/wikibase/build.env',
 				'WIKIBASE_COMMIT=bbb\n'
 			);
 			const result = cli( fixture, 'update-versions', 'wikibase' );
@@ -214,7 +215,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join( fixture.root, 'docker-images/wikibase/package.json' ),
 						'utf8'
 					)
 				).version,
@@ -259,16 +260,16 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/CHANGELOG.md',
+				'docker-images/wikibase/CHANGELOG.md',
 				'# 1.2.0\n\n- First draft.\n\n# 1.1.0\n\n- Second draft.\n\n# 1.0.0\n\n- Initial.\n'
 			);
 			commitAll( fixture, 'feat(wikibase): ambiguous release notes' );
 			const packageBefore = readFileSync(
-				join( fixture.root, 'development/images/wikibase/package.json' ),
+				join( fixture.root, 'docker-images/wikibase/package.json' ),
 				'utf8'
 			);
 			const changelogBefore = readFileSync(
-				join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+				join( fixture.root, 'docker-images/wikibase/CHANGELOG.md' ),
 				'utf8'
 			);
 			const result = cli( fixture, 'update-versions', 'wikibase' );
@@ -276,14 +277,14 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.match( result.stderr, /multiple untagged release entries/u );
 			assert.equal(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/package.json' ),
+					join( fixture.root, 'docker-images/wikibase/package.json' ),
 					'utf8'
 				),
 				packageBefore
 			);
 			assert.equal(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+					join( fixture.root, 'docker-images/wikibase/CHANGELOG.md' ),
 					'utf8'
 				),
 				changelogBefore
@@ -294,7 +295,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/feature.txt',
+				'docker-images/wikibase/feature.txt',
 				'new behavior\n'
 			);
 			write(
@@ -305,7 +306,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			commitAll( fixture, 'feat(wikibase): prepare an atomic release' );
 			const packagePath = join(
 				fixture.root,
-				'development/images/wikibase/package.json'
+				'docker-images/wikibase/package.json'
 			);
 			const before = readFileSync( packagePath, 'utf8' );
 			const result = cli( fixture, 'update-versions', 'wikibase', 'wbs' );
@@ -319,12 +320,12 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/package.json',
+				'docker-images/wikibase/package.json',
 				'{\n\t"name": "wikibase",\n\t"version": "1.0.1"\n}\n'
 			);
 			write(
 				fixture,
-				'development/images/wikibase/CHANGELOG.md',
+				'docker-images/wikibase/CHANGELOG.md',
 				'# 1.0.1 (2026-01-02)\n\n- Fix.\n\n# 1.0.0 (2026-01-01)\n\n- Initial.\n'
 			);
 			commitAll( fixture, 'fix(wikibase): correct behavior' );
@@ -360,7 +361,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 
 		it( 'blocks publication from a dirty working tree', () => {
 			const fixture = createFixture();
-			write( fixture, 'development/images/wikibase/build.env', 'dirty=true\n' );
+			write( fixture, 'docker-images/wikibase/build.env', 'dirty=true\n' );
 			const result = cli( fixture, 'release', 'images', 'wikibase', '--dry-run' );
 			assert.notEqual( result.status, 0 );
 			assert.match( result.stderr, /clean working tree/u );
@@ -370,12 +371,12 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
-				'development/images/wikibase/package.json',
+				'docker-images/wikibase/package.json',
 				'{\n\t"name": "wikibase",\n\t"version": "1.1.0-rc.1"\n}\n'
 			);
 			write(
 				fixture,
-				'development/images/wikibase/CHANGELOG.md',
+				'docker-images/wikibase/CHANGELOG.md',
 				'# 1.1.0-rc.1 (2026-01-02)\n\n- Candidate.\n'
 			);
 			commitAll( fixture, 'feat(wikibase): prepare a candidate' );

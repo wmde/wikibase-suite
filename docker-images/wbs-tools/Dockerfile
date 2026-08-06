@@ -4,14 +4,14 @@ WORKDIR /workspace/development
 
 RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY images/wbs-tools/package.json ./images/wbs-tools/package.json
+COPY development/package.json development/pnpm-lock.yaml development/pnpm-workspace.yaml ./
+COPY docker-images/wbs-tools/package.json ../docker-images/wbs-tools/package.json
 RUN pnpm --filter wbs-tools install --frozen-lockfile
 
-COPY images/wbs-tools ./images/wbs-tools
+COPY docker-images/wbs-tools ../docker-images/wbs-tools
 RUN pnpm --filter wbs-tools build && \
     pnpm --filter wbs-tools --prod deploy /app && \
-    cp -R images/wbs-tools/web/public/assets /app/web/public/
+    cp -R ../docker-images/wbs-tools/web/public/assets /app/web/public/
 
 FROM node:24-alpine
 

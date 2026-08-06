@@ -1,6 +1,6 @@
 # Updating Query Service frontend (`wikibase/wdqs-frontend`)
 
-[Back to the release guide](../../docs/release.md#1-update-images-from-upstream-sources-optional)
+[Back to the release guide](../../development/docs/release.md#1-update-images-from-upstream-sources-optional)
 
 Use this guide when the release refreshes the Query Service frontend.
 
@@ -22,4 +22,4 @@ Compare the commits and confirm that query behavior, configuration, and the loca
 - **Minor:** compatible new or changed frontend behavior.
 - **Major:** incompatible configuration, endpoints, or user workflows.
 
-[Continue with testing](../../docs/release.md#3-test-and-fix)
+[Continue with testing](../../development/docs/release.md#3-test-and-fix)

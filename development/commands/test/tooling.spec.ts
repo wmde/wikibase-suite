@@ -52,7 +52,7 @@ exit 0
 
 	it( 'selects the compatible major version published by the tools project', () => {
 		const toolsPackage = JSON.parse(
-			readFileSync( resolve( 'images/wbs-tools/package.json' ), 'utf8' )
+			readFileSync( resolve( '../docker-images/wbs-tools/package.json' ), 'utf8' )
 		) as { version: string };
 		const major = toolsPackage.version.split( '.', 1 )[ 0 ];
 		const versionsScript = resolve( '../scripts/_versions.sh' );

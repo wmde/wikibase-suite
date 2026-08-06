@@ -1,6 +1,6 @@
 # Updating QuickStatements (`wikibase/quickstatements`)
 
-[Back to the release guide](../../docs/release.md#1-update-images-from-upstream-sources-optional)
+[Back to the release guide](../../development/docs/release.md#1-update-images-from-upstream-sources-optional)
 
 QuickStatements is built from pinned QuickStatements and MagnusTools development commits rather than a published release.
 
@@ -24,4 +24,4 @@ Compare both commit ranges. Check user workflows, OAuth, Wikibase API, configura
 - **Minor:** the default for a compatible source refresh.
 - **Major:** incompatible configuration, authentication, API, or user action.
 
-[Continue with testing](../../docs/release.md#3-test-and-fix)
+[Continue with testing](../../development/docs/release.md#3-test-and-fix)

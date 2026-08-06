@@ -114,7 +114,7 @@ This first builds the checkout's tools image and then uses it to build every pro
 - If root `local.env` exists, Docker Compose loads it after `.env`. The configurator writes only `.env`.
 - After launch, the saved `.env` configuration is displayed. Store credentials securely.
 
-Host-side scripts retain only the bootstrap boundary: Docker checks, tools-image selection, temporary web-container orchestration, and mounting the Docker socket into CLI or worker roles. [`scripts/run-wbs-tools.sh`](../../../../scripts/run-wbs-tools.sh) is the single internal dispatcher and tools-container launcher. Test-only environment variables are explicitly requested by the development harness instead of being part of the product launcher.
+Host-side scripts retain only the bootstrap boundary: Docker checks, tools-image selection, temporary web-container orchestration, and mounting the Docker socket into CLI or worker roles. [`scripts/run-wbs-tools.sh`](../../../scripts/run-wbs-tools.sh) is the single internal dispatcher and tools-container launcher. Test-only environment variables are explicitly requested by the development harness instead of being part of the product launcher.
 
 ## Local installer state
 

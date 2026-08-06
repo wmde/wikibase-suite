@@ -18,11 +18,11 @@ async function runLint(
 		throw new Error( 'lint --prettier requires --fix.' );
 	}
 	const lintPaths = new Map<string, string>( [
-		[ 'root', '..' ],
-		[ 'development', '.' ],
-		[ 'test', 'tests' ],
+		[ 'root', '.' ],
+		[ 'development', 'development' ],
+		[ 'test', 'development/tests' ],
 		...discoverImageNames( context ).map(
-			( image ) => [ image, `images/${ image }` ] as [string, string]
+			( image ) => [ image, `docker-images/${ image }` ] as [string, string]
 		)
 	] );
 	const normalized =
@@ -43,10 +43,10 @@ async function runLint(
 	await runTasks(
 		selected.map( ( target ) => ( {
 			label: `lint ${ target }`,
-			command: 'commands/lint/run.sh',
+			command: 'development/commands/lint/run.sh',
 			args: [ lintPaths.get( target )!, ...optionArgs ]
 		} ) ),
-		{ cwd: context.developmentRoot }
+		{ cwd: context.repositoryRoot }
 	);
 }
 

@@ -1,6 +1,6 @@
 # Installing Extensions
 
-The Wikibase Docker Image supplied with Wikibase Suite (WBS) includes [several commonly used extensions](../../development/images/wikibase/README.md#bundled-extensions). You can install additional MediaWiki or Wikibase extensions specifically for your instance.
+The Wikibase Docker Image supplied with Wikibase Suite (WBS) includes [several commonly used extensions](../../docker-images/wikibase/README.md#bundled-extensions). You can install additional MediaWiki or Wikibase extensions specifically for your instance.
 
 The [MediaWiki Extension Distributor](https://www.mediawiki.org/wiki/Special:ExtensionDistributor) provides downloadable extension packages for supported MediaWiki versions. Before installing an extension, read its documentation to understand what it does and identify its compatibility requirements, dependencies, configuration, and installation instructions.
 

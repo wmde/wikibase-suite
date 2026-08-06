@@ -1,0 +1,12 @@
+**
+!development/
+!development/package.json
+!development/pnpm-lock.yaml
+!development/pnpm-workspace.yaml
+!docker-images/
+!docker-images/wbs-tools/
+!docker-images/wbs-tools/**
+docker-images/wbs-tools/.DS_Store
+docker-images/wbs-tools/dist
+docker-images/wbs-tools/node_modules
+docker-images/wbs-tools/web/public/assets

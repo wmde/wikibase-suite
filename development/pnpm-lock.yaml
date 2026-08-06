@@ -142,11 +142,11 @@ importers:
         specifier: ^9.30.0
         version: 9.30.0(puppeteer-core@21.11.0(supports-color@8.1.1))(supports-color@8.1.1)
 
-  images/opensearch: {}
+  ../docker-images/opensearch: {}
 
-  images/quickstatements: {}
+  ../docker-images/quickstatements: {}
 
-  images/wbs-tools:
+  ../docker-images/wbs-tools:
     dependencies:
       '@clack/prompts':
         specifier: ^1.2.0
@@ -195,11 +195,11 @@ importers:
         specifier: ^3.2.7
         version: 3.3.9(typescript@5.8.3)
 
-  images/wdqs: {}
+  ../docker-images/wdqs: {}
 
-  images/wdqs-frontend: {}
+  ../docker-images/wdqs-frontend: {}
 
-  images/wikibase: {}
+  ../docker-images/wikibase: {}
 
 packages:
 

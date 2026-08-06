@@ -32,4 +32,4 @@ WBS Docker Images are published to [Docker Hub](https://hub.docker.com/u/wikibas
 | Minor | `7.1` | Moves to the latest patch release within that minor version. |
 | Patch | `7.1.0` | Identifies a specific image release. |
 
-Some images also publish tags for the version of the software they contain, such as the bundled MediaWiki or Query Service version. See [Wikibase Suite (WBS) Docker Images](./docker-images.md) for details.
+Some images also publish tags for the version of the software they contain, such as the bundled MediaWiki or Query Service version. See [Wikibase Suite (WBS) Docker Images](../docker-images/README.md) for details.

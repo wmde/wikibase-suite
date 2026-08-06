@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DEVELOPMENT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
+REPOSITORY_ROOT=$(cd "$DEVELOPMENT_ROOT/.." && pwd)
 
 if [ "$#" -lt 1 ]; then
 	echo "Usage: $0 <image> [--dry-run] [--publish] [docker buildx build arguments...]"
@@ -15,8 +16,8 @@ fi
 IMAGE_PROJECT=$1
 
 # Change to the directory for the specified image project
-cd "$DEVELOPMENT_ROOT/images/$IMAGE_PROJECT" || {
-	echo "Failed to change directory to images/$IMAGE_PROJECT"
+cd "$REPOSITORY_ROOT/docker-images/$IMAGE_PROJECT" || {
+	echo "Failed to change directory to docker-images/$IMAGE_PROJECT"
 	exit 1
 }
 
@@ -156,14 +157,14 @@ RUN_BUILDX_ARGS=(
 )
 
 if [ "$IMAGE_NAME" = "wbs-tools" ]; then
-	# wbs-tools is a pnpm workspace package; build it from the workspace root so
-	# the production image consumes the same frozen lockfile as development.
+	# wbs-tools is a pnpm workspace package outside the development directory;
+	# use the repository build context so both it and the frozen lockfile are available.
 	RUN_BUILDX_ARGS=(
 		--cache-name "$IMAGE_NAME"
 		--builder-name wbs-application-builder
-		--context "$DEVELOPMENT_ROOT"
+		--context "$REPOSITORY_ROOT"
 	)
-	BUILD_ARGS+=(--file "$DEVELOPMENT_ROOT/images/wbs-tools/Dockerfile")
+	BUILD_ARGS+=(--file "$REPOSITORY_ROOT/docker-images/wbs-tools/Dockerfile")
 fi
 
 if [ "$DRY_RUN" = true ]; then

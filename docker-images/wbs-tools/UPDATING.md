@@ -1,6 +1,6 @@
 # Updating the Wikibase Suite (WBS) Tools Docker Image (`wikibase/wbs-tools`)
 
-[Back to the release guide](../../docs/release.md#2-complete-the-product-changes)
+[Back to the release guide](../../development/docs/release.md#2-complete-the-product-changes)
 
 WBS tools is repository-owned code and has no `update-sources` step. Its version and changelog are generated later from conventional commits.
 
@@ -16,4 +16,4 @@ The WBS Tools Docker Image can be published independently. WBS selects its compa
 - **Minor:** backward-compatible commands or installer functionality.
 - **Major:** incompatible commands, configuration, or WBS requirements.
 
-[Continue with testing](../../docs/release.md#3-test-and-fix)
+[Continue with testing](../../development/docs/release.md#3-test-and-fix)

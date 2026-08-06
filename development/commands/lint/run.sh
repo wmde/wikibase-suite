@@ -2,10 +2,10 @@
 
 set -u
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit
+cd "$(dirname "${BASH_SOURCE[0]}")/../../.." || exit
 
-[ -f "local.env" ] || touch local.env
-source local.env
+[ -f "development/local.env" ] || touch development/local.env
+source development/local.env
 
 # Default values
 path="."
@@ -60,8 +60,8 @@ if $fix; then
   if $prettier; then
     echo "ℹ️ Pre-processing with Prettier"
     prettier "$path/**/*.{cjs,js,mjs,ts,vue,json}" --log-level error --write
-    prettier "$path/**/*.md" --log-level error --config .prettierrc.json --write
-    prettier "$path/**/*.{yml,yaml}" --log-level error --config .prettierrc.json --write
+    prettier "$path/**/*.md" --log-level error --config development/.prettierrc.json --write
+    prettier "$path/**/*.{yml,yaml}" --log-level error --config development/.prettierrc.json --write
   fi
 
   echo "ℹ️ Running ESLint with fix"
@@ -91,6 +91,6 @@ find "$path" \
 
 echo "ℹ️ Running hadolint on all Dockerfiles"
 find "$path" -type d \( -name node_modules -o -name .git \) -prune -o -type f -name Dockerfile -print0 | xargs -0 -r \
-  hadolint --config .hadolint.yml
+  hadolint --config development/.hadolint.yml
 
 exit $exit_code

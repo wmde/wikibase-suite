@@ -7,13 +7,13 @@ Updates in concert with Wikibase image v8.0.0 (MediaWiki 1.46.0) release.
 - Moves the Wikibase Suite Compose configuration from `deploy/` to the repository root. Existing installations must move their `.env`, complete `config/` contents, and any Compose override to the root during the upgrade.
 - Adds the Wikibase Suite installer.
 - Makes Suite and image documentation part of the root product documentation and moves image sources, integration tests, and release tooling under `development/`.
-- See the [Wikibase image changelog](https://github.com/wmde/wikibase-suite/blob/main/development/images/wikibase/CHANGELOG.md#800-2026-07-20) for the paired image changes in this release.
+- See the [Wikibase image changelog](https://github.com/wmde/wikibase-suite/blob/main/docker-images/wikibase/CHANGELOG.md#800-2026-07-20) for the paired image changes in this release.
 
 ## 7.0.0 (2026-04-20)
 
 Updates in concert with Wikibase image v7.0.0 (mw-1.45.3) release
 
-- See `development/images/wikibase/CHANGELOG.md` for the paired Wikibase image changes in this release.
+- See `docker-images/wikibase/CHANGELOG.md` for the paired Wikibase image changes in this release.
 
 ## 6.0.0 (2026-02-16)
 
@@ -60,7 +60,7 @@ Updates in concert with Wikibase image v6.0.0 (mw-1.45) release
 
 ### 🚀 Features
 
-- Adds a [Call Back](https://github.com/wmde/wikibase-suite/blob/main/development/images/wikibase/README.md#wikibase-suite-call-back) feature to allow instances to share publicly available data to analyze the use of Wikibase and increase discoverability.
+- Adds a [Call Back](https://github.com/wmde/wikibase-suite/blob/main/docker-images/wikibase/README.md#wikibase-suite-call-back) feature to allow instances to share publicly available data to analyze the use of Wikibase and increase discoverability.
 
 
 ## 4.0.1 (2025-03-21)

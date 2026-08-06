@@ -23,7 +23,7 @@
 Updates MediaWiki and bundled extensions within the 1.45 release line and adds several new default capabilities to the Wikibase image.
 
 - MediaWiki updated from 1.45.0 to 1.45.3 (see https://github.com/wikimedia/mediawiki/compare/1.45.0...1.45.3 and https://www.mediawiki.org/wiki/Release_notes/1.45).
-- Bundled extension versions were updated to current MediaWiki 1.45-compatible code in `development/images/wikibase/build.env`.
+- Bundled extension versions were updated to current MediaWiki 1.45-compatible code in `docker-images/wikibase/build.env`.
 - Enables `mul` language code by default.
   - BREAKING CHANGE: Upgrading standalone Wikibase image users must re-index Elasticsearch to see `mul` results in Typeahead searches. See the [CirrusSearch documentation](https://www.mediawiki.org/wiki/Extension:CirrusSearch) for how to recreate and reindex.
 - Enables Wikidata-style statement grouping for item identifiers and property constraints by default.

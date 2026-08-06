@@ -26,7 +26,7 @@ if [ -f "pnpm-lock.yaml" ]; then
 
   if [[ "$installed_hash" != "$dependency_state_hash" ]] ||
     [[ ! -x node_modules/.bin/tsx ]] ||
-    [[ ! -x images/wbs-tools/node_modules/.bin/vite ]]; then
+    [[ ! -x ../docker-images/wbs-tools/node_modules/.bin/vite ]]; then
     echo "Installing workspace dependencies from the frozen lockfile"
     pnpm install --frozen-lockfile
     printf '%s\n' "$dependency_state_hash" > "$dependency_state_marker"
