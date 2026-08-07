@@ -1,6 +1,6 @@
 import { CommitParser } from 'conventional-commits-parser';
 import { readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { relative } from 'node:path';
 import semver from 'semver';
 import type { RepositoryContext } from './context.js';
 import { GitRepository } from './git.js';
@@ -29,6 +29,20 @@ export interface VersionPlan {
 	targetVersion: string;
 	updates: FileUpdate[];
 	reason: string;
+}
+
+export interface VersionPolicy {
+	isRelevantWorkingChange: ( change: {
+		context: RepositoryContext;
+		git: GitRepository;
+		project: ReleaseProject;
+		path: string;
+	} ) => boolean;
+	additionalUpdates: ( update: {
+		context: RepositoryContext;
+		project: ReleaseProject;
+		targetVersion: string;
+	} ) => FileUpdate[];
 }
 
 interface ChangelogHeading {
@@ -112,7 +126,8 @@ function findPreviousRelease(
 function hasRelevantWorkingChanges(
 	git: GitRepository,
 	context: RepositoryContext,
-	project: ReleaseProject
+	project: ReleaseProject,
+	policy: VersionPolicy
 ): boolean {
 	const changed = git
 		.run( [ 'diff', '--name-only', 'HEAD', '--', ...project.pathspecs ] )
@@ -127,15 +142,7 @@ function hasRelevantWorkingChanges(
 		if ( generated.has( path ) ) {
 			return false;
 		}
-		if ( project.name === 'wbs' && path === 'docker-compose.yml' ) {
-			return git
-				.run( [ 'diff', '--unified=0', 'HEAD', '--', path ] )
-				.split( '\n' )
-				.filter( ( line ) => /^[+-]/u.test( line ) )
-				.filter( ( line ) => !line.startsWith( '+++' ) && !line.startsWith( '---' ) )
-				.some( ( line ) => !line.includes( 'DEPLOY_VERSION' ) );
-		}
-		return true;
+		return policy.isRelevantWorkingChange( { context, git, project, path } );
 	} );
 }
 
@@ -239,24 +246,11 @@ function packageWithVersion( contents: string, version: string ): string {
 	return `${ JSON.stringify( packageJson, null, '\t' ) }\n`;
 }
 
-function deployComposeWithVersion( contents: string, version: string ): string {
-	const updated = contents.replace(
-		/(\bDEPLOY_VERSION:\s*["']?)[^\s"']+(["']?)/u,
-		`$1${ version }$2`
-	);
-	if (
-		updated === contents &&
-		!contents.includes( `DEPLOY_VERSION: "${ version }"` )
-	) {
-		throw new Error( 'Could not find DEPLOY_VERSION in docker-compose.yml.' );
-	}
-	return updated;
-}
-
 export function planVersionUpdate(
 	context: RepositoryContext,
 	git: GitRepository,
 	project: ReleaseProject,
+	policy: VersionPolicy,
 	date = new Date().toISOString().slice( 0, 10 )
 ): VersionPlan | undefined {
 	const packageContents = readFileSync( project.packagePath, 'utf8' );
@@ -265,7 +259,7 @@ export function planVersionUpdate(
 	const previous = findPreviousRelease( git, project );
 	const commits = readCommits( git, project, previous.tag );
 	const bumps = commits.map( ( commit ) => commit.bump ).filter( Boolean ) as Bump[];
-	if ( hasRelevantWorkingChanges( git, context, project ) ) {
+	if ( hasRelevantWorkingChanges( git, context, project, policy ) ) {
 		bumps.push( 'patch' );
 	}
 	const bump = bumps.sort( ( left, right ) => bumpRank( right ) - bumpRank( left ) )[ 0 ];
@@ -309,16 +303,9 @@ export function planVersionUpdate(
 			)
 		}
 	];
-	if ( project.name === 'wbs' ) {
-		const composePath = join( context.repositoryRoot, 'docker-compose.yml' );
-		updates.push( {
-			path: composePath,
-			contents: deployComposeWithVersion(
-				readFileSync( composePath, 'utf8' ),
-				targetVersion
-			)
-		} );
-	}
+	updates.push(
+		...policy.additionalUpdates( { context, project, targetVersion } )
+	);
 	return {
 		project,
 		targetVersion,

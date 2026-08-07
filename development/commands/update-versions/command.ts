@@ -1,12 +1,13 @@
 import type { Command } from 'commander';
 import type { RepositoryContext } from '../../lib/context.js';
-import { GitRepository } from '../../lib/git.js';
 import { applyFileUpdates, type FileUpdate } from '../../lib/file-updates.js';
-import { planVersionUpdate, type VersionPlan } from '../../lib/versioning.js';
+import { GitRepository } from '../../lib/git.js';
 import {
 	discoverReleaseProjects,
 	resolveProjectSelections
 } from '../../lib/projects.js';
+import { planVersionUpdate, type VersionPlan } from '../../lib/versioning.js';
+import { versionPolicyFor } from './policies/index.js';
 
 function isVersionPlan( plan: VersionPlan | undefined ): plan is VersionPlan {
 	return plan !== undefined;
@@ -25,7 +26,9 @@ async function updateVersions(
 	const git = new GitRepository( context );
 	git.fetchRemoteTags();
 	const plans = projects
-		.map( ( project ) => planVersionUpdate( context, git, project ) )
+		.map( ( project ) =>
+			planVersionUpdate( context, git, project, versionPolicyFor( project ) )
+		)
 		.filter( isVersionPlan );
 	if ( plans.length === 0 ) {
 		console.log( 'No selected projects have releasable changes.' );

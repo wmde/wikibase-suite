@@ -3,10 +3,10 @@ import process from 'node:process';
 import { registerBuildCommand } from './commands/build/command.js';
 import { registerInstallerDevCommand } from './commands/installer-dev/command.js';
 import { registerLintCommand } from './commands/lint/command.js';
-import { registerUpdateSourcesCommand } from './commands/prepare/update-sources-command.js';
-import { registerUpdateVersionsCommand } from './commands/prepare/update-versions-command.js';
 import { registerReleaseCommand } from './commands/release/command.js';
 import { registerTestCommand } from './commands/test/command.js';
+import { registerUpdateSourcesCommand } from './commands/update-sources/command.js';
+import { registerUpdateVersionsCommand } from './commands/update-versions/command.js';
 import { createRepositoryContext } from './lib/context.js';
 
 async function main(): Promise<void> {

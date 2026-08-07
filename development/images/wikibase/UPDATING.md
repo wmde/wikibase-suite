@@ -14,7 +14,7 @@ For a MediaWiki update, set `MEDIAWIKI_VERSION` in [`build.env`](./build.env) to
 
 Use the latest stable maintenance release in the target MediaWiki release line. Moving to a new release line is a deliberate Wikibase major update.
 
-The command updates the matching extension branches and the configured community-extension commits. It can also be run without changing MediaWiki for an extension-only refresh. Source definitions live in `development/commands/prepare/source-providers.ts`; the URLs in `build.env` remain review references.
+The command updates the matching extension branches and the configured community-extension commits. It can also be run without changing MediaWiki for an extension-only refresh. Source definitions live in `development/commands/update-sources/providers/wikibase.ts`; the URLs in `build.env` remain review references.
 
 ## 2. Review
 

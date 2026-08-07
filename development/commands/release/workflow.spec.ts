@@ -10,7 +10,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { replaceVariable } from '../prepare/source-providers.js';
+import { replaceVariable } from '../update-sources/shared.js';
 
 const CLI = resolve( 'wbs-dev.ts' );
 const TSX = resolve( 'node_modules/.bin/tsx' );
@@ -252,6 +252,27 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.match(
 				readFileSync( join( fixture.root, 'docker-compose.yml' ), 'utf8' ),
 				/DEPLOY_VERSION: "2\.0\.0"/u
+			);
+		} );
+
+		it( 'does not treat a generated WBS deploy version as a release change', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'docker-compose.yml',
+				'services:\n  wikibase:\n    environment:\n      DEPLOY_VERSION: "2.0.0"\n'
+			);
+			const result = cli( fixture, 'update-versions', 'wbs' );
+			assert.equal( result.status, 0, result.stderr );
+			assert.match(
+				result.stdout,
+				/No selected projects have releasable changes\./u
+			);
+			assert.equal(
+				JSON.parse(
+					readFileSync( join( fixture.root, 'package.json' ), 'utf8' )
+				).version,
+				'1.0.0'
 			);
 		} );
 

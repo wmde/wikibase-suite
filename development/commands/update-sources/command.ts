@@ -8,17 +8,17 @@ async function updateSources(
 	requested: string[],
 	context: RepositoryContext
 ): Promise<void> {
-	const selected = resolveNames( requested, sourceUpdateImages, {
+	const selected = resolveNames(requested, sourceUpdateImages, {
 		command: 'update-sources',
 		noun: 'image',
 		requireExplicit: true
-	} );
+	});
 	const updates: FileUpdate[] = [];
-	for ( const image of selected ) {
-		updates.push( await planSourceUpdate( context, image ) );
+	for (const image of selected) {
+		updates.push(await planSourceUpdate(context, image));
 	}
-	const changed = applyFileUpdates( updates );
-	if ( changed > 0 ) {
+	const changed = applyFileUpdates(updates);
+	if (changed > 0) {
 		console.log(
 			'Applied available source updates. Nothing was staged, committed, tagged, or pushed. Review with git diff.'
 		);
@@ -30,14 +30,14 @@ export function registerUpdateSourcesCommand(
 	context: RepositoryContext
 ): void {
 	program
-		.command( 'update-sources' )
-		.description( 'Update upstream commit pins in local, unstaged files.' )
-		.argument( '<images...>', 'IMAGE...|all' )
+		.command('update-sources')
+		.description('Update upstream commit pins in local, unstaged files.')
+		.argument('<images...>', 'IMAGE...|all')
 		.addHelpText(
 			'after',
-			`\nImages:\n  ${ sourceUpdateImages.join( ', ' ) }\n  Select one or more images, or "all" by itself.`
+			`\nImages:\n  ${sourceUpdateImages.join(', ')}\n  Select one or more images, or "all" by itself.`
 		)
 		.action(
-			async ( requested: string[] ) => await updateSources( requested, context )
+			async (requested: string[]) => await updateSources(requested, context)
 		);
 }
