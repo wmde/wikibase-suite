@@ -79,7 +79,7 @@ Put local overrides in `development/local.env`. Defaults come from the root `.en
 - `WIKIBASE_URL`, `WIKIBASE_CLIENT_URL`, `QUICKSTATEMENTS_URL`, and `WDQS_URL`: service URLs used from the test network.
 - `MW_SCRIPT_PATH`: path to `index.php`, `api.php`, and related endpoints; defaults to `/w`.
 - `WIKIBASE_PROPERTY_STRING`, `WIKIBASE_PROPERTY_URL`, etc.: Property ID of a property with datatype `string`, `url`, etc. – if not set, a new property of this type will be created each time the tests are run. (This will fail unless anonymous users are allowed to create properties on the wiki, so setting `WIKIBASE_PROPERTY_STRING` correctly is recommended.)
-- `HEADED_TESTS`: set to `true` to run tests in a headed browser. Follow the test execution at http://localhost:7900/?autoconnect=1&resize=scale.
+- `WBS_TEST_HEADED`: set to `true` to run tests in a headed browser. Follow the test execution at http://localhost:7900/?autoconnect=1&resize=scale.
 - `WBS_TEST_MAX_INSTANCES`: global ceiling for WebdriverIO workers and Selenium sessions. Set it to `1` in `development/local.env` when parallel suites exhaust local CPU or memory. It can lower, but never raise, a suite's configured worker count.
 - `MAX_INSTANCES`: fallback worker count for suites without an explicit setting. Prefer `WBS_TEST_MAX_INSTANCES` when limiting local resource usage.
 - `TEST_LOG_LEVEL`, `MOCHA_OPTS_TIMEOUT`, and `WAIT_FOR_TIMEOUT`: runner logging and timeout controls.

@@ -89,7 +89,7 @@ export const makeTestSettings = (
 		debug,
 		debugNode,
 		outputDir,
-		runHeaded: process.env.HEADED_TESTS === 'true',
+		runHeaded: process.env.WBS_TEST_HEADED === 'true',
 		logLevel: process.env.TEST_LOG_LEVEL,
 		testTimeout: debug ?
 			ONE_DAY_IN_MS :

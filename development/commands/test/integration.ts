@@ -33,7 +33,7 @@ function prepareWdioOptions( options: TestOptions ): WdioOptions {
 	delete wdioOptions.skipBuild;
 
 	if ( headed ) {
-		process.env.HEADED_TESTS = 'true';
+		process.env.WBS_TEST_HEADED = 'true';
 	}
 	if ( debug || nodeDebug ) {
 		process.env.DEBUG = nodeDebug ? 'node' : 'true';

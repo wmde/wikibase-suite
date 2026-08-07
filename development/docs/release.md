@@ -1,58 +1,42 @@
-# Release Guide
+# Release guide
 
 Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into `main`.
 
-WBS and each image are versioned independently according to the [WBS version policy](../../docs/versions.md), and all follow the [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard.
+WBS and each image are versioned independently according to the [WBS version policy](../../docs/versions.md) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-The `wbs-dev update` command interviews the operator about supported upstream updates, uses the repository's [versioning and commit policy](./versioning-and-commits.md) to propose release versions, and generates changelog drafts.
+The primary release-preparation workflow is the `wbs-dev update` interview. It gathers supported upstream updates, proposes versions, and drafts changelogs for the products being released.
 
-## Release workflow
+## Prepare a release
 
-The starting point for a release is the unreleased development work already completed for the selected products. Before releasing, consider whether to also update images from upstream sources. An image update may accompany other changes or be the purpose of the release, and may require repository changes to keep the product compatible.
+1. Complete and commit the intended product changes according to the [versioning and commit policy](./versioning-and-commits.md).
 
-### 1. Review image update policies
+2. Run the update interview for the projects being released, or for all projects:
 
-Before running the update interview, review the guides for images in scope:
+   ```bash
+   wbs-dev update <project...>
+   wbs-dev update all
+   ```
 
-- [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
-- [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
-- [Query Service frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
-- [QuickStatements (`quickstatements`)](../images/quickstatements/UPDATING.md)
-- [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
+   The command presents supported upstream update candidates and the information needed to assess them. It then proposes semantic versions and generates changelog drafts. Review the relevant image updating guides as you make those decisions and inspect the resulting changes:
 
-### 2. Complete the product changes
+   - [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
+   - [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
+   - [Query Service frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
+   - [QuickStatements (`quickstatements`)](../images/quickstatements/UPDATING.md)
+   - [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
+   - [WBS tools (`wbs-tools`)](../images/wbs-tools/UPDATING.md)
 
-Ensure that the intended development work and any compatibility changes required by image updates are complete. When WBS is in scope, update its selected image major versions and any required operating or migration documentation. For WBS tools, follow the [product-specific preparation guide](../images/wbs-tools/UPDATING.md).
+   The generated changes are local and unstaged: the command does not commit, tag, or push. Review them with `git diff`, including upstream comparisons, compatibility implications, version proposals, and changelog wording.
 
-### 3. Test and fix
+3. Make any compatibility or documentation changes identified during review, then build and test the projects in scope. Use `wbs-dev test -h` and `wbs-dev build -h` to select appropriate targets.
 
-After all intended changes are in place:
+4. Commit the release changes. If additional product commits changed the release contents, rerun `wbs-dev update` so that its version and changelog proposals include them, then review and commit the refreshed metadata.
 
-```bash
-wbs-dev test
-```
+5. Merge the pull request into `main` after review and CI pass.
 
-Fix failures and rerun the tests before continuing.
+The update command can be rerun safely while preparing the release. It reconstructs each draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading. For `wbs`, it also keeps `DEPLOY_VERSION` aligned.
 
-### 4. Commit the changes
-
-Commit all release changes according to the [versioning and commit policy](./versioning-and-commits.md).
-
-### 5. Prepare upstream updates, versions, and changelogs
-
-```bash
-wbs-dev update <project...|all>
-```
-
-For supported images, the command first offers current upstream candidates and comparison links. It then assembles upstream and Wikibase Suite changelog sections, proposes a semantic version, and asks for final confirmation before writing anything. The result is local and unstaged: the command does not commit, tag, or push. Review it with `git diff`.
-
-The command can be rerun after testing or additional commits. It reconstructs the draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading. For `wbs`, the command also keeps `DEPLOY_VERSION` aligned.
-
-### 6. Review and merge
-
-Review and amend the generated versions and changelogs as needed. Commit the release metadata and merge the reviewed pull request into `main` after CI passes.
-
-### 7. Publish
+## Publish a release
 
 Run **Create a WBS Release** in GitHub Actions:
 
