@@ -12,7 +12,7 @@ export interface InstallerDevWebDependencies {
 }
 
 export interface InstallerDevWebOptions {
-	mock?: boolean;
+	mock?: 'success' | 'failure';
 }
 
 function defaultDependencies(
@@ -49,6 +49,7 @@ export async function runInstallerDevWeb(
 				ENV_FILE_PATH: join( root, '.env' ),
 				INSTALLER_DEV: 'true',
 				INSTALLER_DEV_MOCK: options.mock ? 'true' : 'false',
+				INSTALLER_DEV_MOCK_OUTCOME: options.mock ?? 'success',
 				CONFIGURE_ONLY: 'false',
 				LAUNCH_TRIGGER_PATH: join( stateRoot, 'installer-dev-launch-ready' ),
 				LOCALHOST: 'true',

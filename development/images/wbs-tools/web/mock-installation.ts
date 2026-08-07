@@ -15,14 +15,39 @@ const MOCK_INSTALLATION_EVENTS = [
 	{ delayMs: 3400, message: 'Installation is complete.', code: 'installation_complete' }
 ] as const;
 
+const MOCK_INSTALLATION_FAILURE = {
+	delayMs: 1700,
+	message: 'Installation failed: simulated Docker image pull failure.',
+	code: 'installation_failed'
+} as const;
+
+const MOCK_INSTALLATION_FAILURE_EVENTS = [
+	{ delayMs: 250, message: 'Configuration saved.', code: 'config_saved' },
+	{ delayMs: 900, message: 'Pulling Docker images...', code: 'images_pull_started' },
+	MOCK_INSTALLATION_FAILURE
+] as const;
+
+export type MockInstallationOutcome = 'success' | 'failure';
+
 export interface MockInstallation {
 	getConfigResponse(): ConfigResponse | null;
 	start( configResponse: ConfigResponse ): void;
 }
 
-export function createMockInstallation( logPath: string ): MockInstallation {
+export function createMockInstallation(
+	logPath: string,
+	outcome: MockInstallationOutcome = 'success'
+): MockInstallation {
 	let configResponse: ConfigResponse | null = null;
 	let timers: ReturnType<typeof setTimeout>[] = [];
+	if ( outcome === 'failure' ) {
+		appendWbsLogEntry( MOCK_INSTALLATION_FAILURE.message );
+		appendInstallationLog(
+			MOCK_INSTALLATION_FAILURE.message,
+			MOCK_INSTALLATION_FAILURE.code,
+			logPath
+		);
+	}
 
 	return {
 		getConfigResponse(): ConfigResponse | null {
@@ -36,7 +61,9 @@ export function createMockInstallation( logPath: string ): MockInstallation {
 			timers = [];
 			clearInstallationLog( logPath );
 
-			for ( const event of MOCK_INSTALLATION_EVENTS ) {
+			const events = outcome === 'failure' ?
+				MOCK_INSTALLATION_FAILURE_EVENTS : MOCK_INSTALLATION_EVENTS;
+			for ( const event of events ) {
 				timers.push( setTimeout( () => {
 					appendWbsLogEntry( event.message );
 					appendInstallationLog( event.message, event.code, logPath );

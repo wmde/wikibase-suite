@@ -1,4 +1,4 @@
-import type { Command } from 'commander';
+import { Option, type Command } from 'commander';
 import type { RepositoryContext } from '../../lib/context.js';
 import { runInstallerDevWeb } from './web.js';
 
@@ -26,7 +26,11 @@ export function registerInstallerDevCommand(
 	installerDev
 		.command( 'web' )
 		.description( 'Start the browser installer with live reload.' )
-		.option( '--mock', 'Simulate installation without starting Suite services.' )
+		.addOption(
+			new Option( '--mock [outcome]', 'Simulate installation without starting Suite services.' )
+				.choices( [ 'success', 'failure' ] )
+				.preset( 'success' )
+		)
 		.addHelpText(
 			'after',
 			[
@@ -40,15 +44,17 @@ export function registerInstallerDevCommand(
 				'Mock behavior:',
 				'  Uses the same live development server, makes installer steps directly navigable,',
 				'  and retains normal form validation. Starting installation streams an accelerated',
-				'  simulated image-pull and service-startup log through completion. It does not',
-				'  write .env, signal the host launcher, or start Suite services.',
+				'  simulated image-pull and service-startup log. The default outcome is success;',
+				'  use --mock failure to preview and exercise the installation failure screen.',
+				'  Mock mode does not write .env, signal the host launcher, or start Suite services.',
 				'',
 				'Examples:',
 				'  wbs-dev installer-dev web',
-				'  wbs-dev installer-dev web --mock'
+				'  wbs-dev installer-dev web --mock',
+				'  wbs-dev installer-dev web --mock failure'
 			].join( '\n' )
 		)
-		.action( async ( options: { mock?: boolean } ) =>
+		.action( async ( options: { mock?: 'success' | 'failure' } ) =>
 			await runInstallerDevWeb( context, { mock: options.mock } )
 		);
 }

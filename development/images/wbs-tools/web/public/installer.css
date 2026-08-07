@@ -278,8 +278,8 @@ body {
   gap: 12px;
 }
 
-.installer-callout,
-.intro-callout {
+.installer-callout.cdx-message,
+.intro-callout.cdx-message {
   margin: 0;
   border: 0;
   border-left: 4px solid var(--border-color-progressive, #36c);
@@ -293,12 +293,12 @@ body {
   padding: 18px 20px 18px 22px;
 }
 
-.installer-callout--warning {
+.installer-callout.cdx-message.installer-callout--warning {
   border-left-color: var(--border-color-warning, #ac6600);
   background: var(--background-color-warning-subtle, #fff3d6);
 }
 
-.installer-callout--error {
+.installer-callout.cdx-message.installer-callout--error {
   border-left-color: var(--border-color-error, #bf3c2c);
   background: var(--background-color-error-subtle, #fee7e6);
 }
@@ -346,6 +346,10 @@ body {
 
 .callout-icon--warning {
   color: var(--color-warning, #ac6600) !important;
+}
+
+.callout-icon--error {
+  color: var(--color-error, #b32424) !important;
 }
 
 .callout-title {
@@ -761,6 +765,44 @@ body {
 
 .installation-flow {
   gap: 18px;
+}
+
+.installation-failure .cdx-message__content {
+  gap: 12px;
+}
+
+.installation-failure__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.installation-failure__heading h2,
+.installation-failure p {
+  margin: 0;
+}
+
+.installation-failure__steps {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.installation-failure__steps li {
+  padding-left: 4px;
+}
+
+.installation-failure__steps .cdx-button {
+  margin-top: 8px;
+}
+
+.installation-failure__support {
+  font-size: 0.9rem;
+}
+
+.installation-failure .cdx-button {
+  justify-self: start;
 }
 
 .installation-progress-panel {

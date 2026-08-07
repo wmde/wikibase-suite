@@ -20,6 +20,8 @@ const SSL_CERT_KEY_PATH = process.env.SSL_CERT_KEY_PATH || '/app/certs/key.pem';
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || '/app/certs/cert.pem';
 const DEV_SERVER = process.env.DEV_SERVER === 'true';
 const INSTALLER_DEV_MOCK = DEV_SERVER && process.env.INSTALLER_DEV_MOCK === 'true';
+const INSTALLER_DEV_MOCK_OUTCOME = process.env.INSTALLER_DEV_MOCK_OUTCOME === 'failure' ?
+	'failure' : 'success';
 const CONFIGURE_ONLY = process.env.CONFIGURE_ONLY === 'true';
 const INSTALLER_ACCESS_CODE = process.env.INSTALLER_ACCESS_CODE || '';
 const SERVER_IP = process.env.SERVER_IP || '';
@@ -33,7 +35,10 @@ const installerLifecycle = createInstallerLifecycle( {
 	devServer: DEV_SERVER,
 	installerDevMock: INSTALLER_DEV_MOCK
 } );
-const mockInstallation = createMockInstallation( INSTALLATION_LOG_PATH );
+const mockInstallation = createMockInstallation(
+	INSTALLATION_LOG_PATH,
+	INSTALLER_DEV_MOCK_OUTCOME
+);
 const renderInstallerShell = createInstallerShellRenderer( {
 	configurationOnly: CONFIGURE_ONLY,
 	devServer: DEV_SERVER,

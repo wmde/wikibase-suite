@@ -34,6 +34,7 @@ export type InitialInstallerState = {
 export type InstallationProgressEvent = {
 	progress: number;
 	summary: string;
+	failed?: boolean;
 	startTimer?: boolean;
 	stopTimer?: boolean;
 	timerTarget?: number;

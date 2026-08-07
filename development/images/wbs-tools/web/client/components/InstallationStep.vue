@@ -70,6 +70,39 @@
 				</div>
 				</div>
 
+			<cdx-message v-else-if="failed" class="installer-callout installer-callout--error installation-failure">
+				<div class="installation-failure__heading">
+					<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--error" size="small" />
+					<h2>Installation could not be completed</h2>
+				</div>
+				<p>{{ summary }}</p>
+				<ol class="installation-failure__steps">
+					<li>
+						<p>View the installation log to identify the underlying error.</p>
+						<cdx-button type="button" @click="emit( 'open-log' )">
+							View installation log
+						</cdx-button>
+					</li>
+					<li>
+						Consult the
+						<a
+							href="https://github.com/wmde/wikibase-suite/blob/main/docs/operate/troubleshooting.md"
+							target="_blank"
+							rel="noopener noreferrer"
+						>troubleshooting guide</a>
+						for help understanding and correcting what you find.
+					</li>
+					<li>
+						After correcting the problem, return to your server terminal and rerun the install
+						command you used to start the installer.
+					</li>
+				</ol>
+				<p class="installation-failure__support">
+					If you’re still stuck, contact the Wikibase Suite team at
+					<a href="mailto:wikibase-suite-support@wikimedia.de">wikibase-suite-support@wikimedia.de</a>.
+				</p>
+			</cdx-message>
+
 			<div v-else class="installation-progress-panel surface-card">
 				<div class="installation-progress-panel__topline">
 					<p class="installation-progress-panel__status">{{ currentStatusLine }}</p>
@@ -96,7 +129,7 @@
 				</ol>
 			</div>
 
-			<section v-if="!complete && !configurationOnly" class="installation-contents" aria-labelledby="installation-contents-heading">
+			<section v-if="!complete && !failed && !configurationOnly" class="installation-contents" aria-labelledby="installation-contents-heading">
 				<h3 id="installation-contents-heading">What is getting installed</h3>
 				<ul>
 					<li>Wikibase and MediaWiki for creating and managing structured linked data.</li>
@@ -124,6 +157,7 @@ const props = defineProps<{
 	configText: string;
 	progress: number;
 	summary: string;
+	failed: boolean;
 	statusLines: string[];
 	hasStatusLines: boolean;
 }>();

@@ -7,6 +7,7 @@ export WBS_DIR
 export WBS_DEVELOPMENT_ROOT
 export INSTALLER_DEV
 export INSTALLER_DEV_MOCK
+export INSTALLER_DEV_MOCK_OUTCOME
 export DEBUG
 export LOCALHOST
 export LAUNCH_TRIGGER_PATH
@@ -143,7 +144,11 @@ compose_services_are_running() {
 }
 
 detect_existing_install_state() {
-  if compose_services_are_running; then
+  if [[ -f "$INSTALLATION_LOG_PATH" ]] && grep -q '\[installation_failed\]' "$INSTALLATION_LOG_PATH"; then
+    # A failed worker may have created runtime files or started only some services.
+    # Let the user retry the idempotent installation instead of treating that partial state as complete.
+    echo "none"
+  elif compose_services_are_running; then
     echo "running"
   elif [ -f "$WBS_DIR/config/LocalSettings.php" ]; then
     echo "previous"
@@ -194,6 +199,7 @@ start_installer_development_server() {
   export EXISTING_INSTALL_STATE
   export DEV_SERVER=true
   export INSTALLER_DEV_MOCK
+  export INSTALLER_DEV_MOCK_OUTCOME
   export INSTALLER_ACCESS_CODE
   export SSL_CERT_KEY_PATH="$CERTS_DIR/key.pem"
   export SSL_CERT_PATH="$CERTS_DIR/cert.pem"

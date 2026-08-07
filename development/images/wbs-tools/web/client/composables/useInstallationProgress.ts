@@ -18,6 +18,7 @@ export function useInstallationProgress( onComplete: () => Promise<void> | void 
 	const statusLines = ref<string[]>( [] );
 	const progress = ref( 0 );
 	const summary = ref( 'Installation has started. Waiting for the first progress update.' );
+	const failed = ref( false );
 	const hasStatusLines = computed( () => statusLines.value.length > 0 );
 	let installationEventSource: EventSource | null = null;
 	let wbsLogEventSource: EventSource | null = null;
@@ -106,6 +107,12 @@ export function useInstallationProgress( onComplete: () => Promise<void> | void 
 
 		const marker = INSTALLATION_PROGRESS_EVENTS[ code ];
 		if ( marker ) {
+			if ( marker.failed ) {
+				failed.value = true;
+				stopProgressTimer();
+				summary.value = marker.summary;
+				return;
+			}
 			if ( marker.startTimer ) {
 				startProgressTimer(
 					marker.progress,
@@ -185,6 +192,7 @@ export function useInstallationProgress( onComplete: () => Promise<void> | void 
 		statusLines.value = [];
 		progress.value = 0;
 		summary.value = 'Installation has started. Waiting for the first progress update.';
+		failed.value = false;
 		handledComplete = false;
 	}
 
@@ -194,6 +202,7 @@ export function useInstallationProgress( onComplete: () => Promise<void> | void 
 		hasStatusLines,
 		progress,
 		summary,
+		failed,
 		setProgress,
 		resetForRun,
 		start,

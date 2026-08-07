@@ -17,16 +17,22 @@ export async function completeWebInstallation( options: {
 	rmSync( requestPath, { force: true } );
 	appendInstallationLog( 'Configuration saved.', 'config_saved' );
 	appendInstallationLog( 'Updating Docker images...', 'images_pull_started' );
-	await up( {
-		...( options.build ? { build: true } : {
-			update: true,
-			localImages: options.localImages
-		} ),
-		onStartingServices: () => appendInstallationLog(
-			'Starting Docker Compose services. Generally takes 2–6 minutes...',
-			'services_waiting'
-		)
-	} );
+	try {
+		await up( {
+			...( options.build ? { build: true } : {
+				update: true,
+				localImages: options.localImages
+			} ),
+			onStartingServices: () => appendInstallationLog(
+				'Starting Docker Compose services. Generally takes 2–6 minutes...',
+				'services_waiting'
+			)
+		} );
+	} catch ( error ) {
+		const detail = error instanceof Error ? error.message : String( error );
+		appendInstallationLog( `Installation failed: ${ detail }`, 'installation_failed' );
+		throw error;
+	}
 	appendInstallationLog( 'Docker Compose services reported ready.', 'services_ready' );
 	appendInstallationLog( 'Installation is complete.', 'installation_complete' );
 }

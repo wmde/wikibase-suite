@@ -168,6 +168,62 @@ describe( 'Installer supporting contracts', () => {
 		}
 	} );
 
+	it( 'reports installation worker failures to the browser event log', () => {
+		const failureRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'worker-failure-' ) );
+		try {
+			writeFileSync(
+				join( failureRoot, '.env' ),
+				[
+					'WIKIBASE_PUBLIC_HOST=wikibase.test',
+					'WDQS_PUBLIC_HOST=query.wikibase.test',
+					'MW_ADMIN_NAME=Admin',
+					'MW_ADMIN_EMAIL=admin@example.test',
+					'MW_ADMIN_PASS=AdminPassword-2026',
+					'DB_PASS=DatabasePassword-2026',
+					'DB_NAME=my_wiki',
+					'DB_USER=sqluser',
+					''
+				].join( '\n' )
+			);
+			writeFileSync( join( failureRoot, 'docker-compose.yml' ), 'services: {}\n' );
+			writeFileSync( join( failureRoot, 'install-request' ), 'ready\n' );
+			const fakeDocker = join( failureRoot, 'docker' );
+			writeFileSync(
+				fakeDocker,
+				'#!/bin/sh\necho "simulated image pull failure" >&2\nexit 42\n'
+			);
+			chmodSync( fakeDocker, 0o755 );
+
+			const result = spawnSync(
+				'docker',
+				[
+					'run', '--rm',
+					'-e', 'WBS_DIR=/app/wbs',
+					'-e', 'ENV_FILE_PATH=/app/wbs/.env',
+					'-e', 'WBS_LOG_PATH=/app/wbs/wbs.log',
+					'-e', 'INSTALLATION_LOG_PATH=/app/wbs/installation.log',
+					'-e', 'LAUNCH_TRIGGER_PATH=/app/wbs/install-request',
+					'-v', `${ failureRoot }:/app/wbs`,
+					'-v', `${ fakeDocker }:/usr/local/bin/docker:ro`,
+					toolsImage(),
+					'node', '/app/dist/wbs.js', 'install-worker'
+				],
+				{ encoding: 'utf8', stdio: 'pipe' }
+			);
+			assert.notEqual( result.status, 0 );
+			assert.match(
+				readFileSync( join( failureRoot, 'wbs.log' ), 'utf8' ),
+				/simulated image pull failure/u
+			);
+			assert.match(
+				readFileSync( join( failureRoot, 'installation.log' ), 'utf8' ),
+				/Installation failed: docker exited with status 42\. \[installation_failed\]/u
+			);
+		} finally {
+			rmSync( failureRoot, { recursive: true, force: true } );
+		}
+	} );
+
 	it( 'finishes CLI configuration before starting lifecycle operations', () => {
 		verifyCliInstallWaitsForConfiguration();
 	} );

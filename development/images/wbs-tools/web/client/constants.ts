@@ -61,6 +61,12 @@ export const INSTALLATION_PROGRESS_EVENTS: Record<string, InstallationProgressEv
 		summary: 'Installation stopped before service launch because skip-launch mode is enabled. No services were started.',
 		stopTimer: true
 	},
+	installation_failed: {
+		progress: 0,
+		summary: 'The installer stopped before all services were ready.',
+		stopTimer: true,
+		failed: true
+	},
 	installation_complete: {
 		progress: 100,
 		summary: 'Installation complete. Your services are ready.',

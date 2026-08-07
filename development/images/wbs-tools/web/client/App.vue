@@ -110,6 +110,7 @@
 						:config-text="configText"
 						:progress="installationProgress"
 						:summary="installationSummary"
+						:failed="installationFailed"
 						:status-lines="installationStatusLines"
 						:has-status-lines="installationHasStatusLines"
 						@open-log="logOpen = true"
@@ -216,6 +217,7 @@ const passwordValidation = usePasswordValidation();
 const installationActivity = useInstallationProgress( handleInstallationComplete );
 const installationProgress = computed( () => installationActivity.progress.value );
 const installationSummary = computed( () => installationActivity.summary.value );
+const installationFailed = computed( () => installationActivity.failed.value );
 const installationStatusLines = computed( () => installationActivity.statusLines.value );
 const installationHasStatusLines = computed( () => installationActivity.hasStatusLines.value );
 const wbsLogText = computed( () => installationActivity.logText.value );

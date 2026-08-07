@@ -80,7 +80,7 @@ cd development
 
 This builds all local Suite images, mounts the installer application source for live reload, and launches the normal installer and service-startup flow with local test domains. Cached build stages make repeat starts substantially faster.
 
-Use `./wbs-dev installer-dev web --mock` for UI and UX development without changing installer or Suite state. Mock mode uses the same live development server, enables direct navigation among the progress steps, and retains the normal form and validation behavior. Starting installation streams a short simulated image-pull and service-startup log through the completed screen. It does not write configuration, signal the host launcher, or start services. Without `--mock`, steps cannot be skipped and the real installation flow is used.
+Use `./wbs-dev installer-dev web --mock` for UI and UX development without changing installer or Suite state. Mock mode uses the same live development server, enables direct navigation among the progress steps, and retains the normal form and validation behavior. Starting installation streams a short simulated image-pull and service-startup log through the completed screen. Use `--mock failure` to preview the installation failure state directly and to end the simulated sequence on that screen; `--mock` and `--mock success` both use the successful sequence. Mock mode does not write configuration, signal the host launcher, or start services. Without `--mock`, steps cannot be skipped and the real installation flow is used.
 
 To test a complete installation from the current checkout, build the tools and product images before starting the installer:
 

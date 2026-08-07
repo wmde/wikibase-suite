@@ -93,12 +93,13 @@ describe( 'installer-dev web environment', () => {
 			commandRunner: runner
 		};
 
-		await runInstallerDevWeb( context, { mock: true }, dependencies );
+		await runInstallerDevWeb( context, { mock: 'failure' }, dependencies );
 
 		assert.equal( localBuilds, 0 );
 		assert.equal( runner.calls.length, 1 );
 		const environment = runner.calls[ 0 ].options.env;
 		assert.ok( environment );
 		assert.equal( environment.INSTALLER_DEV_MOCK, 'true' );
+		assert.equal( environment.INSTALLER_DEV_MOCK_OUTCOME, 'failure' );
 	} );
 } );
