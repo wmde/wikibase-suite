@@ -8,25 +8,14 @@ type ResetOptions = {
 };
 
 async function resetSuite( options: ResetOptions ): Promise<void> {
-	let deleteConfiguration = options.force === true;
+	let deleteEnvironment = options.force === true;
 	let deleteData = options.force === true;
 	if ( options.force !== true ) {
 		if ( !process.stdin.isTTY ) {
 			throw new Error( 'reset requires confirmation; rerun with --force for automation.' );
 		}
-		if ( configurationExists() ) {
-			const configurationAnswer = await confirm( {
-				message: 'Delete the current Wikibase Suite configuration in .env?',
-				initialValue: false
-			} );
-			if ( isCancel( configurationAnswer ) ) {
-				console.log( 'Reset canceled.' );
-				return;
-			}
-			deleteConfiguration = configurationAnswer;
-		}
 		const dataAnswer = await confirm( {
-			message: 'Permanently delete all Wikibase Suite services and data?',
+			message: 'Permanently delete all Wikibase Suite services, data, and generated runtime configuration files?',
 			initialValue: false
 		} );
 		if ( isCancel( dataAnswer ) ) {
@@ -34,26 +23,37 @@ async function resetSuite( options: ResetOptions ): Promise<void> {
 			return;
 		}
 		deleteData = dataAnswer;
-	}
-	if ( !deleteConfiguration && !deleteData ) {
-		console.log( 'Nothing was reset.' );
-		return;
+		if ( !deleteData ) {
+			console.log( 'Nothing was reset.' );
+			return;
+		}
+		if ( configurationExists() ) {
+			const environmentAnswer = await confirm( {
+				message: 'Also delete the saved installer configuration in .env?',
+				initialValue: false
+			} );
+			if ( isCancel( environmentAnswer ) ) {
+				console.log( 'Reset canceled.' );
+				return;
+			}
+			deleteEnvironment = environmentAnswer;
+		}
 	}
 	await reset( {
-		configuration: deleteConfiguration,
+		environment: deleteEnvironment,
 		data: deleteData
 	} );
-	if ( deleteConfiguration ) {
-		console.log( 'Wikibase Suite .env configuration was removed.' );
-	}
 	if ( deleteData ) {
-		console.log( 'Wikibase Suite services, data, and generated runtime files were removed.' );
+		console.log( 'Wikibase Suite services, data, and generated runtime configuration files were removed.' );
+	}
+	if ( deleteEnvironment ) {
+		console.log( 'Wikibase Suite .env configuration was removed.' );
 	}
 }
 
 export function registerResetCommand( program: Command ): void {
 	program.command( 'reset' )
-		.description( 'Delete Suite configuration, services, and data.' )
-		.addOption( new Option( '--force', 'Delete both configuration and data without prompting.' ) )
+		.description( 'Reset Suite services, data, and generated runtime configuration, optionally including .env.' )
+		.addOption( new Option( '--force', 'Delete services, data, generated runtime configuration, and .env without prompting.' ) )
 		.action( resetSuite );
 }

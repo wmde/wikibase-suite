@@ -58,7 +58,7 @@
 						To update your DNS settings, log in to your domain provider and navigate to DNS settings (often
 						called “DNS Management,” “DNS Settings,” or “Zone File Editor”). For more information, follow
 						the domain instructions in the
-						<a href="https://github.com/wmde/wikibase-suite/blob/main/docs/installation/README.md" target="_blank" rel="noreferrer">installation guide</a>.
+						<a href="https://github.com/wmde/wikibase-suite/blob/main/docs/install/README.md" target="_blank" rel="noreferrer">installation guide</a>.
 					</p>
 				</div>
 			</cdx-message>

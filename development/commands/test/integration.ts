@@ -78,7 +78,6 @@ async function buildImages( context: RepositoryContext ): Promise<void> {
 			resolveBuild();
 		} );
 	} );
-	console.log( '✅ Images finished building' );
 }
 
 export async function runIntegrationSuites(

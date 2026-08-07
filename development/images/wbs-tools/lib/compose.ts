@@ -11,7 +11,7 @@ export type SuiteOptions = {
 };
 
 export type ResetOptions = {
-	configuration: boolean;
+	environment: boolean;
 	data: boolean;
 };
 
@@ -94,15 +94,15 @@ export async function status(): Promise<void> {
 }
 
 export async function reset( options: ResetOptions ): Promise<void> {
-	// Compose needs .env while it removes the instance, so configuration is
-	// deliberately deleted only after any requested data reset has completed.
+	// Compose needs .env while it removes the instance, so the environment file
+	// is deliberately deleted only after any requested data reset has completed.
 	if ( options.data ) {
 		await runProcess( 'docker', [ ...composeArgs(), 'down', '--volumes' ] );
 		for ( const filename of [ 'LocalSettings.php', 'wikibase-php.ini', 'wdqs-frontend-config.json' ] ) {
 			rmSync( join( repositoryRoot, 'config', filename ), { force: true } );
 		}
 	}
-	if ( options.configuration ) {
+	if ( options.environment ) {
 		rmSync( envFile, { force: true } );
 	}
 }
