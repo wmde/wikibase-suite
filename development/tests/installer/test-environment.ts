@@ -14,6 +14,7 @@ import {
 import { join, resolve } from 'path';
 
 export const INSTALLER_PORT = 18888;
+export const INSTALLER_ACCESS_CODE = '482193';
 export const WIKIBASE_HTTPS_PORT = 18443;
 export const INSTALLER_URL = `https://host.docker.internal:${ INSTALLER_PORT }`;
 export const WIKIBASE_URL = 'https://wikibase.test';
@@ -40,6 +41,7 @@ const TEMP_ROOT = INSTALLER_TEMP_ROOT;
 const CHECKOUT_ROOT = join( TEMP_ROOT, 'checkout' );
 const RESULT_ROOT = join( SUITE_ROOT, 'results' );
 const INSTALL_LOG = join( CHECKOUT_ROOT, 'installation.log' );
+const WBS_LOG = join( CHECKOUT_ROOT, 'wbs.log' );
 const COMPOSE_FILES = [
 	join( CHECKOUT_ROOT, 'docker-compose.yml' ),
 	join( CHECKOUT_ROOT, 'docker-compose.local.yml' )
@@ -183,7 +185,8 @@ export function startInstaller(): void {
 		env: {
 			...process.env,
 			COMPOSE_PROJECT_NAME: INSTALL_PROJECT,
-			LOG_PATH: INSTALL_LOG,
+			WBS_LOG_PATH: WBS_LOG,
+			INSTALLATION_LOG_PATH: INSTALL_LOG,
 			WBS_E2E_PULL_POLICY:
 				process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never',
 			WBS_E2E_HTTP_PORT: '18080',
@@ -191,6 +194,7 @@ export function startInstaller(): void {
 			WBS_INSTALLER_CONTAINER_NAME: INSTALLER_CONTAINER,
 			WBS_INSTALLER_WORKER_CONTAINER_NAME: INSTALLER_WORKER_CONTAINER,
 			WBS_INSTALLER_PORT: String( INSTALLER_PORT ),
+			WBS_INSTALLER_ACCESS_CODE: INSTALLER_ACCESS_CODE,
 			WBS_SKIP_ARCH_CHECK: 'true',
 			WBS_SKIP_DEPENDENCY_INSTALLS: 'true',
 			WBS_TOOLS_ENV_PASSTHROUGH: [
@@ -384,6 +388,12 @@ export function collectDiagnostics(): void {
 		writeFileSync(
 			join( RESULT_ROOT, 'installation.log' ),
 			readFileSync( INSTALL_LOG )
+		);
+	}
+	if ( existsSync( WBS_LOG ) ) {
+		writeFileSync(
+			join( RESULT_ROOT, 'wbs.log' ),
+			readFileSync( WBS_LOG )
 		);
 	}
 	writeFileSync(

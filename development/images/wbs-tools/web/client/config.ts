@@ -1,6 +1,6 @@
 import { DEFAULT_FORM } from './constants';
 import type { ConfigForm } from './types';
-import type { SetupConfigValidationIssue } from '../../lib/validation.ts';
+import type { ConfigurationValidationIssue } from '../../lib/validation.ts';
 
 export class SaveConfigError extends Error {
 	constructor( public readonly details: string[] = [] ) {
@@ -51,7 +51,7 @@ export async function saveConfig( form: ConfigForm ): Promise<{ config: Record<s
 			const body = await response.json();
 			if ( Array.isArray( body?.errors ) ) {
 				details = body.errors
-					.map( ( issue: SetupConfigValidationIssue ) => issue.message )
+					.map( ( issue: ConfigurationValidationIssue ) => issue.message )
 					.filter( ( message: unknown ): message is string => typeof message === 'string' && message !== '' );
 			}
 		} catch {

@@ -1,7 +1,7 @@
 <template>
-	<section class="wizard-panel is-active">
-		<div class="wizard-panel__body wizard-panel__body--form">
-			<header class="wizard-panel__header">
+	<section class="installer-panel is-active">
+		<div class="installer-panel__body installer-panel__body--form">
+			<header class="installer-panel__header">
 				<h2>Administrator account</h2>
 				<p>
 					This will be your administrator account for your Wikibase. After the installation you can use
@@ -54,9 +54,9 @@
 			</div>
 		</div>
 
-		<div class="wizard-actions">
+		<div class="installer-actions">
 			<span></span>
-			<div class="wizard-actions__group">
+			<div class="installer-actions__group">
 				<cdx-button type="button" weight="quiet" :disabled="disabled" @click="emit( 'back' )">
 					Back
 				</cdx-button>

@@ -5,7 +5,7 @@ export type ValidationResult = {
 	reason?: string;
 };
 
-export const SETUP_CONFIG_FIELDS = [
+export const CONFIGURATION_FIELDS = [
 	'MW_ADMIN_EMAIL',
 	'WIKIBASE_PUBLIC_HOST',
 	'WDQS_PUBLIC_HOST',
@@ -17,16 +17,16 @@ export const SETUP_CONFIG_FIELDS = [
 	'DB_PASS'
 ] as const;
 
-export type SetupConfigField = typeof SETUP_CONFIG_FIELDS[number];
+export type ConfigurationField = typeof CONFIGURATION_FIELDS[number];
 
-export type SetupConfigValidationIssue = {
-	field?: SetupConfigField;
+export type ConfigurationValidationIssue = {
+	field?: ConfigurationField;
 	code: string;
 	message: string;
 };
 
-export type SetupConfigValidationOptions = {
-	isLocalhostSetup?: boolean;
+export type ConfigurationValidationOptions = {
+	isLocalMode?: boolean;
 	passwordValidator?: ( value: string ) => ValidationResult;
 };
 
@@ -60,12 +60,12 @@ export function isValidEmailAddress( value: string ): boolean {
 	return parsedDomain.hostname !== null && parsedDomain.isIcann === true;
 }
 
-export function isValidSetupEmailAddress(
+export function isValidConfigurationEmailAddress(
 	value: string,
-	isLocalhostSetup = false
+	isLocalMode = false
 ): boolean {
 	const emailAddress = value.trim();
-	if ( isLocalhostSetup && EMAIL_ADDRESS_REGEX.test( emailAddress ) ) {
+	if ( isLocalMode && EMAIL_ADDRESS_REGEX.test( emailAddress ) ) {
 		const domain = emailAddress.slice( emailAddress.lastIndexOf( '@' ) + 1 );
 		if ( /\.test$/iu.test( domain ) ) {
 			return true;
@@ -81,23 +81,23 @@ export function isLocalTestHostname( value: string ): boolean {
 
 export function canSkipDnsValidation(
 	value: string,
-	isLocalhostSetup = false
+	isLocalMode = false
 ): boolean {
-	return isLocalhostSetup && isLocalTestHostname( value );
+	return isLocalMode && isLocalTestHostname( value );
 }
 
-export function isValidSetupHostname(
+export function isValidHostname(
 	value: string,
-	isLocalhostSetup = false
+	isLocalMode = false
 ): boolean {
 	const hostname = value.trim();
 	if ( !HOST_NAME_REGEX.test( hostname ) ) {
 		return false;
 	}
-	return isLocalhostSetup || !isLocalTestHostname( hostname );
+	return isLocalMode || !isLocalTestHostname( hostname );
 }
 
-export function areSetupHostsDistinct(
+export function areHostsDistinct(
 	wikibaseHost: string,
 	queryServiceHost: string
 ): boolean {
@@ -155,16 +155,16 @@ export function isValidPassword(
 	return validatePassword( value, commonPasswords ).valid;
 }
 
-export function validateSetupConfig(
+export function validateConfiguration(
 	input: Record<string, unknown>,
-	options: SetupConfigValidationOptions = {}
-): SetupConfigValidationIssue[] {
-	const issues: SetupConfigValidationIssue[] = [];
-	const isLocalhost = options.isLocalhostSetup ?? false;
+	options: ConfigurationValidationOptions = {}
+): ConfigurationValidationIssue[] {
+	const issues: ConfigurationValidationIssue[] = [];
+	const isLocalhost = options.isLocalMode ?? false;
 	const validateConfigPassword = options.passwordValidator ?? validatePassword;
-	const config = normalizeSetupConfig( input );
+	const config = normalizeConfiguration( input );
 
-	if ( !isValidSetupEmailAddress( config.MW_ADMIN_EMAIL, isLocalhost ) ) {
+	if ( !isValidConfigurationEmailAddress( config.MW_ADMIN_EMAIL, isLocalhost ) ) {
 		issues.push( {
 			field: 'MW_ADMIN_EMAIL',
 			code: 'invalid-email',
@@ -172,7 +172,7 @@ export function validateSetupConfig(
 		} );
 	}
 
-	if ( !isValidSetupHostname( config.WIKIBASE_PUBLIC_HOST, isLocalhost ) ) {
+	if ( !isValidHostname( config.WIKIBASE_PUBLIC_HOST, isLocalhost ) ) {
 		issues.push( {
 			field: 'WIKIBASE_PUBLIC_HOST',
 			code: 'invalid-hostname',
@@ -182,7 +182,7 @@ export function validateSetupConfig(
 		} );
 	}
 
-	if ( !isValidSetupHostname( config.WDQS_PUBLIC_HOST, isLocalhost ) ) {
+	if ( !isValidHostname( config.WDQS_PUBLIC_HOST, isLocalhost ) ) {
 		issues.push( {
 			field: 'WDQS_PUBLIC_HOST',
 			code: 'invalid-hostname',
@@ -192,7 +192,7 @@ export function validateSetupConfig(
 		} );
 	}
 
-	if ( !areSetupHostsDistinct( config.WIKIBASE_PUBLIC_HOST, config.WDQS_PUBLIC_HOST ) ) {
+	if ( !areHostsDistinct( config.WIKIBASE_PUBLIC_HOST, config.WDQS_PUBLIC_HOST ) ) {
 		issues.push( {
 			field: 'WDQS_PUBLIC_HOST',
 			code: 'duplicate-hostname',
@@ -253,11 +253,11 @@ export function validateSetupConfig(
 	return issues;
 }
 
-export function normalizeSetupConfig( input: Record<string, unknown> ): Record<SetupConfigField, string> {
-	return SETUP_CONFIG_FIELDS.reduce( ( normalized, field ) => {
+export function normalizeConfiguration( input: Record<string, unknown> ): Record<ConfigurationField, string> {
+	return CONFIGURATION_FIELDS.reduce( ( normalized, field ) => {
 		normalized[ field ] = String( input[ field ] ?? '' ).trim();
 		return normalized;
-	}, {} as Record<SetupConfigField, string> );
+	}, {} as Record<ConfigurationField, string> );
 }
 
 export function parseEnvContent( content: string ): Record<string, string> {

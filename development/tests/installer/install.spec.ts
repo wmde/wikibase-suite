@@ -5,6 +5,7 @@ import {
 	DATABASE_NAME,
 	DATABASE_PASSWORD,
 	DATABASE_USER,
+	INSTALLER_ACCESS_CODE,
 	INSTALL_TIMEOUT,
 	WIKIBASE_URL,
 	verifyFinalizedInstallerArtifacts,
@@ -30,6 +31,23 @@ async function clickEnabledButton( label: string ): Promise<void> {
 describe( 'Complete installer user journey', () => {
 	it( 'configures, installs, finalizes, and signs in to a healthy Wikibase Suite', async () => {
 		await browser.url( '/' );
+		await expect( $( 'dialog' ) ).toBeDisplayed();
+		await expect( $( 'h1=Enter installer access code' ) ).toBeDisplayed();
+		await setField( 'code', '000000' );
+		await clickEnabledButton( 'Continue' );
+		await expect( $( '.error' ) ).toHaveText(
+			expect.stringContaining( '4 attempts remaining' )
+		);
+		await setField( 'code', INSTALLER_ACCESS_CODE );
+		await clickEnabledButton( 'Continue' );
+		await expect( $( 'h1=Installer' ) ).toBeDisplayed();
+
+		await browser.deleteCookies();
+		await browser.url( `/access/${ INSTALLER_ACCESS_CODE }` );
+		await expect( browser ).toHaveUrl( expect.not.stringContaining( '/access/' ) );
+		await expect( $( 'h1=Installer' ) ).toBeDisplayed();
+		await browser.refresh();
+		await expect( $( 'h1=Installer' ) ).toBeDisplayed();
 		await clickEnabledButton( 'Get started' );
 
 		await setField( 'WIKIBASE_PUBLIC_HOST', 'wikibase.test' );
@@ -59,8 +77,11 @@ describe( 'Complete installer user journey', () => {
 		await waitForInstalledServicesHealthy();
 		verifySubmittedInstallerConfiguration();
 		await clickEnabledButton( 'View log' );
+		await expect( $( '#log-content' ) ).toHaveText(
+			expect.stringContaining( 'Starting Wikibase Suite services...' )
+		);
 		const stopInstallerButton = await $(
-			'.setup-log-dialog .shutdown-panel button'
+			'.installation-log-dialog .shutdown-panel button'
 		);
 		await stopInstallerButton.waitForDisplayed();
 		await stopInstallerButton.waitForEnabled();

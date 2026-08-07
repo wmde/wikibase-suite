@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 import { HOST_VALIDATION_DEBOUNCE_MS } from '../constants';
-import { canSkipDnsValidation, isValidSetupHostname } from '../../../lib/validation.ts';
+import { canSkipDnsValidation, isValidHostname } from '../../../lib/validation.ts';
 import type { FieldValidationStatus } from '../types';
 
 type HostFieldName = 'WIKIBASE_PUBLIC_HOST' | 'WDQS_PUBLIC_HOST';
@@ -10,7 +10,7 @@ type HostValidationResponse = {
 	valid?: boolean;
 };
 
-export function useHostValidation( isLocalhostSetup = false ) {
+export function useHostValidation( isLocalMode = false ) {
 	const statuses = reactive<HostStatusMap>( {
 		WIKIBASE_PUBLIC_HOST: 'neutral',
 		WDQS_PUBLIC_HOST: 'neutral'
@@ -32,7 +32,7 @@ export function useHostValidation( isLocalhostSetup = false ) {
 	}
 
 	async function doesHostnameResolveToServer( hostname: string ): Promise<boolean> {
-		if ( canSkipDnsValidation( hostname, isLocalhostSetup ) ) {
+		if ( canSkipDnsValidation( hostname, isLocalMode ) ) {
 			return true;
 		}
 
@@ -61,7 +61,7 @@ export function useHostValidation( isLocalhostSetup = false ) {
 			return 'invalid';
 		}
 
-		if ( !isValidSetupHostname( hostname, isLocalhostSetup ) ) {
+		if ( !isValidHostname( hostname, isLocalMode ) ) {
 			setStatus( name, 'invalid' );
 			return 'invalid';
 		}
@@ -87,7 +87,7 @@ export function useHostValidation( isLocalhostSetup = false ) {
 			return;
 		}
 
-		if ( !isValidSetupHostname( hostname, isLocalhostSetup ) ) {
+		if ( !isValidHostname( hostname, isLocalMode ) ) {
 			setStatus( name, 'invalid' );
 			return;
 		}

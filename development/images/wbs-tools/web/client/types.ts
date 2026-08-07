@@ -1,4 +1,4 @@
-export type WizardStep = 0 | 1 | 2 | 3 | 4 | 5;
+export type InstallerStep = 0 | 1 | 2 | 3 | 4 | 5;
 
 export type FieldValidationStatus = 'neutral' | 'pending' | 'valid' | 'invalid';
 export type ExistingInstallState = 'none' | 'running' | 'previous';
@@ -20,18 +20,18 @@ export type ConfigResponse = {
 	configText: string;
 };
 
-export type InitialSetupState = {
+export type InitialInstallerState = {
 	installerDevMock: boolean;
 	configurationOnly: boolean;
 	isConfigSaved: boolean;
 	isBooted: boolean;
-	isSetupStarted: boolean;
+	isInstallationStarted: boolean;
 	existingInstallState: ExistingInstallState;
-	isLocalhostSetup: boolean;
+	isLocalMode: boolean;
 	serverIp: string;
 };
 
-export type SetupProgressEvent = {
+export type InstallationProgressEvent = {
 	progress: number;
 	summary: string;
 	startTimer?: boolean;

@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
 import {
 	DEBUG_LOG_SUFFIX_REGEX,
-	SETUP_PROGRESS_EVENTS,
-	SETUP_PROGRESS_TIMER_TICK_MS,
-	SETUP_STATUS_LINE_LIMIT,
+	INSTALLATION_PROGRESS_EVENTS,
+	INSTALLATION_PROGRESS_TIMER_TICK_MS,
+	INSTALLATION_STATUS_LINE_LIMIT,
 	STATUS_CODE_SUFFIX_REGEX,
 	TIMESTAMPED_LOG_ENTRY_REGEX
 } from '../constants';
@@ -13,13 +13,14 @@ type ParsedStatusLine = {
 	code?: string;
 };
 
-export function useSetupLog( onComplete: () => Promise<void> | void ) {
+export function useInstallationProgress( onComplete: () => Promise<void> | void ) {
 	const logText = ref( 'Loading logs...\n' );
 	const statusLines = ref<string[]>( [] );
 	const progress = ref( 0 );
 	const summary = ref( 'Installation has started. Waiting for the first progress update.' );
 	const hasStatusLines = computed( () => statusLines.value.length > 0 );
-	let eventSource: EventSource | null = null;
+	let installationEventSource: EventSource | null = null;
+	let wbsLogEventSource: EventSource | null = null;
 	let handledComplete = false;
 	let progressTimer: number | null = null;
 	let progressTimerStartedAt = 0;
@@ -51,7 +52,7 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 			if ( ratio >= 1 ) {
 				stopProgressTimer();
 			}
-		}, SETUP_PROGRESS_TIMER_TICK_MS );
+		}, INSTALLATION_PROGRESS_TIMER_TICK_MS );
 	}
 
 	function setProgress( nextProgress: number, nextSummary?: string ): void {
@@ -93,8 +94,8 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 			statusLines.value.push( line.message );
 		}
 
-		if ( statusLines.value.length > SETUP_STATUS_LINE_LIMIT ) {
-			statusLines.value = statusLines.value.slice( -SETUP_STATUS_LINE_LIMIT );
+		if ( statusLines.value.length > INSTALLATION_STATUS_LINE_LIMIT ) {
+			statusLines.value = statusLines.value.slice( -INSTALLATION_STATUS_LINE_LIMIT );
 		}
 	}
 
@@ -103,13 +104,13 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 			return;
 		}
 
-		const marker = SETUP_PROGRESS_EVENTS[ code ];
+		const marker = INSTALLATION_PROGRESS_EVENTS[ code ];
 		if ( marker ) {
 			if ( marker.startTimer ) {
 				startProgressTimer(
 					marker.progress,
 					marker.timerTarget ?? 95,
-					marker.timerMs ?? SETUP_PROGRESS_TIMER_TICK_MS
+					marker.timerMs ?? INSTALLATION_PROGRESS_TIMER_TICK_MS
 				);
 			}
 			if ( marker.stopTimer ) {
@@ -119,43 +120,62 @@ export function useSetupLog( onComplete: () => Promise<void> | void ) {
 		}
 	}
 
-	async function handleLogMessage( text: string ): Promise<void> {
+	async function handleInstallationEvent( text: string ): Promise<void> {
 		const parsedStatusLines = parseStatusLines( text );
 		appendStatusLines( parsedStatusLines );
 		for ( const line of parsedStatusLines ) {
 			updateProgressFromStatusCode( line.code );
 		}
-		logText.value += text.endsWith( '\n' ) ? text : `${ text }\n`;
-
-		if ( !handledComplete && parsedStatusLines.some( ( line ) => line.code === 'setup_complete' ) ) {
+		if ( !handledComplete && parsedStatusLines.some( ( line ) => line.code === 'installation_complete' ) ) {
 			handledComplete = true;
 			await onComplete();
 		}
 	}
 
+	function handleWbsLogMessage( text: string ): void {
+		logText.value += text.endsWith( '\n' ) ? text : `${ text }\n`;
+	}
+
 	function start(): void {
-		if ( eventSource ) {
+		if ( installationEventSource || wbsLogEventSource ) {
 			return;
 		}
 
-		eventSource = new EventSource( '/log/stream', { withCredentials: false } );
-		eventSource.onmessage = ( event ) => {
+		installationEventSource = new EventSource(
+			'/installation/stream',
+			{ withCredentials: false }
+		);
+		installationEventSource.onmessage = ( event ) => {
 			if ( !event.data ) {
 				return;
 			}
-			void handleLogMessage( JSON.parse( event.data ) );
+			void handleInstallationEvent( JSON.parse( event.data ) );
 		};
-		eventSource.onerror = () => {
+		installationEventSource.onerror = () => {
 			// EventSource reconnects automatically; keep the UI calm while that happens.
-			console.log( 'SSE error (will auto-reconnect)' );
+			console.log( 'Installation event stream disconnected; reconnecting.' );
+		};
+
+		wbsLogEventSource = new EventSource( '/log/stream', { withCredentials: false } );
+		wbsLogEventSource.onmessage = ( event ) => {
+			if ( event.data ) {
+				handleWbsLogMessage( JSON.parse( event.data ) );
+			}
+		};
+		wbsLogEventSource.onerror = () => {
+			console.log( 'WBS log stream disconnected; reconnecting.' );
 		};
 	}
 
 	function stop(): void {
 		stopProgressTimer();
-		if ( eventSource ) {
-			eventSource.close();
-			eventSource = null;
+		if ( installationEventSource ) {
+			installationEventSource.close();
+			installationEventSource = null;
+		}
+		if ( wbsLogEventSource ) {
+			wbsLogEventSource.close();
+			wbsLogEventSource = null;
 		}
 	}
 

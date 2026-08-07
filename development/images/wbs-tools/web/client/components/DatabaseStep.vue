@@ -1,7 +1,7 @@
 <template>
-	<section class="wizard-panel is-active">
-		<div class="wizard-panel__body wizard-panel__body--form">
-			<header class="wizard-panel__header">
+	<section class="installer-panel is-active">
+		<div class="installer-panel__body installer-panel__body--form">
+			<header class="installer-panel__header">
 				<h2>Database credentials</h2>
 				<p>
 					Wikibase stores data in a MariaDB database. These credentials are used internally between
@@ -53,21 +53,21 @@
 				/>
 			</div>
 
-			<cdx-message class="setup-callout setup-callout--warning">
+			<cdx-message class="installer-callout installer-callout--warning">
 				<div class="callout-heading">
 					<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
 					<div class="callout-title">Please note</div>
 				</div>
-				<p class="setup-callout__text">
+				<p class="installer-callout__text">
 					You can continue with the default credentials, or change them to something more familiar. Remember
 					that these cannot be changed easily after installation.
 				</p>
 			</cdx-message>
 		</div>
 
-		<div class="wizard-actions">
+		<div class="installer-actions">
 			<span></span>
-			<div class="wizard-actions__group">
+			<div class="installer-actions__group">
 				<cdx-button type="button" weight="quiet" :disabled="disabled" @click="emit( 'back' )">
 					Back
 				</cdx-button>

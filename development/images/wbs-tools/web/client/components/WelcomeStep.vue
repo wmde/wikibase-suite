@@ -1,11 +1,11 @@
 <template>
-	<section class="wizard-panel is-active">
-		<div v-if="existingInstallState === 'previous'" class="wizard-panel__body wizard-panel__body--intro">
-			<header class="wizard-panel__header">
+	<section class="installer-panel is-active">
+		<div v-if="existingInstallState === 'previous'" class="installer-panel__body installer-panel__body--intro">
+			<header class="installer-panel__header">
 				<h2>Installation already completed</h2>
 			</header>
 
-			<cdx-message class="setup-callout setup-callout--warning">
+			<cdx-message class="installer-callout installer-callout--warning">
 				<div class="callout-heading">
 					<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
 					<div class="callout-title">Existing installation found</div>
@@ -22,8 +22,8 @@
 			</cdx-message>
 		</div>
 
-		<div v-else class="wizard-panel__body wizard-panel__body--intro">
-			<header class="wizard-panel__header">
+		<div v-else class="installer-panel__body installer-panel__body--intro">
+			<header class="installer-panel__header">
 				<h2>Welcome to Wikibase Suite</h2>
 				<p v-if="configurationOnly">
 					Create or update the configuration used by your Wikibase Suite installation.
@@ -62,21 +62,21 @@
 				</ul>
 			</section>
 
-			<cdx-message class="setup-callout security-note">
+			<cdx-message class="installer-callout security-note">
 				<div class="callout-heading">
 					<cdx-icon :icon="cdxIconLock" class="callout-icon callout-icon--info" size="small" />
 					<div class="callout-title">Security note</div>
 				</div>
-				<p class="setup-callout__text">
-					Any credentials entered here are transmitted securely, used only for this setup, and
+				<p class="installer-callout__text">
+					Any credentials entered here are transmitted securely, used only for this installation, and
 					are not stored or shared with any third party.
 				</p>
 			</cdx-message>
 		</div>
 
-		<div v-if="existingInstallState !== 'previous'" class="wizard-actions">
+		<div v-if="existingInstallState !== 'previous'" class="installer-actions">
 			<span></span>
-			<div class="wizard-actions__group">
+			<div class="installer-actions__group">
 				<cdx-button type="button" action="progressive" weight="primary" :disabled="disabled" @click="emit( 'continue' )">
 					Get started
 				</cdx-button>

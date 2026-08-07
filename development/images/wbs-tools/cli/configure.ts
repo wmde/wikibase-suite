@@ -15,18 +15,18 @@ import {
 import { stdin as input, stdout as output } from 'process';
 import {
 	getConfig,
-	isLocalhostSetup,
+	isLocalMode,
 	saveConfigText
 } from '../lib/configuration.js';
-import { validateSetupPassword } from '../lib/password-policy.js';
+import { validateConfigurationPassword } from '../lib/password-policy.js';
 import {
-	areSetupHostsDistinct,
+	areHostsDistinct,
 	canSkipDnsValidation,
 	isValidAdminUsername,
 	isValidDatabaseName,
 	isValidDatabaseUser,
-	isValidSetupEmailAddress,
-	isValidSetupHostname
+	isValidConfigurationEmailAddress,
+	isValidHostname
 } from '../lib/validation.js';
 
 type CliConfigInput = {
@@ -46,21 +46,21 @@ type ValidationMessage = string | undefined;
 const serverIp = process.env.SERVER_IP || '';
 const pipedAnswers = input.isTTY ? [] : readFileSync( 0, 'utf8' ).split( /\r?\n/ );
 
-function abortSetup(): never {
+function abortConfiguration(): never {
 	cancel( 'Installation canceled.' );
 	process.exit( 130 );
 }
 
 function unwrapPromptValue( value: string | boolean | symbol ): string | boolean {
 	if ( isCancel( value ) ) {
-		abortSetup();
+		abortConfiguration();
 	}
 	return value;
 }
 
 function unwrapPromptString( value: string | symbol | undefined ): string {
 	if ( isCancel( value ) ) {
-		abortSetup();
+		abortConfiguration();
 	}
 	return value ?? '';
 }
@@ -79,14 +79,14 @@ function readPipedSecret( label: string, placeholder: string ): string {
 function showIntro(): void {
 	if ( input.isTTY ) {
 		intro( 'Configure Wikibase Suite' );
-		if ( !isLocalhostSetup() ) {
+		if ( !isLocalMode() ) {
 			note( serverIp, 'Public IP of this server' );
 		}
 		return;
 	}
 
 	console.log( '\nConfigure Wikibase Suite\n' );
-	if ( !isLocalhostSetup() ) {
+	if ( !isLocalMode() ) {
 		console.log( `Public IP of this server: ${ serverIp }\n` );
 	}
 }
@@ -170,7 +170,7 @@ function validatePasswordMessage( value: string | undefined ): ValidationMessage
 		return undefined;
 	}
 
-	const validation = validateSetupPassword( passwordValue );
+	const validation = validateConfigurationPassword( passwordValue );
 	if ( validation.valid ) {
 		return undefined;
 	}
@@ -226,11 +226,11 @@ async function promptPasswordUntil(
 
 async function hostResolvesToServer( hostname: string ): Promise<boolean> {
 	const host = hostname.trim();
-	if ( !isValidSetupHostname( host, isLocalhostSetup() ) ) {
+	if ( !isValidHostname( host, isLocalMode() ) ) {
 		return false;
 	}
 
-	if ( canSkipDnsValidation( host, isLocalhostSetup() ) ) {
+	if ( canSkipDnsValidation( host, isLocalMode() ) ) {
 		return true;
 	}
 
@@ -253,7 +253,7 @@ async function gatherConfig(): Promise<CliConfigInput> {
 	const MW_ADMIN_EMAIL = await promptUntil(
 		'Admin email address',
 		defaults.MW_ADMIN_EMAIL || '',
-		( value ) => isValidSetupEmailAddress( value, isLocalhostSetup() ),
+		( value ) => isValidConfigurationEmailAddress( value, isLocalMode() ),
 		'Enter a valid email address.'
 	);
 
@@ -268,7 +268,7 @@ async function gatherConfig(): Promise<CliConfigInput> {
 	const WDQS_PUBLIC_HOST = await promptUntil(
 		'Query Service host',
 		defaults.WDQS_PUBLIC_HOST || `query.${ WIKIBASE_PUBLIC_HOST }`,
-		async ( value ) => areSetupHostsDistinct( WIKIBASE_PUBLIC_HOST, value ) &&
+		async ( value ) => areHostsDistinct( WIKIBASE_PUBLIC_HOST, value ) &&
 			await hostResolvesToServer( value ),
 		`Host must be different from the Wikibase host and resolve to this server IP address (${ serverIp }).`,
 		{ spinnerMessage: 'Checking DNS for Query Service host...' }
@@ -335,7 +335,7 @@ export async function configureFromTerminal(): Promise<void> {
 		console.log( '\nConfiguration saved.\n' );
 	}
 
-	if ( isLocalhostSetup() ) {
+	if ( isLocalMode() ) {
 		console.log( 'Local hostnames must resolve to this machine. Add this hosts-file entry if needed:' );
 		console.log(
 			`127.0.0.1 ${ inputConfig.WIKIBASE_PUBLIC_HOST } ${ inputConfig.WDQS_PUBLIC_HOST }\n`

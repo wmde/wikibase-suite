@@ -40,7 +40,11 @@ exit 0
 				],
 				{
 					encoding: 'utf8',
-					env: { ...process.env, PATH: `${ fixture }:${ process.env.PATH }` }
+					env: {
+						...process.env,
+						PATH: `${ fixture }:${ process.env.PATH }`,
+						WBS_LOG_PATH: join( fixture, 'wbs.log' )
+					}
 				}
 			);
 			assert.equal( result.status, 0, result.stderr );

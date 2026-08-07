@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BOOTSTRAP_LOG="${WBS_BOOTSTRAP_LOG:-/tmp/wikibase-suite-installer.log}"
+BOOTSTRAP_LOG_PATH="${WBS_BOOTSTRAP_LOG:-/tmp/wikibase-suite-bootstrap.log}"
 WBS_TOOLS_IMAGE="${WBS_TOOLS_IMAGE:-wikibase/wbs-tools:1}"
 WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
 WBS_DIR="${WBS_DIR:-$HOME/wikibase-suite}"
@@ -12,7 +12,7 @@ WBS_REF="${WBS_REF:-}"
 RUNTIME_ARGS=()
 WEB_SELECTED=false
 
-exec > >(tee -a "$BOOTSTRAP_LOG") 2>&1
+exec > >(tee "$BOOTSTRAP_LOG_PATH") 2>&1
 
 while (( $# )); do
   case "$1" in
@@ -81,17 +81,19 @@ else
     "$WBS_TOOLS_IMAGE" \
     node /app/dist/wbs.js "${prepare_args[@]}"
 
-  WBS_STATE_DIR="$WBS_DIR/.wbs"
-  LOG_PATH="$WBS_STATE_DIR/installation.log"
-  mkdir -p "$WBS_STATE_DIR"
-  touch "$LOG_PATH"
-  {
-    echo "Bootstrap log from $BOOTSTRAP_LOG"
-    cat "$BOOTSTRAP_LOG"
-  } >> "$LOG_PATH"
-  # Continue the same installation log after handing control to the checkout.
-  export WBS_STATE_DIR LOG_PATH WBS_LOG_INITIALIZED=1
 fi
+
+WBS_STATE_DIR="$WBS_DIR/.wbs"
+WBS_LOG_PATH="$WBS_STATE_DIR/wbs.log"
+INSTALLATION_LOG_PATH="$WBS_STATE_DIR/installation.log"
+mkdir -p "$WBS_STATE_DIR"
+touch "$WBS_LOG_PATH"
+{
+  echo "===== Bootstrap ====="
+  cat "$BOOTSTRAP_LOG_PATH"
+  echo "===== WBS tools ====="
+} >> "$WBS_LOG_PATH"
+export WBS_STATE_DIR WBS_LOG_PATH INSTALLATION_LOG_PATH WBS_LOG_INITIALIZED=1
 
 if [[ "$WEB_SELECTED" != true ]]; then
   RUNTIME_ARGS=(--web "${RUNTIME_ARGS[@]}")

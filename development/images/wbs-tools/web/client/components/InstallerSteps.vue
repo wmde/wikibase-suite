@@ -1,9 +1,9 @@
 <template>
-	<ol class="wizard-progress" aria-label="Configuration steps">
+	<ol class="installer-progress" aria-label="Configuration steps">
 		<li
 			v-for="( step, index ) in steps"
 			:key="step.title"
-			class="wizard-progress__item"
+			class="installer-progress__item"
 			:class="{
 				'is-active': currentStep === index,
 				'is-complete': currentStep > index,
@@ -17,8 +17,8 @@
 			@keydown.enter.prevent="selectStep( index )"
 			@keydown.space.prevent="selectStep( index )"
 		>
-			<div class="wizard-progress__topline">
-				<span class="wizard-progress__step">
+			<div class="installer-progress__topline">
+				<span class="installer-progress__step">
 					<cdx-icon
 						v-if="step.complete || currentStep > index"
 						:icon="cdxIconCheck"
@@ -26,7 +26,7 @@
 					/>
 					<span v-else>{{ index + 1 }}</span>
 				</span>
-				<span class="wizard-progress__title">{{ step.title }}</span>
+				<span class="installer-progress__title">{{ step.title }}</span>
 			</div>
 		</li>
 	</ol>

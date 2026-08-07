@@ -2,17 +2,6 @@
 
 # Internal host boundary for the containerized WBS tools application.
 
-prepare_wbs_tools_environment_args() {
-  WBS_TOOLS_ENVIRONMENT_ARGS=()
-  local variable_name
-  local variable_names="COMPOSE_PROJECT_NAME BUILD_CACHE_REGISTRY GITHUB_ACTIONS WBS_DEV_IMAGE ${WBS_TOOLS_ENV_PASSTHROUGH:-}"
-  for variable_name in $variable_names; do
-    if [[ -v "$variable_name" ]]; then
-      WBS_TOOLS_ENVIRONMENT_ARGS+=(-e "$variable_name")
-    fi
-  done
-}
-
 run_wbs_tools_validation() {
   docker run --rm \
     -e WBS_VALIDATE_OPTIONS=true \
@@ -27,16 +16,10 @@ run_wbs_tools_command() {
   else
     tty_flags=(-i)
   fi
-  prepare_wbs_tools_environment_args
-  exec docker run "${tty_flags[@]}" --rm \
-    "${WBS_TOOLS_ENVIRONMENT_ARGS[@]}" \
-    -e WBS_DIR="$WBS_DIR" \
-    -e ENV_FILE_PATH="$ENV_FILE_PATH" \
-    -e LOG_PATH="$LOG_PATH" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v "$WBS_DIR:$WBS_DIR" \
+  prepare_wbs_tools_container_args
+  exec docker run "${tty_flags[@]}" \
+    "${WBS_TOOLS_CONTAINER_ARGS[@]}" \
     -v "$WBS_DIR:/app/wbs" \
-    -w "$WBS_DIR" \
     "$WBS_TOOLS_IMAGE" \
     node /app/dist/wbs.js "$@"
 }
@@ -66,7 +49,7 @@ prepare_install_runtime() {
 prepare_source_tools_image() {
   status "🕐 Building the WBS tools image from the selected source checkout..." "tools_build_started"
   if ! run_args "$WBS_DIR/development/wbs-dev" build wbs-tools; then
-    status "⛔️ The WBS tools image build failed. Review $LOG_PATH or rerun with --debug." "tools_build_failed"
+    status "⛔️ The WBS tools image build failed. Review $WBS_LOG_PATH or rerun with --debug." "tools_build_failed"
     exit 1
   fi
   status "✅ The source checkout's WBS tools image is ready." "tools_build_ready"
@@ -167,14 +150,8 @@ main() {
   fi
   export WBS_STATE_DIR="${WBS_STATE_DIR:-$WBS_DIR/.wbs}"
   export ENV_FILE_PATH="${ENV_FILE_PATH:-$WBS_DIR/.env}"
-  if [[ -z "${LOG_PATH:-}" ]]; then
-    if [[ "$command" == install ]]; then
-      LOG_PATH="$WBS_STATE_DIR/installation.log"
-    else
-      LOG_PATH="$WBS_STATE_DIR/wbs.log"
-    fi
-  fi
-  export LOG_PATH
+  export WBS_LOG_PATH="${WBS_LOG_PATH:-$WBS_STATE_DIR/wbs.log}"
+  export INSTALLATION_LOG_PATH="${INSTALLATION_LOG_PATH:-$WBS_STATE_DIR/installation.log}"
   export DEBUG="${DEBUG:-false}"
   export INSTALLER_DEV=false
   export INSTALLER_DEV_MOCK=false
@@ -186,7 +163,7 @@ main() {
   # shellcheck disable=SC1091
   source "$SCRIPTS_DIR/_logging.sh"
   # shellcheck disable=SC1091
-  source "$SCRIPTS_DIR/_tools-image.sh"
+  source "$SCRIPTS_DIR/_wbs-tools-runtime.sh"
 
   case "$command" in
     install)

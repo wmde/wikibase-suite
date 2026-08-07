@@ -18,7 +18,7 @@ const nodeFiles = [
 	'commands/**/*.ts',
 	'lib/**/*.ts',
 	'tests/**/*.{cjs,js,mjs,ts}',
-	'images/wbs-tools/{wbs.ts,commands/**/*.ts,cli/**/*.ts,lib/**/*.ts,web/*.ts}'
+	'images/wbs-tools/{wbs.ts,commands/**/*.ts,cli/**/*.ts,lib/**/*.ts,web/*.ts,web/routes/**/*.ts}'
 ];
 
 const testFiles = [

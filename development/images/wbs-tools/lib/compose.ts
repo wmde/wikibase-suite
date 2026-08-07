@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseEnvContent } from './validation.js';
 import { runProcess } from './command-runner.js';
@@ -105,14 +105,4 @@ export async function reset( options: ResetOptions ): Promise<void> {
 	if ( options.configuration ) {
 		rmSync( envFile, { force: true } );
 	}
-}
-
-export function appendOperationLog( message: string, code?: string ): void {
-	const logPath = process.env.LOG_PATH || join( repositoryRoot, '.wbs/installation.log' );
-	mkdirSync( join( repositoryRoot ), { recursive: true } );
-	writeFileSync(
-		logPath,
-		`${ new Date().toISOString() } ${ message }${ code ? ` [${ code }]` : '' }\n`,
-		{ flag: 'a' }
-	);
 }

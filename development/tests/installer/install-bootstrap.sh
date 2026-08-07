@@ -84,7 +84,8 @@ run_bootstrap latest "$fixture_remote"
 grep -q '"version": "1.10.0"' "$TEST_ROOT/latest/wikibase-suite/package.json"
 grep -qx 'install' "$TEST_ROOT/latest/wikibase-suite/wbs-invocation"
 grep -qx -- '--web' "$TEST_ROOT/latest/wikibase-suite/wbs-invocation"
-test -f "$TEST_ROOT/latest/wikibase-suite/.wbs/installation.log"
+test -f "$TEST_ROOT/latest/wikibase-suite/.wbs/wbs.log"
+grep -q '===== Bootstrap =====' "$TEST_ROOT/latest/wikibase-suite/.wbs/wbs.log"
 
 run_bootstrap explicit "$fixture_remote" --wbs-ref 'wbs@1.9.0' --local --from-source --debug
 grep -q '"version": "1.9.0"' "$TEST_ROOT/explicit/wikibase-suite/package.json"

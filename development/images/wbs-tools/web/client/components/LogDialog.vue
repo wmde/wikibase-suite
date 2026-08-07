@@ -4,23 +4,23 @@
 		title="Installation log"
 		subtitle="Use the live log when you need more detail than the step-by-step status summary provides."
 		use-close-button
-		class="setup-log-dialog"
+		class="installation-log-dialog"
 		:default-action="{ label: 'Close' }"
 		@update:open="emit( 'update:open', $event )"
 		@default="emit( 'update:open', false )"
 	>
-		<div class="setup-log-dialog__frame">
+		<div class="installation-log-dialog__frame">
 			<div
 				ref="logScroll"
-				class="setup-log-dialog__scroll"
+				class="installation-log-dialog__scroll"
 				@scroll="updateLogPosition"
 			>
 				<pre id="log-content">{{ logText }}</pre>
 			</div>
-			<div class="setup-log-dialog__actions">
+			<div class="installation-log-dialog__actions">
 				<button
 					type="button"
-					class="setup-log-dialog__action"
+					class="installation-log-dialog__action"
 					:class="{ 'is-copied': copied }"
 					:aria-label="copied ? 'Copied log' : 'Copy log'"
 					:title="copied ? 'Copied log' : 'Copy log'"
@@ -31,7 +31,7 @@
 				<button
 					v-if="!atLatest"
 					type="button"
-					class="setup-log-dialog__action"
+					class="installation-log-dialog__action"
 					:class="{ 'has-new-entries': hasNewEntries }"
 					aria-label="Scroll to latest log entry"
 					title="Scroll to latest log entry"
@@ -145,7 +145,7 @@ async function finalize(): Promise<void> {
 	shutdownMessage.value = 'Shutting down installer...';
 
 	try {
-		const response = await fetch( '/finalize-setup', {
+		const response = await fetch( '/installation/finalize', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' }
 		} );

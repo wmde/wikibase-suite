@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { existsSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { INSTALLATION_LOG_PATH } from './installation-log.js';
 import {
 	parseEnvContent,
 	serializeEnvContent
@@ -12,7 +13,6 @@ export const ENV_TEMPLATE_FILE_PATH = join( WBS_DIR, 'template.env' );
 export const DOT_ENV_EXAMPLE_FILE_PATH = join( WBS_DIR, '.env.example' );
 export const LOCAL_SETTINGS_FILE_PATH = join( WBS_DIR, 'config', 'LocalSettings.php' );
 export const LAUNCH_TRIGGER_PATH = process.env.LAUNCH_TRIGGER_PATH || '';
-export const LOG_PATH = process.env.LOG_PATH || '/app/installation.log';
 const DEFAULT_DB_NAME = 'my_wiki';
 const DEFAULT_DB_USER = 'sqluser';
 const EXISTING_INSTALL_STATES = new Set( [ 'none', 'running', 'previous' ] );
@@ -22,23 +22,24 @@ export type ExistingInstallState = 'none' | 'running' | 'previous';
 // Status
 
 export function isBooted(): boolean {
-	if ( !existsSync( LOG_PATH ) ) {
+	if ( !existsSync( INSTALLATION_LOG_PATH ) ) {
 		return false;
 	}
-	const log = readFileSync( LOG_PATH, 'utf8' );
-	return /(?:Setup|Installation) is complete!/i.test( log );
+	return readFileSync( INSTALLATION_LOG_PATH, 'utf8' )
+		.split( '\n' )
+		.some( ( line ) => line.endsWith( ' [installation_complete]' ) );
 }
 
-export function isSetupStarted(): boolean {
+export function isInstallationStarted(): boolean {
 	if ( LAUNCH_TRIGGER_PATH && existsSync( LAUNCH_TRIGGER_PATH ) ) {
 		return true;
 	}
 
-	if ( !existsSync( LOG_PATH ) ) {
+	if ( !existsSync( INSTALLATION_LOG_PATH ) ) {
 		return false;
 	}
 
-	return readFileSync( LOG_PATH, 'utf8' )
+	return readFileSync( INSTALLATION_LOG_PATH, 'utf8' )
 		.split( '\n' )
 		.some( ( line ) => {
 			const match = line.match( /\s\[([a-z0-9_]+)\]$/i );
@@ -63,7 +64,7 @@ export function getExistingInstallState(): ExistingInstallState {
 	return 'none';
 }
 
-export function isLocalhostSetup(): boolean {
+export function isLocalMode(): boolean {
 	return process.env.LOCALHOST === 'true';
 }
 
@@ -135,7 +136,7 @@ export function getConfig(
 	config: Record<string, string>;
 	configText: string;
 } {
-	// 1) Submitted setup fields override the existing .env when present. Templates
+	// 1) Submitted configuration fields override the existing .env when present. Templates
 	// are only the base for a new configuration.
 	if ( hasAnyInput( input ) ) {
 		const existingEnv = getEnv();
@@ -159,7 +160,7 @@ export function getConfig(
 		return { config: configObject, configText: makeConfigText( configObject ) };
 	}
 
-	// 2) Existing .env hydrates the setup form when there is no new submitted input.
+	// 2) Existing .env hydrates the configuration form when there is no new submitted input.
 	const existingEnv = getEnv();
 	if ( existingEnv ) {
 		const configObject = {
@@ -176,14 +177,14 @@ export function getConfig(
 	const templateEnv = getTemplateEnv();
 	const configObject: Record<string, string> = {
 		...templateEnv,
-		MW_ADMIN_EMAIL: isLocalhostSetup() ? 'admin@example.test' : '',
-		MW_ADMIN_NAME: isLocalhostSetup() ? 'Admin' : '',
+		MW_ADMIN_EMAIL: isLocalMode() ? 'admin@example.test' : '',
+		MW_ADMIN_NAME: isLocalMode() ? 'Admin' : '',
 		DB_NAME: templateEnv.DB_NAME && templateEnv.DB_NAME !== '' ?
 			templateEnv.DB_NAME : DEFAULT_DB_NAME,
 		DB_USER: templateEnv.DB_USER && templateEnv.DB_USER !== '' ?
 			templateEnv.DB_USER : DEFAULT_DB_USER,
-		WIKIBASE_PUBLIC_HOST: isLocalhostSetup() ? 'wikibase.test' : '',
-		WDQS_PUBLIC_HOST: isLocalhostSetup() ? 'query.wikibase.test' : '',
+		WIKIBASE_PUBLIC_HOST: isLocalMode() ? 'wikibase.test' : '',
+		WDQS_PUBLIC_HOST: isLocalMode() ? 'query.wikibase.test' : '',
 		MW_ADMIN_PASS: '',
 		DB_PASS: '',
 		METADATA_CALLBACK: 'false'
@@ -199,12 +200,5 @@ export function sanitizeConfig(): void {
 		const sanitized = configText.replace( /^(\s*[A-Z0-9_]*PASS(?:WORD)?=).+$/gim, '$1' );
 		saveConfigText( sanitized );
 		console.log( '🧼 Passwords sanitized' );
-	}
-}
-
-export function clearLog(): void {
-	if ( existsSync( LOG_PATH ) ) {
-		writeFileSync( LOG_PATH, '' );
-		console.log( '🧹 Log cleared' );
 	}
 }

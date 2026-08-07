@@ -18,15 +18,24 @@ CONFIGURE_ARGS=( "$@" )
 # --- Bootstrap Logging ---
 
 # shellcheck disable=SC1091
-source "$SCRIPTS_DIR/_logging.sh"
-# shellcheck disable=SC1091
-source "$SCRIPTS_DIR/run-wbs-tools.sh"
+source "$SCRIPTS_DIR/_wbs-tools-runtime.sh"
 # -- Script Specific Variables --
 
 CERT_EMAIL="${CERT_EMAIL:-wbs-setup@wikimedia.de}"
 INSTALLER_CONTAINER_NAME=${WBS_INSTALLER_CONTAINER_NAME:-wikibase-suite-installer-webserver}
 INSTALLER_WORKER_CONTAINER_NAME=${WBS_INSTALLER_WORKER_CONTAINER_NAME:-wikibase-suite-installer-worker}
 INSTALLER_PORT=${WBS_INSTALLER_PORT:-8888}
+if [[ -n "${WBS_INSTALLER_ACCESS_CODE:-}" ]]; then
+  INSTALLER_ACCESS_CODE="$WBS_INSTALLER_ACCESS_CODE"
+else
+  installer_code_seed=$(openssl rand -hex 4)
+  printf -v INSTALLER_ACCESS_CODE '%06d' "$((16#$installer_code_seed % 1000000))"
+fi
+if [[ ! "$INSTALLER_ACCESS_CODE" =~ ^[0-9]{6}$ ]]; then
+  echo "WBS_INSTALLER_ACCESS_CODE must contain exactly six digits." >&2
+  exit 1
+fi
+export INSTALLER_ACCESS_CODE
 SERVER_IP=$(curl --silent --show-error --fail https://api.ipify.org || echo "127.0.0.1")
 CERTBOT_IMAGE="${CERTBOT_IMAGE:-certbot/certbot:v4.2.0}"
 LE_DIR="$WBS_STATE_DIR/letsencrypt"
@@ -104,19 +113,13 @@ start_installer_worker() {
   elif [[ "${WBS_LOCAL_IMAGES:-false}" == true ]]; then
     worker_args+=(--local-images)
   fi
-  prepare_wbs_tools_environment_args
+  prepare_wbs_tools_container_args
 
-  run_args docker run -d --rm \
+  run_args docker run -d \
     --name "$INSTALLER_WORKER_CONTAINER_NAME" \
     --network none \
-    -e "WBS_DIR=$WBS_DIR" \
-    -e "ENV_FILE_PATH=$ENV_FILE_PATH" \
-    -e "LOG_PATH=$LOG_PATH" \
     -e "LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_PATH" \
-    "${WBS_TOOLS_ENVIRONMENT_ARGS[@]}" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v "$WBS_DIR:$WBS_DIR" \
-    -w "$WBS_DIR" \
+    "${WBS_TOOLS_CONTAINER_ARGS[@]}" \
     "$WBS_TOOLS_IMAGE" \
     node /app/dist/wbs.js "${worker_args[@]}"
 }
@@ -152,16 +155,19 @@ detect_existing_install_state() {
 prepare_installer_webserver() {
   remove_any_existing_installer_webserver
   mkdir -p "$WBS_STATE_DIR"
-  touch "$ENV_FILE_PATH" "$LOG_PATH"
-  rm -f "$LAUNCH_TRIGGER_PATH"
+  touch "$ENV_FILE_PATH" "$WBS_LOG_PATH"
+  rm -f "$INSTALLATION_LOG_PATH" "$LAUNCH_TRIGGER_PATH"
 }
 
 show_installer_url() {
   echo "Open the following URL in your browser to continue:"
   echo
-  echo "https://$INSTALLER_HOST:$INSTALLER_PORT"
+  echo "https://$INSTALLER_HOST:$INSTALLER_PORT/access/$INSTALLER_ACCESS_CODE"
   echo
   if [[ "${SELF_SIGNED_CERT:-false}" == true ]]; then
+    echo "If you are prompted for an access code after bypassing the certificate warning,"
+    echo "enter $INSTALLER_ACCESS_CODE."
+    echo
     echo "⚠️ This installer page is using a temporary self-signed HTTPS certificate."
     echo "Your browser will likely show a warning before loading the page."
     echo "See the Troubleshooting section of the installer README for help"
@@ -188,6 +194,7 @@ start_installer_development_server() {
   export EXISTING_INSTALL_STATE
   export DEV_SERVER=true
   export INSTALLER_DEV_MOCK
+  export INSTALLER_ACCESS_CODE
   export SSL_CERT_KEY_PATH="$CERTS_DIR/key.pem"
   export SSL_CERT_PATH="$CERTS_DIR/cert.pem"
 
@@ -206,12 +213,14 @@ start_installer_webserver() {
     -e "LAUNCH_TRIGGER_PATH=$LAUNCH_TRIGGER_CONTAINER_PATH"
     -e "EXISTING_INSTALL_STATE=$EXISTING_INSTALL_STATE"
     -e "CONFIGURE_ONLY=${CONFIGURE_ONLY:-false}"
+    -e "WBS_LOG_PATH=/app/state/wbs.log"
+    -e "INSTALLATION_LOG_PATH=/app/state/installation.log"
+    -e INSTALLER_ACCESS_CODE
     -p "$INSTALLER_PORT:443"
     -v "$WBS_DIR:/app/wbs:ro"
     -v "$ENV_FILE_PATH:/app/wbs/.env"
     -v "$WBS_STATE_DIR:/app/state"
     -v "$CERTS_DIR:/app/certs"
-    -v "$LOG_PATH:/app/installation.log"
     "$WBS_TOOLS_IMAGE"
     node dist/wbs.js configure "${CONFIGURE_ARGS[@]}"
   )

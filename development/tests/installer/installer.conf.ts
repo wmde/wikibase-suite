@@ -11,7 +11,11 @@ import {
 export const testEnv = TestEnv.create( {
 	name: 'installer',
 	maxInstances: 1,
-	specs: [ 'installer/contracts.spec.ts', 'installer/install.spec.ts' ],
+	specs: [
+		'installer/contracts.spec.ts',
+		'installer/installer-access.spec.ts',
+		'installer/install.spec.ts'
+	],
 	envFiles: [ './test-runner.env', '../local.env' ],
 	composeFiles: [ 'installer/docker-compose.override.yml' ],
 	waitForUrls: () => [ 'http://browser:4444/wd/hub/status' ],

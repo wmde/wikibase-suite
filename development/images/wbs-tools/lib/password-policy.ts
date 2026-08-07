@@ -24,6 +24,6 @@ function loadCommonPasswords(): Set<string> {
 	return commonPasswords;
 }
 
-export function validateSetupPassword( password: string ): ValidationResult {
+export function validateConfigurationPassword( password: string ): ValidationResult {
 	return validatePassword( password, loadCommonPasswords() );
 }

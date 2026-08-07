@@ -1,6 +1,7 @@
 import { existsSync, rmSync } from 'node:fs';
 import { setTimeout as delay } from 'node:timers/promises';
-import { appendOperationLog, up } from './compose.js';
+import { up } from './compose.js';
+import { appendInstallationLog } from './installation-log.js';
 
 export async function completeWebInstallation( options: {
 	localImages?: boolean;
@@ -14,18 +15,18 @@ export async function completeWebInstallation( options: {
 		await delay( 500 );
 	}
 	rmSync( requestPath, { force: true } );
-	appendOperationLog( 'Configuration saved.', 'config_saved' );
-	appendOperationLog( 'Updating Docker images...', 'images_pull_started' );
+	appendInstallationLog( 'Configuration saved.', 'config_saved' );
+	appendInstallationLog( 'Updating Docker images...', 'images_pull_started' );
 	await up( {
 		...( options.build ? { build: true } : {
 			update: true,
 			localImages: options.localImages
 		} ),
-		onStartingServices: () => appendOperationLog(
+		onStartingServices: () => appendInstallationLog(
 			'Starting Docker Compose services. Generally takes 2–6 minutes...',
 			'services_waiting'
 		)
 	} );
-	appendOperationLog( 'Docker Compose services reported ready.', 'services_ready' );
-	appendOperationLog( 'Installation is complete.', 'setup_complete' );
+	appendInstallationLog( 'Docker Compose services reported ready.', 'services_ready' );
+	appendInstallationLog( 'Installation is complete.', 'installation_complete' );
 }

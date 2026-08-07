@@ -1,8 +1,8 @@
 <template>
-	<section class="wizard-panel is-active">
-		<div class="wizard-panel__body setup-flow">
-			<div v-if="complete" class="setup-complete">
-				<div class="wizard-panel__header">
+	<section class="installer-panel is-active">
+		<div class="installer-panel__body installation-flow">
+			<div v-if="complete" class="installation-complete">
+				<div class="installer-panel__header">
 					<h2>{{ configurationOnly ? 'Configuration saved!' : 'Installation complete! 🎉' }}</h2>
 				</div>
 
@@ -12,7 +12,7 @@
 								Your Wikibase Suite is now available at the links below.
 								<button
 									type="button"
-									class="setup-log-link"
+									class="installation-log-link"
 									@click="emit( 'open-log' )"
 								>
 									View log
@@ -34,7 +34,7 @@
 						</div>
 					</div>
 
-					<cdx-message class="setup-callout setup-callout--warning complete-checklist__item">
+					<cdx-message class="installer-callout installer-callout--warning complete-checklist__item">
 						<div class="save-config-heading">
 							<div class="callout-heading">
 								<cdx-icon :icon="cdxIconAlert" class="callout-icon callout-icon--warning" size="small" />
@@ -70,9 +70,9 @@
 				</div>
 				</div>
 
-			<div v-else class="setup-progress-panel surface-card">
-				<div class="setup-progress-panel__topline">
-					<p class="setup-progress-panel__status">{{ currentStatusLine }}</p>
+			<div v-else class="installation-progress-panel surface-card">
+				<div class="installation-progress-panel__topline">
+					<p class="installation-progress-panel__status">{{ currentStatusLine }}</p>
 					<cdx-button
 						size="small"
 						weight="quiet"
@@ -83,15 +83,15 @@
 					</cdx-button>
 				</div>
 				<cdx-progress-bar :value="progress" :max="100" aria-hidden="true" />
-				<ol class="setup-checklist">
+				<ol class="installation-checklist">
 					<li
 						v-for="item in progressChecklistItems"
 						:key="item.title"
-						class="setup-checklist__item"
+						class="installation-checklist__item"
 						:class="`is-${ item.state }`"
 					>
-						<span class="setup-checklist__icon" aria-hidden="true">{{ itemIcon( item.state ) }}</span>
-						<span class="setup-checklist__label">{{ item.title }}</span>
+						<span class="installation-checklist__icon" aria-hidden="true">{{ itemIcon( item.state ) }}</span>
+						<span class="installation-checklist__label">{{ item.title }}</span>
 					</li>
 				</ol>
 			</div>

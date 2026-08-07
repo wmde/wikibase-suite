@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 
-import type { InitialSetupState } from './types';
+import type { InitialInstallerState } from './types';
 
 declare global {
 	interface Window {
-		__SETUP_STATE__?: InitialSetupState;
+		__INSTALLER_STATE__?: InitialInstallerState;
 	}
 }

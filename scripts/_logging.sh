@@ -5,7 +5,8 @@
 # - log   : ISO8601 timestamp + message + optional trailing [code]
 # -----------------------------------------------------------------------------
 
-export LOG_PATH=${LOG_PATH:=/tmp/wikibase-suite-installer.log}
+: "${WBS_LOG_PATH:?WBS_LOG_PATH must be set before sourcing _logging.sh}"
+export WBS_LOG_PATH
 
 DEBUG=${DEBUG:=false}
 
@@ -22,18 +23,18 @@ log_init() {
   fi
   export WBS_LOG_INITIALIZED=1
 
-  mkdir -p "$(dirname "$LOG_PATH")" 2>/dev/null || true
+  mkdir -p "$(dirname "$WBS_LOG_PATH")" 2>/dev/null || true
 
-  if [ -f "$LOG_PATH" ] && [ -s "$LOG_PATH" ]; then
+  if [ -f "$WBS_LOG_PATH" ] && [ -s "$WBS_LOG_PATH" ]; then
     ts=$(date -u +"%Y%m%d-%H%M%S")
-    backup="${LOG_PATH}.${ts}"
+    backup="${WBS_LOG_PATH}.${ts}"
     # Prefer mv; fall back to cp if moving across devices fails
-    mv -- "$LOG_PATH" "$backup" 2>/dev/null || {
-      cp --preserve=mode,timestamps -- "$LOG_PATH" "$backup" 2>/dev/null || true
-      touch "$LOG_PATH"
+    mv -- "$WBS_LOG_PATH" "$backup" 2>/dev/null || {
+      cp --preserve=mode,timestamps -- "$WBS_LOG_PATH" "$backup" 2>/dev/null || true
+      touch "$WBS_LOG_PATH"
     }
   fi
-  touch "$LOG_PATH"
+  touch "$WBS_LOG_PATH"
 }
 
 # run init immediately
@@ -46,9 +47,9 @@ status() {
   local message="$1"
   local code="${2:-}"
   if [ -n "$code" ]; then
-    printf '%s %s [%s]\n' "$(_timestamp)" "$message" "$code" >> "$LOG_PATH"
+    printf '%s %s [%s]\n' "$(_timestamp)" "$message" "$code" >> "$WBS_LOG_PATH"
   else
-    printf '%s %s\n' "$(_timestamp)" "$message" >> "$LOG_PATH"
+    printf '%s %s\n' "$(_timestamp)" "$message" >> "$WBS_LOG_PATH"
   fi
   if $INTERACTIVE; then
     printf '%s\n' "$message"
@@ -59,7 +60,7 @@ status() {
 # - stdout: shown only if DEBUG=true (clean)
 # - log   : "2025-08-12T10:00:00Z Message... [debug]"
 debug() {
-  printf '%s %s [debug]\n' "$(_timestamp)" "$*" >> "$LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "$*" >> "$WBS_LOG_PATH"
   if [ "$DEBUG" = true ]; then
     printf '%s\n' "$*"
   fi
@@ -69,23 +70,23 @@ _run_logged() {
   local rendered_command="$1"
   shift
   local command_status=0
-  printf '%s %s [debug]\n' "$(_timestamp)" "BEGIN RUN: $rendered_command" >> "$LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "BEGIN RUN: $rendered_command" >> "$WBS_LOG_PATH"
 
   if $INTERACTIVE && [ "$DEBUG" = true ]; then
-    if "$@" 2>&1 | tee -a "$LOG_PATH"; then
+    if "$@" 2>&1 | tee -a "$WBS_LOG_PATH"; then
       :
     else
       command_status=$?
     fi
   else
-    if "$@" >>"$LOG_PATH" 2>&1; then
+    if "$@" >>"$WBS_LOG_PATH" 2>&1; then
       :
     else
       command_status=$?
     fi
   fi
-  printf '\n' >> "$LOG_PATH"
-  printf '%s %s [debug]\n' "$(_timestamp)" "END RUN" >> "$LOG_PATH"
+  printf '\n' >> "$WBS_LOG_PATH"
+  printf '%s %s [debug]\n' "$(_timestamp)" "END RUN" >> "$WBS_LOG_PATH"
   return "$command_status"
 }
 
