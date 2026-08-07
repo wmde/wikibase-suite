@@ -13,12 +13,18 @@ Repository tasks run through `wbs-dev`. The wrapper builds or loads the developm
 The container keeps its Linux `node_modules` installations in named Docker volumes. This leaves any host-side pnpm installation untouched, so contributors can also use the Node version declared in `.nvmrc` for direct editor and package-manager integration. Dependency volumes are refreshed automatically when the package manifest, lockfile, workspace configuration, or pnpm version changes.
 
 > [!NOTE]
-> Development commands in this documentation assume you first run `cd development`; examples therefore use `./wbs-dev` consistently. Optionally, add the repository's `development/` directory to your shell's `PATH` to run the wrapper as `wbs-dev` from any working directory.
+> Development commands in this documentation use `wbs-dev`. Add the checkout's `wikibase-suite/development` directory to your shell's `PATH` to use that form from any working directory. Without changing `PATH`, run the same commands as `./wbs-dev` from `wikibase-suite/development`, or as `development/wbs-dev` from the repository root.
+
+For example, add the absolute path for your checkout to your shell configuration:
 
 ```bash
-./wbs-dev build
-./wbs-dev test
-./wbs-dev lint
+export PATH="$PATH:/path/to/wikibase-suite/development"
+```
+
+```bash
+wbs-dev build
+wbs-dev test
+wbs-dev lint
 ```
 
 ## Running a Suite instance
@@ -38,7 +44,7 @@ When the repository-root `.env` is missing or incomplete, interactive `wbs up` r
 Optional repository-root `local.env` values override `.env` when lifecycle commands run Docker Compose. The configurator continues to own `.env` and never modifies `local.env`. The WBS host runner sources this trusted, shell-compatible file before preparing the tools image. Developers running a complete source installation on ARM can set `WBS_SKIP_ARCH_CHECK=true` without changing the supported installer defaults; ordinary lifecycle commands do not perform the installer's architecture preflight.
 
 The `development/wbs` lifecycle commands are an internal, experimental development interface. They are intentionally absent from the repository root and are not documented as an end-user operations feature yet.
-The development launcher uses `wikibase/wbs-tools:latest` from the checkout rather than pulling the published compatible-major image. On first use it builds that local tools image when it is missing; after tools-application changes, rebuild it explicitly with `./wbs-dev build wbs-tools`.
+The development launcher uses `wikibase/wbs-tools:latest` from the checkout rather than pulling the published compatible-major image. On first use it builds that local tools image when it is missing; after tools-application changes, rebuild it explicitly with `wbs-dev build wbs-tools`.
 
 The current local profile uses `wikibase.test` and `query.wikibase.test`. The configurator prints the hosts-file entry needed when those names do not already resolve locally. Local DNS and certificate handling remain separate from image and lifecycle selection.
 
@@ -49,7 +55,7 @@ Use `./wbs reset` to reset the development instance. It asks independently wheth
 For exploratory work inside an integration-test environment instead, start exactly one named suite with `--setup`:
 
 ```bash
-./wbs-dev test repo --setup
+wbs-dev test repo --setup
 ```
 
 This builds the test images, starts that suite's test-only services and fixtures, and leaves the environment running without executing its specifications. It is test infrastructure rather than an alternative product lifecycle command.
@@ -59,7 +65,7 @@ This builds the test images, starts that suite's test-only services and fixtures
 Start the browser installer with live reload from the current checkout:
 
 ```bash
-./wbs-dev installer-dev web
+wbs-dev installer-dev web
 ```
 
 This builds the local Suite images, uses local test domains, and runs the normal host launch scripts, so following the regular installer actions performs a real Suite installation.
@@ -67,12 +73,12 @@ This builds the local Suite images, uses local test domains, and runs the normal
 For UI and UX work without starting services, use mock mode:
 
 ```bash
-./wbs-dev installer-dev web --mock
+wbs-dev installer-dev web --mock
 ```
 
 Mock mode uses the same live development server, makes the progress steps clickable, and runs normal form validation. Starting installation emits an accelerated, realistic installation log through the completed screen, but does not write configuration, signal the host launch scripts, or start Suite services. Without `--mock`, the progress steps are not skippable and the installer retains its real end-to-end behavior.
 
-Use `./wbs-dev --help` or `./wbs-dev <command> --help` for the current targets, options, and examples.
+Use `wbs-dev --help` or `wbs-dev <command> --help` for the current targets, options, and examples.
 
 Contribution expectations are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -86,7 +92,7 @@ See the [integration test guide](./tests/README.md#environment-and-local-overrid
 
 ## Linting
 
-`./wbs-dev lint` applies one shared JavaScript and TypeScript correctness baseline, with scoped additions for Node.js, Vue, Mocha, and WebdriverIO execution environments. Prettier remains an explicit formatting option through `./wbs-dev lint --fix --prettier`; formatting is not part of the default lint check.
+`wbs-dev lint` applies one shared JavaScript and TypeScript correctness baseline, with scoped additions for Node.js, Vue, Mocha, and WebdriverIO execution environments. Prettier remains an explicit formatting option through `wbs-dev lint --fix --prettier`; formatting is not part of the default lint check.
 
 The repository does not currently contain JavaScript owned by WBS that runs as Wikibase or MediaWiki extension code. Upstream extension source is excluded because it belongs to its source project. If extension JavaScript is added here later, keep it in an explicit source directory and add a scoped Wikimedia ESLint configuration for that directory rather than applying Wikimedia rules to the development tools, installer, or integration tests.
 
@@ -99,7 +105,7 @@ Use the documentation according to the task:
 | Install or operate a published WBS release | [WBS documentation](../README.md) |
 | Set up and work in the repository locally | This guide |
 | Prepare and submit a change | [Contributor guide](../CONTRIBUTING.md) |
-| Run build, test, lint, update, or publish commands | `./wbs-dev <command> --help` |
+| Run build, test, lint, update, or publish commands | `wbs-dev <command> --help` |
 | Add or debug an integration test | [Integration test suites](./tests/README.md) |
 | Develop or test the installer and operations tools | [WBS tools development guide](./images/wbs-tools/docs/README.md) |
 | Write end-user or developer documentation | [Documentation guide](./docs/document/README.md) |

@@ -12,14 +12,14 @@ Wikibase Suite currently publishes and tests AMD64 images. We want to publish co
 
 The current tooling is partially prepared:
 
-- `./wbs-dev build` forwards normal Buildx arguments, including a single `--platform=linux/arm64` target.
+- `wbs-dev build` forwards normal Buildx arguments, including a single `--platform=linux/arm64` target.
 - Registry caches are scoped by the requested platform set.
 - The shared CI setup action can opt into QEMU without adding emulation overhead to normal AMD64 jobs.
 - The AMD64-only Wikimedia Composer images used by Wikibase and QuickStatements run as AMD64 intermediate stages and copy portable PHP dependencies into the target image.
 
 ## Decision
 
-Publish `linux/amd64` and `linux/arm64` variants through the shared `./wbs-dev` build path. GitHub Actions should provide only the builder, emulation or native nodes, credentials, and requested platforms rather than implement a separate build path.
+Publish `linux/amd64` and `linux/arm64` variants through the shared `wbs-dev` build path. GitHub Actions should provide only the builder, emulation or native nodes, credentials, and requested platforms rather than implement a separate build path.
 
 This decision remains open until these steps are completed:
 

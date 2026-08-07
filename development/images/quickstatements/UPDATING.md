@@ -1,27 +1,54 @@
 # Updating QuickStatements (`wikibase/quickstatements`)
 
-[Back to the release guide](../../docs/release.md#1-update-images-from-upstream-sources-optional)
+[Back to the release guide](../../docs/release.md#1-review-image-update-policies)
 
-QuickStatements is built from pinned QuickStatements and MagnusTools development commits rather than a published release.
+QuickStatements is built from pinned QuickStatements and MagnusTools development commits rather than published releases. QuickStatements uses MagnusTools directly but does not declare a matching MagnusTools version or commit, so the image treats the latest commit from each development branch as one update candidate.
 
 Use this guide when the release refreshes those commits.
 
-## 1. Update the sources
+## Automated update
+
+The recommended workflow is:
 
 ```bash
-./wbs-dev update-sources quickstatements
+wbs-dev update quickstatements
 ```
 
-The command updates both commits and the MagnusTools archive checksum.
+The command:
 
-## 2. Review
+1. Resolves the latest commits from the QuickStatements and MagnusTools `master` branches.
+2. Presents both current-to-proposed commit ranges with comparison links as one update candidate.
+3. Asks whether to include the paired update.
+4. Downloads the proposed MagnusTools archive and calculates its SHA-256 checksum after confirmation.
+5. Updates `QUICKSTATEMENTS_COMMIT`, `MAGNUSTOOLS_COMMIT`, and `MAGNUSTOOLS_ARCHIVE_SHA` together in [`build.env`](./build.env).
+6. Drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
-Compare both commit ranges. Check user workflows, OAuth, Wikibase API, configuration, and runtime changes.
+The command confirms that both branches and the MagnusTools archive are available, but it cannot determine whether their latest commits remain compatible. Complete the review below before releasing the image.
 
-## 3. Determine the impact
+## Manual update
 
-- **Patch:** a narrow compatible correction.
-- **Minor:** the default for a compatible source refresh.
-- **Major:** incompatible configuration, authentication, API, or user action.
+The same update can be prepared manually:
+
+1. Resolve the head of `refs/heads/master` from the [QuickStatements repository](https://github.com/magnusmanske/quickstatements) and the [MagnusTools repository](https://codeberg.org/magnusmanske/magnustools).
+2. Set `QUICKSTATEMENTS_COMMIT` and `MAGNUSTOOLS_COMMIT` in [`build.env`](./build.env) to those full commit hashes.
+3. Download `https://codeberg.org/magnusmanske/magnustools/archive/<MAGNUSTOOLS_COMMIT>.tar.gz` and calculate its SHA-256 checksum using `sha256sum` or `shasum -a 256`.
+4. Set `MAGNUSTOOLS_ARCHIVE_SHA` to that checksum.
+5. Review the resulting `build.env` diff before building or testing the image.
+
+## Review
+
+Compare both commit ranges, including any interaction between the two repositories. Check user workflows, OAuth, Wikibase API, configuration, PHP dependencies, and runtime changes.
+
+## Choosing a version
+
+QuickStatements source updates are usually small and remain compatible with the current image major version. Keep that major unless the upstream diff or an image change clearly breaks the existing contract—for example, by changing required configuration or environment variables, authentication, API behavior, or user workflows. Apply the shared versioning policy to compatible changes.
+
+## Dependencies not updated automatically
+
+`wbs-dev update` does not select the PHP runtime or Composer build image in [`build.env`](./build.env). When reviewing them:
+
+- Confirm that the PHP runtime satisfies the pinned QuickStatements `composer.json` requirement and supports the PHP extensions installed by the [`Dockerfile`](./Dockerfile). The currently pinned QuickStatements source requires PHP 8.1 or later; recheck the upstream file when the source pin changes.
+- Confirm that the Composer image can install the pinned QuickStatements dependency set. It is an AMD64-only intermediate stage and must continue to produce portable dependencies for the final image.
+- Keep the PHP image's Debian variant compatible with the packages installed by the Dockerfile, and build and test every published architecture after changing either image.
 
 [Continue with testing](../../docs/release.md#3-test-and-fix)

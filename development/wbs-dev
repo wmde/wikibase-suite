@@ -59,7 +59,13 @@ lib/buildx.sh \
   --silent \
   -- "${build_args[@]}"
 
-compose_run_args=(--progress quiet run --no-TTY --rm)
+compose_run_args=(--progress quiet run --rm)
+# Interactive commands need the host terminal forwarded so prompt libraries can
+# enable raw mode and interpret arrow keys. Non-interactive runs must disable
+# Compose's TTY allocation explicitly.
+if [[ ! -t 0 || ! -t 1 ]]; then
+  compose_run_args+=(--no-TTY)
+fi
 if [[ "${1:-}" == "installer-dev" && "${2:-}" == "web" ]]; then
   installer_port=${WBS_INSTALLER_PORT:-8888}
   compose_run_args+=(--publish "$installer_port:443" --env "WBS_INSTALLER_PORT=$installer_port")

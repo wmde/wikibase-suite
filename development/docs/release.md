@@ -4,15 +4,15 @@ Prepare each release in a pull request containing the implementation, versions, 
 
 WBS and each image are versioned independently according to the [WBS version policy](../../docs/versions.md), and all follow the [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard.
 
-The `./wbs-dev update-versions` command uses the repository's [versioning and commit policy](./versioning-and-commits.md) to determine the next release version and generate changelog entries.
+The `wbs-dev update` command interviews the operator about supported upstream updates, uses the repository's [versioning and commit policy](./versioning-and-commits.md) to propose release versions, and generates changelog drafts.
 
 ## Release workflow
 
 The starting point for a release is the unreleased development work already completed for the selected products. Before releasing, consider whether to also update images from upstream sources. An image update may accompany other changes or be the purpose of the release, and may require repository changes to keep the product compatible.
 
-### 1. Update images from upstream sources (optional)
+### 1. Review image update policies
 
-To update one or more images from upstream sources, follow the corresponding guides:
+Before running the update interview, review the guides for images in scope:
 
 - [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
 - [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
@@ -29,7 +29,7 @@ Ensure that the intended development work and any compatibility changes required
 After all intended changes are in place:
 
 ```bash
-./wbs-dev test
+wbs-dev test
 ```
 
 Fix failures and rerun the tests before continuing.
@@ -38,13 +38,15 @@ Fix failures and rerun the tests before continuing.
 
 Commit all release changes according to the [versioning and commit policy](./versioning-and-commits.md).
 
-### 5. Generate versions and changelogs
+### 5. Prepare upstream updates, versions, and changelogs
 
 ```bash
-./wbs-dev update-versions <project...|all>
+wbs-dev update <project...|all>
 ```
 
-This makes local working-tree changes only: it does not stage, commit, tag, or push anything. Review the result with `git diff`. For `wbs`, it also keeps `DEPLOY_VERSION` aligned. An existing higher version is not reduced, and a manually written unreleased changelog entry is preserved.
+For supported images, the command first offers current upstream candidates and comparison links. It then assembles upstream and Wikibase Suite changelog sections, proposes a semantic version, and asks for final confirmation before writing anything. The result is local and unstaged: the command does not commit, tag, or push. Review it with `git diff`.
+
+The command can be rerun after testing or additional commits. It reconstructs the draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading. For `wbs`, the command also keeps `DEPLOY_VERSION` aligned.
 
 ### 6. Review and merge
 

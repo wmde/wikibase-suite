@@ -1,19 +1,19 @@
 # Integration test suites
 
-Run tests through the repository's `wbs-dev` container. Use `./wbs-dev test --help` for the current command reference.
+Run tests through the repository's `wbs-dev` container. Use `wbs-dev test --help` for the current command reference.
 
 ```bash
 # Run every suite sequentially
-./wbs-dev test
+wbs-dev test
 
 # Run one suite
-./wbs-dev test repo-client
+wbs-dev test repo-client
 
 # Run one spec within a suite's environment
-./wbs-dev test extensions --spec extensions/babel.spec.ts
+wbs-dev test extensions --spec extensions/babel.spec.ts
 
 # Start a suite's services and leave them running
-./wbs-dev test queryservice --setup
+wbs-dev test queryservice --setup
 ```
 
 Test runs build the local images once before starting the selected suites. Use `--skip-build` when the required images were built separately, as they are in CI. CI sets `WBS_TEST_IMAGE_REGISTRY` and `WBS_TEST_IMAGE_TAG` to use the images built for that workflow run.

@@ -10,10 +10,19 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { replaceVariable } from '../update-sources/shared.js';
+import { createRepositoryContext } from '../../lib/context.js';
+import { applyFileUpdates } from '../../lib/file-updates.js';
+import { GitRepository } from '../../lib/git.js';
+import {
+	discoverReleaseProjects,
+	resolveProjectSelections
+} from '../../lib/projects.js';
+import { planVersionUpdate, type VersionPlan } from '../../lib/versioning.js';
+import { replaceVariable } from '../update/source-utils.js';
+import { defaultVersionPolicy, versionPolicyFor } from '../update/versions.js';
 
-const CLI = resolve( 'wbs-dev.ts' );
-const TSX = resolve( 'node_modules/.bin/tsx' );
+const CLI = resolve('wbs-dev.ts');
+const TSX = resolve('node_modules/.bin/tsx');
 const fixtures: string[] = [];
 
 interface Fixture {
@@ -28,37 +37,37 @@ interface CliResult {
 	stderr: string;
 }
 
-function run( command: string, args: string[], cwd: string ): string {
-	return execFileSync( command, args, { cwd, encoding: 'utf8' } );
+function run(command: string, args: string[], cwd: string): string {
+	return execFileSync(command, args, { cwd, encoding: 'utf8' });
 }
 
-function git( fixture: Fixture, ...args: string[] ): string {
-	return run( 'git', args, fixture.root ).trim();
+function git(fixture: Fixture, ...args: string[]): string {
+	return run('git', args, fixture.root).trim();
 }
 
-function write( fixture: Fixture, relativePath: string, contents: string ): void {
-	const path = join( fixture.root, relativePath );
-	mkdirSync( dirname( path ), { recursive: true } );
-	writeFileSync( path, contents );
+function write(fixture: Fixture, relativePath: string, contents: string): void {
+	const path = join(fixture.root, relativePath);
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, contents);
 }
 
-function commitAll( fixture: Fixture, message: string ): void {
-	git( fixture, 'add', '.' );
-	git( fixture, 'commit', '-m', message );
+function commitAll(fixture: Fixture, message: string): void {
+	git(fixture, 'add', '.');
+	git(fixture, 'commit', '-m', message);
 }
 
 function createFixture(): Fixture {
-	const parent = mkdtempSync( join( tmpdir(), 'wbs-dev-release-' ) );
-	fixtures.push( parent );
-	const remote = join( parent, 'origin.git' );
-	const root = join( parent, 'checkout' );
-	run( 'git', [ 'init', '--bare', '--initial-branch=main', remote ], parent );
-	run( 'git', [ 'init', '--initial-branch=main', root ], parent );
-	const fixture = { root, development: join( root, 'development' ), remote };
-	git( fixture, 'config', 'user.name', 'Test Operator' );
-	git( fixture, 'config', 'user.email', 'test@example.test' );
-	git( fixture, 'remote', 'add', 'origin', remote );
-	write( fixture, 'development/images/wikibase/Dockerfile', 'FROM scratch\n' );
+	const parent = mkdtempSync(join(tmpdir(), 'wbs-dev-release-'));
+	fixtures.push(parent);
+	const remote = join(parent, 'origin.git');
+	const root = join(parent, 'checkout');
+	run('git', ['init', '--bare', '--initial-branch=main', remote], parent);
+	run('git', ['init', '--initial-branch=main', root], parent);
+	const fixture = { root, development: join(root, 'development'), remote };
+	git(fixture, 'config', 'user.name', 'Test Operator');
+	git(fixture, 'config', 'user.email', 'test@example.test');
+	git(fixture, 'remote', 'add', 'origin', remote);
+	write(fixture, 'development/images/wikibase/Dockerfile', 'FROM scratch\n');
 	write(
 		fixture,
 		'development/images/wikibase/package.json',
@@ -89,18 +98,18 @@ function createFixture(): Fixture {
 		'docker-compose.yml',
 		'services:\n  wikibase:\n    environment:\n      DEPLOY_VERSION: "1.0.0"\n'
 	);
-	commitAll( fixture, 'chore: initial release' );
-	git( fixture, 'tag', 'wikibase@1.0.0' );
-	git( fixture, 'tag', 'deploy@1.0.0' );
-	git( fixture, 'push', '-u', 'origin', 'main', '--tags' );
+	commitAll(fixture, 'chore: initial release');
+	git(fixture, 'tag', 'wikibase@1.0.0');
+	git(fixture, 'tag', 'deploy@1.0.0');
+	git(fixture, 'push', '-u', 'origin', 'main', '--tags');
 	return fixture;
 }
 
-function cli( fixture: Fixture, ...args: string[] ): CliResult {
-	const result = spawnSync( TSX, [ CLI, ...args ], {
+function cli(fixture: Fixture, ...args: string[]): CliResult {
+	const result = spawnSync(TSX, [CLI, ...args], {
 		cwd: fixture.development,
 		encoding: 'utf8'
-	} );
+	});
 	return {
 		status: result.status,
 		stdout: result.stdout,
@@ -108,16 +117,64 @@ function cli( fixture: Fixture, ...args: string[] ): CliResult {
 	};
 }
 
-describe( 'wbs-dev preparation and release workflow', () => {
-	afterEach( () => {
-		for ( const fixture of fixtures ) {
-			rmSync( fixture, { recursive: true, force: true } );
+function versions(fixture: Fixture, ...projects: string[]): CliResult {
+	const output: string[] = [];
+	const originalLog = console.log;
+	console.log = (...values: unknown[]) => output.push(values.join(' '));
+	try {
+		const context = createRepositoryContext(fixture.development);
+		const gitRepository = new GitRepository(context);
+		gitRepository.fetchRemoteTags();
+		const plans = resolveProjectSelections(
+			projects,
+			discoverReleaseProjects(context),
+			'update',
+			{ requireExplicit: true }
+		)
+			.map((project) =>
+				planVersionUpdate(
+					context,
+					gitRepository,
+					project,
+					versionPolicyFor(project)
+				)
+			)
+			.filter((plan): plan is VersionPlan => plan !== undefined);
+		if (plans.length === 0) {
+			console.log('No selected projects have releasable changes.');
+		} else {
+			for (const plan of plans) {
+				console.log(
+					`Preparing ${plan.project.name} ${plan.targetVersion} (${plan.reason}).`
+				);
+			}
+			applyFileUpdates(plans.flatMap((plan) => plan.updates));
+			console.log(
+				'Updated local files. Nothing was staged, committed, tagged, or pushed. Review with git diff.'
+			);
+		}
+		return { status: 0, stdout: `${output.join('\n')}\n`, stderr: '' };
+	} catch (error) {
+		return {
+			status: 1,
+			stdout: `${output.join('\n')}\n`,
+			stderr: error instanceof Error ? error.message : String(error)
+		};
+	} finally {
+		console.log = originalLog;
+	}
+}
+
+describe('wbs-dev preparation and release workflow', () => {
+	afterEach(() => {
+		for (const fixture of fixtures) {
+			rmSync(fixture, { recursive: true, force: true });
 		}
 		fixtures.length = 0;
-	} );
+	});
 
-	describe( 'release preparation', () => {
-		it( 'updates only the exact requested source variable', () => {
+	describe('release preparation', () => {
+		it('updates only the exact requested source variable', () => {
 			assert.equal(
 				replaceVariable(
 					'OAUTH_COMMIT=aaa\nWSOAUTH_COMMIT=bbb\n',
@@ -126,24 +183,24 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				),
 				'OAUTH_COMMIT=ccc\nWSOAUTH_COMMIT=bbb\n'
 			);
-		} );
+		});
 
-		it( 'infers a minor version and generates a flat changelog entry', () => {
+		it('infers a minor version and generates a structured changelog entry', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
 				'development/images/wikibase/feature.txt',
 				'new behavior\n'
 			);
-			commitAll( fixture, 'feat(wikibase): add useful behavior' );
-			git( fixture, 'tag', '--force', 'wikibase@1.0.0', 'HEAD' );
-			git( fixture, 'tag', 'wikibase@99.0.0' );
-			const result = cli( fixture, 'update-versions', 'wikibase' );
-			assert.equal( result.status, 0, result.stderr );
+			commitAll(fixture, 'feat(wikibase): add useful behavior');
+			git(fixture, 'tag', '--force', 'wikibase@1.0.0', 'HEAD');
+			git(fixture, 'tag', 'wikibase@99.0.0');
+			const result = versions(fixture, 'wikibase');
+			assert.equal(result.status, 0, result.stderr);
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join(fixture.root, 'development/images/wikibase/package.json'),
 						'utf8'
 					)
 				).version,
@@ -151,26 +208,26 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			);
 			assert.match(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+					join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
 					'utf8'
 				),
-				/^# 1\.1\.0 \(\d{4}-\d{2}-\d{2}\)\n\n- feat\(wikibase\): add useful behavior/u
+				/^# 1\.1\.0 \(\d{4}-\d{2}-\d{2}\)\n\n## Changes\n\n- feat\(wikibase\): add useful behavior/u
 			);
-			assert.equal( git( fixture, 'diff', '--cached', '--name-only' ), '' );
-			const rerun = cli( fixture, 'update-versions', 'wikibase' );
-			assert.equal( rerun.status, 0, rerun.stderr );
+			assert.equal(git(fixture, 'diff', '--cached', '--name-only'), '');
+			const rerun = versions(fixture, 'wikibase');
+			assert.equal(rerun.status, 0, rerun.stderr);
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join(fixture.root, 'development/images/wikibase/package.json'),
 						'utf8'
 					)
 				).version,
 				'1.1.0'
 			);
-		} );
+		});
 
-		it( 'preserves a manually written untagged draft and its higher version floor', () => {
+		it('preserves a manually written untagged draft and its higher version floor', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
@@ -187,26 +244,166 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				'development/images/wikibase/CHANGELOG.md',
 				'# Unreleased\n\nA carefully edited explanation.\n\n# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
 			);
-			commitAll( fixture, 'feat(wikibase): draft a larger release' );
-			const result = cli( fixture, 'update-versions', 'wikibase' );
-			assert.equal( result.status, 0, result.stderr );
+			commitAll(fixture, 'feat(wikibase): draft a larger release');
+			const result = versions(fixture, 'wikibase');
+			assert.equal(result.status, 0, result.stderr);
 			const changelog = readFileSync(
-				join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+				join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
 				'utf8'
 			);
-			assert.match( changelog, /^# 1\.2\.0 \(\d{4}-\d{2}-\d{2}\)/u );
-			assert.match( changelog, /A carefully edited explanation\./u );
-		} );
+			assert.match(changelog, /^# 1\.2\.0 \(\d{4}-\d{2}-\d{2}\)/u);
+			assert.match(changelog, /A carefully edited explanation\./u);
+		});
 
-		it( 'treats uncommitted source updates as a local patch release', () => {
+		it('regenerates managed changelog sections while preserving manual prose', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# Unreleased\n\nCompatibility notes written by the operator.\n\n# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
+			);
+			write(
+				fixture,
+				'development/images/wikibase/build.env',
+				'WIKIBASE_COMMIT=bbb\n'
+			);
+			const context = createRepositoryContext(fixture.development);
+			const gitRepository = new GitRepository(context);
+			const project = discoverReleaseProjects(context).find(
+				(candidate) => candidate.name === 'wikibase'
+			)!;
+			const sourceChanges = [
+				{
+					variable: 'MEDIAWIKI_VERSION',
+					description: 'MediaWiki',
+					previous: '1.45.4',
+					next: '1.46.0'
+				},
+				{
+					variable: 'WIKIBASE_COMMIT',
+					description: 'Wikibase',
+					previous: 'aaa',
+					next: 'bbb',
+					link: {
+						label: 'Diff',
+						url: 'https://example.test/compare/aaa...bbb'
+					}
+				},
+				{
+					variable: 'UNLINKED_COMMIT',
+					description: 'Unlinked dependency',
+					previous: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+					next: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+				},
+				{
+					variable: 'NEW_COMMIT',
+					description: 'Example extension REL1_46',
+					next: 'cccccccccccccccccccccccccccccccccccccccc',
+					link: {
+						label: 'Commit',
+						url: 'https://example.test/commit/cccccccccccccccccccccccccccccccccccccccc'
+					}
+				}
+			];
+			gitRepository.fetchRemoteTags();
+			const first = planVersionUpdate(
+				context,
+				gitRepository,
+				project,
+				defaultVersionPolicy,
+				{
+					date: '2026-08-07',
+					sourceChanges,
+					sourcePaths: ['development/images/wikibase/build.env']
+				}
+			)!;
+			applyFileUpdates(first.updates);
+			write(
+				fixture,
+				'development/images/wikibase/feature.txt',
+				'new behavior\n'
+			);
+			commitAll(fixture, 'feat(wikibase): add behavior after the first draft');
+
+			const rerun = planVersionUpdate(
+				context,
+				gitRepository,
+				project,
+				defaultVersionPolicy,
+				{
+					date: '2026-08-08',
+					sourceChanges,
+					sourcePaths: ['development/images/wikibase/build.env']
+				}
+			)!;
+			assert.equal(rerun.replacesGeneratedChangelogSections, true);
+			const changelog = rerun.updates.find(
+				(update) => update.path === project.changelogPath
+			)!.contents;
+			assert.match(changelog, /Compatibility notes written by the operator\./u);
+			assert.equal(
+				(changelog.match(/^## Dependency updates$/gmu) ?? []).length,
+				1
+			);
+			assert.match(changelog, /MediaWiki from 1\.45\.4 to 1\.46\.0\./u);
+			assert.doesNotMatch(changelog, /MediaWiki from `1\.45\.4`/u);
+			assert.match(
+				changelog,
+				/Wikibase \(\[Diff\]\(https:\/\/example\.test\/compare\/aaa\.\.\.bbb\)\)\./u
+			);
+			assert.match(
+				changelog,
+				/Unlinked dependency from `aaaaaaaaaaaa` to `bbbbbbbbbbbb`\./u
+			);
+			assert.match(
+				changelog,
+				/Added Example extension REL1_46 at \[Commit\]\(https:\/\/example\.test\/commit\/cccccccccccccccccccccccccccccccccccccccc\)\./u
+			);
+			assert.match(
+				changelog,
+				/## Changes\n\n- feat\(wikibase\): add behavior after the first draft/u
+			);
+			assert.ok(
+				changelog.indexOf('## Changes') <
+					changelog.indexOf('## Dependency updates')
+			);
+		});
+
+		it('rejects duplicate generated sections instead of guessing', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# Unreleased\n\n## Changes\n\n- First.\n\n## Changes\n\n- Second.\n\n# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
+			);
+			write(fixture, 'development/images/wikibase/fix.txt', 'fixed\n');
+			const context = createRepositoryContext(fixture.development);
+			const gitRepository = new GitRepository(context);
+			gitRepository.fetchRemoteTags();
+			const project = discoverReleaseProjects(context).find(
+				(candidate) => candidate.name === 'wikibase'
+			)!;
+			assert.throws(
+				() =>
+					planVersionUpdate(
+						context,
+						gitRepository,
+						project,
+						defaultVersionPolicy
+					),
+				/multiple "Changes" sections/u
+			);
+		});
+
+		it('treats uncommitted source updates as a local patch release', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
 				'development/images/wikibase/build.env',
 				'WIKIBASE_COMMIT=bbb\n'
 			);
-			const result = cli( fixture, 'update-versions', 'wikibase' );
-			assert.equal( result.status, 0, result.stderr );
+			const result = versions(fixture, 'wikibase');
+			assert.equal(result.status, 0, result.stderr);
 			assert.match(
 				result.stdout,
 				/Preparing wikibase 1\.0\.1 \(patch release\)/u
@@ -214,7 +411,7 @@ describe( 'wbs-dev preparation and release workflow', () => {
 			assert.equal(
 				JSON.parse(
 					readFileSync(
-						join( fixture.root, 'development/images/wikibase/package.json' ),
+						join(fixture.root, 'development/images/wikibase/package.json'),
 						'utf8'
 					)
 				).version,
@@ -224,94 +421,106 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				result.stdout,
 				/Nothing was staged, committed, tagged, or pushed/u
 			);
-			assert.equal( git( fixture, 'diff', '--cached', '--name-only' ), '' );
-		} );
+			assert.equal(git(fixture, 'diff', '--cached', '--name-only'), '');
+		});
 
-		it( 'reserves dry runs for release commands', () => {
+		it('reserves dry runs for release commands', () => {
 			const fixture = createFixture();
-			const versions = cli( fixture, 'update-versions', 'wikibase', '--dry-run' );
-			assert.notEqual( versions.status, 0 );
-			assert.match( versions.stderr, /unknown option '--dry-run'/u );
+			const update = cli(fixture, 'update', 'wikibase', '--dry-run');
+			assert.notEqual(update.status, 0);
+			assert.match(update.stderr, /unknown option '--dry-run'/u);
+		});
 
-			const sources = cli( fixture, 'update-sources', 'wikibase', '--dry-run' );
-			assert.notEqual( sources.status, 0 );
-			assert.match( sources.stderr, /unknown option '--dry-run'/u );
-		} );
-
-		it( 'uses legacy deploy tags for WBS and keeps DEPLOY_VERSION aligned', () => {
+		it('uses legacy deploy tags for WBS and keeps DEPLOY_VERSION aligned', () => {
 			const fixture = createFixture();
-			write( fixture, 'install', '#!/usr/bin/env bash\necho changed\n' );
-			commitAll( fixture, 'feat!: replace the WBS installation contract' );
-			const result = cli( fixture, 'update-versions', 'wbs' );
-			assert.equal( result.status, 0, result.stderr );
+			write(fixture, 'install', '#!/usr/bin/env bash\necho changed\n');
+			commitAll(fixture, 'feat!: replace the WBS installation contract');
+			const result = versions(fixture, 'wbs');
+			assert.equal(result.status, 0, result.stderr);
 			assert.equal(
-				JSON.parse( readFileSync( join( fixture.root, 'package.json' ), 'utf8' ) )
+				JSON.parse(readFileSync(join(fixture.root, 'package.json'), 'utf8'))
 					.version,
 				'2.0.0'
 			);
 			assert.match(
-				readFileSync( join( fixture.root, 'docker-compose.yml' ), 'utf8' ),
+				readFileSync(join(fixture.root, 'docker-compose.yml'), 'utf8'),
 				/DEPLOY_VERSION: "2\.0\.0"/u
 			);
-		} );
+		});
 
-		it( 'does not treat a generated WBS deploy version as a release change', () => {
+		it('does not treat a generated WBS deploy version as a release change', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
 				'docker-compose.yml',
 				'services:\n  wikibase:\n    environment:\n      DEPLOY_VERSION: "2.0.0"\n'
 			);
-			const result = cli( fixture, 'update-versions', 'wbs' );
-			assert.equal( result.status, 0, result.stderr );
+			const result = versions(fixture, 'wbs');
+			assert.equal(result.status, 0, result.stderr);
 			assert.match(
 				result.stdout,
 				/No selected projects have releasable changes\./u
 			);
 			assert.equal(
-				JSON.parse(
-					readFileSync( join( fixture.root, 'package.json' ), 'utf8' )
-				).version,
+				JSON.parse(readFileSync(join(fixture.root, 'package.json'), 'utf8'))
+					.version,
 				'1.0.0'
 			);
-		} );
+		});
 
-		it( 'rejects ambiguous drafts before writing any release files', () => {
+		it('does not add a committed generated release draft to its own changelog', () => {
+			const fixture = createFixture();
+			write(fixture, 'development/images/wikibase/fix.txt', 'fixed\n');
+			commitAll(fixture, 'fix(wikibase): original fix');
+			const first = versions(fixture, 'wikibase');
+			assert.equal(first.status, 0, first.stderr);
+			commitAll(fixture, 'chore(wikibase): prepare release draft');
+			const result = versions(fixture, 'wikibase');
+			assert.equal(result.status, 0, result.stderr);
+			const changelog = readFileSync(
+				join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
+				'utf8'
+			);
+			assert.doesNotMatch(changelog, /prepare release draft/u);
+			assert.match(changelog, /fix\(wikibase\): original fix/u);
+		});
+
+		it('rejects ambiguous drafts before writing any release files', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
 				'development/images/wikibase/CHANGELOG.md',
 				'# 1.2.0\n\n- First draft.\n\n# 1.1.0\n\n- Second draft.\n\n# 1.0.0\n\n- Initial.\n'
 			);
-			commitAll( fixture, 'feat(wikibase): ambiguous release notes' );
+			commitAll(fixture, 'feat(wikibase): ambiguous release notes');
 			const packageBefore = readFileSync(
-				join( fixture.root, 'development/images/wikibase/package.json' ),
+				join(fixture.root, 'development/images/wikibase/package.json'),
 				'utf8'
 			);
 			const changelogBefore = readFileSync(
-				join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+				join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
 				'utf8'
 			);
-			const result = cli( fixture, 'update-versions', 'wikibase' );
-			assert.notEqual( result.status, 0 );
-			assert.match( result.stderr, /multiple untagged release entries/u );
+			const result = versions(fixture, 'wikibase');
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /multiple untagged release entries/u);
 			assert.equal(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/package.json' ),
+					join(fixture.root, 'development/images/wikibase/package.json'),
 					'utf8'
 				),
 				packageBefore
 			);
 			assert.equal(
 				readFileSync(
-					join( fixture.root, 'development/images/wikibase/CHANGELOG.md' ),
+					join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
 					'utf8'
 				),
 				changelogBefore
 			);
-		} );
+		});
 
-		it( 'plans every selected project before writing any of them', () => {
+		it('plans every selected project before writing any of them', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
@@ -323,20 +532,20 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				'CHANGELOG.md',
 				'# 1.2.0\n\n- First draft.\n\n# 1.1.0\n\n- Second draft.\n\n# 1.0.0\n\n- Initial.\n'
 			);
-			commitAll( fixture, 'feat(wikibase): prepare an atomic release' );
+			commitAll(fixture, 'feat(wikibase): prepare an atomic release');
 			const packagePath = join(
 				fixture.root,
 				'development/images/wikibase/package.json'
 			);
-			const before = readFileSync( packagePath, 'utf8' );
-			const result = cli( fixture, 'update-versions', 'wikibase', 'wbs' );
-			assert.notEqual( result.status, 0 );
-			assert.equal( readFileSync( packagePath, 'utf8' ), before );
-		} );
-	} );
+			const before = readFileSync(packagePath, 'utf8');
+			const result = versions(fixture, 'wikibase', 'wbs');
+			assert.notEqual(result.status, 0);
+			assert.equal(readFileSync(packagePath, 'utf8'), before);
+		});
+	});
 
-	describe( 'release publication', () => {
-		it( 'creates and pushes a missing image tag, and is rerunnable', () => {
+	describe('release publication', () => {
+		it('creates and pushes a missing image tag, and is rerunnable', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
@@ -348,15 +557,15 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				'development/images/wikibase/CHANGELOG.md',
 				'# 1.0.1 (2026-01-02)\n\n- Fix.\n\n# 1.0.0 (2026-01-01)\n\n- Initial.\n'
 			);
-			commitAll( fixture, 'fix(wikibase): correct behavior' );
-			git( fixture, 'push', 'origin', 'main' );
-			git( fixture, 'tag', 'wikibase@1.0.1', 'wikibase@1.0.0' );
-			const first = cli( fixture, 'release', 'images', 'wikibase' );
-			assert.equal( first.status, 0, first.stderr );
+			commitAll(fixture, 'fix(wikibase): correct behavior');
+			git(fixture, 'push', 'origin', 'main');
+			git(fixture, 'tag', 'wikibase@1.0.1', 'wikibase@1.0.0');
+			const first = cli(fixture, 'release', 'images', 'wikibase');
+			assert.equal(first.status, 0, first.stderr);
 			assert.match(
 				run(
 					'git',
-					[ '--git-dir', fixture.remote, 'tag', '--list' ],
+					['--git-dir', fixture.remote, 'tag', '--list'],
 					fixture.root
 				),
 				/wikibase@1\.0\.1/u
@@ -372,22 +581,22 @@ describe( 'wbs-dev preparation and release workflow', () => {
 					],
 					fixture.root
 				).trim(),
-				git( fixture, 'rev-parse', 'HEAD' )
+				git(fixture, 'rev-parse', 'HEAD')
 			);
-			const second = cli( fixture, 'release', 'images', 'wikibase' );
-			assert.equal( second.status, 0, second.stderr );
-			assert.match( second.stdout, /Already published: wikibase@1\.0\.1/u );
-		} );
+			const second = cli(fixture, 'release', 'images', 'wikibase');
+			assert.equal(second.status, 0, second.stderr);
+			assert.match(second.stdout, /Already published: wikibase@1\.0\.1/u);
+		});
 
-		it( 'blocks publication from a dirty working tree', () => {
+		it('blocks publication from a dirty working tree', () => {
 			const fixture = createFixture();
-			write( fixture, 'development/images/wikibase/build.env', 'dirty=true\n' );
-			const result = cli( fixture, 'release', 'images', 'wikibase', '--dry-run' );
-			assert.notEqual( result.status, 0 );
-			assert.match( result.stderr, /clean working tree/u );
-		} );
+			write(fixture, 'development/images/wikibase/build.env', 'dirty=true\n');
+			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /clean working tree/u);
+		});
 
-		it( 'rejects prerelease versions until a publication policy exists', () => {
+		it('rejects prerelease versions until a publication policy exists', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
@@ -399,11 +608,11 @@ describe( 'wbs-dev preparation and release workflow', () => {
 				'development/images/wikibase/CHANGELOG.md',
 				'# 1.1.0-rc.1 (2026-01-02)\n\n- Candidate.\n'
 			);
-			commitAll( fixture, 'feat(wikibase): prepare a candidate' );
-			git( fixture, 'push', 'origin', 'main' );
-			const result = cli( fixture, 'release', 'images', 'wikibase', '--dry-run' );
-			assert.notEqual( result.status, 0 );
-			assert.match( result.stderr, /stable MAJOR\.MINOR\.PATCH/u );
-		} );
-	} );
-} );
+			commitAll(fixture, 'feat(wikibase): prepare a candidate');
+			git(fixture, 'push', 'origin', 'main');
+			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /stable MAJOR\.MINOR\.PATCH/u);
+		});
+	});
+});
