@@ -28,13 +28,13 @@ export const DATABASE_PASSWORD = 'WbsToolsDatabasePassword-2026';
 
 const INSTALLER_CONTAINER = 'installer-e2e-web';
 const INSTALLER_WORKER_CONTAINER = 'installer-e2e-worker';
-const INSTALL_PROJECT = 'installer-e2e';
+const INSTALL_PROJECT = 'wbs-tools-e2e';
 const HOST_REPOSITORY_ROOT = resolve(
 	process.env.HOST_PWD || join( process.cwd(), '../..' )
 );
 const SUITE_ROOT = join(
 	HOST_REPOSITORY_ROOT,
-	'development/tests/installer'
+	'development/tests/wbs-tools'
 );
 export const INSTALLER_TEMP_ROOT = join( SUITE_ROOT, 'tmp' );
 const TEMP_ROOT = INSTALLER_TEMP_ROOT;

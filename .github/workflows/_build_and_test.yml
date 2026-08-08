@@ -91,7 +91,7 @@ jobs:
           - quickstatements
           - pingback
           - opensearch
-          - installer
+          - wbs-tools
 
     steps:
       - uses: actions/checkout@v4

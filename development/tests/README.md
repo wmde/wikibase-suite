@@ -14,7 +14,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
 | `pingback` | Integration | Metadata callback behavior using its suite-specific fixture. |
-| `installer` | Integration | Complete installer journey, including bootstrap selection, web configuration, deployment health, and administrator login. |
+| `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
 
 Integration suite settings live in `tests/<suite>/<suite>.conf.ts`. Each combines the published deployment Compose file with the shared test override and any suite-specific override. Test results are written beneath the suite's `results` directory; CI uploads them after a failure.
 
@@ -61,9 +61,9 @@ wbs-dev test queryservice --setup
 
 An existing suite automatically discovers a new spec only when its `<suite>.conf.ts` `specs` patterns include the new path. When a change needs a different combination of Compose profiles or overrides, add a suite directory with a matching `<suite>.conf.ts` and include it in the CI test matrix.
 
-### Installer Suite (WBS Tools Image)
+### WBS Tools Suite
 
-The `installer` suite is the dedicated end-to-end suite for the WBS Tools image and installer flow. In contrast, `wbs-dev-tools` tests the development CLI and its supporting libraries.
+The `wbs-tools` suite is the dedicated end-to-end suite for the WBS Tools image and its installer lifecycle. In contrast, `wbs-dev-tools` tests the development CLI and its supporting libraries.
 
 It runs the selected WBS Tools image against a temporary WBS checkout and covers:
 
@@ -72,6 +72,8 @@ It runs the selected WBS Tools image against a temporary WBS checkout and covers
 - **Complete installation:** the supported local browser flow, generated configuration, service health, installer finalization, and administrator sign-in.
 
 It exercises the supported `--local` path. Public DNS matching, certificate issuance, firewall configuration, and reachability from outside the Docker host remain separate deployment concerns.
+
+Run it with `wbs-dev test wbs-tools`.
 
 ### WBS DevTools Tests
 

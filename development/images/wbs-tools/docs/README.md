@@ -71,6 +71,12 @@ The old `--cli`, `--skip-clone`, `--skip-deps`, `--skip-launch`, and `--reset` o
 
 ## Developing the browser installer
 
+The `wbs-tools` integration test suite owns the existing installer lifecycle coverage: bootstrap and CLI contracts, installer access and isolation, and a complete installation through administrator sign-in. Run it from `development` with:
+
+```bash
+wbs-dev test wbs-tools
+```
+
 From an existing checkout, run:
 
 ```bash

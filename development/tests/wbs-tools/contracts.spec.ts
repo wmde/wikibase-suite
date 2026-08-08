@@ -9,7 +9,7 @@ import {
 	verifyCliInstallWaitsForConfiguration
 } from './test-environment.js';
 
-describe( 'Installer supporting contracts', () => {
+describe( 'WBS Tools installer lifecycle contracts', () => {
 	it( 'selects stable releases and forwards supported bootstrap options', () => {
 		execFileSync(
 			'bash',
