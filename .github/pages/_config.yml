@@ -1,0 +1,24 @@
+title: Wikibase Suite (WBS)
+description: Preview documentation for Wikibase Suite 8.
+
+remote_theme: pages-themes/primer@v0.6.0
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+  - jekyll-relative-links
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+optional_front_matter:
+  remove_originals: true
+
+relative_links:
+  enabled: true
+  collections: true

@@ -1,0 +1,128 @@
+<style>
+  /* Preview banner */
+
+  .alpha-docs-banner {
+    background: #fff8c5;
+    border-bottom: 1px solid #d4a72c;
+  }
+
+  .alpha-docs-banner__inner {
+    max-width: 1012px;
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+  }
+
+  .alpha-docs-banner__inner p {
+    margin: 0;
+  }
+
+  /* Homepage actions */
+
+  .docs-homepage .markdown-body a[href$="/docs/install/"],
+  .docs-homepage .markdown-body a[href$="/docs/"] {
+    display: inline-block;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid;
+    border-radius: 6px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-decoration: none;
+  }
+
+  /* Install WBS — primary */
+
+  .docs-homepage .markdown-body a[href$="/docs/install/"] {
+    border-color: #0969da;
+    background: #0969da;
+    color: #fff;
+  }
+
+  .docs-homepage .markdown-body a[href$="/docs/install/"]:hover {
+    background: #0860ca;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  /* Operate WBS — secondary */
+
+  .docs-homepage .markdown-body a[href$="/docs/"] {
+    border-color: #d0d7de;
+    background: #f6f8fa;
+    color: #24292f;
+  }
+
+  .docs-homepage .markdown-body a[href$="/docs/"]:hover {
+    background: #f3f4f6;
+    color: #24292f;
+    text-decoration: none;
+  }
+
+  /* Code copy button */
+
+  .markdown-body pre {
+    position: relative;
+  }
+
+  .copy-code-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #f6f8fa;
+    color: #24292f;
+    font: inherit;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  .copy-code-button:hover {
+    background: #f3f4f6;
+  }
+
+  .copy-code-button:focus-visible {
+    outline: 2px solid #0969da;
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    /* Only style action links as buttons on the site homepage. */
+    const base = "{{ site.baseurl }}";
+    if (location.pathname === `${base}/` || location.pathname === base) {
+      document.body.classList.add("docs-homepage");
+    }
+
+    /* Preview banner. */
+    document.body.insertAdjacentHTML("afterbegin", `
+      <div class="alpha-docs-banner">
+        <div class="alpha-docs-banner__inner">
+          <p>
+            ⚠️ This site is a preview of in-development documentation for the upcoming Wikibase Suite 8 release.
+            For current Wikibase Suite 7 documentation, see
+            <a href="https://github.com/wmde/wikibase-release-pipeline">Wikibase Suite on GitHub</a>.
+          </p>
+        </div>
+      </div>
+    `);
+
+    /* Copy buttons. */
+    document.querySelectorAll(".markdown-body pre > code").forEach(code => {
+      const button = document.createElement("button");
+      button.className = "copy-code-button";
+      button.textContent = "Copy";
+
+      button.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(code.textContent);
+        button.textContent = "Copied";
+        setTimeout(() => button.textContent = "Copy", 1500);
+      });
+
+      code.parentElement.appendChild(button);
+    });
+  });
+</script>

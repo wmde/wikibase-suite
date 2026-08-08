@@ -1,0 +1,61 @@
+name: Publish documentation
+
+on:
+  push:
+    branches:
+      - wbs-8.0.0-product-first-monorepo
+    paths:
+      - ".github/pages/**"
+      - ".github/workflows/publish_documentation.yml"
+      - "CHANGELOG.md"
+      - "README.md"
+      - "docs/**"
+      - "development/**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Configure documentation site
+        run: |
+          cp .github/pages/_config.yml _config.yml
+          mkdir -p _includes
+          cp .github/pages/_includes/head-custom.html _includes/head-custom.html
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
