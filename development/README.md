@@ -1,8 +1,8 @@
-# Wikibase Suite (WBS) development
+# Wikibase Suite (WBS) Development
 
 This directory contains the build, test, update, and release tooling for Wikibase Suite. It is for contributors and advanced users building customized images; installing and operating published WBS releases is documented from the [repository root](../README.md). For all development documentation, see the [development documentation index](./docs/README.md).
 
-## Getting started
+## Getting Started
 
 1. Install Git and a supported Docker environment: Docker Engine 22.0 or later, Docker Compose 2.10 or later, and the Buildx plugin. Node.js, pnpm, Python, and the repository linters do not need to be installed on the host.
 
@@ -37,7 +37,7 @@ This directory contains the build, test, update, and release tooling for Wikibas
 
    Use `wbs-dev` to build, test, lint, prepare updates, and make releases. Use `wbs` to configure and operate a Suite instance from the checkout. Every subcommand has its own help, for example `wbs-dev test -h` or `wbs up -h`.
 
-## Development cycle
+## Development Cycle
 
 Make changes in the checkout, then use the relevant `wbs-dev` commands to build, test, and lint them:
 
@@ -66,9 +66,9 @@ wbs-dev update all
 
 The command checks supported upstream dependencies, proposes release versions, and generates changelog drafts as unstaged changes for review. For more information on using `wbs-dev update` in addition to the full release workflow see the [release guide](./docs/release.md).
 
-## Developing the browser installer
+## Developing the Browser Installer
 
-The installer begins with a host-side bootstrap script that checks the environment, obtains the selected WBS checkout and tools image, and then delegates configuration and installation to the containerized WBS tools application. See the [WBS tools development guide](./images/wbs-tools/docs/README.md) for its entry points, architecture, and end-to-end testing options.
+The installer begins with a host-side bootstrap script that checks the environment, obtains the selected WBS checkout and tools image, and then delegates configuration and installation to the containerized WBS Tools application. See the [WBS Tools image overview](./images/wbs-tools/README.md) for its scope and architecture.
 
 For browser UI development, `wbs-dev` provides a dedicated local harness. It starts the installer from the current checkout with live reload, without requiring an already running Suite instance:
 
@@ -102,10 +102,10 @@ Two particularly useful test overrides are:
 
 See the [integration test guide](./tests/README.md) for test suites, exploratory test environments, and other test-specific configuration.
 
-## Further documentation
+## Further Documentation
 
 - [Contributor guide](../CONTRIBUTING.md)
 - [Development documentation](./docs/README.md)
-- [WBS tools development guide](./images/wbs-tools/docs/README.md)
+- [WBS Tools image](./images/wbs-tools/README.md)
 - [Documentation guide](./docs/document/README.md)
 - [Architecture Decision Records](./docs/adr/index.md)

@@ -31,3 +31,4 @@ Current ADRs include:
 - [19 - publish multi-platform images](0019-multi-platform-images.md)
 - [20 - generate upstream updates and image changelogs](0020-upstream-updates-and-changelogs.md)
 - [21 - product-first monorepo](0021-product-first-monorepo.md)
+- [22 - WBS Tools foundation](0022-wbs-tools-foundation.md)
