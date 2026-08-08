@@ -142,4 +142,88 @@ exit 0
 			rmSync( fixture, { recursive: true, force: true } );
 		}
 	} );
+
+	it( 'pulls a missing tools image once before running a lifecycle command', () => {
+		const fixture = mkdtempSync( join( tmpdir(), 'wbs-tools-runtime-' ) );
+		const dockerLog = join( fixture, 'docker.log' );
+		const imageReady = join( fixture, 'image-ready' );
+		const fakeDocker = join( fixture, 'docker' );
+		writeFileSync(
+			fakeDocker,
+			`#!/bin/sh
+printf '%s\\n' "$*" >> "$FAKE_DOCKER_LOG"
+if [ "$1 $2" = "image inspect" ]; then
+  test -f "$FAKE_IMAGE_READY"
+elif [ "$1" = "pull" ]; then
+  touch "$FAKE_IMAGE_READY"
+fi
+`
+		);
+		chmodSync( fakeDocker, 0o755 );
+
+		try {
+			const result = spawnSync(
+				resolve( '../scripts/run-wbs-tools.sh' ),
+				[ 'status' ],
+				{
+					encoding: 'utf8',
+					env: {
+						...process.env,
+						FAKE_DOCKER_LOG: dockerLog,
+						FAKE_IMAGE_READY: imageReady,
+						PATH: `${ fixture }:${ process.env.PATH }`,
+						WBS_DIR: fixture,
+						WBS_LOG_PATH: join( fixture, 'wbs.log' ),
+						WBS_TOOLS_IMAGE: 'example/wbs-tools:9'
+					}
+				}
+			);
+			assert.equal( result.status, 0, result.stderr );
+			const commands = readFileSync( dockerLog, 'utf8' );
+			assert.match( commands, /^image inspect example\/wbs-tools:9$/mu );
+			assert.match( commands, /^pull example\/wbs-tools:9$/mu );
+			assert.match( commands, /^run .*example\/wbs-tools:9 node \/app\/dist\/wbs\.js status$/mu );
+		} finally {
+			rmSync( fixture, { recursive: true, force: true } );
+		}
+	} );
+
+	it( 'fails clearly when a missing tools image cannot be pulled', () => {
+		const fixture = mkdtempSync( join( tmpdir(), 'wbs-tools-runtime-failure-' ) );
+		const fakeDocker = join( fixture, 'docker' );
+		writeFileSync(
+			fakeDocker,
+			`#!/bin/sh
+if [ "$1 $2" = "image inspect" ] || [ "$1" = "pull" ]; then
+  exit 1
+fi
+`
+		);
+		chmodSync( fakeDocker, 0o755 );
+
+		try {
+			const logPath = join( fixture, 'wbs.log' );
+			const result = spawnSync(
+				resolve( '../scripts/run-wbs-tools.sh' ),
+				[ 'status' ],
+				{
+					encoding: 'utf8',
+					env: {
+						...process.env,
+						PATH: `${ fixture }:${ process.env.PATH }`,
+						WBS_DIR: fixture,
+						WBS_LOG_PATH: logPath,
+						WBS_TOOLS_IMAGE: 'example/wbs-tools:missing'
+					}
+				}
+			);
+			assert.notEqual( result.status, 0 );
+			assert.match(
+				readFileSync( logPath, 'utf8' ),
+				/Could not pull example\/wbs-tools:missing\. For an unpublished source checkout, rerun wbs install with --from-source\./u
+			);
+		} finally {
+			rmSync( fixture, { recursive: true, force: true } );
+		}
+	} );
 } );

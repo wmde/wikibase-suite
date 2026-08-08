@@ -113,7 +113,7 @@ run_configurator() {
   exec bash "$SCRIPTS_DIR/run-web-installer.sh" "${configure_args[@]}"
 }
 
-run_install() {
+prepare_install() {
   local from_source=false
   local argument
   for argument in "$@"; do
@@ -125,14 +125,14 @@ run_install() {
   prepare_install_runtime
   if [[ "$from_source" == true ]]; then
     prepare_source_tools_image
-  else
-    update_wbs_tools_image " For an unpublished source checkout, rerun wbs install with --from-source."
   fi
+}
+
+run_install() {
   run_configurator install "$@"
 }
 
 run_configure() {
-  require_wbs_tools_image
   run_configurator configure "$@"
 }
 
@@ -165,6 +165,11 @@ main() {
   # shellcheck disable=SC1091
   source "$SCRIPTS_DIR/_wbs-tools-runtime.sh"
 
+  if [[ "$command" == install ]]; then
+    prepare_install "${@:2}"
+  fi
+  ensure_wbs_tools_image " For an unpublished source checkout, rerun wbs install with --from-source."
+
   case "$command" in
     install)
       shift
@@ -177,7 +182,6 @@ main() {
     *)
       # All other verbs are implemented entirely by the tools application.
       # This path also renders application help when no verb was supplied.
-      require_wbs_tools_image
       run_wbs_tools_command "$@"
       ;;
   esac

@@ -49,3 +49,12 @@ update_wbs_tools_image() {
     return 1
   fi
 }
+
+ensure_wbs_tools_image() {
+  local failure_hint="${1:-}"
+  if docker image inspect "$WBS_TOOLS_IMAGE" >/dev/null 2>&1; then
+    return
+  fi
+  update_wbs_tools_image "$failure_hint" || return
+  require_wbs_tools_image
+}

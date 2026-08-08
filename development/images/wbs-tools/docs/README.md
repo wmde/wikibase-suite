@@ -109,7 +109,7 @@ This first builds the checkout's tools image and then uses it to build every pro
 - The lifecycle commands are exposed only through experimental `development/wbs`; there is no root-level `wbs` product interface in this release.
 - Remote installs discover the highest stable `wbs@MAJOR.MINOR.PATCH` tag and clone it to `~/wikibase-suite`. Set `WBS_DIR` to use a custom checkout path.
 - Normal installations pull the compatible WBS tools major selected by the installation scripts, currently `wikibase/wbs-tools:1`. Set `WBS_TOOLS_IMAGE` to test a different published image.
-- Lifecycle commands reuse the tools image acquired during installation; they do not pull it again. A future explicit update workflow can own refreshing operational tooling.
+- Lifecycle commands reuse the checkout's selected tools image when it exists locally and pull it only when it is missing. They do not check the registry for a newer image.
 - The experimental `development/wbs` launcher selects the checkout's local `wikibase/wbs-tools:latest` image without pulling. It builds that image when missing; run `wbs-dev build wbs-tools` after changing the tools application.
 - Source installations requested with `--from-source` build `wikibase/wbs-tools:latest` and explicitly select `development/docker-compose.local-images.yml` for that operation.
 - `wbs-dev installer-dev web` builds and uses the local `latest` images for that development session without changing the checkout's persistent product-image selection.
