@@ -149,16 +149,29 @@ export async function runIntegrationSuites(
 	}
 
 	const wdioOptions = prepareWdioOptions( options );
-	let failed = false;
+	const passedSuites: string[] = [];
+	const failedSuites: string[] = [];
 	for ( const suiteName of suiteNames ) {
 		const exitCode = await runWdio(
 			suiteConfigPath( context, suiteName ),
 			wdioOptions
 		);
-		failed = failed || exitCode !== 0;
+		if ( exitCode === 0 ) {
+			passedSuites.push( suiteName );
+		} else {
+			failedSuites.push( suiteName );
+		}
 	}
 
-	if ( failed ) {
+	if ( suiteNames.length > 1 ) {
+		console.log( chalk.whiteBright.bold( '\nTest suite results:' ) );
+		console.log( chalk.green( `  Passed: ${ passedSuites.join( ', ' ) || 'none' }` ) );
+		if ( failedSuites.length ) {
+			console.log( chalk.red( `  Failed: ${ failedSuites.join( ', ' ) }` ) );
+		}
+	}
+
+	if ( failedSuites.length ) {
 		throw new Error( 'One or more integration test suites failed.' );
 	}
 }

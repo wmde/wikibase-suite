@@ -1,6 +1,6 @@
 # Wikibase Suite (WBS) development
 
-This directory contains the build, test, update, and release tooling for Wikibase Suite. It is for contributors and advanced users building customized images; installing and operating published WBS releases is documented from the [repository root](../README.md).
+This directory contains the build, test, update, and release tooling for Wikibase Suite. It is for contributors and advanced users building customized images; installing and operating published WBS releases is documented from the [repository root](../README.md). For all development documentation, see the [development documentation index](./docs/README.md).
 
 ## Getting started
 
@@ -55,7 +55,7 @@ To run and manually test a complete Suite built from the checkout, use its norma
 wbs up --build
 ```
 
-If `.env` is absent or incomplete, `wbs up` opens the command-line configurator. Use `wbs reset` when you need to reset the local instance; see the [reset documentation](../docs/operate/reset.md) for exactly what it can remove.
+If `.env` is absent or incomplete, `wbs up` opens the command-line configurator. Use `wbs reset` when you need to reset the local instance; see the [reset documentation](../docs/reset.md) for exactly what it can remove.
 
 When an image or WBS itself is ready for release preparation, run the update interview for the relevant projects or for all projects:
 
@@ -105,7 +105,7 @@ See the [integration test guide](./tests/README.md) for test suites, exploratory
 ## Further documentation
 
 - [Contributor guide](../CONTRIBUTING.md)
-- [Contributor and engineering documentation](./docs/README.md)
+- [Development documentation](./docs/README.md)
 - [WBS tools development guide](./images/wbs-tools/docs/README.md)
 - [Documentation guide](./docs/document/README.md)
 - [Architecture Decision Records](./docs/adr/index.md)

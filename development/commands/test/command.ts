@@ -126,6 +126,9 @@ async function runTests(
 		const { runIntegrationSuites } = await import( './integration.js' );
 		await runIntegrationSuites( integrationSuites, options, context );
 	}
+	if ( selected.length > 1 ) {
+		console.log( '\n✅ All requested test targets passed.' );
+	}
 }
 
 export function registerTestCommand(
