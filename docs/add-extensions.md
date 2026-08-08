@@ -1,6 +1,6 @@
-# Installing Extensions
+# Adding Extensions
 
-The Wikibase Docker Image supplied with Wikibase Suite (WBS) includes [several commonly used extensions](../../development/images/wikibase/README.md#bundled-extensions). You can install additional MediaWiki or Wikibase extensions specifically for your instance.
+The Wikibase Docker Image supplied with Wikibase Suite (WBS) includes [several commonly used extensions](../development/images/wikibase/README.md#bundled-extensions). You can install additional MediaWiki or Wikibase extensions specifically for your instance.
 
 The [MediaWiki Extension Distributor](https://www.mediawiki.org/wiki/Special:ExtensionDistributor) provides downloadable extension packages for supported MediaWiki versions. Before installing an extension, read its documentation to understand what it does and identify its compatibility requirements, dependencies, configuration, and installation instructions.
 
@@ -10,7 +10,7 @@ To install an extension, copy its files into `config/extensions`, load it from `
 
 1. Visit `https://<WIKIBASE_PUBLIC_HOST>/wiki/Special:Version` and note the installed MediaWiki version.
 
-2. If you have not already, [log in to your server and change to your WBS directory](../operate/README.md#accessing-your-wbs-server). Keep this terminal session open.
+2. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server). Keep this terminal session open.
 
 3. On your computer, select the extension in the [MediaWiki Extension Distributor](https://www.mediawiki.org/wiki/Special:ExtensionDistributor), choose the release matching the MediaWiki version you noted in step 1, and download the `.tar.gz` package.
 
@@ -47,6 +47,6 @@ To install an extension, copy its files into `config/extensions`, load it from `
 
 9. Visit `https://<WIKIBASE_PUBLIC_HOST>/wiki/Special:Version` and confirm that the extension appears in the list of installed extensions.
 
-To keep an extension you installed in `config/extensions` current, follow [Updating Extensions](../operate/update-extensions.md).
+To keep an extension you installed in `config/extensions` current, follow [Updating Extensions](./update-extensions.md).
 
 For more information, see the [MediaWiki extension manual](https://www.mediawiki.org/wiki/Manual:Extensions).

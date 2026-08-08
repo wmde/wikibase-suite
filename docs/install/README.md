@@ -123,4 +123,4 @@ Note: **Download the configuration file.**
 
 ## Support
 
-If something is not working as expected, start with [Troubleshooting](../operate/troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.
+If something is not working as expected, start with [Troubleshooting](../troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.

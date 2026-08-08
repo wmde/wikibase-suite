@@ -4,7 +4,7 @@ Wikibase Suite (WBS) and each WBS Docker Image have independent version numbers.
 
 They all use [semantic versioning](https://semver.org/spec/v2.0.0.html), written as `MAJOR.MINOR.PATCH`. Major releases may require upgrade work, while minor and patch releases remain compatible.
 
-This page explains how to read these versions. For update instructions, see [Updating and Upgrading](./operate/updating.md).
+This page explains how to read these versions. For update instructions, see [Upgrading](./upgrade.md).
 
 ## WBS versions
 

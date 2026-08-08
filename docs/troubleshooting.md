@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Before troubleshooting Wikibase Suite (WBS), [log in to your server and change to your WBS directory](./README.md#accessing-your-wbs-server).
+Before troubleshooting Wikibase Suite (WBS), [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 ## Wikibase or other services don't start or show as "unhealthy" or "restarting"
 

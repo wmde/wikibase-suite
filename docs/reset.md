@@ -6,7 +6,7 @@ Resetting deletes the current Docker volumes and generated configuration before 
 
 ## Instructions
 
-1. If you have not already, [log in to your server and change to your WBS directory](./README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 2. Back up anything you want to keep:
 

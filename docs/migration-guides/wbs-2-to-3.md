@@ -7,7 +7,7 @@ This guide explains how to upgrade Wikibase Suite (WBS) from version 2 to 3 whil
 
 ## Prepare
 
-1. If you have not already, [log in to your server and change to your WBS directory](../README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](../README.md#access-your-wbs-server).
 
 2. Read the `CHANGELOG` entries for the target WBS release and images changed by this upgrade:
 

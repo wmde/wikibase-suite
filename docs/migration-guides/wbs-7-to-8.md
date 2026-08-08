@@ -7,11 +7,11 @@ As of Wikibase Suite (WBS) 8, the source repository has moved from `wikibase-rel
 
 ## Prepare
 
-1. If you have not already, [log in to your server and change to your WBS directory](../README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](../README.md#access-your-wbs-server).
 
 2. Read the `CHANGELOG` entries for the target WBS release and images changed by this upgrade:
 
-   - [WBS 8.0.0](../../../CHANGELOG.md#800-2026-07-20)
+   - [WBS 8.0.0](../../CHANGELOG.md#800-2026-07-20)
    - [Wikibase Docker Image changelog](https://github.com/wmde/wikibase-suite/blob/main/docker-images/wikibase/CHANGELOG.md)
    - [OpenSearch Docker Image changelog](https://github.com/wmde/wikibase-suite/blob/main/docker-images/opensearch/CHANGELOG.md)
    - [QuickStatements Docker Image changelog](https://github.com/wmde/wikibase-suite/blob/main/docker-images/quickstatements/CHANGELOG.md)

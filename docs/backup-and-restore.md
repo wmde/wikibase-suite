@@ -1,6 +1,6 @@
 # Backing Up and Restoring
 
-Wikibase Suite (WBS) stores the parts that make your instance unique in two places: service data in [Docker volumes](https://docs.docker.com/storage/volumes/), and [configuration](../configure/README.md) in the `config` directory and `.env` file. The procedures below explain how to back up each and how to restore service data when recovering from a failed upgrade or reset.
+Wikibase Suite (WBS) stores the parts that make your instance unique in two places: service data in [Docker volumes](https://docs.docker.com/storage/volumes/), and [configuration](./configuration-files.md) in the `config` directory and `.env` file. The procedures below explain how to back up each and how to restore service data when recovering from a failed upgrade or reset.
 
 ## Back up your data
 
@@ -15,7 +15,7 @@ WBS stores service data in the following Docker volumes:
 
 To back up these data volumes:
 
-1. If you have not already, [log in to your server and change to your WBS directory](./README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 2. Create a `backup` directory one level above the directory from which you operate WBS, shut down the instance, and dump the contents of all Docker volumes into `.tar.gz` files there.
 
@@ -54,7 +54,7 @@ WBS configuration is contained in the following files:
 
 To back up your configuration:
 
-1. If you have not already, [log in to your server and change to your WBS directory](./README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 2. Copy the `config` directory and `.env` file into the same backup directory.
 
@@ -68,7 +68,7 @@ To back up your configuration:
 
 ## Restore from a backup
 
-1. If you have not already, [log in to your server and change to your WBS directory](./README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 2. Shut down the instance and populate the Docker volumes with data from the `../backup` directory. Only restore these backups when recovering from a failed upgrade or reset.
 

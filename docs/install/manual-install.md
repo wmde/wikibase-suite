@@ -69,11 +69,11 @@ Edit `.env` and set the values below.
 | `DB_USER` | `sqluser` | The MariaDB user created for MediaWiki. The default value can be used for a new install. |
 | `DB_PASS` | `change-this-password` | The MariaDB password for `DB_USER`. Set this to something other than the default value before first start. |
 | `METADATA_CALLBACK` | `true` | Set to `true` to opt into the WBS metadata callback, or `false` to opt out. |
-| `WIKIMEDIA_OAUTH_CONSUMER_TOKEN` (optional) | None | Wikimedia OAuth consumer token. See [Enabling Login with Wikimedia](../configure/login-with-wikimedia.md). |
+| `WIKIMEDIA_OAUTH_CONSUMER_TOKEN` (optional) | None | Wikimedia OAuth consumer token. See [Enabling Login with Wikimedia](../enable-login-with-wikimedia.md). |
 | `WIKIMEDIA_OAUTH_SECRET_TOKEN` (optional) | None | Wikimedia OAuth secret token. |
 
 > [!WARNING]
-> With the exception of `METADATA_CALLBACK` and the two `WIKIMEDIA_OAUTH_*` values, `.env` values are setup values. To change them after first start, follow [Resetting an Instance](../operate/reset.md).
+> With the exception of `METADATA_CALLBACK` and the two `WIKIMEDIA_OAUTH_*` values, `.env` values are setup values. To change them after first start, follow [Resetting an Instance](../reset.md).
 
 ## 6. Start WBS
 
@@ -93,7 +93,7 @@ You can now access your services using the hostnames you set in `.env`:
 - QuickStatements: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements`
 
 > [!NOTE]
-> If anything goes wrong, see [Troubleshooting](../operate/troubleshooting.md).
+> If anything goes wrong, see [Troubleshooting](../troubleshooting.md).
 
 ## 7. Stop and restart WBS
 
@@ -111,4 +111,4 @@ docker compose up -d
 
 ## Support
 
-If something is not working as expected, start with [Troubleshooting](../operate/troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.
+If something is not working as expected, start with [Troubleshooting](../troubleshooting.md). If you have questions or need help, use this [bug report form](https://phabricator.wikimedia.org/maniphest/task/edit/form/129/) to start a conversation with the engineering team.

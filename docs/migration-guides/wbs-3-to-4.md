@@ -7,7 +7,7 @@ This guide explains how to upgrade Wikibase Suite (WBS) from version 3 to 4 whil
 
 ## Prepare
 
-1. If you have not already, [log in to your server and change to your WBS directory](../README.md#accessing-your-wbs-server).
+1. If you have not already, [log in to your server and change to your WBS directory](../README.md#access-your-wbs-server).
 
 2. Read the `CHANGELOG` entries for the target WBS release and images changed by this upgrade:
 
@@ -36,7 +36,7 @@ This guide explains how to upgrade Wikibase Suite (WBS) from version 3 to 4 whil
    - `https://query.wikibase.example/sparql` — Query Service SPARQL endpoint
    - `https://wikibase.example/tools/quickstatements` — QuickStatements
 
-   The `wdqs-proxy` image was removed. Traefik now routes Query Service HTTP traffic. The `wdqs-frontend` environment variables also changed; see the [Query Service frontend environment-variable documentation](../../../development/images/wdqs-frontend/README.md#2-set-the-environment-variables).
+   The `wdqs-proxy` image was removed. Traefik now routes Query Service HTTP traffic. The `wdqs-frontend` environment variables also changed; see the [Query Service frontend environment-variable documentation](../../development/images/wdqs-frontend/README.md#2-set-the-environment-variables).
 
 5. Read the [MediaWiki 1.43 UPGRADE file](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/REL1_43/UPGRADE) and identify any required changes. Do not update files under `deploy/config/extensions` while WBS is running, because that directory is mounted into the running container.
 

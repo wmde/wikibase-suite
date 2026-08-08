@@ -1,9 +1,4 @@
-# Configuring Wikibase Suite (WBS)
-
-Configuration tasks:
-
-- [Enabling Login with Wikimedia](./login-with-wikimedia.md)
-- [Installing Extensions](./extensions.md)
+# Configuration Files
 
 On first launch, Wikibase Suite (WBS) will create files in the `config` directory. This is your instance configuration. You own and control these files. Be sure to include them in your backups.
 
@@ -18,11 +13,11 @@ The presence of `config/LocalSettings.php` controls whether WBS starts from exis
 
 This is why changing `.env` and restarting is not a supported way to reconfigure an existing setup. With the exception of `METADATA_CALLBACK`, `WIKIMEDIA_OAUTH_CONSUMER_TOKEN`, and `WIKIMEDIA_OAUTH_SECRET_TOKEN`, `.env` values are first-start inputs that were already written into `LocalSettings.php`, the database volume, or other generated state.
 
-If you need to change first-start setup values, follow [Resetting an Instance](../operate/reset.md).
+If you need to change first-start setup values, follow [Resetting an Instance](./reset.md).
 
-To enable or update login with a Wikimedia account, follow [Enabling Login with Wikimedia](./login-with-wikimedia.md).
+To enable or update login with a Wikimedia account, follow [Enabling Login with Wikimedia](./enable-login-with-wikimedia.md).
 
-For a major version upgrade, preserve the existing configuration and follow the [major upgrade procedure](../operate/updating.md#major-version-upgrades).
+For a major version upgrade, preserve the existing configuration and follow the [major upgrade procedure](./upgrade.md#major-version-upgrades).
 
 After changing `config/LocalSettings.php`, restart the Wikibase and job-runner services:
 

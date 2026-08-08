@@ -44,7 +44,7 @@ You need a Wikimedia account to register the OAuth consumer. Your WBS instance m
    > [!WARNING]
    > Store the secret token securely. Do not share it or commit it to version control.
 
-6. If you have not already, [log in to your server and change to your WBS directory](../operate/README.md#accessing-your-wbs-server).
+6. If you have not already, [log in to your server and change to your WBS directory](./README.md#access-your-wbs-server).
 
 7. In the `.env` file in your WBS directory, add the credentials returned by Wikimedia:
 
