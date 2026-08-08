@@ -2,7 +2,7 @@
 
 This directory contains the build, test, update, and release tooling for Wikibase Suite. It is for contributors and advanced users building customized images; installing and operating published WBS releases is documented from the [repository root](../README.md). For all development documentation, see the [development documentation index](./docs/README.md).
 
-## Getting Started
+## Getting started
 
 1. Install Git and a supported Docker environment: Docker Engine 22.0 or later, Docker Compose 2.10 or later, and the Buildx plugin. Node.js, pnpm, Python, and the repository linters do not need to be installed on the host.
 
@@ -37,7 +37,7 @@ This directory contains the build, test, update, and release tooling for Wikibas
 
    Use `wbs-dev` to build, test, lint, prepare updates, and make releases. Use `wbs` to configure and operate a Suite instance from the checkout. Every subcommand has its own help, for example `wbs-dev test -h` or `wbs up -h`.
 
-## Development Cycle
+## Development cycle
 
 Make changes in the checkout, then use the relevant `wbs-dev` commands to build, test, and lint them:
 
@@ -66,7 +66,7 @@ wbs-dev update all
 
 The command checks supported upstream dependencies, proposes release versions, and generates changelog drafts as unstaged changes for review. For more information on using `wbs-dev update` in addition to the full release workflow see the [release guide](./docs/release.md).
 
-## Developing the Browser Installer
+## Developing the browser installer
 
 The installer begins with a host-side bootstrap script that checks the environment, obtains the selected WBS checkout and tools image, and then delegates configuration and installation to the containerized WBS Tools application. See the [WBS Tools image overview](./images/wbs-tools/README.md) for its scope and architecture.
 
@@ -102,7 +102,7 @@ Two particularly useful test overrides are:
 
 See the [integration test guide](./tests/README.md) for test suites, exploratory test environments, and other test-specific configuration.
 
-## Further Documentation
+## Further documentation
 
 - [Contributor guide](../CONTRIBUTING.md)
 - [Development documentation](./docs/README.md)

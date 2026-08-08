@@ -1,4 +1,4 @@
-# Maintaining the Wikibase Suite (WBS) Tools Docker Image
+# Maintaining Wikibase Suite (WBS) Tools
 
 [Back to the release guide](../../docs/release.md#2-complete-the-product-changes)
 

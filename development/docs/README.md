@@ -1,4 +1,4 @@
-# Development Documentation
+# Development documentation
 
 Use these guides to develop, test, document, and release Wikibase Suite. End-user documentation belongs under [`docs/`](../../docs).
 

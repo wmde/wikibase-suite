@@ -2,7 +2,7 @@
 
 Find instructions below for configuring and maintaining an existing WBS installation. If you’re setting up WBS for the first time, start by [Installing WBS](./install/README.md)⁠.
 
-## Access Your WBS Server
+## Access your WBS server
 
 For most operating tasks, first connect to the server where WBS is installed and change to its installation directory.
 
@@ -32,7 +32,7 @@ These are the default locations used by the installation instructions. If you ch
 
 Manage configuration files, connect WBS to other services, or install additional extensions.
 
-- [Configuring WBS](./configuration-files.md)
+- [Configuration Files](./configuration-files.md)
 - [Adding Extensions](./add-extensions.md)
 - [Enabling Login with Wikimedia](./enable-login-with-wikimedia.md)
 

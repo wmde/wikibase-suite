@@ -1,4 +1,4 @@
-# Updating Wikibase (`wikibase/wikibase`)
+# Updating Wikibase Suite (WBS) Wikibase
 
 [Back to the release guide](../../docs/release.md#1-review-image-update-policies)
 

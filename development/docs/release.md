@@ -6,7 +6,7 @@ WBS and each image are versioned independently according to the [WBS version pol
 
 The primary release-preparation workflow is the `wbs-dev update` interview. It gathers supported upstream updates, proposes versions, and drafts changelogs for the products being released.
 
-## Prepare a Release
+## Prepare a release
 
 1. Complete and commit the intended product changes according to the [versioning and commit policy](./versioning-and-commits.md).
 
@@ -36,7 +36,7 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
 
 The update command can be rerun safely while preparing the release. It reconstructs each draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading. For `wbs`, it also keeps `DEPLOY_VERSION` aligned.
 
-## Publish a Release
+## Publish a release
 
 Run **Create a WBS Release** in GitHub Actions:
 

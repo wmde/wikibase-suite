@@ -14,13 +14,13 @@ WBS is a supported and tested Docker Compose configuration for deploying the fol
 - **[QuickStatements](https://github.com/wmde/wikibase-release-pipeline/blob/main/build/quickstatements/README.md):** A web-based tool to import and manipulate large amounts of data.
 - **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
 
-## Getting Started
+## Getting started
 
 Start here for guidance on preparing a server and domain names, then use the web-based installer to configure and start WBS.
 
 **[Install WBS](./docs/install/README.md)**
 
-## Current Users
+## Current users
 
 If you’re already running WBS, find instructions for updating to the latest release, changing your configuration, enabling features, adding extensions, backing up your data, and troubleshooting your installation.
 
