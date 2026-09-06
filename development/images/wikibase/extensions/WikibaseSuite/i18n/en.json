@@ -1,7 +1,0 @@
-{
-	"@metadata": {
-		"authors": ["Wikibase Suite Team"]
-	},
-	"wikibasesuite-extensionname": "Wikibase Suite",
-	"wikibasesuite-desc": "Adds Wikibase Suite version reporting and public metrics"
-}

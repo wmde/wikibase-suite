@@ -12,8 +12,8 @@ variable "IMAGE_VERSION" { default = "8.0.0" } # retained
 
 variable "SOURCE" {
   default = {
-    revision     = "old"
-    revision_url = "https://example.test/old" # retained too
+    commit     = "old"
+    commit_url = "https://example.test/old" # retained too
   }
 }
 `;
@@ -21,16 +21,16 @@ variable "SOURCE" {
 describe('Bake manifest editing', () => {
 	it('reads scalar and object string literals from HCL', () => {
 		assert.equal(readBakeScalar(manifest, 'IMAGE_VERSION'), '8.0.0');
-		assert.equal(readBakeValue(manifest, 'SOURCE', 'revision'), 'old');
+		assert.equal(readBakeValue(manifest, 'SOURCE', 'commit'), 'old');
 	});
 
 	it('replaces only the exact literal while preserving formatting and comments', () => {
 		const expected = manifest.replace(
-			'revision     = "old"',
-			'revision     = "new\\nvalue"'
+			'commit     = "old"',
+			'commit     = "new\\nvalue"'
 		);
 		assert.equal(
-			replaceBakeValue(manifest, 'SOURCE', 'revision', 'new\nvalue'),
+			replaceBakeValue(manifest, 'SOURCE', 'commit', 'new\nvalue'),
 			expected
 		);
 	});
@@ -39,12 +39,12 @@ describe('Bake manifest editing', () => {
 		const updated = replaceBakeValue(
 			manifest,
 			'SOURCE',
-			'revision_url',
+			'commit_url',
 			'https://new.example/'
 		);
-		assert.equal(readBakeValue(updated, 'SOURCE', 'revision'), 'old');
+		assert.equal(readBakeValue(updated, 'SOURCE', 'commit'), 'old');
 		assert.equal(
-			readBakeValue(updated, 'SOURCE', 'revision_url'),
+			readBakeValue(updated, 'SOURCE', 'commit_url'),
 			'https://new.example/'
 		);
 	});

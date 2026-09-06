@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "extensions": [
+    {
+      "name": "Wikibase",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Wikibase",
+        "ref": "refs/heads/REL1_46",
+        "commit": "eaa851d89d36136ab718f1fe5fa81a8b770c0d59",
+        "patches": [
+          "wikibase-submodules-from-github-instead-of-phabricator.patch"
+        ]
+      }
+    },
+    {
+      "name": "WikibaseEdtf",
+      "source": {
+        "repo": "https://github.com/ProfessionalWiki/WikibaseEdtf.git",
+        "ref": "refs/heads/master",
+        "commit": "3bfad88a9a71222e9ddc3df2b80f095be059b365"
+      }
+    },
+    {
+      "name": "EntitySchema",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/EntitySchema",
+        "ref": "refs/heads/REL1_46",
+        "commit": "a2702db104ca5e3060cc98d1646f5a5facf41ae3"
+      }
+    },
+    {
+      "name": "WikibaseLocalMedia",
+      "source": {
+        "repo": "https://github.com/ProfessionalWiki/WikibaseLocalMedia.git",
+        "ref": "refs/heads/master",
+        "commit": "26795a660a2d870e7f87f29e388ca8abb9220510"
+      }
+    },
+    {
+      "name": "WikibaseManifest",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseManifest",
+        "ref": "refs/heads/REL1_46",
+        "commit": "c2bc551300acad1331cbc210ab7d00b5dd71af0c"
+      }
+    },
+    {
+      "name": "WikibaseInWikitext",
+      "source": {
+        "repo": "https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext.git",
+        "ref": "refs/heads/main",
+        "commit": "5175dceecd2f0522b0ab9a9dae7b1bc304e359b7"
+      }
+    },
+    {
+      "name": "Babel",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Babel",
+        "ref": "refs/heads/REL1_46",
+        "commit": "a6ca7bbc50cf8292dc9624d8e6fb8dba87d8af92"
+      }
+    },
+    {
+      "name": "cldr",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/cldr",
+        "ref": "refs/heads/REL1_46",
+        "commit": "d4ca0930e7a972848038b18aaf9c3a2fc1bbffc7"
+      }
+    },
+    {
+      "name": "UniversalLanguageSelector",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/UniversalLanguageSelector",
+        "ref": "refs/heads/REL1_46",
+        "commit": "f914eba81f7f7196140febbfce3ed6e17d65ba22"
+      }
+    },
+    {
+      "name": "Elastica",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Elastica",
+        "ref": "refs/heads/REL1_46",
+        "commit": "3a4dafa5edfb99ed4f9401ad77be6e62e59faa1c"
+      }
+    },
+    {
+      "name": "CirrusSearch",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/CirrusSearch",
+        "ref": "refs/heads/REL1_46",
+        "commit": "3e6305b1f0643b17279179f0a9965c911de6f48d"
+      }
+    },
+    {
+      "name": "WikibaseCirrusSearch",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseCirrusSearch",
+        "ref": "refs/heads/REL1_46",
+        "commit": "febb2a2765eb98d18e1bbb9e1e1c72d04c726d3e"
+      }
+    },
+    {
+      "name": "OAuth",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/OAuth",
+        "ref": "refs/heads/REL1_46",
+        "commit": "35bf322abd9c41e760ac0d56d451f1669e68f7ec",
+        "patches": [
+          "mediawiki-extensions-OAuth-same-domain.patch"
+        ]
+      }
+    },
+    {
+      "name": "PluggableAuth",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/PluggableAuth",
+        "ref": "refs/heads/REL1_46",
+        "commit": "ee69d0ddede47c665a737c398289d733c9a7f402"
+      }
+    },
+    {
+      "name": "WSOAuth",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WSOAuth",
+        "ref": "refs/heads/REL1_46",
+        "commit": "b57d90e6527e2b85be6df39c98d698d610fcc619"
+      }
+    },
+    {
+      "name": "WikibaseSuite",
+      "source": {
+        "path": "runtime/var/www/html/extensions/WikibaseSuite"
+      }
+    }
+  ]
+}

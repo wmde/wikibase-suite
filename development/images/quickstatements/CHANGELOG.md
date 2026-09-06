@@ -1,3 +1,9 @@
+# 1.2.1 (2026-09-03)
+
+## Dependency updates
+
+- MagnusTools master ([Diff](https://codeberg.org/magnusmanske/magnustools/compare/7d9b415bfab0ae624e17676be1e9d763f340b315...b5686e6b4bc8f95095eea295031718a9186d1510)).
+
 # 1.2.0 (2026-08-06)
 
 - Updates QuickStatements to its latest upstream commit, adding full lexeme support, `LAST_FORM` and `LAST_SENSE`, automatic import-format detection, and interface improvements alongside fixes.

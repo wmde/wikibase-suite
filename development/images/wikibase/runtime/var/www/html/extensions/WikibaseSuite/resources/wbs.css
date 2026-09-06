@@ -1,0 +1,14 @@
+/**
+ * Narrow, Vector 2022-specific presentation adjustments for Wikibase Suite.
+ * Keep additions limited to documented Vector customization points:
+ * https://www.mediawiki.org/wiki/Skin:Vector/Customizing_the_logo_for_special_events
+ */
+.skin-vector-2022 .mw-logo-icon {
+	width: 80px;
+	height: 80px;
+}
+
+/* A site title is branding, not a content link whose visited state is useful. */
+.skin-vector-2022 .mw-logo-wordmark {
+	color: #202122;
+}

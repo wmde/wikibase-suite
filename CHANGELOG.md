@@ -1,3 +1,9 @@
+# 8.0.1 (2026-09-03)
+
+## Dependency updates
+
+- WBS Tools image from wikibase/wbs-tools:1.0.0 to wikibase/wbs-tools:1.0.1.
+
 # 8.0.0 (2026-07-20)
 
 Updates in concert with Wikibase image v8.0.0 (MediaWiki 1.46.0) release.

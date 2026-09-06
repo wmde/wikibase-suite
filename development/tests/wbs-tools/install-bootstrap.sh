@@ -72,7 +72,9 @@ run_bootstrap() {
 
   local bootstrap_image="${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wbs-tools:${WBS_TEST_IMAGE_TAG:-latest}"
   if [[ "${WBS_TEST_USE_INSTALL_DEFAULT:-false}" == true ]]; then
-    sed "s|wikibase/wbs-tools:1.0.0|$bootstrap_image|" \
+    local install_default_image
+    install_default_image="$(sed -n 's/^WBS_TOOLS_IMAGE=//p' "$REPO_DIR/.wbs/version")"
+    sed "s|$install_default_image|$bootstrap_image|" \
       "$case_dir/bootstrap/install" > "$case_dir/bootstrap/install.tmp"
     mv "$case_dir/bootstrap/install.tmp" "$case_dir/bootstrap/install"
   fi

@@ -1,9 +1,24 @@
 import { describe, it } from 'mocha';
 import assert from 'node:assert/strict';
 import type { VersionPlan } from '../../lib/versioning.js';
-import { applyVersionChoice, isNoOpVersionChoice } from './command.js';
+import {
+	applyVersionChoice,
+	imageRelativePath,
+	isNoOpVersionChoice
+} from './command.js';
 
 describe('update project choices', () => {
+	it('keeps additional source paths relative to their image', () => {
+		assert.equal(
+			imageRelativePath(
+				{ imagesRoot: '/repo/development/images' },
+				'wikibase',
+				'/repo/development/images/wikibase/build/extensions.json'
+			),
+			'build/extensions.json'
+		);
+	});
+
 	it('keeps the version update when the generated changelog is rejected', () => {
 		const plan = {
 			project: {

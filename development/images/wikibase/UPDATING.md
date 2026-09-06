@@ -21,7 +21,7 @@ The command:
 5. Resolves the configured community extensions from their development branches.
 6. Presents current-to-proposed commit ranges, drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
-Source repositories, refs, revisions, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl), which is the authoritative image manifest. The TypeScript provider contains only the Wikibase-specific update interview and compatibility logic. The command confirms that releases and branches exist, but it cannot establish compatibility with local patches or the OpenSearch image.
+MediaWiki, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl). Bundled extension sources and commits live in [`build/extensions.json`](./build/extensions.json), which is also consumed by the image build. The TypeScript provider updates both files together. The command confirms that releases and branches exist, but it cannot establish compatibility with local patches or the OpenSearch image.
 
 ## Manual update
 
@@ -30,8 +30,8 @@ The same update can be prepared manually:
 1. Find the available [MediaWiki releases](https://releases.wikimedia.org/mediawiki/) and decide whether to use the latest maintenance release in the current line, move to a newer stable line, or leave `MEDIAWIKI_VERSION` unchanged.
 2. Set `MEDIAWIKI.version` in [`docker-bake.hcl`](./docker-bake.hcl) when changing MediaWiki.
 3. Derive the extension branch as `REL<major>_<minor>` from that version—for example, MediaWiki 1.46 uses `REL1_46`.
-4. Resolve the head of that branch for every Wikimedia-maintained extension declared in `docker-bake.hcl` and update its `revision` attribute.
-5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, and WikibaseInWikitext and update their `revision` attributes.
+4. Resolve the head of that branch for every Wikimedia-maintained extension in `build/extensions.json` and update its `source.commit` value.
+5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, and WikibaseInWikitext and update their `source.commit` values.
 6. Review the MediaWiki release notes and every resulting commit range before building or testing the image.
 
 ## Review

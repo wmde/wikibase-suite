@@ -8,47 +8,58 @@ import type {
 } from '../source-types.js';
 import {
 	changeLines,
-	describePinChanges,
-	manifestPins,
-	planPins,
+	gitRefName,
+	gitSourcePin,
+	pinLink,
 	readVariable,
 	replaceVariable,
 	request
 } from '../source-utils.js';
 
-export function wikibasePins(contents: string) {
-	return manifestPins(contents);
-}
+const REGISTRY_PATH = 'build/extensions.json';
+type GitSource = {
+	repo: string;
+	ref: string;
+	commit: string;
+	patches?: string[];
+};
+type Extension = { name: string; source: GitSource | { path: string } };
+type Registry = { schemaVersion: number; extensions: Extension[] };
 
-interface MediaWikiSettings {
-	source: string;
-	releaseNotes: string;
-}
-
-function mediaWikiSettings(contents: string): MediaWikiSettings {
-	const mediaWiki = bakeObject(
+function settings(contents: string) {
+	const value = bakeObject(
 		resolveBakeVariables(contents, process.cwd()),
 		'MEDIAWIKI'
 	);
 	return {
-		source: String(mediaWiki.source).replace(/\/?$/u, '/'),
-		releaseNotes: String(mediaWiki.release_notes)
+		source: String(value.source).replace(/\/?$/u, '/'),
+		notes: String(value.release_notes)
 	};
 }
-
-function releaseNotesUrl(settings: MediaWikiSettings, version: string): string {
-	return settings.releaseNotes.replace(
-		'{line}',
-		version.replace(/\.\d+$/u, '')
+function notesUrl(settingsValue: ReturnType<typeof settings>, version: string) {
+	return settingsValue.notes.replace('{line}', version.replace(/\.\d+$/u, ''));
+}
+function registry(contents: string): Registry {
+	const value = JSON.parse(contents) as Registry;
+	if (value.schemaVersion !== 1 || !Array.isArray(value.extensions))
+		throw new Error('Invalid Wikibase extension manifest.');
+	return value;
+}
+function git(source: Extension['source']): source is GitSource {
+	return Boolean(
+		source && 'repo' in source && 'ref' in source && 'commit' in source
 	);
 }
+function isWmfRef(ref: string) {
+	return /^refs\/heads\/REL\d+_\d+$/u.test(ref);
+}
+function wmfRef(version: string) {
+	const [major, minor] = version.split('.');
+	return `refs/heads/REL${major}_${minor}`;
+}
 
-async function mediaWikiVersionsInLine(
-	line: string,
-	source: string
-): Promise<string[]> {
-	const response = await request(`${source}${line}/`);
-	const page = await response.text();
+async function versions(line: string, source: string) {
+	const page = await (await request(`${source}${line}/`)).text();
 	return [
 		...new Set(
 			[...page.matchAll(/mediawiki-(\d+\.\d+\.\d+)\.tar\.gz/gmu)].map(
@@ -57,41 +68,32 @@ async function mediaWikiVersionsInLine(
 		)
 	].sort(semver.rcompare);
 }
-
 export async function discoverMediaWikiCandidates(
 	currentVersion: string,
 	source = 'https://releases.wikimedia.org/mediawiki/'
-): Promise<{ maintenance?: string; newerLine?: string }> {
+) {
 	const current = semver.parse(currentVersion);
-	if (!current) {
+	if (!current)
 		throw new Error(`Invalid MEDIAWIKI_VERSION "${currentVersion}".`);
-	}
-	const normalizedSource = source.replace(/\/?$/u, '/');
-	const response = await request(normalizedSource);
-	const page = await response.text();
+	const base = source.replace(/\/?$/u, '/');
+	const page = await (await request(base)).text();
 	const lines = [
 		...new Set(
 			[...page.matchAll(/href="(\d+\.\d+)\//gmu)].map((match) => match[1])
 		)
 	]
 		.filter((line) => {
-			const parsed = semver.parse(`${line}.0`);
-			return (
-				parsed && semver.gte(parsed, `${current.major}.${current.minor}.0`)
-			);
+			const value = semver.parse(`${line}.0`);
+			return value && semver.gte(value, `${current.major}.${current.minor}.0`);
 		})
-		.sort((left, right) => semver.rcompare(`${left}.0`, `${right}.0`));
-	const versionsByLine = await Promise.all(
-		lines.map(async (line) => ({
-			line,
-			versions: await mediaWikiVersionsInLine(line, normalizedSource)
-		}))
+		.sort((a, b) => semver.rcompare(`${a}.0`, `${b}.0`));
+	const found = await Promise.all(
+		lines.map(async (line) => ({ line, versions: await versions(line, base) }))
 	);
-	const currentLine = `${current.major}.${current.minor}`;
-	const maintenance = versionsByLine.find(({ line }) => line === currentLine)
-		?.versions[0];
-	const newerLine = versionsByLine.find(
-		({ line, versions }) => line !== currentLine && versions.length > 0
+	const line = `${current.major}.${current.minor}`;
+	const maintenance = found.find((value) => value.line === line)?.versions[0];
+	const newerLine = found.find(
+		(value) => value.line !== line && value.versions.length
 	)?.versions[0];
 	return {
 		maintenance:
@@ -101,19 +103,17 @@ export async function discoverMediaWikiCandidates(
 		newerLine
 	};
 }
-
 export async function selectMediaWikiUpdate(
-	currentVersion: string,
+	current: string,
 	candidates: { maintenance?: string; newerLine?: string },
 	interaction: Pick<SourceUpdateInteraction, 'confirm' | 'select'>
-): Promise<string | undefined> {
-	if (!candidates.maintenance && !candidates.newerLine) {
+) {
+	if (!candidates.maintenance && !candidates.newerLine)
 		return (await interaction.confirm('Refresh extensions?'))
-			? currentVersion
+			? current
 			: undefined;
-	}
-	const selection = await interaction.select(
-		`Update ${strong('MediaWiki')}? (current: ${strong(currentVersion)})`,
+	const selected = await interaction.select(
+		`Update ${strong('MediaWiki')}? (current: ${strong(current)})`,
 		[
 			...(candidates.maintenance
 				? [
@@ -135,87 +135,131 @@ export async function selectMediaWikiUpdate(
 			{ value: 'skip', label: 'No' }
 		]
 	);
-	if (selection === 'skip') {
-		return (await interaction.confirm('Refresh extensions?'))
-			? currentVersion
-			: undefined;
-	}
-	return selection;
+	return selected === 'skip'
+		? (await interaction.confirm('Refresh extensions?'))
+			? current
+			: undefined
+		: selected;
+}
+
+function registryChanges(previous: string, next: string): SourceChange[] {
+	const old = new Map(
+		registry(previous).extensions.map((item) => [item.name, item])
+	);
+	return registry(next).extensions.flatMap((item) => {
+		if (!git(item.source)) return [];
+		const prior = old.get(item.name)?.source;
+		const before = git(prior) ? prior.commit : undefined;
+		return before === item.source.commit
+			? []
+			: [
+					{
+						variable: `${item.name}.source.commit`,
+						description: `${item.name} ${gitRefName(item.source.ref)}`,
+						...(before ? { previous: before } : {}),
+						next: item.source.commit,
+						link: pinLink(gitSourcePin(item.source), before, item.source.commit)
+					}
+				];
+	});
 }
 
 export const wikibaseSourceProvider: SourceUpdateProvider = {
 	image: 'wikibase',
-	describeChanges: (previousContents, nextContents) => {
-		const settings = mediaWikiSettings(nextContents);
-		const previousVersion = readVariable(previousContents, 'MEDIAWIKI.version');
-		const nextVersion = readVariable(nextContents, 'MEDIAWIKI.version');
-		const mediaWikiChange: SourceChange[] =
-			previousVersion === nextVersion
-				? []
-				: [
-						{
-							variable: 'MEDIAWIKI.version',
-							description: 'MediaWiki',
-							previous: previousVersion,
-							next: nextVersion,
-							link: {
-								label: 'Release notes',
-								url: releaseNotesUrl(settings, nextVersion)
-							}
-						}
-					];
-		return [
-			...mediaWikiChange,
-			...describePinChanges(
-				previousContents,
-				nextContents,
-				wikibasePins(nextContents)
-			)
-		];
+	additionalSourcePaths: [REGISTRY_PATH],
+	describeChanges: (previous, next) => {
+		const value = settings(next);
+		const before = readVariable(previous, 'MEDIAWIKI.version');
+		const after = readVariable(next, 'MEDIAWIKI.version');
+		return before === after
+			? []
+			: [
+					{
+						variable: 'MEDIAWIKI.version',
+						description: 'MediaWiki',
+						previous: before,
+						next: after,
+						link: { label: 'Release notes', url: notesUrl(value, after) }
+					}
+				];
 	},
 	plan: async (contents, interaction) => {
-		const settings = mediaWikiSettings(contents);
-		const currentVersion = readVariable(contents, 'MEDIAWIKI.version');
-		const candidates = await discoverMediaWikiCandidates(
-			currentVersion,
-			settings.source
-		);
-		const selectedVersion = await selectMediaWikiUpdate(
-			currentVersion,
-			candidates,
+		const value = settings(contents);
+		const current = readVariable(contents, 'MEDIAWIKI.version');
+		const selected = await selectMediaWikiUpdate(
+			current,
+			await discoverMediaWikiCandidates(current, value.source),
 			interaction
 		);
-		if (!selectedVersion) {
-			return { contents, changes: [] };
+		if (!selected) return { contents, changes: [] };
+		const next =
+			selected === current
+				? contents
+				: replaceVariable(contents, 'MEDIAWIKI.version', selected);
+		return {
+			contents: next,
+			changes:
+				selected === current
+					? []
+					: [
+							{
+								variable: 'MEDIAWIKI.version',
+								description: 'MediaWiki',
+								previous: current,
+								next: selected,
+								link: { label: 'Release notes', url: notesUrl(value, selected) }
+							}
+						],
+			refreshSources: true
+		};
+	},
+	planWithAdditional: async (contents, additional, interaction) => {
+		const base = await wikibaseSourceProvider.plan(contents, interaction);
+		if (!base.refreshSources) {
+			return { ...base, additionalContents: additional };
 		}
-		let plannedContents = contents;
-		const changes: SourceChange[] = [];
-		if (selectedVersion !== currentVersion) {
-			plannedContents = replaceVariable(
-				plannedContents,
-				'MEDIAWIKI.version',
-				selectedVersion
-			);
+		const value = registry(additional[REGISTRY_PATH]);
+		const version = readVariable(base.contents, 'MEDIAWIKI.version');
+		const changes = [...base.changes];
+		for (const item of value.extensions) {
+			if (!git(item.source)) continue;
+			if (isWmfRef(item.source.ref)) item.source.ref = wmfRef(version);
+			const source = gitSourcePin(item.source);
+			const before = item.source.commit;
+			const next = await source.resolve();
+			if (before === next) continue;
+			item.source.commit = next;
 			changes.push({
-				variable: 'MEDIAWIKI.version',
-				description: 'MediaWiki',
-				previous: currentVersion,
-				next: selectedVersion,
-				link: {
-					label: 'Release notes',
-					url: releaseNotesUrl(settings, selectedVersion)
-				}
+				variable: `${item.name}.source.commit`,
+				description: `${item.name} ${gitRefName(item.source.ref)}`,
+				previous: before,
+				next,
+				link: pinLink(source, before, next)
 			});
 		}
-		const pins = await planPins(plannedContents, wikibasePins(plannedContents));
-		changes.push(...pins.changes);
-		if (changes.length === 0) {
+		if (changes.length) interaction.note('Source update', changeLines(changes));
+		else
 			interaction.info(
-				'The image and its configured extensions are already current.'
+				'Dependencies are current.'
 			);
-			return { contents, changes: [] };
-		}
-		interaction.note('Source update', changeLines(changes));
-		return { contents: pins.contents, changes };
-	}
+		return {
+			contents: base.contents,
+			changes,
+			additionalContents: {
+				[REGISTRY_PATH]: `${JSON.stringify(value, null, 2)}\n`
+			}
+		};
+	},
+	describeChangesWithAdditional: (
+		previous,
+		next,
+		previousAdditional,
+		nextAdditional
+	) => [
+		...wikibaseSourceProvider.describeChanges(previous, next),
+		...registryChanges(
+			previousAdditional[REGISTRY_PATH],
+			nextAdditional[REGISTRY_PATH]
+		)
+	]
 };

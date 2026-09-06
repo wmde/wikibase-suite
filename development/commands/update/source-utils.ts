@@ -90,6 +90,24 @@ async function gitlabCommit(
 	return ((await response.json()) as { commit: { id: string } }).commit.id;
 }
 
+export interface GitSource {
+	repo: string;
+	ref: string;
+}
+
+export function gitRefName(ref: string): string {
+	return ref.replace(/^refs\/heads\//u, '');
+}
+
+function isSupportedGitRepository(repo: string): boolean {
+	return [
+		'https://github.com/',
+		'https://codeberg.org/',
+		'https://gitlab.wikimedia.org/',
+		'https://gerrit.wikimedia.org/r/'
+	].some((prefix) => repo.startsWith(prefix));
+}
+
 function repositorySlug(url: string, host: string): string {
 	const prefix = `https://${host}/`;
 	if (!url.startsWith(prefix)) {
@@ -110,6 +128,53 @@ function sourceString(
 	return value;
 }
 
+export function gitSourcePin(
+	source: GitSource
+): Pick<SourcePin, 'resolve' | 'compareUrl' | 'commitUrl'> {
+	const ref = gitRefName(source.ref);
+	if (source.repo.startsWith('https://github.com/')) {
+		const repository = repositorySlug(source.repo, 'github.com');
+		return {
+			resolve: async () => await githubCommit(repository, ref),
+			compareUrl: (previous, next) =>
+				githubCompareUrl(repository, previous, next),
+			commitUrl: (commit) => githubCommitUrl(repository, commit)
+		};
+	}
+	if (source.repo.startsWith('https://codeberg.org/')) {
+		const repository = repositorySlug(source.repo, 'codeberg.org');
+		return {
+			resolve: async () => await codebergCommit(repository, ref),
+			compareUrl: (previous, next) =>
+				`https://codeberg.org/${repository}/compare/${previous}...${next}`,
+			commitUrl: (commit) => codebergCommitUrl(repository, commit)
+		};
+	}
+	if (source.repo.startsWith('https://gitlab.wikimedia.org/')) {
+		const repository = repositorySlug(source.repo, 'gitlab.wikimedia.org');
+		return {
+			resolve: async () => await gitlabCommit(repository, ref),
+			compareUrl: (previous, next) =>
+				`https://gitlab.wikimedia.org/${repository}/-/compare/${previous}...${next}`,
+			commitUrl: (commit) =>
+				`https://gitlab.wikimedia.org/${repository}/-/commit/${commit}`
+		};
+	}
+	if (source.repo.startsWith('https://gerrit.wikimedia.org/r/')) {
+		const repository = repositorySlug(
+			source.repo,
+			'gerrit.wikimedia.org'
+		).replace(/^r\//u, '');
+		return {
+			resolve: async () => await gerritCommit(repository, ref),
+			compareUrl: (previous, next) =>
+				gerritCompareUrl(repository, previous, next),
+			commitUrl: (commit) => gerritCommitUrl(repository, commit)
+		};
+	}
+	throw new Error(`Unsupported source repository: ${source.repo}.`);
+}
+
 export function manifestPins(contents: string): SourcePin[] {
 	const variables = resolveBakeVariables(contents, process.cwd());
 	return [...variables.keys()].flatMap((variable) => {
@@ -118,64 +183,31 @@ export function manifestPins(contents: string): SourcePin[] {
 			return [];
 		}
 		const source = bakeObject(variables, variable);
-		if (!['gerrit', 'github', 'codeberg', 'gitlab'].includes(String(source.kind))) {
+		if (
+			typeof source.repo !== 'string' ||
+			typeof source.ref !== 'string' ||
+			typeof source.commit !== 'string' ||
+			!isSupportedGitRepository(source.repo)
+		) {
 			return [];
 		}
-		const kind = sourceString(source, 'kind', variable);
 		const repo = sourceString(source, 'repo', variable);
-		const ref = sourceString(source, 'ref', variable).replace(
-			/^refs\/heads\//u,
-			''
-		);
+		const ref = sourceString(source, 'ref', variable);
 		const description = `${
 			typeof source.name === 'string' ? source.name : variable
-		} ${ref}`;
-		let resolve: SourcePin['resolve'];
-		let compareUrl: SourcePin['compareUrl'];
-		let commitUrl: SourcePin['commitUrl'];
-		if (kind === 'github') {
-			const repository = repositorySlug(repo, 'github.com');
-			resolve = async () => await githubCommit(repository, ref);
-			compareUrl = (previous, next) =>
-				githubCompareUrl(repository, previous, next);
-			commitUrl = (commit) => githubCommitUrl(repository, commit);
-		} else if (kind === 'codeberg') {
-			const repository = repositorySlug(repo, 'codeberg.org');
-			resolve = async () => await codebergCommit(repository, ref);
-			compareUrl = (previous, next) =>
-				`https://codeberg.org/${repository}/compare/${previous}...${next}`;
-			commitUrl = (commit) => codebergCommitUrl(repository, commit);
-		} else if (kind === 'gitlab') {
-			const repository = repositorySlug(repo, 'gitlab.wikimedia.org');
-			resolve = async () => await gitlabCommit(repository, ref);
-			compareUrl = (previous, next) =>
-				`https://gitlab.wikimedia.org/${repository}/-/compare/${previous}...${next}`;
-			commitUrl = (commit) =>
-				`https://gitlab.wikimedia.org/${repository}/-/commit/${commit}`;
-		} else {
-			const repository = repositorySlug(repo, 'gerrit.wikimedia.org').replace(
-				/^r\//u,
-				''
-			);
-			resolve = async () => await gerritCommit(repository, ref);
-			compareUrl = (previous, next) =>
-				gerritCompareUrl(repository, previous, next);
-			commitUrl = (commit) => gerritCommitUrl(repository, commit);
-		}
+		} ${gitRefName(ref)}`;
 		const archive =
 			typeof source.archive === 'string' ? source.archive : undefined;
 		return [
 			{
-				variable: `${variable}.revision`,
+				variable: `${variable}.commit`,
 				description,
-				resolve,
-				compareUrl,
-				commitUrl,
+				...gitSourcePin({ repo, ref }),
 				...(archive
 					? {
 							archiveShaVariable: `${variable}.archive_sha256`,
-							archiveUrl: (revision: string) =>
-								archive.replace('{revision}', revision)
+							archiveUrl: (commit: string) =>
+								archive.replace('{commit}', commit)
 						}
 					: {})
 			}
@@ -207,6 +239,20 @@ function findVariable(contents: string, variable: string): string | undefined {
 	}
 }
 
+function findPreviousPinValue(
+	contents: string,
+	variable: string
+): string | undefined {
+	const value = findVariable(contents, variable);
+	if (value !== undefined || !variable.endsWith('.commit')) {
+		return value;
+	}
+	// Release tags before the pin-schema rename use `.revision`. Remove this
+	// fallback once the latest prior release has `.commit` pins.
+	const legacyVariable = variable.replace(/\.commit$/u, '.revision');
+	return findVariable(contents, legacyVariable);
+}
+
 export function readVariable(contents: string, variable: string): string {
 	const value = findVariable(contents, variable);
 	if (value === undefined) {
@@ -215,8 +261,8 @@ export function readVariable(contents: string, variable: string): string {
 	return value;
 }
 
-function pinLink(
-	pin: SourcePin,
+export function pinLink(
+	pin: Pick<SourcePin, 'compareUrl' | 'commitUrl'>,
 	previous: string | undefined,
 	next: string
 ): SourceChange['link'] {
@@ -269,7 +315,7 @@ export function describePinChanges(
 	pins: SourcePin[]
 ): SourceChange[] {
 	return pins.flatMap((pin) => {
-		const previous = findVariable(previousContents, pin.variable);
+		const previous = findPreviousPinValue(previousContents, pin.variable);
 		const next = readVariable(nextContents, pin.variable);
 		if (previous === next) {
 			return [];
@@ -333,6 +379,7 @@ export async function confirmPinPlan(
 	interaction: SourceUpdateInteraction
 ): Promise<SourceUpdatePlan> {
 	if (plan.changes.length === 0) {
+		interaction.info('Dependencies are current.');
 		return plan;
 	}
 	interaction.note('Source candidate', changeLines(plan.changes));

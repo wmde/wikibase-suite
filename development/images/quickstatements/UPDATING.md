@@ -20,7 +20,7 @@ The command:
 2. Presents both current-to-proposed commit ranges with comparison links as one update candidate.
 3. Asks whether to include the paired update.
 4. Downloads the proposed MagnusTools archive and calculates its SHA-256 checksum after confirmation.
-5. Updates the QuickStatements and MagnusTools revisions and archive checksum together in [`docker-bake.hcl`](./docker-bake.hcl).
+5. Updates the QuickStatements and MagnusTools commits and archive checksum together in [`docker-bake.hcl`](./docker-bake.hcl).
 6. Drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
 The command confirms that both branches and the MagnusTools archive are available, but it cannot determine whether their latest commits remain compatible. Complete the review below before releasing the image.
@@ -30,7 +30,7 @@ The command confirms that both branches and the MagnusTools archive are availabl
 The same update can be prepared manually:
 
 1. Resolve the head of `refs/heads/master` from the [QuickStatements repository](https://github.com/magnusmanske/quickstatements) and the [MagnusTools repository](https://codeberg.org/magnusmanske/magnustools).
-2. Set `QUICKSTATEMENTS.revision` and `MAGNUSTOOLS.revision` in [`docker-bake.hcl`](./docker-bake.hcl) to those full commit hashes.
+2. Set `QUICKSTATEMENTS.commit` and `MAGNUSTOOLS.commit` in [`docker-bake.hcl`](./docker-bake.hcl) to those full commit hashes.
 3. Download `https://codeberg.org/magnusmanske/magnustools/archive/<MAGNUSTOOLS_COMMIT>.tar.gz` and calculate its SHA-256 checksum using `sha256sum` or `shasum -a 256`.
 4. Set `MAGNUSTOOLS.archive_sha256` to that checksum.
 5. Review the resulting `docker-bake.hcl` diff before building or testing the image.

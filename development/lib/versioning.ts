@@ -246,7 +246,7 @@ function findDraftHeadings(
 
 function isCommitPin(change: SourceChange): boolean {
 	return change.variable.endsWith('_COMMIT') ||
-		change.variable.endsWith('.revision');
+		change.variable.endsWith('.commit');
 }
 
 function visibleSourceRange(
@@ -423,9 +423,7 @@ export function planVersionUpdate(
 	if ((options.sourceChanges?.length ?? 0) > 0) {
 		bumps.push('patch');
 	}
-	if (
-		hasRelevantWorkingChanges(git, context, project, proposedUpdates)
-	) {
+	if (hasRelevantWorkingChanges(git, context, project, proposedUpdates)) {
 		bumps.push('patch');
 	}
 	const bump = bumps.sort((left, right) => bumpRank(right) - bumpRank(left))[0];
@@ -445,7 +443,6 @@ export function planVersionUpdate(
 	);
 	const changelogHeadings = parseHeadings(changelog);
 	const draftHeadings = findDraftHeadings(changelogHeadings, publishedVersions);
-	const hasDraft = draftHeadings.length > 0;
 	const draftBody =
 		draftHeadings.length === 1
 			? changelog.slice(
@@ -457,9 +454,6 @@ export function planVersionUpdate(
 			: '';
 	const replacesGeneratedChangelogSections =
 		/^##[ \t]+(?:Changes|Dependency updates)[ \t]*$/mu.test(draftBody);
-	if (!bump && !hasDraft && previous.version === currentVersion) {
-		return undefined;
-	}
 	const minimumVersion = [currentVersion, inferred]
 		.filter(Boolean)
 		.sort((left, right) => semver.rcompare(left!, right!))[0]!;
@@ -471,6 +465,11 @@ export function planVersionUpdate(
 		);
 	}
 	const updates: FileUpdate[] = [
+		...proposedUpdates.filter(
+			(update) =>
+				update.path !== project.versionPath &&
+				update.path !== project.changelogPath
+		),
 		{
 			path: project.versionPath,
 			contents: projectWithVersion(project, versionContents, targetVersion)
@@ -488,6 +487,14 @@ export function planVersionUpdate(
 			)
 		}
 	];
+	if (
+		!bump ||
+		updates.every(
+			(update) => readFileSync(update.path, 'utf8') === update.contents
+		)
+	) {
+		return undefined;
+	}
 	return {
 		project,
 		currentVersion,

@@ -15,6 +15,8 @@ export interface SourcePin {
 export interface SourceUpdatePlan {
 	contents: string;
 	changes: SourceChange[];
+	additionalContents?: Record<string, string>;
+	refreshSources?: boolean;
 }
 
 export interface SelectOption<T extends string> {
@@ -35,6 +37,7 @@ export interface SourceUpdateInteraction {
 
 export interface SourceUpdateProvider {
 	image: string;
+	additionalSourcePaths?: string[];
 	describeChanges: (
 		previousContents: string,
 		nextContents: string
@@ -43,4 +46,15 @@ export interface SourceUpdateProvider {
 		contents: string,
 		interaction: SourceUpdateInteraction
 	) => Promise<SourceUpdatePlan>;
+	planWithAdditional?: (
+		contents: string,
+		additionalContents: Record<string, string>,
+		interaction: SourceUpdateInteraction
+	) => Promise<SourceUpdatePlan>;
+	describeChangesWithAdditional?: (
+		previousContents: string,
+		nextContents: string,
+		previousAdditionalContents: Record<string, string>,
+		nextAdditionalContents: Record<string, string>
+	) => SourceChange[];
 }

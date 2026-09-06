@@ -1,7 +1,7 @@
 # QuickStatements image manifest. Runtime build policy is supplied by wbs-dev.
 
 variable "IMAGE_NAME" { default = "quickstatements" }
-variable "IMAGE_VERSION" { default = "1.2.0" }
+variable "IMAGE_VERSION" { default = "1.2.1" }
 variable "IMAGE_REPOSITORY" { default = "wikibase/quickstatements" }
 variable "TAGS" {
   type    = list(string)
@@ -13,23 +13,21 @@ variable "QUICKSTATEMENTS_GENERATION" { default = "2" }
 
 variable "QUICKSTATEMENTS" {
   default = {
-    kind     = "github"
     name     = "QuickStatements"
     repo     = "https://github.com/magnusmanske/quickstatements.git"
     ref      = "refs/heads/master"
-    revision = "5daef4bcb4a99eea27b3a3ccc10cae21e6c746f9"
+    commit   = "5daef4bcb4a99eea27b3a3ccc10cae21e6c746f9"
   }
 }
 
 variable "MAGNUSTOOLS" {
   default = {
-    kind           = "codeberg"
     name           = "MagnusTools"
     repo           = "https://codeberg.org/magnusmanske/magnustools.git"
     ref            = "refs/heads/master"
-    revision       = "7d9b415bfab0ae624e17676be1e9d763f340b315"
-    archive        = "https://codeberg.org/magnusmanske/magnustools/archive/{revision}.tar.gz"
-    archive_sha256 = "f062fb7ff177a198dbc1a24a87775c2691cf64ed11a3e77c0b5bfc7ebf24ca4e"
+    commit         = "b5686e6b4bc8f95095eea295031718a9186d1510"
+    archive        = "https://codeberg.org/magnusmanske/magnustools/archive/{commit}.tar.gz"
+    archive_sha256 = "0c9eed7856e2437b26defae4ef4a14145c0e5f1caabbe8c64a77a46b7ec72413"
   }
 }
 
@@ -60,8 +58,8 @@ target "quickstatements-base" {
   context    = "."
   dockerfile = "Dockerfile"
   args = {
-    QUICKSTATEMENTS_COMMIT   = QUICKSTATEMENTS.revision
-    MAGNUSTOOLS_COMMIT       = MAGNUSTOOLS.revision
+    QUICKSTATEMENTS_COMMIT   = QUICKSTATEMENTS.commit
+    MAGNUSTOOLS_COMMIT       = MAGNUSTOOLS.commit
     MAGNUSTOOLS_ARCHIVE_SHA  = MAGNUSTOOLS.archive_sha256
     COMPOSER_IMAGE_URL       = "${COMPOSER_IMAGE.image}:${COMPOSER_IMAGE.tag}"
     COMPOSER_IMAGE_PLATFORM  = COMPOSER_IMAGE.platform

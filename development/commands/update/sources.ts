@@ -32,6 +32,7 @@ export function sourceUpdateProviderFor(
 
 export interface SourceFileUpdate extends FileUpdate {
 	changes: SourceChange[];
+	additionalUpdates: FileUpdate[];
 }
 
 export async function planSourceFileUpdate(
@@ -41,10 +42,25 @@ export async function planSourceFileUpdate(
 ): Promise<SourceFileUpdate> {
 	const path = join(context.imagesRoot, provider.image, BAKE_MANIFEST);
 	const original = readFileSync(path, 'utf8');
-	const plan = await provider.plan(original, interaction);
+	const additionalContents = Object.fromEntries(
+		(provider.additionalSourcePaths ?? []).map((relativePath) => [
+			relativePath,
+			readFileSync(join(context.imagesRoot, provider.image, relativePath), 'utf8')
+		])
+	);
+	const plan = provider.planWithAdditional
+		? await provider.planWithAdditional(original, additionalContents, interaction)
+		: await provider.plan(original, interaction);
 	return {
 		path,
 		contents: plan.contents,
 		changes: plan.changes
+		,
+		additionalUpdates: Object.entries(plan.additionalContents ?? {}).map(
+			([relativePath, contents]) => ({
+				path: join(context.imagesRoot, provider.image, relativePath),
+				contents
+			})
+		)
 	};
 }

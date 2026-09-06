@@ -17,11 +17,11 @@ This image contains the Wikibase extension running on top of MediaWiki. Wikibase
     creates `InstanceSettings.php` for generated instance values and
     `LocalSettings.php` for user configuration. Do not edit
     `InstanceSettings.php`; add MediaWiki customizations to `LocalSettings.php`,
-    which is loaded after image defaults and extensions.
+    which is loaded after image defaults and image-loaded extensions.
 
-    The generated `LocalSettings.php` also loads `Extensions.php` from the same
-    directory when present, following the WBS convention for configuring
-    instance-specific extensions.
+    Configure additional extensions in `LocalSettings.php` using normal
+    MediaWiki PHP configuration. For compatibility, it also loads a separate
+    `Extensions.php` from the same directory when present.
 
 - **Job runner**
     MediaWiki/Wikibase depends on [background jobs](https://www.mediawiki.org/wiki/Manual:Job_queue), which can run during HTTP requests or through a dedicated runner. The image's default configuration requires an external job runner. Run a second container from this image with its command set to `jobrunner`, share the same configuration volume with it, and start it after the web workload has created `InstanceSettings.php`.
@@ -71,10 +71,8 @@ must be set explicitly.
 
 ### Bundled extensions
 
-The image includes the extensions below in addition to those shipped with
-MediaWiki. **Enabled** describes whether the default image configuration loads
-an extension. Externally managed configuration controls its own extension
-loading.
+The image's default extension loading includes both MediaWiki-provided
+extensions and additional packages placed in this image.
 
 | Bundled extension | Enabled | Description |
 | --- | --- | --- |
@@ -87,10 +85,15 @@ loading.
 | [OAuth](https://www.mediawiki.org/wiki/Extension:OAuth) | Yes | Allows users to safely authorize another application (a “consumer”) to use the MediaWiki Action API on their behalf. |
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) and [WSOAuth](https://www.mediawiki.org/wiki/Extension:WSOAuth) | Yes | Let users authenticate to Wikibase with their Wikimedia account through a Meta-Wiki OAuth 1.0a consumer. Enabled when both Wikimedia OAuth token variables are set. |
 | [UniversalLanguageSelector](https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector) | Yes | Allows users to select a language and configure its support. |
-| [WikibaseEdtf](https://github.com/ProfessionalWiki/WikibaseEdtf) | No | Adds support for the Extended Date/Time Format (EDTF) specification through a new data type. Add `wfLoadExtension( 'WikibaseEdtf' );` to your local configuration to enable it. |
+| [WikibaseEdtf](https://github.com/ProfessionalWiki/WikibaseEdtf) | No | Adds support for the Extended Date/Time Format (EDTF) specification through a new data type. |
 | [WikibaseInWikitext](https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext) | Yes | Adds a `<sparql>` tag for writing local Query Service examples on wiki pages. |
 | [WikibaseLocalMedia](https://github.com/ProfessionalWiki/WikibaseLocalMedia) | Yes | Adds support for local media files to Wikibase through a new data type. |
 | [WikibaseManifest](https://www.mediawiki.org/wiki/Extension:WikibaseManifest) | Yes | Provides metadata about the structured data repository through an API. |
+
+Enable and configure additional packaged extensions in `LocalSettings.php`
+using the normal MediaWiki instructions for that extension. A complete
+externally managed configuration continues to control its own extension
+loading.
 
 ### Login with Wikimedia
 
@@ -140,10 +143,20 @@ The job runner and maintenance workloads use the same configuration as the web
 workload but do not initialize it. The web workload must initialize the shared
 `/config` volume first.
 
+### Cache configuration
+
+The image uses APCu for lightweight, local caching, while its default WBS
+configuration stores authenticated sessions and parser output in the database.
+
+Deployments with more than one Wikibase web container need a shared main cache.
+This image supports Redis for that purpose; configure `REDIS_SERVER` and, when
+needed, `REDIS_PASSWORD`, or use a custom MediaWiki configuration. See
+[MediaWiki's Redis documentation](https://www.mediawiki.org/wiki/Redis).
+
 ### Externally managed configuration
 
 The image sets MediaWiki's native `MW_CONFIG_FILE` environment variable to its
-WBS-managed `/opt/wbs/WBSConfig.php` entry point. Override
+Wikibase Suite-managed `/opt/wbs/Settings.php` entry point. Override
 `MW_CONFIG_FILE` with another path to supply a complete externally managed
 configuration. The selected file may contain static configuration or resolve
 configuration dynamically. Bundled extensions remain available, but your
@@ -162,17 +175,20 @@ image. See the [Dockerfile](./Dockerfile) for their source.
 | `/var/www/html/images` | MediaWiki image and media upload directory. |
 | `/var/www/html/skins` | MediaWiki skins directory. |
 | `/var/www/html/extensions` | MediaWiki extensions directory. |
-| `/opt/wbs/WBSConfig.php` | Image-owned entry point selected by the default `MW_CONFIG_FILE`. Override the environment variable rather than replacing this file. |
-| `/opt/wbs/extension-loaders` | Loader and configuration modules for extensions enabled by the image. Their load order is declared explicitly by `/opt/wbs/ExtensionLoaders.php`. |
-| `/config/InstanceSettings.php` | Persistent WBS-managed settings unique to an installed instance. |
+| `/opt/wbs/Settings.php` | Image-owned Wikibase Suite entry point selected by the default `MW_CONFIG_FILE`. Override the environment variable rather than replacing this file. |
+| `/opt/wbs/DefaultSettings.php` | Image-owned Wikibase Suite MediaWiki defaults, loaded before bundled extensions. MediaWiki supplies its own core defaults. |
+| `/opt/wbs/LoadExtensions.php` | Image-owned extension loading and related configuration, loaded before user configuration. |
+| `/opt/wbs/extensions.json` | Image-owned build manifest of additional extension sources, pins, and patches included in this image. |
+| `/opt/wbs/extension-profiles/` | Image-specific extension profiles for defaults that need more than normal MediaWiki loading. |
+| `/opt/wbs/setup/` | Default Wikibase Suite installation, configuration, and migration machinery. |
+| `/config/InstanceSettings.php` | Persistent image-generated settings unique to an installed instance. Loaded first by `Settings.php`; do not edit it. |
 | `/config/LocalSettings.php` | Persistent user-owned MediaWiki and extension customizations, loaded last. |
-| `/config/Extensions.php` | Optional user-owned extension configuration loaded by the generated `LocalSettings.php`. |
-| `/opt/wbs/WBSSettings.php` | Image-owned WBS MediaWiki settings, loaded before bundled extensions. MediaWiki supplies its own core defaults. |
-| `/opt/wbs/ExtensionLoaders.php` | Image-owned registry defining the order of extension loaders. |
-| `/opt/wbs/bootstrap/` | Default WBS installation and configuration preparation. |
-| `/templates/` | Directory containing templates. |
+| `/config/Extensions.php` | Optional user-owned extension configuration loaded by `LocalSettings.php` for compatibility. New configuration can go directly in `LocalSettings.php`. |
+| `/config/wikibase-php.ini` | Persistent user-customizable PHP settings. The image seeds it during managed setup. |
+| `/config/.wikibase-image/` | Image-managed transient installation and migration state. |
+| `/entrypoint.sh` | Selects the requested workload and runs managed setup only when the default `MW_CONFIG_FILE` is in use. |
 | `/healthcheck.sh` | Verifies that MediaWiki is serving requests. |
-| `/default-extra-install.sh` | Image script for automatically creating OpenSearch indices and the QuickStatements OAuth consumer during a fresh installation. |
+| `/opt/wbs/setup/scripts/` | WBS-owned setup scripts, including optional OpenSearch and QuickStatements configuration and the opted-in metadata callback. |
 | `/extra-install.sh` | Optional script for custom functionality run during a fresh installation. |
 
 ## Releases

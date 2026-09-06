@@ -10,7 +10,7 @@ WBS_TOOLS_IMAGE_EXPLICIT=false
 if [[ -n "${WBS_TOOLS_IMAGE:-}" ]]; then
   WBS_TOOLS_IMAGE_EXPLICIT=true
 fi
-WBS_TOOLS_IMAGE="${WBS_TOOLS_IMAGE:-wikibase/wbs-tools:1.0.0}"
+WBS_TOOLS_IMAGE="${WBS_TOOLS_IMAGE:-wikibase/wbs-tools:1.0.1}"
 WBS_REPO_URL="${WBS_REPO_URL:-https://github.com/wmde/wikibase-suite.git}"
 WBS_DIR="${WBS_DIR:-$HOME/wikibase-suite}"
 WBS_DOCKER_DIR="${WBS_DOCKER_DIR:-$WBS_DIR}"

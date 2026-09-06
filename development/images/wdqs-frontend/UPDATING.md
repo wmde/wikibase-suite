@@ -17,7 +17,7 @@ The command:
 1. Resolves the latest commit from the Wikidata Query GUI `main` branch.
 2. Presents the current-to-proposed commit range with a Wikimedia GitLab comparison link.
 3. Asks whether to include the update.
-4. Updates `WDQSQUERYGUI.revision` in [`docker-bake.hcl`](./docker-bake.hcl), drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
+4. Updates `WDQSQUERYGUI.commit` in [`docker-bake.hcl`](./docker-bake.hcl), drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
 The command confirms that the branch exists, but it cannot establish compatibility with the image's local patches or configuration.
 
@@ -25,10 +25,10 @@ The command confirms that the branch exists, but it cannot establish compatibili
 
 The same update can be prepared manually:
 
-1. Read `WDQSQUERYGUI.revision` from [`docker-bake.hcl`](./docker-bake.hcl).
+1. Read `WDQSQUERYGUI.commit` from [`docker-bake.hcl`](./docker-bake.hcl).
 2. Resolve the head of `refs/heads/main` from the [Wikidata Query GUI repository](https://gitlab.wikimedia.org/repos/wmde/wikidata-query-gui).
 3. Compare the pinned and proposed commits in Wikimedia GitLab.
-4. Set `WDQSQUERYGUI.revision` to the proposed full commit hash and review the resulting diff.
+4. Set `WDQSQUERYGUI.commit` to the proposed full commit hash and review the resulting diff.
 
 ## Review
 

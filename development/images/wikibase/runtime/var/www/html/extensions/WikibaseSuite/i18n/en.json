@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": ["Wikibase Suite Team"]
+	},
+	"wikibasesuite-extensionname": "Wikibase Suite",
+	"wikibasesuite-desc": "Adds Wikibase Suite version reporting and public metrics",
+	"wikibase-suite-sidebar": "Wikibase",
+	"wikibasesuite-sidebar-heading": "Wikibase",
+	"wikibasesuite-sidebar-link-create-item": "Create new item",
+	"wikibasesuite-sidebar-link-create-property": "Create new property",
+	"wikibasesuite-sidebar-link-all-items": "All items",
+	"wikibasesuite-sidebar-link-all-properties": "All properties",
+	"wikibasesuite-sidebar-link-quickstatements": "QuickStatements",
+	"wikibasesuite-sidebar-link-sparql-query-service": "SPARQL Query Service"
+}

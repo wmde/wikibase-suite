@@ -59,7 +59,7 @@ function commitAll(fixture: Fixture, message: string): void {
 	git(fixture, 'commit', '-m', message);
 }
 
-function wikibaseManifest(version: string, revision = 'aaa'): string {
+function wikibaseManifest(version: string, commit = 'aaa'): string {
 	return `variable "IMAGE_NAME" { default = "wikibase" }
 variable "IMAGE_VERSION" { default = "${version}" }
 variable "WIKIBASE" {
@@ -68,7 +68,7 @@ variable "WIKIBASE" {
     name = "Wikibase"
     repo = "https://github.com/example/wikibase.git"
     ref = "refs/heads/main"
-    revision = "${revision}"
+    commit = "${commit}"
   }
 }
 `;
@@ -223,6 +223,10 @@ describe('wbs-dev preparation and release workflow', () => {
 			const rerun = versions(fixture, 'wikibase');
 			assert.equal(rerun.status, 0, rerun.stderr);
 			assert.equal(imageVersion(fixture), '1.1.0');
+			assert.match(
+				rerun.stdout,
+				/No selected projects have releasable changes\./u
+			);
 		});
 
 		it('preserves a manually written untagged draft and its higher version floor', () => {
@@ -303,7 +307,7 @@ describe('wbs-dev preparation and release workflow', () => {
 					}
 				},
 				{
-					variable: 'SOURCE.revision',
+					variable: 'SOURCE.commit',
 					description: 'Manifest source main',
 					previous: 'dddddddddddddddddddddddddddddddddddddddd',
 					next: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -441,7 +445,7 @@ describe('wbs-dev preparation and release workflow', () => {
 					],
 					sourceChanges: [
 						{
-							variable: 'WIKIBASE.revision',
+							variable: 'WIKIBASE.commit',
 							description: 'Wikibase main',
 							previous: 'aaa',
 							next: 'bbb'
@@ -455,7 +459,7 @@ describe('wbs-dev preparation and release workflow', () => {
 			)!.contents;
 			assert.equal(plan.currentVersion, '1.0.0');
 			assert.equal(plan.targetVersion, '1.0.1');
-			assert.equal(readVariable(manifestUpdate, 'WIKIBASE.revision'), 'bbb');
+			assert.equal(readVariable(manifestUpdate, 'WIKIBASE.commit'), 'bbb');
 			assert.equal(readImageManifest(project.versionPath).version, '1.0.0');
 			assert.equal(readVariable(manifestUpdate, 'IMAGE_VERSION'), '1.0.1');
 		});
@@ -507,6 +511,11 @@ describe('wbs-dev preparation and release workflow', () => {
 				version: '1.0.1',
 				toolsImage: 'wikibase/wbs-tools:1.1.0'
 			});
+			assert.match(
+				plan.updates.find((update) => update.path.endsWith('/install'))!
+					.contents,
+				/WBS_TOOLS_IMAGE="\$\{WBS_TOOLS_IMAGE:-wikibase\/wbs-tools:1\.1\.0\}"/u
+			);
 			assert.match(
 				plan.updates.find((update) => update.path.endsWith('CHANGELOG.md'))!
 					.contents,

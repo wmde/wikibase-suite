@@ -10,7 +10,7 @@ import {
 } from '@clack/prompts';
 import type { Command } from 'commander';
 import { readFileSync } from 'node:fs';
-import { relative } from 'node:path';
+import { join, relative } from 'node:path';
 import semver from 'semver';
 import type { RepositoryContext } from '../../lib/context.js';
 import { applyFileUpdates, type FileUpdate } from '../../lib/file-updates.js';
@@ -30,12 +30,12 @@ import {
 } from '../../lib/versioning.js';
 import { ClackInteraction, UpdateCancelled } from './interaction.js';
 import { projectLabel, projectOptionLabel, strong } from './presentation.js';
-import type { SourceUpdateProvider } from './source-types.js';
 import {
 	planWbsToolsAdoption,
 	type WbsToolsAdoption
 } from './projects/wbs-tools.js';
 import { planWbsUpdate } from './projects/wbs.js';
+import type { SourceUpdateProvider } from './source-types.js';
 import {
 	planSourceFileUpdate,
 	sourceUpdateProviderFor,
@@ -45,12 +45,20 @@ import {
 interface ProjectSourceUpdate {
 	fileUpdate: SourceFileUpdate;
 	releaseChanges: SourceChange[];
-	relativePath: string;
+	relativePaths: string[];
 }
 
 interface VersionChoice {
 	includeChangelog: boolean;
 	targetVersion: string;
+}
+
+export function imageRelativePath(
+	context: Pick<RepositoryContext, 'imagesRoot'>,
+	image: string,
+	path: string
+): string {
+	return relative(join(context.imagesRoot, image), path);
 }
 
 function unwrapPrompt<T>(value: T | symbol): T {
@@ -70,13 +78,45 @@ function describeSourceUpdate(
 	const relativePath = relative(context.repositoryRoot, fileUpdate.path);
 	const previousTag = findPreviousRelease(git, project).tag;
 	const releasedContents = previousTag
-		? git.run(['show', `${previousTag}:${relativePath}`], { allowFailure: true })
+		? git.run(['show', `${previousTag}:${relativePath}`], {
+				allowFailure: true
+			})
 		: '';
 	const baseline = releasedContents || readFileSync(fileUpdate.path, 'utf8');
+	const previousAdditionalContents = Object.fromEntries(
+		fileUpdate.additionalUpdates.map((update) => {
+			const path = relative(context.repositoryRoot, update.path);
+			const released = previousTag
+				? git.run(['show', `${previousTag}:${path}`], { allowFailure: true })
+				: '';
+			return [
+				imageRelativePath(context, provider.image, update.path),
+				released || readFileSync(update.path, 'utf8')
+			];
+		})
+	);
+	const nextAdditionalContents = Object.fromEntries(
+		fileUpdate.additionalUpdates.map((update) => [
+			imageRelativePath(context, provider.image, update.path),
+			update.contents
+		])
+	);
 	return {
 		fileUpdate,
-		releaseChanges: provider.describeChanges(baseline, fileUpdate.contents),
-		relativePath
+		releaseChanges: provider.describeChangesWithAdditional
+			? provider.describeChangesWithAdditional(
+					baseline,
+					fileUpdate.contents,
+					previousAdditionalContents,
+					nextAdditionalContents
+				)
+			: provider.describeChanges(baseline, fileUpdate.contents),
+		relativePaths: [
+			relativePath,
+			...fileUpdate.additionalUpdates.map((update) =>
+				relative(context.repositoryRoot, update.path)
+			)
+		]
 	};
 }
 
@@ -188,7 +228,7 @@ async function update(
 	try {
 		const git = new GitRepository(context);
 		git.fetchRemoteTags();
-		const sourceUpdates: SourceFileUpdate[] = [];
+		const sourceUpdates: FileUpdate[] = [];
 		const versionPlans: VersionPlan[] = [];
 		const wbs = releaseProjects.find((project) => project.name === 'wbs')!;
 		const selectedWbs = projects.find((project) => project.name === 'wbs');
@@ -217,23 +257,24 @@ async function update(
 			}
 			if (sourceUpdate?.fileUpdate.changes.length) {
 				sourceUpdates.push(sourceUpdate.fileUpdate);
+				sourceUpdates.push(...sourceUpdate.fileUpdate.additionalUpdates);
 			}
 			const proposedUpdates = sourceUpdate?.fileUpdate.changes.length
-				? [sourceUpdate.fileUpdate]
+				? [
+						sourceUpdate.fileUpdate,
+						...sourceUpdate.fileUpdate.additionalUpdates
+					]
 				: [];
 			const options = {
 				proposedUpdates,
 				sourceChanges: sourceUpdate?.releaseChanges ?? [],
-				sourcePaths: sourceUpdate ? [sourceUpdate.relativePath] : []
+				sourcePaths: sourceUpdate?.relativePaths ?? []
 			};
-			const proposal = planVersionUpdate(
-				context,
-				git,
-				project,
-				options
-			);
+			const proposal = planVersionUpdate(context, git, project, options);
 			if (!proposal) {
-				log.info('No releasable changes were found.');
+				log.info('No unreleased code was found.', {
+					spacing: provider ? 0 : 1
+				});
 				continue;
 			}
 			if (proposal.replacesGeneratedChangelogSections) {
@@ -303,7 +344,7 @@ async function update(
 					'WBS Tools adoption did not produce a WBS release plan.'
 				);
 			} else {
-				log.info('No releasable changes were found.');
+				log.info('No unreleased code was found.');
 			}
 		}
 

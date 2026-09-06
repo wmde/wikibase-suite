@@ -95,6 +95,7 @@ export const wdqsSourceProvider: SourceUpdateProvider = {
 			settings.tagPrefix
 		);
 		if (candidates.length === 0) {
+			interaction.info('Dependencies are current.');
 			return { contents, changes: [] };
 		}
 		const candidate = candidates[0];

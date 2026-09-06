@@ -2,12 +2,10 @@ import { afterEach, describe, it } from 'mocha';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { bakeObject, resolveBakeVariables } from '../../lib/bake.js';
 import { discoverWdqsCandidates, wdqsSourceProvider } from './projects/wdqs.js';
 import {
 	discoverMediaWikiCandidates,
-	selectMediaWikiUpdate,
-	wikibasePins
+	selectMediaWikiUpdate
 } from './projects/wikibase.js';
 import type { SourceUpdateInteraction } from './source-types.js';
 import {
@@ -20,6 +18,9 @@ import {
 } from './source-utils.js';
 
 const WIKIBASE_IMAGE = resolve('images/wikibase');
+const QUICKSTATEMENTS_MANIFEST = resolve(
+	'images/quickstatements/docker-bake.hcl'
+);
 const WDQS_MANIFEST = resolve('images/wdqs/docker-bake.hcl');
 const originalFetch = globalThis.fetch;
 
@@ -29,34 +30,6 @@ const pinManifest = (value: string) =>
 describe('Wikibase source update provider', () => {
 	afterEach(() => {
 		globalThis.fetch = originalFetch;
-	});
-
-	it('discovers every managed source from the authoritative manifest', () => {
-		const contents = readFileSync(
-			resolve(WIKIBASE_IMAGE, 'docker-bake.hcl'),
-			'utf8'
-		);
-		const variables = resolveBakeVariables(contents, WIKIBASE_IMAGE);
-		const managed = [...variables.keys()].filter((name) => {
-			const value = variables.get(name);
-			return (
-				value !== null &&
-				typeof value === 'object' &&
-				!Array.isArray(value) &&
-				['gerrit', 'github', 'codeberg', 'gitlab'].includes(
-					String(bakeObject(variables, name).kind)
-				)
-			);
-		});
-		const pins = wikibasePins(contents);
-		assert.deepEqual(
-			pins.map(({ variable }) => variable).sort(),
-			managed.map((name) => `${name}.revision`).sort()
-		);
-		assert.equal(
-			new Set(pins.map(({ variable }) => variable)).size,
-			pins.length
-		);
 	});
 
 	it('discovers maintenance and newer stable MediaWiki releases', async () => {
@@ -147,34 +120,48 @@ describe('Wikibase source update provider', () => {
 		assert.equal(selected, '1.46.1');
 	});
 
-	it('keeps manifest-managed Wikimedia extensions aligned with the Dockerfile', () => {
-		const manifest = readFileSync(
-			resolve(WIKIBASE_IMAGE, 'docker-bake.hcl'),
+	it('keeps image package sources in the registry', () => {
+		const contents = readFileSync(
+			resolve(WIKIBASE_IMAGE, 'build/extensions.json'),
 			'utf8'
 		);
-		const dockerfile = readFileSync(
-			resolve(WIKIBASE_IMAGE, 'Dockerfile'),
-			'utf8'
+		const registry = JSON.parse(contents) as {
+			schemaVersion: number;
+			extensions: Array<{ name: string; source: unknown }>;
+		};
+		assert.equal(registry.schemaVersion, 1);
+		assert.ok(registry.extensions.length > 0);
+		assert.equal(
+			new Set(registry.extensions.map(({ name }) => name)).size,
+			registry.extensions.length
 		);
-		const match = /^ARG WMF_EXTENSIONS="([^"]+)"$/mu.exec(dockerfile);
-		assert.ok(match, 'Dockerfile must declare WMF_EXTENSIONS');
-		const variables = resolveBakeVariables(manifest, WIKIBASE_IMAGE);
-		const extensionVariables = [...variables.keys()].filter((name) => {
-			const value = variables.get(name);
-			return (
-				value !== null &&
-				typeof value === 'object' &&
-				!Array.isArray(value) &&
-				bakeObject(variables, name).kind === 'gerrit'
-			);
-		});
-		const extensions = extensionVariables.map((name) =>
-			String(bakeObject(variables, name).name)
+		assert.ok(registry.extensions.every(({ source }) => source !== null));
+		assert.deepEqual(
+			registry.extensions.slice(0, 4).map(({ name }) => name),
+			['Wikibase', 'WikibaseEdtf', 'EntitySchema', 'WikibaseLocalMedia']
 		);
-		assert.deepEqual(new Set(match[1].split(',')), new Set(extensions));
-		for (const name of extensionVariables) {
-			assert.match(dockerfile, new RegExp(`^ARG ${name}_COMMIT$`, 'mu'));
-		}
+	});
+});
+
+describe('Bake source pins', () => {
+	it('discovers branch-pinned sources without kind metadata', () => {
+		const pins = manifestPins(readFileSync(QUICKSTATEMENTS_MANIFEST, 'utf8'));
+
+		assert.deepEqual(
+			pins
+				.map(({ variable, description }) => ({ variable, description }))
+				.sort((left, right) => left.variable.localeCompare(right.variable)),
+			[
+				{
+					variable: 'MAGNUSTOOLS.commit',
+					description: 'MagnusTools master'
+				},
+				{
+					variable: 'QUICKSTATEMENTS.commit',
+					description: 'QuickStatements master'
+				}
+			]
+		);
 	});
 });
 
@@ -316,17 +303,16 @@ describe('other source update providers', () => {
 		};
 		const manifest = `variable "SOURCE" {
   default = {
-    kind = "gitlab"
     name = "Example"
     repo = "https://gitlab.wikimedia.org/repos/wmde/example.git"
     ref = "refs/heads/main"
-    revision = "old-commit"
+    commit = "old-commit"
   }
 }
 `;
 		const plan = await planPins(manifest, manifestPins(manifest));
 
-		assert.equal(readVariable(plan.contents, 'SOURCE.revision'), 'new-commit');
+		assert.equal(readVariable(plan.contents, 'SOURCE.commit'), 'new-commit');
 		assert.equal(
 			plan.changes[0].link?.url,
 			'https://gitlab.wikimedia.org/repos/wmde/example/-/compare/old-commit...new-commit'

@@ -1,7 +1,7 @@
 # WBS Tools image manifest. The application package remains package.json.
 
 variable "IMAGE_NAME" { default = "wbs-tools" }
-variable "IMAGE_VERSION" { default = "1.0.0" }
+variable "IMAGE_VERSION" { default = "1.0.1" }
 variable "IMAGE_REPOSITORY" { default = "wikibase/wbs-tools" }
 variable "TAGS" {
   type    = list(string)

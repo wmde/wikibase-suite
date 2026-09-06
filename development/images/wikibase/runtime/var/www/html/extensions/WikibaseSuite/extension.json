@@ -1,0 +1,38 @@
+{
+	"name": "WikibaseSuite",
+	"version": "1.0.0",
+	"author": ["Wikibase Suite Team"],
+	"url": "https://www.mediawiki.org/wiki/Wikibase/Suite",
+	"namemsg": "wikibasesuite-extensionname",
+	"descriptionmsg": "wikibasesuite-desc",
+	"type": "other",
+	"license-name": "BSD-3-Clause",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseSuite\\": "includes/"
+	},
+	"callback": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onRegistration",
+	"APIMetaModules": {
+		"wikibasesuite": "MediaWiki\\Extension\\WikibaseSuite\\ApiQueryWikibaseSuite"
+	},
+	"Hooks": {
+		"BeforePageDisplay": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onBeforePageDisplay",
+		"SoftwareInfo": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onSoftwareInfo",
+		"SidebarBeforeOutput": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onSidebarBeforeOutput"
+	},
+	"ResourceModules": {
+		"ext.wikibasesuite.vector2022": {
+			"styles": ["resources/wbs.css"]
+		},
+		"ext.wikibasesuite.pinAnonymousMainMenu": {
+			"scripts": ["resources/pinAnonymousMainMenu.js"]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": ".",
+		"remoteExtPath": "WikibaseSuite"
+	},
+	"MessagesDirs": {
+		"WikibaseSuite": ["i18n"]
+	},
+	"manifest_version": 2
+}
