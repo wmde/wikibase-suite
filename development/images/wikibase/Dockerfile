@@ -52,9 +52,9 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
         opcache \
         ; \
     \
-    pecl install APCu-5.1.21; \
+    pecl install APCu-5.1.21 redis-6.3.0; \
         docker-php-ext-enable \
-        apcu \
+        apcu redis \
         ; \
     rm -r /tmp/pear; \
     \
