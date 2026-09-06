@@ -17,6 +17,8 @@ RUN apt-get update; \
         gettext-base \
         librsvg2-bin \
         imagemagick \
+        # Required by Score MediaWiki Extension
+        lilypond \
         # Required by SyntaxHighlighting MediaWiki Extension
         python3 \
         # Required by Scribunto MediaWiki Extension
