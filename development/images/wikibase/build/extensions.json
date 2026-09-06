@@ -128,6 +128,150 @@
       }
     },
     {
+      "name": "ConfirmAccount",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/ConfirmAccount",
+        "ref": "refs/heads/REL1_46",
+        "commit": "a3227fdc9413ec8c3b50d671ee389a72d818257b"
+      }
+    },
+    {
+      "name": "InviteSignup",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/InviteSignup",
+        "ref": "refs/heads/REL1_46",
+        "commit": "07463e8d97370a36bc8ef47153c818ef9e3b7cd3"
+      }
+    },
+    {
+      "name": "Mailgun",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Mailgun",
+        "ref": "refs/heads/REL1_46",
+        "commit": "fd8d7748ccee5e89d5d2c0502efa6abefbeedfd4"
+      }
+    },
+    {
+      "name": "StopForumSpam",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/StopForumSpam",
+        "ref": "refs/heads/REL1_46",
+        "commit": "b133d7b9f3822b217d0b396359aa931e5a7497d3"
+      }
+    },
+    {
+      "name": "TorBlock",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/TorBlock",
+        "ref": "refs/heads/REL1_46",
+        "commit": "7a34e88517b1bd70856b299aec7563eb9091606b"
+      }
+    },
+    {
+      "name": "RevisionSlider",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/RevisionSlider",
+        "ref": "refs/heads/REL1_46",
+        "commit": "bcf88506161d57001b523bf9c2ff3a03cf565255"
+      }
+    },
+    {
+      "name": "JsonConfig",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/JsonConfig",
+        "ref": "refs/heads/REL1_46",
+        "commit": "f9015ed89d7aedeb6c5d18fed6b58bb598a7dc20"
+      }
+    },
+    {
+      "name": "Kartographer",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Kartographer",
+        "ref": "refs/heads/REL1_46",
+        "commit": "634b552f6f5d3c47dd9413dde00d81e0efcb4c81"
+      }
+    },
+    {
+      "name": "DeleteBatch",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/DeleteBatch",
+        "ref": "refs/heads/REL1_46",
+        "commit": "3e63873a3548b575a1decfe4914d09e3c3c009d8"
+      }
+    },
+    {
+      "name": "EmbedVideo",
+      "source": {
+        "repo": "https://github.com/StarCitizenWiki/mediawiki-extensions-EmbedVideo.git",
+        "ref": "refs/heads/master",
+        "commit": "d0aa2a3245c1308362b2ce77df1f6bb3e2bf6579"
+      }
+    },
+    {
+      "name": "ThatSrc",
+      "source": {
+        "repo": "https://github.com/nyurik/ThatSrc.git",
+        "ref": "refs/heads/master",
+        "commit": "3e039311504eb82f8c5c488a457b9e376b5cf7e3"
+      }
+    },
+    {
+      "name": "TemplateSandbox",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/TemplateSandbox",
+        "ref": "refs/heads/REL1_46",
+        "commit": "7fd76b37e6d85418ff082ab8127cf1c51c7fa466"
+      }
+    },
+    {
+      "name": "CodeMirror",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/CodeMirror",
+        "ref": "refs/heads/REL1_46",
+        "commit": "31801f4f592c30786a8845b4503855860b41be81"
+      }
+    },
+    {
+      "name": "AdvancedSearch",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/AdvancedSearch",
+        "ref": "refs/heads/REL1_46",
+        "commit": "23ae0b9718b368673ac86fbc86d0c701a54b48fa"
+      }
+    },
+    {
+      "name": "TwoColConflict",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/TwoColConflict",
+        "ref": "refs/heads/REL1_46",
+        "commit": "d4c4742626c2bec7720b5552c1e8d853fdc37f71"
+      }
+    },
+    {
+      "name": "MobileFrontend",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/MobileFrontend",
+        "ref": "refs/heads/REL1_46",
+        "commit": "e00881d4d6f2e91f57026e8fa81a7dd8ad71cda4"
+      }
+    },
+    {
+      "name": "WikibaseLexeme",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseLexeme",
+        "ref": "refs/heads/REL1_46",
+        "commit": "f71760e895a3b0793a946f976bd5783409f87536"
+      }
+    },
+    {
+      "name": "WikibaseLexemeCirrusSearch",
+      "source": {
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseLexemeCirrusSearch",
+        "ref": "refs/heads/REL1_46",
+        "commit": "3fbbbe32baac83146a1ff3f939e2631dc12de708"
+      }
+    },
+    {
       "name": "WikibaseSuite",
       "source": {
         "path": "runtime/var/www/html/extensions/WikibaseSuite"

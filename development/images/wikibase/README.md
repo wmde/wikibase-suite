@@ -66,6 +66,8 @@ must be set explicitly.
 | `WIKIMEDIA_OAUTH_CONSUMER_TOKEN` | | Consumer token from a Wikimedia OAuth 1.0a consumer. Wikimedia login is active only when this and the secret token below are provided.                                                    |
 | `WIKIMEDIA_OAUTH_SECRET_TOKEN` | | Secret token from that consumer.                                                                                                                                                            |
 | `QUICKSTATEMENTS_PUBLIC_URL` |         | Public URL of the QuickStatements server, such as [wikibase/quickstatements](https://hub.docker.com/r/wikibase/quickstatements). Initial setup also uses it to create the OAuth consumer; changing it later does not update that consumer. |
+| `REDIS_SERVER`               |         | Redis server address. Enables Redis for the main cache and session store when using the default WBS configuration. |
+| `REDIS_PASSWORD`             |         | Password for a protected Redis server. |
 
 ## Features
 
@@ -76,17 +78,33 @@ extensions and additional packages placed in this image.
 
 | Bundled extension | Enabled | Description |
 | --- | --- | --- |
+| [AdvancedSearch](https://www.mediawiki.org/wiki/Extension:AdvancedSearch) | No | Adds an advanced search interface. |
 | [Babel](https://www.mediawiki.org/wiki/Extension:Babel) | Yes | Adds a parser function to inform other users about language proficiency and categorize users of the same levels and languages. |
 | [CLDR](https://www.mediawiki.org/wiki/Extension:CLDR) | Yes | Provides functions to localize the names of languages, countries, currencies, and time units based on their language code. |
-| [DiscussionTools](https://www.mediawiki.org/wiki/Extension:DiscussionTools) | Yes | Adds modern discussion features such as reply links and add-topic workflows on talk pages. |
+| [CodeMirror](https://www.mediawiki.org/wiki/Extension:CodeMirror) | No | Adds an in-browser code editor. |
+| [ConfirmAccount](https://www.mediawiki.org/wiki/Extension:ConfirmAccount) | No | Lets administrators review and approve account requests. |
+| [DeleteBatch](https://www.mediawiki.org/wiki/Extension:DeleteBatch) | No | Lets administrators delete many pages at once. |
 | [Elastica](https://www.mediawiki.org/wiki/Extension:Elastica), [CirrusSearch](https://www.mediawiki.org/wiki/Extension:CirrusSearch), and [WikibaseCirrusSearch](https://www.mediawiki.org/wiki/Extension:WikibaseCirrusSearch) | Yes | Provide OpenSearch integration for MediaWiki and Wikibase. Enabled when `ELASTICSEARCH_HOST` is set. See the [CirrusSearch documentation](https://www.mediawiki.org/wiki/Extension:CirrusSearch) for index maintenance and reindexing. |
-| [Echo](https://www.mediawiki.org/wiki/Extension:Echo) | Yes | Provides notifications for user mentions, page activity, and other wiki events. |
+| [EmbedVideo](https://www.mediawiki.org/wiki/Extension:EmbedVideo) | No | Embeds supported video services in wiki pages. |
 | [EntitySchema](https://www.mediawiki.org/wiki/Extension:EntitySchema) | Yes | Stores Shape Expressions schemas on wiki pages. |
+| [InviteSignup](https://www.mediawiki.org/wiki/Extension:InviteSignup) | No | Restricts account creation to invitations issued by authorized users. |
+| [JsonConfig](https://www.mediawiki.org/wiki/Extension:JsonConfig) | No | Stores JSON configuration pages in a dedicated content model. |
+| [Kartographer](https://www.mediawiki.org/wiki/Extension:Kartographer) | No | Adds interactive maps. Requires a compatible map-tile server. |
+| [Mailgun](https://www.mediawiki.org/wiki/Extension:Mailgun) | No | Sends MediaWiki email through the Mailgun API. |
+| [MobileFrontend](https://www.mediawiki.org/wiki/Extension:MobileFrontend) | No | Adapts the wiki interface for mobile devices. |
 | [OAuth](https://www.mediawiki.org/wiki/Extension:OAuth) | Yes | Allows users to safely authorize another application (a “consumer”) to use the MediaWiki Action API on their behalf. |
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) and [WSOAuth](https://www.mediawiki.org/wiki/Extension:WSOAuth) | Yes | Let users authenticate to Wikibase with their Wikimedia account through a Meta-Wiki OAuth 1.0a consumer. Enabled when both Wikimedia OAuth token variables are set. |
+| [RevisionSlider](https://www.mediawiki.org/wiki/Extension:RevisionSlider) | No | Adds a visual revision comparison slider. |
+| [StopForumSpam](https://www.mediawiki.org/wiki/Extension:StopForumSpam) | No | Checks account registrations against the Stop Forum Spam service. |
+| [TemplateSandbox](https://www.mediawiki.org/wiki/Extension:TemplateSandbox) | No | Lets editors preview pages using draft template revisions. |
+| [ThatSrc](https://github.com/nyurik/ThatSrc) | No | Displays source information for embedded media. |
+| [TorBlock](https://www.mediawiki.org/wiki/Extension:TorBlock) | No | Restricts edits from anonymous Tor exit nodes. |
+| [TwoColConflict](https://www.mediawiki.org/wiki/Extension:TwoColConflict) | No | Provides a two-column edit-conflict interface. |
 | [UniversalLanguageSelector](https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector) | Yes | Allows users to select a language and configure its support. |
 | [WikibaseEdtf](https://github.com/ProfessionalWiki/WikibaseEdtf) | No | Adds support for the Extended Date/Time Format (EDTF) specification through a new data type. |
 | [WikibaseInWikitext](https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext) | Yes | Adds a `<sparql>` tag for writing local Query Service examples on wiki pages. |
+| [WikibaseLexeme](https://www.mediawiki.org/wiki/Wikibase/Lexeme) | No | Adds lexicographical data, forms, and senses to Wikibase. |
+| [WikibaseLexemeCirrusSearch](https://www.mediawiki.org/wiki/Extension:WikibaseLexemeCirrusSearch) | No | Adds OpenSearch support for lexemes when Wikibase Lexeme and Wikibase CirrusSearch are enabled. |
 | [WikibaseLocalMedia](https://github.com/ProfessionalWiki/WikibaseLocalMedia) | Yes | Adds support for local media files to Wikibase through a new data type. |
 | [WikibaseManifest](https://www.mediawiki.org/wiki/Extension:WikibaseManifest) | Yes | Provides metadata about the structured data repository through an API. |
 

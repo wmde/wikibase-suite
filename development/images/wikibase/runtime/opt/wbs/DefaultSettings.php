@@ -19,6 +19,26 @@ $wgMainCacheType = CACHE_ACCEL;
 $wgSessionCacheType = CACHE_DB;
 $wgParserCacheType = CACHE_DB;
 $wgMemCachedServers = [];
+
+# Redis is optional. When configured, it provides a shared main cache and
+# session store suitable for multiple web or job-runner containers.
+$wbsRedisServer = getenv( 'REDIS_SERVER' );
+if ( $wbsRedisServer !== false && trim( (string)$wbsRedisServer ) !== '' ) {
+	$wbsRedisOptions = [
+		'class' => RedisBagOStuff::class,
+		'servers' => [ trim( (string)$wbsRedisServer ) ],
+		'connectTimeout' => 1,
+		'persistent' => true,
+	];
+	$wbsRedisPassword = getenv( 'REDIS_PASSWORD' );
+	if ( $wbsRedisPassword !== false && $wbsRedisPassword !== '' ) {
+		$wbsRedisOptions['password'] = $wbsRedisPassword;
+	}
+	$wgObjectCaches['redis'] = $wbsRedisOptions;
+	$wgMainCacheType = 'redis';
+	$wgSessionCacheType = 'redis';
+}
+
 $wgUseImageMagick = true;
 
 $wgRightsPage = '';
