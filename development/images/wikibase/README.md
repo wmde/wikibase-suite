@@ -66,6 +66,8 @@ must be set explicitly.
 | `WIKIMEDIA_OAUTH_CONSUMER_TOKEN` | | Consumer token from a Wikimedia OAuth 1.0a consumer. Wikimedia login is active only when this and the secret token below are provided.                                                    |
 | `WIKIMEDIA_OAUTH_SECRET_TOKEN` | | Secret token from that consumer.                                                                                                                                                            |
 | `QUICKSTATEMENTS_PUBLIC_URL` |         | Public URL of the QuickStatements server, such as [wikibase/quickstatements](https://hub.docker.com/r/wikibase/quickstatements). Initial setup also uses it to create the OAuth consumer; changing it later does not update that consumer. |
+| `REDIS_SERVER`               |         | Redis server address. Enables Redis for the main cache and session store when using the default WBS configuration. |
+| `REDIS_PASSWORD`             |         | Password for a protected Redis server. |
 
 ## Features
 
