@@ -1,6 +1,6 @@
 # Cloud image POC findings
 
-_Current as of 2026-09-07._
+_Current as of 2026-09-07. The working Compose fixture is beside this file._
 
 This local-only POC derives a Cloud-specific image from the Wikibase Suite
 Wikibase image. This is a living record of findings, decisions, and follow-up
@@ -91,15 +91,6 @@ other optional extensions are simple loads with no material policy bundle.
   canonical URIs, and service URLs are tenant data. A profile can establish
   the behavior while Cloud and WBS provide their instance values afterward.
 
-### Score
-
-- **Shared profile target:** eventually load Score with the same Wikibase data
-  type setting in both images.
-- **Current packaging decision:** Score is excluded from the generic image for
-  now because LilyPond adds roughly 73 MiB in a distinct image layer and has a
-  wider operational footprint. This is conservative, not a policy divergence;
-  revisit it if full extension-set parity becomes worth the image cost.
-
 Extensions such as RevisionSlider, TemplateSandbox, CodeMirror, AdvancedSearch,
 EmbedVideo, DeleteBatch, WikiHiero, Echo, and Thanks currently need only normal
 loading. Cloud platform integration—OAuth privileges, Platform API
@@ -133,18 +124,7 @@ inventory; it belongs solely in the eventual Cloud layer.
 
 ## Actions to take now for WBS
 
-1. Add WikiHiero to the generic optional-extension bundle, disabled by
-   default, and document it in the Wikibase image README. Its omission was not
-   a deliberate compatibility or footprint decision: its REL1_46 metadata
-   requires only MediaWiki 1.46, it has no production Composer dependency, and
-   its installed extension directory is approximately 5 MiB.
-2. Make a focused WBS runtime-layout pass: strongly consider moving the WBS
-   PHP bootstrap, default settings, extension profiles, and related
-   image-owned configuration from `/opt/wbs` into the WikibaseSuite extension.
-   Keep the generic container dispatcher and shell setup/migration machinery
-   separate where that remains clearer. This would place the WBS policy next
-   to the extension that owns it, following the useful Cloud pattern.
-3. Revisit an extension registry as the likely shared Cloud/WBS architecture
+1. Revisit an extension registry as the likely shared Cloud/WBS architecture
    for the profiles described above and selective activation. It must be able
    to express enabled/disabled extensions and dependency-aware,
    multi-extension profiles that activate according to what other extensions
@@ -157,4 +137,4 @@ inventory; it belongs solely in the eventual Cloud layer.
    not a new configuration interface. The Cloud POC is the reference point for
    deriving further profiles and policies. The longer-term target is a shared
    extension-policy set and a Cloud full-set variant built from a base image
-   that packages every extension except Score.
+   that packages every extension Cloud uses.

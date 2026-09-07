@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "domain": "cloud1.wikibase.test",
+    "sitename": "Cloud POC One",
+    "wiki_db": {
+      "id": 1,
+      "name": "mwdb_cloud1",
+      "prefix": "mwt_cloud1",
+      "user": "mwu_someuser",
+      "password": "somepassword",
+      "version": "mw1.46-cloud-poc",
+      "wiki_id": 1
+    },
+    "wiki_queryservice_namespace": {
+      "id": 1,
+      "namespace": "cloud1",
+      "backend": "wdqs:9999",
+      "wiki_id": 1
+    },
+    "settings": [
+      { "name": "wgSecretKey", "value": "cloud-poc-one-secret" },
+      { "name": "wwExtEnableWikibaseLexeme", "value": "0" },
+      { "name": "wwExtEnableConfirmAccount", "value": "0" },
+      { "name": "wwExtEnableInviteSignup", "value": "0" },
+      { "name": "nyurikThatSrcEnable", "value": "0" },
+      { "name": "wwExtEnableElasticSearch", "value": "0" }
+    ]
+  }
+}

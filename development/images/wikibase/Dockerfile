@@ -171,27 +171,11 @@ CMD ["web"]
 # ###########################################################################
 # Cloud-specific derivative. The normal Wikibase image remains the target
 # above; this stage is selected only by the wikibase-cloud Bake target.
-# Add the Cloud-only packages after the normal Wikibase package set, then
-# refresh Composer once over the complete Cloud application tree.
-FROM composer AS cloud-composer
-
-COPY --chown=nobody:nogroup --chmod=755 build/cloud/extensions.json /tmp/cloud-extensions.json
-RUN php /tmp/InstallExtensions.php /tmp/cloud-extensions.json && \
-    rm -rf composer.lock && \
-    composer update --no-dev -vv -n
-
 FROM wikibase AS wikibase-cloud
 
-COPY --from=cloud-composer --chown=nobody:nogroup /var/www/html /var/www/html
-
-# Score requires LilyPond and the Cloud job code uses pcntl. Keep both Cloud
-# dependencies out of the general-purpose Wikibase image.
-RUN apt-get update; \
-    apt-get install -y --no-install-recommends \
-        lilypond \
-        ; \
-    docker-php-ext-install pcntl; \
-    rm -rf /var/lib/apt/lists/*
+# Cloud job code uses pcntl. Score and its LilyPond dependency are supplied by
+# the shared image alongside the other optional extensions.
+RUN docker-php-ext-install pcntl
 
 # Cloud runtime files mirror their final paths, just as the Suite runtime files
 # above do. They are copied only by this Cloud-derived target.
