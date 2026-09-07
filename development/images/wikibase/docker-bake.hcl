@@ -68,6 +68,8 @@ function "image_tags" {
 }
 
 target "wikibase-base" {
+  target = "wikibase"
+
   args = {
     WIKIBASE_IMAGE_VERSION = IMAGE_VERSION
     MEDIAWIKI_VERSION      = MEDIAWIKI.version
@@ -101,6 +103,26 @@ target "wikibase-release" {
     ],
     [for tag in TAGS : image_tags(tag)]
   )))
+}
+
+# Local proof-of-concept Cloud derivative. It intentionally has separate tags
+# and is not part of the default group or release targets.
+target "wikibase-cloud-base" {
+  inherits = ["wikibase-base"]
+  target   = "wikibase-cloud"
+
+  labels = {
+    "org.opencontainers.image.title"       = "Wikibase Cloud image proof of concept"
+    "org.opencontainers.image.description" = "Wikibase image with Cloud-specific runtime integration"
+    "org.opencontainers.image.version"     = IMAGE_VERSION
+    "org.opencontainers.image.source"      = "https://github.com/wmde/wikibase-suite"
+    "org.opencontainers.image.licenses"    = "GPL-2.0-or-later"
+  }
+}
+
+target "wikibase-cloud" {
+  inherits = ["wikibase-cloud-base"]
+  tags     = ["wikibase/wikibase-cloud:latest"]
 }
 
 group "default" {

@@ -1,0 +1,7 @@
+{
+	"@metadata": {
+		"authors": ["Wikibase Cloud and Wikibase Suite contributors"]
+	},
+	"wbstackinternal-desc": "Provides private WB Stack control-plane compatibility APIs"
+}
+

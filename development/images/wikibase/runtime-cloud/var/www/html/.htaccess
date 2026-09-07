@@ -1,0 +1,37 @@
+# This file is provided by the wikibase/wikibase docker image.
+## http://www.mediawiki.org/wiki/Manual:Short_URL/Apache
+
+# Enable the rewrite engine
+RewriteEngine On
+
+# Rewrite Wikibase RDF URLs like Wikidata per
+# https://meta.wikimedia.org/wiki/Wikidata/Notes/URI_scheme
+RewriteRule ^/?entity/statement/(L\d+)-([SF]\d+)-(.*)$ /wiki/Special:EntityData/$1#$1-$2\$$3 [NE,R=303,L]
+RewriteRule ^/?entity/statement/([QqPpL]\d+)-(.*)$ /wiki/Special:EntityData/$1#$1\$$2 [NE,R=303,L]
+# Review with Cloud: the trailing space makes this imported rule miss ordinary
+# /entity/statement/Q42-style paths. Is that intentional, or an upstream typo?
+RewriteRule ^/?entity/statement/([QpPpLM]\d+) /wiki/Special:EntityData/$1 [R=303,L]
+RewriteRule ^/?value/(.*)$ /wiki/Special:ListDatatypes [R=303,L]
+RewriteRule ^/?reference/(.*)$ /wiki/Help:Sources [R=303,L]
+RewriteRule ^/?prop/direct/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/direct-normalized/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/novalue/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/statement/value/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/statement/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/qualifier/value/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/qualifier/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/reference/value/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/reference/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/statement/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/qualifier/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/reference/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?prop/(.*)$ /wiki/Property:$1 [R=303,L]
+RewriteRule ^/?entity/E(.*)$ /wiki/EntitySchema:E$1 [R=303,QSA,L]
+RewriteRule ^/?entity/(.*)$ /wiki/Special:EntityData/$1 [R=303,QSA]
+
+# Short url for wiki pages
+RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/w/index.php [L]
+
+# Redirect / to Main Page
+RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [L]
+

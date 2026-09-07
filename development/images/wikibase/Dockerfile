@@ -167,3 +167,44 @@ ENV DB_NAME=my_wiki \
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["web"]
+
+# ###########################################################################
+# Cloud-specific derivative. The normal Wikibase image remains the target
+# above; this stage is selected only by the wikibase-cloud Bake target.
+# Add the Cloud-only packages after the normal Wikibase package set, then
+# refresh Composer once over the complete Cloud application tree.
+FROM composer AS cloud-composer
+
+COPY --chown=nobody:nogroup --chmod=755 build/cloud/extensions.json /tmp/cloud-extensions.json
+RUN php /tmp/InstallExtensions.php /tmp/cloud-extensions.json && \
+    rm -rf composer.lock && \
+    composer update --no-dev -vv -n
+
+FROM wikibase AS wikibase-cloud
+
+COPY --from=cloud-composer --chown=nobody:nogroup /var/www/html /var/www/html
+
+# Score requires LilyPond and the Cloud job code uses pcntl. Keep both Cloud
+# dependencies out of the general-purpose Wikibase image.
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends \
+        lilypond \
+        ; \
+    docker-php-ext-install pcntl; \
+    rm -rf /var/lib/apt/lists/*
+
+# Cloud runtime files mirror their final paths, just as the Suite runtime files
+# above do. They are copied only by this Cloud-derived target.
+COPY --chown=nobody:nogroup runtime-cloud/ /
+
+# Cloud owns the selected configuration entry point and bypasses Suite setup.
+ENV MW_CONFIG_FILE=/opt/wikibase-cloud/CloudSettings.php
+
+# Cloud disables localization recaching during normal requests. Build its cache
+# through the static database-less maintenance profile instead.
+ARG LOCALIZATION_CACHE_THREAD_COUNT=1
+RUN WBS_DOMAIN=maint php /var/www/html/maintenance/run.php rebuildLocalisationCache \
+        --threads="${LOCALIZATION_CACHE_THREAD_COUNT}" \
+        --no-database \
+        --skip-message-purge \
+        --no-progress
