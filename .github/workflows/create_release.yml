@@ -12,6 +12,8 @@ on:
           - wbs
           - opensearch
           - quickstatements
+          - qlever
+          - qlever-updater
           - wbs-tools
           - wdqs
           - wdqs-frontend
@@ -68,7 +70,7 @@ jobs:
             "All projects")
               release_target=(all)
               ;;
-            opensearch|quickstatements|wbs-tools|wdqs|wdqs-frontend|wikibase)
+            opensearch|qlever|qlever-updater|quickstatements|wbs-tools|wdqs|wdqs-frontend|wikibase)
               release_target=(images "$PROJECT_NAME")
               ;;
             *)

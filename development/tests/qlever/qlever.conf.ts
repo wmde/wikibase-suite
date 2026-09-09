@@ -4,12 +4,13 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'queryservice',
-	specs: [ 'queryservice/*.spec.ts' ],
-	composeProfiles: [ 'queryservice' ],
+	name: 'qlever',
+	specs: [ 'qlever/*.spec.ts' ],
+	composeProfiles: [ 'qlever' ],
 	composeFiles: [
-		...defaultSettings.composeFiles,
-		'queryservice/docker-compose.override.yml'
+		'../../docker-compose.yml',
+		'_setup/docker-compose.override.yml',
+		'qlever/docker-compose.override.yml'
 	]
 } );
 

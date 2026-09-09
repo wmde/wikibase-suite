@@ -20,8 +20,10 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
    The command presents supported upstream update candidates and the information needed to assess them. It then proposes semantic versions and generates changelog drafts. Review the relevant image updating guides as you make those decisions and inspect the resulting changes:
 
    - [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
-   - [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
-   - [Query Service frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
+   - [WDQS (`wdqs`)](../images/wdqs/UPDATING.md)
+   - [WDQS Frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
+   - [QLever (`qlever`)](../images/qlever/UPDATING.md)
+   - [QLever Updater (`qlever-updater`)](../images/qlever-updater/UPDATING.md)
    - [QuickStatements (`quickstatements`)](../images/quickstatements/UPDATING.md)
    - [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
    - [WBS tools (`wbs-tools`)](../images/wbs-tools/UPDATING.md)

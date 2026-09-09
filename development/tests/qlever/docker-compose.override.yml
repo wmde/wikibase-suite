@@ -1,0 +1,33 @@
+# Development-only full export and reindex fixture. It is intentionally not
+# part of the root Suite runtime Compose file.
+services:
+  query-bootstrap:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/qlever-updater:${WBS_TEST_IMAGE_TAG:-latest}
+    command: ["bootstrap.php"]
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - query-data:/data
+    environment:
+      WIKIBASE_URL: http://wikibase
+      WIKIBASE_RDF_BASE: ${WIKIBASE_URL}
+      BOOTSTRAP_FORCE: "true"
+
+  query-indexer:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/qlever:${WBS_TEST_IMAGE_TAG:-latest}
+    command: ["index"]
+    working_dir: /data
+    depends_on:
+      query-bootstrap:
+        condition: service_completed_successfully
+    restart: "no"
+    volumes:
+      - query-data:/data
+
+  query:
+    depends_on: !override
+      query-indexer:
+        condition: service_completed_successfully
+        restart: true

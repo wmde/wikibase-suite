@@ -53,7 +53,8 @@ WBS Docker Images are released independently from WBS. Your WBS configuration re
 Before updating, you can review the changelog for any images you want to check:
 
 - [Wikibase](../../development/images/wikibase/CHANGELOG.md)
-- [Query Service](../../development/images/wdqs/CHANGELOG.md)
+- [QLever image](../../development/images/qlever/CHANGELOG.md)
+- [QLever Updater image](../../development/images/qlever-updater/CHANGELOG.md)
 - [Query Service frontend](../../development/images/wdqs-frontend/CHANGELOG.md)
 - [QuickStatements](../../development/images/quickstatements/CHANGELOG.md)
 - [OpenSearch](../../development/images/opensearch/CHANGELOG.md)

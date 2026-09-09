@@ -4,15 +4,18 @@
 
 Wikibase Suite (WBS) helps you run your own [Wikibase](https://wikiba.se/) on a server.
 
+> [!WARNING]
+> If you're seeing this you are looking at a not-yet-released POC which replaces the Blazegraph-based WDQS with QLever as the default query service. This is not ready for production or general use.
+
 WBS is a supported and tested Docker Compose configuration for deploying the following services to a publicly accessible server:
 
 - **[Wikibase](./development/images/wikibase/README.md):** MediaWiki service with the Wikibase extension included for creating and managing your Wikibase data.
 - **Job Runner:** Background job service used by Wikibase.
 - **[MariaDB](https://hub.docker.com/_/mariadb):** Database service used by Wikibase.
 - **[OpenSearch](./development/images/opensearch/README.md):** Search service used by Wikibase.
-- **[Query service](./development/images/wdqs/README.md):** SPARQL service for querying Wikibase data.
+- **[Query Service](./development/images/qlever/README.md):** QLever-backed SPARQL service for querying Wikibase data.
+- **[Query Service updater](./development/images/qlever-updater/README.md):** Synchronizes entity RDF into the Query Service.
 - **[Query service frontend](./development/images/wdqs-frontend/README.md):** Web interface for SPARQL queries.
-- **[Query service updater](./development/images/wdqs/README.md):** Keeps query service data in sync with Wikibase.
 - **[QuickStatements](./development/images/quickstatements/README.md):** A web-based tool to import and manipulate large amounts of data.
 - **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
 

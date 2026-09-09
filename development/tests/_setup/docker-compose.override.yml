@@ -31,19 +31,17 @@ services:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/opensearch:${WBS_TEST_IMAGE_TAG:-latest}
     profiles: [ opensearch ]
 
-  wdqs:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ queryservice ]
+  query:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/qlever:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ qlever ]
 
-  wdqs-updater:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ queryservice ]
-    environment:
-      WIKIBASE_CONCEPT_URI: http://${WIKIBASE_PUBLIC_HOST}
+  query-updater:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/qlever-updater:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ qlever ]
 
-  wdqs-frontend:
+  query-ui:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-frontend:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ queryservice ]
+    profiles: [ qlever, queryservice ]
     volumes:
       - ./${WBS_TEST_CONFIG_DIR}:/config
     environment:

@@ -1,73 +1,61 @@
-# traefik dynamic configuration
-
 http:
   services:
     wikibase:
       loadBalancer:
         servers:
           - url: "http://wikibase:80"
-
-    query:
+    wdqs:
       loadBalancer:
         servers:
-          - url: "http://query:7001"
-
+          - url: "http://wdqs:9999"
     query-ui:
       loadBalancer:
         servers:
           - url: "http://query-ui:80"
-
     quickstatements:
       loadBalancer:
         servers:
           - url: "http://quickstatements:80"
-
   routers:
     wikibase-router:
       rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && !PathPrefix(`/tools`)'
       service: wikibase
-
-    query-router:
+    wdqs-router:
       rule: 'Host(`{{ env "WDQS_PUBLIC_HOST" }}`) && PathPrefix(`/sparql`) && (Method(`GET`) || Method(`OPTIONS`) || Method(`POST`))'
-      service: query
-      middlewares: [ query-prefix, query-headers, query-cors-headers, query-rate-limit ]
-
+      service: wdqs
+      middlewares: [ wdqs-prefix, wdqs-headers, wdqs-cors-headers, wdqs-rate-limit ]
     query-ui-router:
       rule: 'Host(`{{ env "WDQS_PUBLIC_HOST" }}`) && !PathPrefix(`/sparql`)'
       service: query-ui
-
     quickstatements-router:
       rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && PathPrefix(`/tools/quickstatements`)'
       service: quickstatements
       middlewares: [ quickstatements-redirectregex, quickstatements-stripprefix ]
-
   middlewares:
-    query-prefix:
-      stripPrefix:
-        prefixes: [ /sparql ]
-
-    query-headers:
+    wdqs-prefix:
+      addPrefix:
+        prefix: /bigdata/namespace/wdq/
+    wdqs-headers:
       headers:
         accessControlAllowMethods: "GET,OPTIONS,POST"
         customResponseHeaders:
           VARY: Accept
-
-    query-cors-headers:
+        customRequestHeaders:
+          X-BIGDATA-READ-ONLY: yes
+          X-BIGDATA-MAX-QUERY-MILLIS: "300000"
+    wdqs-cors-headers:
       headers:
         accessControlAllowHeaders: "*"
-
-    query-rate-limit:
+    wdqs-rate-limit:
       rateLimit:
         burst: 30
         average: 60
         period: 1m
-
     quickstatements-redirectregex:
       redirectRegex:
         regex: /tools/quickstatements$
         replacement: /tools/quickstatements/
         permanent: true
-
     quickstatements-stripprefix:
       stripPrefix:
         prefixes: [ /tools/quickstatements ]

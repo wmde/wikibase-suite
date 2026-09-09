@@ -59,7 +59,8 @@ This configuration file allows you to control `wdqs-frontend`, the GUI for the Q
 After changing `config/wdqs-frontend-config.json`, restart the Query Service frontend:
 
 ```sh
-docker compose restart wdqs-frontend
+docker compose restart query-ui
+
 ```
 
 By default, query examples are loaded from the local Wikibase page `Project:SPARQL/examples`. Administrators can create that page and add local examples with `<sparql>` blocks. On startup, an existing configuration that still points at Wikidata is migrated by removing that legacy setting; a deliberately configured non-Wikidata examples source is preserved.
