@@ -29,7 +29,7 @@ import {
 	type VersionPlan
 } from '../../lib/versioning.js';
 import { ClackInteraction, UpdateCancelled } from './interaction.js';
-import { projectLabel, projectOptionLabel, strong } from './presentation.js';
+import { strong } from './presentation.js';
 import {
 	planWbsToolsAdoption,
 	type WbsToolsAdoption
@@ -210,7 +210,6 @@ async function update(
 		releaseProjects.map((project) => project.name),
 		{
 			command: 'update',
-			label: projectOptionLabel,
 			message: 'Select projects to update',
 			noun: 'project'
 		}
@@ -238,7 +237,7 @@ async function update(
 		for (const project of projects.filter(
 			(project) => project.name !== 'wbs'
 		)) {
-			log.step(strong(projectLabel(project.name)));
+			log.step(strong(project.name));
 			let sourceUpdate: ProjectSourceUpdate | undefined;
 			const provider = sourceUpdateProviderFor(project.name);
 			if (provider) {
@@ -319,7 +318,7 @@ async function update(
 		}
 
 		if (selectedWbs || adoption) {
-			log.step(strong(projectLabel('wbs')));
+			log.step(strong('wbs'));
 			const wbsOptions = {
 				toolsAdoption: adoption
 			};
@@ -356,7 +355,7 @@ async function update(
 			versionPlans
 				.map(
 					(plan) =>
-						`${strong(projectLabel(plan.project.name))}: ${strong(plan.targetVersion)} (${plan.reason})`
+						`${strong(plan.project.name)}: ${strong(plan.targetVersion)} (${plan.reason})`
 				)
 				.join('\n'),
 			'Planned release drafts'

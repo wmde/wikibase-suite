@@ -87,35 +87,6 @@ exit 0
 		);
 	});
 
-	it('selects every locally built product image without pulling it', () => {
-		const repositoryRoot = resolve('..');
-		const output = execFileSync(
-			'docker',
-			[
-				'compose',
-				'--env-file',
-				resolve(repositoryRoot, '.env.example'),
-				'-f',
-				resolve(repositoryRoot, 'docker-compose.yml'),
-				'-f',
-				resolve(repositoryRoot, 'development/docker-compose.local-images.yml'),
-				'config'
-			],
-			{ encoding: 'utf8' }
-		);
-
-		for (const image of [
-			'wikibase/wikibase:latest',
-			'wikibase/opensearch:latest',
-			'wikibase/wdqs:latest',
-			'wikibase/wdqs-frontend:latest',
-			'wikibase/quickstatements:latest'
-		]) {
-			assert.ok(output.includes(`image: ${image}`), `Missing ${image}`);
-		}
-		assert.match(output, /pull_policy: never/u);
-	});
-
 	it('runs development lifecycle commands with the local tools image', () => {
 		const fixture = mkdtempSync(join(tmpdir(), 'wbs-development-launcher-'));
 		const dockerLog = join(fixture, 'docker.log');

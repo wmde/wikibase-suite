@@ -15,7 +15,7 @@ export const testEnv = TestEnv.create( {
 		'wbs-tools/contracts.spec.ts',
 		'wbs-tools/installation-state.spec.ts',
 		'wbs-tools/installer-access.spec.ts',
-		'wbs-tools/install.spec.ts'
+		'wbs-tools/web-install.spec.ts'
 	],
 	envFiles: [ './test-runner.env', '../local.env' ],
 	composeFiles: [ 'wbs-tools/docker-compose.override.yml' ],

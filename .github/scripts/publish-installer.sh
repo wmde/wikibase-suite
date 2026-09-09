@@ -8,7 +8,28 @@ readonly STATE_DIR="${RUNNER_TEMP:-/tmp}/wikibase-suite-installer"
 readonly PR_PAYLOAD_PATH="$STATE_DIR/pr-dispatch.json"
 readonly PR_CLEANUP_PAYLOAD_PATH="$STATE_DIR/pr-cleanup-dispatch.json"
 readonly RELEASE_PAYLOAD_PATH="$STATE_DIR/release-dispatch.json"
-readonly IMAGES=(opensearch quickstatements wbs-tools wdqs wdqs-frontend wikibase)
+declare -a IMAGES=()
+
+load_images() {
+  local source_commit="${1:-}"
+  if [[ -n "$source_commit" ]]; then
+    # This publisher runs trusted default-branch code. Read the PR's image
+    # directories as Git data instead of running its wbs-dev command, so the
+    # installation manifest matches the images CI built for that commit.
+    git fetch --no-tags origin "$source_commit" >/dev/null
+    mapfile -t IMAGES < <(
+      git ls-tree -d --name-only "$source_commit:development/images" |
+        grep -Ev '^(_|node_modules$)' |
+        sort
+    )
+  else
+    mapfile -t IMAGES < <(cd development && ./wbs-dev build --list=json | jq -r '.[]')
+  fi
+  ((${#IMAGES[@]} > 0)) || {
+    echo "Could not discover any Suite images." >&2
+    exit 1
+  }
+}
 
 validate_origin_repository() {
   case "${ORIGIN_REPOSITORY:-}" in
@@ -60,6 +81,7 @@ prepare_pr() {
     echo "Invalid PR head SHA." >&2
     exit 1
   }
+  load_images "$PR_HEAD_SHA"
 
   mkdir -p "$STATE_DIR"
   rm -f "$PR_PAYLOAD_PATH"

@@ -1,15 +1,8 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { composeOverride, runtimeImageNames } from './compose-image-overrides.js';
 
-const IMAGE_SERVICES = {
-	wikibase: [ 'wikibase', 'wikibase-jobrunner' ],
-	opensearch: [ 'elasticsearch' ],
-	wdqs: [ 'wdqs', 'wdqs-updater' ],
-	'wdqs-frontend': [ 'wdqs-frontend' ],
-	quickstatements: [ 'quickstatements' ]
-} as const;
 const WBS_TOOLS_IMAGE = 'wbs-tools';
-const EXPECTED_IMAGES = [ ...Object.keys( IMAGE_SERVICES ), WBS_TOOLS_IMAGE ];
 const COMMIT_SHA = /^[0-9a-f]{40}$/u;
 
 type InstallationManifest = {
@@ -20,7 +13,7 @@ type InstallationManifest = {
 	images: Record<string, string>;
 };
 
-function assertManifest( value: unknown ): asserts value is InstallationManifest {
+function assertManifest( value: unknown, repositoryRoot: string ): asserts value is InstallationManifest {
 	if ( !value || typeof value !== 'object' ) {
 		throw new Error( 'Installation manifest must be a JSON object.' );
 	}
@@ -31,31 +24,19 @@ function assertManifest( value: unknown ): asserts value is InstallationManifest
 	if ( !manifest.source || !COMMIT_SHA.test( manifest.source.commit ) ) {
 		throw new Error( 'Installation manifest has an invalid source commit.' );
 	}
-	if ( !manifest.images || Object.keys( manifest.images ).sort().join( ',' ) !==
-		[ ...EXPECTED_IMAGES ].sort().join( ',' ) ) {
-		throw new Error( 'Installation manifest does not contain the expected image set.' );
+	if ( !manifest.images || typeof manifest.images !== 'object' || Array.isArray( manifest.images ) ) {
+		throw new Error( 'Installation manifest does not contain an image set.' );
+	}
+	const required = [ ...runtimeImageNames( repositoryRoot ), WBS_TOOLS_IMAGE ];
+	const missing = required.filter( ( name ) => !( name in manifest.images! ) );
+	if ( missing.length ) {
+		throw new Error( `Installation manifest is missing required images: ${ missing.join( ', ' ) }.` );
 	}
 	for ( const [ name, image ] of Object.entries( manifest.images ) ) {
 		if ( typeof image !== 'string' || !image.trim() || /[\r\n]/u.test( image ) ) {
 			throw new Error( `Installation manifest has an invalid ${ name } image.` );
 		}
 	}
-}
-
-function composeOverride( images: InstallationManifest['images'] ): string {
-	const services: Array<[string, string]> = Object.entries( IMAGE_SERVICES )
-		.flatMap( ( [ imageName, serviceNames ] ) => serviceNames.map(
-			( serviceName ): [string, string] => [ serviceName, images[ imageName ] ]
-		) );
-	return [
-		'# Generated from a Wikibase Suite installation manifest. Do not edit.',
-		'services:',
-		...services.flatMap( ( [ service, image ] ) => [
-			`  ${ service }:`,
-			`    image: ${ JSON.stringify( image ) }`
-		] ),
-		''
-	].join( '\n' );
 }
 
 function shellValue( value: string ): string {
@@ -76,7 +57,7 @@ export async function applyInstallationManifest( options: {
 		throw new Error( `Could not download installation manifest: HTTP ${ response.status }.` );
 	}
 	const manifest: unknown = await response.json();
-	assertManifest( manifest );
+	assertManifest( manifest, options.repositoryRoot );
 	if ( manifest.source.commit !== options.resolvedSha ) {
 		throw new Error( `Installation manifest does not match checkout ${ options.resolvedSha }.` );
 	}
@@ -85,7 +66,7 @@ export async function applyInstallationManifest( options: {
 	if ( existsSync( overridePath ) ) {
 		throw new Error( `${ overridePath } already exists; refusing to replace it.` );
 	}
-	writeFileSync( overridePath, composeOverride( manifest.images ), { mode: 0o644 } );
+	writeFileSync( overridePath, composeOverride( options.repositoryRoot, manifest.images ), { mode: 0o644 } );
 	mkdirSync( join( options.repositoryRoot, '.wbs' ), { recursive: true } );
 	writeFileSync(
 		join( options.repositoryRoot, '.wbs/install.env' ),

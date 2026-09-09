@@ -49,7 +49,6 @@ export function discoverReleaseProjects(
 				'config',
 				'docs',
 				'scripts',
-				'development/docker-compose.local-images.yml'
 			],
 			legacyTagNames: ['deploy'],
 			isImage: false

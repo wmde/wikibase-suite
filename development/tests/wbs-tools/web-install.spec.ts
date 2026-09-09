@@ -9,7 +9,6 @@ import {
 	INSTALL_TIMEOUT,
 	WIKIBASE_URL,
 	verifyFinalizedInstallerArtifacts,
-	verifyInstallerContainerIsolation,
 	verifySubmittedInstallerConfiguration,
 	waitForInstalledServicesHealthy,
 	waitForInstallerStopped
@@ -29,7 +28,7 @@ async function clickEnabledButton( label: string ): Promise<void> {
 }
 
 describe( 'Complete installer user journey', () => {
-	it( 'configures, installs, finalizes, and signs in to a healthy Wikibase Suite', async () => {
+	it( 'configures and installs locally built images in local-hostname mode (--local), then finalizes and signs in to WBS', async () => {
 		await browser.url( '/' );
 		await expect( $( 'dialog' ) ).toBeDisplayed();
 		await expect( $( 'h1=Enter installer access code' ) ).toBeDisplayed();
@@ -70,7 +69,6 @@ describe( 'Complete installer user journey', () => {
 		await visibilityCheckbox.click();
 		await expect( visibilityCheckbox ).toBeSelected();
 		await clickEnabledButton( 'Start installation' );
-		verifyInstallerContainerIsolation();
 
 		const completionHeading = await $( 'h2=Installation complete! 🎉' );
 		await completionHeading.waitForDisplayed( { timeout: INSTALL_TIMEOUT } );

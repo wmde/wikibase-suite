@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'child_process';
 import { parse } from 'dotenv';
 import {
-	chmodSync,
 	copyFileSync,
 	cpSync,
 	existsSync,
@@ -40,12 +39,14 @@ export const INSTALLER_TEMP_ROOT = join( SUITE_ROOT, 'tmp' );
 const TEMP_ROOT = INSTALLER_TEMP_ROOT;
 const CHECKOUT_ROOT = join( TEMP_ROOT, 'checkout' );
 const RESULT_ROOT = join( SUITE_ROOT, 'results' );
-const INSTALL_LOG = join( CHECKOUT_ROOT, 'installation.log' );
-const WBS_LOG = join( CHECKOUT_ROOT, 'wbs.log' );
+const STATE_ROOT = join( CHECKOUT_ROOT, '.wbs' );
+const INSTALL_LOG = join( STATE_ROOT, 'logs', 'installation.log' );
+const WBS_LOG = join( STATE_ROOT, 'logs', 'wbs.log' );
 const COMPOSE_FILES = [
 	join( CHECKOUT_ROOT, 'docker-compose.yml' ),
 	join( CHECKOUT_ROOT, 'docker-compose.override.yml' )
 ];
+const LOCAL_IMAGES_OVERRIDE = join( STATE_ROOT, 'local-images.override.yml' );
 
 type CommandOptions = {
 	cwd?: string;
@@ -81,16 +82,19 @@ function run(
 }
 
 function composeArgs( command: string[] ): string[] {
-	return [
+	const args = [
 		'compose',
 		'-p',
 		INSTALL_PROJECT,
 		'-f',
 		COMPOSE_FILES[ 0 ],
 		'-f',
-		COMPOSE_FILES[ 1 ],
-		...command
+		COMPOSE_FILES[ 1 ]
 	];
+	if ( existsSync( LOCAL_IMAGES_OVERRIDE ) ) {
+		args.push( '-f', LOCAL_IMAGES_OVERRIDE );
+	}
+	return [ ...args, ...command ];
 }
 
 function copyCheckout(): void {
@@ -106,7 +110,7 @@ function copyCheckout(): void {
 	] ) {
 		copyFileSync( join( HOST_REPOSITORY_ROOT, file ), join( CHECKOUT_ROOT, file ) );
 	}
-	mkdirSync( join( CHECKOUT_ROOT, '.wbs' ), { recursive: true } );
+	mkdirSync( STATE_ROOT, { recursive: true } );
 	copyFileSync(
 		join( HOST_REPOSITORY_ROOT, '.wbs/version' ),
 		join( CHECKOUT_ROOT, '.wbs/version' )
@@ -119,9 +123,10 @@ function copyCheckout(): void {
 		recursive: true
 	} );
 	copyFileSync(
-		join( SUITE_ROOT, 'docker-compose.install.yml' ),
-		join( CHECKOUT_ROOT, 'docker-compose.override.yml' )
+		join( SUITE_ROOT, 'docker-compose.test.yml' ),
+		COMPOSE_FILES[ 1 ]
 	);
+	mkdirSync( join( STATE_ROOT, 'logs' ), { recursive: true } );
 	writeFileSync( INSTALL_LOG, '' );
 }
 
@@ -129,59 +134,6 @@ export function toolsImage(): string {
 	const registry = process.env.WBS_TEST_IMAGE_REGISTRY || 'wikibase';
 	const tag = process.env.WBS_TEST_IMAGE_TAG || 'latest';
 	return `${ registry }/wbs-tools:${ tag }`;
-}
-
-export function verifyCliInstallWaitsForConfiguration(): void {
-	const auditRoot = join( TEMP_ROOT, 'cli-sequencing' );
-	rmSync( auditRoot, { recursive: true, force: true } );
-	mkdirSync( auditRoot, { recursive: true } );
-	copyFileSync( join( HOST_REPOSITORY_ROOT, '.env.example' ), join( auditRoot, '.env.example' ) );
-	const fakeDocker = join( auditRoot, 'docker' );
-	writeFileSync(
-		fakeDocker,
-		'#!/bin/sh\n' +
-			'grep -q "^MW_ADMIN_NAME=CliAdmin$" /app/wbs/.env || exit 99\n' +
-			'touch /app/wbs/docker-called-after-configuration\n'
-	);
-	chmodSync( fakeDocker, 0o755 );
-
-	const answers = [
-		'cli@example.test',
-		'wikibase.test',
-		'query.wikibase.test',
-		'n',
-		'CliAdmin',
-		'',
-		'cli_wiki',
-		'cli_user',
-		'CliDatabasePassword-2026',
-		''
-	].join( '\n' );
-	const output = run(
-		'docker',
-		[
-			'run', '--rm', '-i',
-			'-v', `${ auditRoot }:/app/wbs`,
-			'-v', `${ fakeDocker }:/usr/local/bin/docker:ro`,
-			toolsImage(), 'node', 'dist/wbs.js', 'install', '--local'
-		],
-		{ input: answers }
-	);
-	assert.equal( existsSync( join( auditRoot, 'docker-called-after-configuration' ) ), true );
-	assert.match( output, /Wikibase Suite is now running\./u );
-	assert.match( output, /Admin username:\s+CliAdmin/u );
-	assert.match( output, /Admin password:\s+\S+/u );
-	assert.doesNotMatch( output, /Database username:/u );
-	assert.doesNotMatch( output, /CliDatabasePassword-2026/u );
-	assert.match( output, /Wikibase:\s+https:\/\/wikibase\.test/u );
-	assert.match( output, /Query Service:\s+https:\/\/query\.wikibase\.test/u );
-	assert.match(
-		output,
-		/QuickStatements:\s+https:\/\/wikibase\.test\/tools\/quickstatements/u
-	);
-	const savedEnvironment = readFileSync( join( auditRoot, '.env' ), 'utf8' );
-	assert.match( savedEnvironment, /^MW_ADMIN_PASS=$/mu );
-	assert.match( savedEnvironment, /^DB_PASS=$/mu );
 }
 
 export function startInstaller(): void {
@@ -200,6 +152,11 @@ export function startInstaller(): void {
 				process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never',
 			WBS_E2E_HTTP_PORT: '18080',
 			WBS_E2E_HTTPS_PORT: String( WIKIBASE_HTTPS_PORT ),
+			WBS_LOCAL_IMAGES: 'true',
+			WBS_LOCAL_IMAGE_REPOSITORY: process.env.WBS_TEST_IMAGE_REGISTRY || 'wikibase',
+			WBS_LOCAL_IMAGE_TAG: process.env.WBS_TEST_IMAGE_TAG || 'latest',
+			WBS_LOCAL_IMAGE_PULL_POLICY:
+				process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never',
 			WBS_INSTALLER_CONTAINER_NAME: INSTALLER_CONTAINER,
 			WBS_INSTALLER_WORKER_CONTAINER_NAME: INSTALLER_WORKER_CONTAINER,
 			WBS_INSTALLER_PORT: String( INSTALLER_PORT ),
@@ -209,6 +166,9 @@ export function startInstaller(): void {
 				'WBS_E2E_PULL_POLICY',
 				'WBS_E2E_HTTP_PORT',
 				'WBS_E2E_HTTPS_PORT',
+				'WBS_LOCAL_IMAGE_REPOSITORY',
+				'WBS_LOCAL_IMAGE_TAG',
+				'WBS_LOCAL_IMAGE_PULL_POLICY',
 				'WBS_TEST_IMAGE_REGISTRY',
 				'WBS_TEST_IMAGE_TAG'
 			].join( ' ' ),
@@ -310,30 +270,21 @@ export async function waitForInstallerStopped(): Promise<void> {
 	throw new Error( 'Installer container did not stop after finalization.' );
 }
 
-export function verifyInstallerContainerIsolation(): void {
-	type ContainerInspection = {
-		HostConfig: { NetworkMode: string };
-		Mounts: { Source: string; Destination: string }[];
-	};
-	const inspect = ( container: string ): ContainerInspection =>
-		JSON.parse( run( 'docker', [ 'inspect', container ] ) )[ 0 ] as ContainerInspection;
-	const web = inspect( INSTALLER_CONTAINER );
-	const worker = inspect( INSTALLER_WORKER_CONTAINER );
+export type InstallerContainerInspection = {
+	HostConfig: { NetworkMode: string };
+	Mounts: { Source: string; Destination: string }[];
+};
 
-	assert.equal(
-		web.Mounts.some( ( mount ) => mount.Destination === '/var/run/docker.sock' ),
-		false,
-		'The network-facing installer web container must not receive the Docker socket.'
-	);
-	assert.equal( worker.HostConfig.NetworkMode, 'none' );
-	assert.equal(
-		worker.Mounts.some(
-			( mount ) => mount.Source === '/var/run/docker.sock' &&
-				mount.Destination === '/var/run/docker.sock'
-		),
-		true,
-		'The non-networked installation worker requires the Docker socket.'
-	);
+export function installerContainerInspections(): {
+	web: InstallerContainerInspection;
+	worker: InstallerContainerInspection;
+} {
+	const inspect = ( container: string ): InstallerContainerInspection =>
+		JSON.parse( run( 'docker', [ 'inspect', container ] ) )[ 0 ] as InstallerContainerInspection;
+	return {
+		web: inspect( INSTALLER_CONTAINER ),
+		worker: inspect( INSTALLER_WORKER_CONTAINER )
+	};
 }
 
 export function verifySubmittedInstallerConfiguration(): void {
@@ -385,7 +336,7 @@ export function verifyFinalizedInstallerArtifacts(): void {
 		);
 	}
 
-	if ( readFileSync( INSTALL_LOG, 'utf8' ) !== '' ) {
+	if ( existsSync( INSTALL_LOG ) && readFileSync( INSTALL_LOG, 'utf8' ) !== '' ) {
 		throw new Error( 'Finalized installer did not clear its installation log.' );
 	}
 }
@@ -407,6 +358,10 @@ export function collectDiagnostics(): void {
 	writeFileSync(
 		join( RESULT_ROOT, 'installer-container.log' ),
 		run( 'docker', [ 'logs', INSTALLER_CONTAINER ], { allowFailure: true } )
+	);
+	writeFileSync(
+		join( RESULT_ROOT, 'installer-worker.log' ),
+		run( 'docker', [ 'logs', INSTALLER_WORKER_CONTAINER ], { allowFailure: true } )
 	);
 	if ( existsSync( COMPOSE_FILES[ 0 ] ) ) {
 		writeFileSync(

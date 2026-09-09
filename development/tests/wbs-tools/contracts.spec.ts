@@ -1,285 +1,306 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawnSync, type SpawnSyncReturns } from 'node:child_process';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-	INSTALLER_TEMP_ROOT,
-	toolsImage,
-	verifyCliInstallWaitsForConfiguration
-} from './test-environment.js';
+import { INSTALLER_TEMP_ROOT, installerContainerInspections, toolsImage } from './test-environment.js';
+import { runtimeImageNames } from '../../images/wbs-tools/lib/compose-image-overrides.js';
 
-describe( 'WBS Tools installer lifecycle contracts', () => {
-	it( 'selects stable releases and forwards supported bootstrap options', () => {
-		execFileSync(
-			'bash',
-			[ fileURLToPath( new URL( './install-bootstrap.sh', import.meta.url ) ) ],
-			{ encoding: 'utf8' }
-		);
+const defaultConfiguration = {
+	WIKIBASE_PUBLIC_HOST: 'wikibase.test',
+	WDQS_PUBLIC_HOST: 'query.wikibase.test',
+	MW_ADMIN_NAME: 'Admin',
+	MW_ADMIN_EMAIL: 'admin@example.test',
+	MW_ADMIN_PASS: 'AdminPassword-2026',
+	DB_NAME: 'my_wiki',
+	DB_USER: 'sqluser',
+	DB_PASS: 'DatabasePassword-2026'
+};
+
+function withTemporaryDirectory<T>( name: string, callback: ( root: string ) => T ): T {
+	const root = mkdtempSync( join( INSTALLER_TEMP_ROOT, `${ name }-` ) );
+	try {
+		return callback( root );
+	} finally {
+		rmSync( root, { recursive: true, force: true } );
+	}
+}
+
+function writeConfiguration(
+	root: string,
+	overrides: Partial<Record<keyof typeof defaultConfiguration, string>> = {},
+	compose = 'services: {}\n'
+): void {
+	const configuration = { ...defaultConfiguration, ...overrides };
+	writeFileSync(
+		join( root, '.env' ),
+		[
+			...Object.entries( configuration ).map( ( [ name, value ] ) => `${ name }=${ value }` ),
+			''
+		].join( '\n' )
+	);
+	writeFileSync( join( root, 'docker-compose.yml' ), compose );
+}
+
+function runTools(
+	root: string,
+	args: string[],
+	options: { environment?: Record<string, string>; fakeDocker?: string; input?: string } = {}
+): SpawnSyncReturns<string> {
+	const dockerArgs = [ 'run', '--rm' ];
+	if ( options.input !== undefined ) dockerArgs.push( '-i' );
+	for ( const [ name, value ] of Object.entries( options.environment ?? {} ) ) {
+		dockerArgs.push( '-e', `${ name }=${ value }` );
+	}
+	if ( options.fakeDocker !== undefined ) {
+		dockerArgs.push( '-v', writeFakeDocker( root, options.fakeDocker ) );
+	}
+	dockerArgs.push( '-v', `${ root }:/app/wbs`, toolsImage(), 'node', ...args );
+	return spawnSync( 'docker', dockerArgs, {
+		encoding: 'utf8', input: options.input, stdio: 'pipe'
 	} );
+}
 
-	it( 'provides the supported wbs install command interface', () => {
-		const image = toolsImage();
-		const help = execFileSync(
-			'docker',
-			[ 'run', '--rm', image, 'node', 'dist/wbs.js', 'install', '--help' ],
-			{ encoding: 'utf8' }
-		);
-		for ( const option of [ '--web', '--local', '--from-source', '--debug' ] ) {
-			assert.ok(
-				help.includes( option ),
-				`wbs install help does not include ${ option }.`
-			);
-		}
+function writeFakeDocker( root: string, script: string ): string {
+	const path = join( root, 'docker' );
+	writeFileSync( path, script );
+	chmodSync( path, 0o755 );
+	return `${ path }:/usr/local/bin/docker:ro`;
+}
 
-		const invalid = spawnSync(
-			'docker',
-			[
-				'run', '--rm', image,
-				'node', 'dist/wbs.js', 'install', '--unknown-option'
-			],
-			{ encoding: 'utf8', stdio: 'pipe' }
-		);
-		assert.notEqual( invalid.status, 0 );
-	} );
+function shellScript( strings: TemplateStringsArray, ...values: unknown[] ): string {
+	return String.raw( strings, ...values ).replace( /^\n/u, '' );
+}
 
-	it( 'describes generated and retained passwords independently', () => {
-		const configRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'password-prompts-' ) );
-		try {
-			writeFileSync(
-				join( configRoot, '.env' ),
-				[
-					'MW_ADMIN_EMAIL=admin@example.test',
-					'WIKIBASE_PUBLIC_HOST=wikibase.test',
-					'WDQS_PUBLIC_HOST=query.wikibase.test',
-					'METADATA_CALLBACK=false',
-					'MW_ADMIN_NAME=Admin',
-					'MW_ADMIN_PASS=',
-					'DB_NAME=my_wiki',
-					'DB_USER=sqluser',
-					'DB_PASS=ExistingDatabasePassword-2026',
-					''
-				].join( '\n' )
-			);
-			const result = spawnSync(
-				'docker',
-				[
-					'run', '--rm', '-i',
-					'-v', `${ configRoot }:/app/wbs`,
-					toolsImage(), 'node', 'dist/wbs.js', 'install', 'configure', '--local'
-				],
-				{ encoding: 'utf8', input: '\n'.repeat( 9 ), stdio: 'pipe' }
-			);
-			assert.equal( result.status, 0, result.stderr );
-			assert.match(
-				result.stdout,
-				/Admin password \(press Enter to use generated password\)/u
-			);
-			assert.match(
-				result.stdout,
-				/Database password \(press Enter to keep existing password\)/u
-			);
-			const config = readFileSync( join( configRoot, '.env' ), 'utf8' );
-			assert.match( config, /^MW_ADMIN_PASS=.+$/mu );
-			assert.match( config, /^DB_PASS=ExistingDatabasePassword-2026$/mu );
-		} finally {
-			rmSync( configRoot, { recursive: true, force: true } );
-		}
-	} );
-
-	it( 'does not reapply template values over an existing configuration', () => {
-		const configRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'configuration-' ) );
-		try {
-			// Paths are contained by the test-owned temporary directory.
-			writeFileSync( join( configRoot, '.env.example' ), 'TEMPLATE_ONLY=template\n' );
-			writeFileSync( join( configRoot, '.env' ), 'EXISTING_ONLY=preserved\n' );
-			const input = {
-				MW_ADMIN_EMAIL: 'admin@example.test',
-				WIKIBASE_PUBLIC_HOST: 'wikibase.test',
-				WDQS_PUBLIC_HOST: 'query.wikibase.test',
-				METADATA_CALLBACK: 'false',
-				MW_ADMIN_NAME: 'Admin',
-				MW_ADMIN_PASS: 'AdminPassword-2026',
-				DB_NAME: 'my_wiki',
-				DB_USER: 'sqluser',
-				DB_PASS: 'DatabasePassword-2026'
-			};
-			const script = [
-				"import('./dist/lib/configuration.js')",
-				`.then(({ getConfig }) => console.log(JSON.stringify(getConfig(${ JSON.stringify( input ) }).config)))`
-			].join( '' );
-			const output = execFileSync(
-				'docker',
-				[
-					'run', '--rm',
-					'-v', `${ configRoot }:/app/wbs`,
-					toolsImage(), 'node', '--input-type=module', '--eval', script
-				],
-				{ encoding: 'utf8' }
-			);
-			const config = JSON.parse( output ) as Record<string, string>;
-			assert.equal( config.EXISTING_ONLY, 'preserved' );
-			assert.equal( config.TEMPLATE_ONLY, undefined );
-		} finally {
-			rmSync( configRoot, { recursive: true, force: true } );
-		}
-	} );
-
-	it( 'persists a validated installation manifest and Compose override', () => {
-		const manifestRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'manifest-' ) );
-		try {
-			const commit = 'a1b2c3d4e5f678901234567890abcdef12345678';
-			const tag = 'pr-942-a1b2c3d4e5f6';
-			const imageNames = [
-				'opensearch', 'quickstatements', 'wbs-tools', 'wdqs', 'wdqs-frontend', 'wikibase'
-			];
-			const manifest = {
-				schemaVersion: 1,
-				channel: 'pr',
-				pr: 942,
-				source: { repository: 'wmde/wikibase-suite', commit },
-				images: Object.fromEntries( imageNames.map( ( name ) => [
-					name, `ghcr.io/wmde/wikibase/${ name }:${ tag }`
-				] ) )
-			};
-			const script = [
-				`globalThis.fetch = async () => ({ ok: true, json: async () => (${ JSON.stringify( manifest ) }) });`,
-				"import('./dist/lib/installation-manifest.js').then(({ applyInstallationManifest }) => ",
-				"applyInstallationManifest({ repositoryRoot: '/app/wbs', ",
-				"manifestUrl: 'https://example.test/manifest.json', ",
-				`resolvedSha: '${ commit }' }))`
-			].join( '' );
+describe( 'WBS Tools contracts', () => {
+	describe( 'root install script', () => {
+		it( 'prepares the selected checkout and hands installation to WBS Tools', () => {
 			execFileSync(
-				'docker',
-				[
-					'run', '--rm',
-					'-e', 'WBS_DIR=/app/wbs',
-					'-v', `${ manifestRoot }:/app/wbs`,
-					toolsImage(), 'node', '--input-type=module', '--eval', script
-				],
+				'bash',
+				[ fileURLToPath( new URL( './install-bootstrap.sh', import.meta.url ) ) ],
 				{ encoding: 'utf8' }
 			);
-			assert.match(
-				readFileSync( join( manifestRoot, 'docker-compose.override.yml' ), 'utf8' ),
-				/wikibase-jobrunner:\n[ ]{4}image: "ghcr\.io\/wmde\/wikibase\/wikibase:pr-942-a1b2c3d4e5f6"/u
-			);
-			assert.match(
-				readFileSync( join( manifestRoot, '.wbs/install.env' ), 'utf8' ),
-				/WBS_INSTALL_SOURCE_COMMIT='a1b2c3d4e5f678901234567890abcdef12345678'[\s\S]*WBS_TOOLS_IMAGE='ghcr\.io\/wmde\/wikibase\/wbs-tools:pr-942-a1b2c3d4e5f6'/u
-			);
-		} finally {
-			rmSync( manifestRoot, { recursive: true, force: true } );
-		}
+		} );
 	} );
 
-	it( 'selects all images for a non-interactive source build', () => {
-		const composeRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'source-build-' ) );
-		try {
-			writeFileSync(
-				join( composeRoot, '.env' ),
-				[
-					'WIKIBASE_PUBLIC_HOST=wikibase.test',
-					'WDQS_PUBLIC_HOST=query.wikibase.test',
-					'MW_ADMIN_NAME=Admin',
-					'MW_ADMIN_EMAIL=admin@example.test',
-					'MW_ADMIN_PASS=AdminPassword-2026',
-					'DB_PASS=DatabasePassword-2026',
-					'DB_NAME=my_wiki',
-					'DB_USER=sqluser',
-					''
-				].join( '\n' )
-			);
-			writeFileSync( join( composeRoot, 'docker-compose.yml' ), 'services: {}\n' );
-			const developmentRoot = join( composeRoot, 'development' );
-			writeFileSync( join( composeRoot, 'docker-arguments' ), '' );
-			const fakeDocker = join( composeRoot, 'docker' );
-			writeFileSync(
-				fakeDocker,
-				'#!/bin/sh\nprintf "%s\\n" "$@" >> /app/wbs/docker-arguments\nprintf "%s\\n" --- >> /app/wbs/docker-arguments\n'
-			);
-			chmodSync( fakeDocker, 0o755 );
-			mkdirSync( developmentRoot );
-			writeFileSync( join( developmentRoot, 'docker-compose.yml' ), 'services: {}\n' );
-
-			execFileSync(
+	describe( 'CLI configuration', () => {
+		it( 'provides the supported install command interface', () => {
+			const image = toolsImage();
+			const help = execFileSync(
 				'docker',
-				[
-					'run', '--rm',
-					'-e', 'WBS_DIR=/app/wbs',
-					'-e', 'ENV_FILE_PATH=/app/wbs/.env',
-					'-v', `${ composeRoot }:/app/wbs`,
-					'-v', `${ fakeDocker }:/usr/local/bin/docker:ro`,
-					toolsImage(), 'node', '--input-type=module', '--eval',
-					"import('./dist/lib/compose.js').then(({ up }) => up({ build: true }))"
-				],
+				[ 'run', '--rm', image, 'node', 'dist/wbs.js', 'install', '--help' ],
 				{ encoding: 'utf8' }
 			);
-			assert.match(
-				readFileSync( join( composeRoot, 'docker-arguments' ), 'utf8' ),
-				/pnpm exec tsx wbs-dev\.ts build all/u
-			);
-		} finally {
-			rmSync( composeRoot, { recursive: true, force: true } );
-		}
-	} );
-
-	it( 'reports installation worker failures to the browser event log', () => {
-		const failureRoot = mkdtempSync( join( INSTALLER_TEMP_ROOT, 'worker-failure-' ) );
-		try {
-			writeFileSync(
-				join( failureRoot, '.env' ),
-				[
-					'WIKIBASE_PUBLIC_HOST=wikibase.test',
-					'WDQS_PUBLIC_HOST=query.wikibase.test',
-					'MW_ADMIN_NAME=Admin',
-					'MW_ADMIN_EMAIL=admin@example.test',
-					'MW_ADMIN_PASS=AdminPassword-2026',
-					'DB_PASS=DatabasePassword-2026',
-					'DB_NAME=my_wiki',
-					'DB_USER=sqluser',
-					''
-				].join( '\n' )
-			);
-			writeFileSync( join( failureRoot, 'docker-compose.yml' ), 'services: {}\n' );
-			writeFileSync( join( failureRoot, 'install-request' ), 'ready\n' );
-			const fakeDocker = join( failureRoot, 'docker' );
-			writeFileSync(
-				fakeDocker,
-				'#!/bin/sh\necho "simulated image pull failure" >&2\nexit 42\n'
-			);
-			chmodSync( fakeDocker, 0o755 );
-
-			const result = spawnSync(
-				'docker',
-				[
-					'run', '--rm',
-					'-e', 'WBS_DIR=/app/wbs',
-					'-e', 'ENV_FILE_PATH=/app/wbs/.env',
-					'-e', 'WBS_LOG_PATH=/app/wbs/wbs.log',
-					'-e', 'INSTALLATION_LOG_PATH=/app/wbs/installation.log',
-					'-e', 'LAUNCH_TRIGGER_PATH=/app/wbs/install-request',
-					'-v', `${ failureRoot }:/app/wbs`,
-					'-v', `${ fakeDocker }:/usr/local/bin/docker:ro`,
-					toolsImage(),
-					'node', '/app/dist/wbs.js', 'install', 'worker'
-				],
+			for ( const option of [ '--web', '--local', '--from-source', '--debug' ] ) {
+				assert.ok( help.includes( option ), `wbs install help does not include ${ option }.` );
+			}
+			assert.throws( () => execFileSync(
+				'docker', [ 'run', '--rm', image, 'node', 'dist/wbs.js', 'install', '--unknown-option' ],
 				{ encoding: 'utf8', stdio: 'pipe' }
-			);
-			assert.notEqual( result.status, 0 );
-			assert.match(
-				readFileSync( join( failureRoot, 'wbs.log' ), 'utf8' ),
-				/simulated image pull failure/u
-			);
-			assert.match(
-				readFileSync( join( failureRoot, 'installation.log' ), 'utf8' ),
-				/Installation failed: docker exited with status 42\. \[installation_failed\]/u
-			);
-		} finally {
-			rmSync( failureRoot, { recursive: true, force: true } );
-		}
+			) );
+		} );
+
+		it( 'describes generated and retained passwords independently', () => {
+			withTemporaryDirectory( 'password-prompts', ( root ) => {
+				writeConfiguration( root, { MW_ADMIN_PASS: '', DB_PASS: 'ExistingDatabasePassword-2026' } );
+				const result = runTools( root, [ 'dist/wbs.js', 'install', 'configure', '--local' ], {
+					input: '\n'.repeat( 9 )
+				} );
+				assert.equal( result.status, 0, result.stderr );
+				assert.match( result.stdout, /Admin password \(press Enter to use generated password\)/u );
+				assert.match( result.stdout, /Database password \(press Enter to keep existing password\)/u );
+				const config = readFileSync( join( root, '.env' ), 'utf8' );
+				assert.match( config, /^MW_ADMIN_PASS=.+$/mu );
+				assert.match( config, /^DB_PASS=ExistingDatabasePassword-2026$/mu );
+			} );
+		} );
+
+		it( 'does not reapply template values over an existing configuration', () => {
+			withTemporaryDirectory( 'configuration', ( root ) => {
+				writeConfiguration( root );
+				writeFileSync( join( root, '.env.example' ), 'TEMPLATE_ONLY=template\n' );
+				writeFileSync( join( root, '.env' ), 'EXISTING_ONLY=preserved\n' );
+				const input = {
+					MW_ADMIN_EMAIL: 'admin@example.test', WIKIBASE_PUBLIC_HOST: 'wikibase.test',
+					WDQS_PUBLIC_HOST: 'query.wikibase.test', METADATA_CALLBACK: 'false',
+					MW_ADMIN_NAME: 'Admin', MW_ADMIN_PASS: 'AdminPassword-2026', DB_NAME: 'my_wiki',
+					DB_USER: 'sqluser', DB_PASS: 'DatabasePassword-2026'
+				};
+				const script = `
+					const { getConfig } = await import( './dist/lib/configuration.js' );
+					console.log( JSON.stringify( getConfig( ${ JSON.stringify( input ) } ).config ) );
+				`;
+				const result = runTools( root, [ '--input-type=module', '--eval', script ] );
+				assert.equal( result.status, 0, result.stderr );
+				const config = JSON.parse( result.stdout ) as Record<string, string>;
+				assert.equal( config.EXISTING_ONLY, 'preserved' );
+				assert.equal( config.TEMPLATE_ONLY, undefined );
+			} );
+		} );
+
+		it( 'finishes configuration before starting lifecycle operations', () => {
+			withTemporaryDirectory( 'cli-sequencing', ( root ) => {
+				copyFileSync(
+					fileURLToPath( new URL( '../../../.env.example', import.meta.url ) ),
+					join( root, '.env.example' )
+				);
+				const output = runTools( root, [ 'dist/wbs.js', 'install', '--local' ], {
+					fakeDocker: shellScript`
+#!/bin/sh
+grep -q "^MW_ADMIN_NAME=CliAdmin$" /app/wbs/.env || exit 99
+touch /app/wbs/docker-called-after-configuration
+`,
+					input: [
+						'cli@example.test',
+						'wikibase.test',
+						'query.wikibase.test',
+						'n',
+						'CliAdmin',
+						'',
+						'cli_wiki',
+						'cli_user',
+						'CliDatabasePassword-2026',
+						''
+					].join( '\n' )
+				} );
+				assert.equal( output.status, 0, output.stderr );
+				assert.equal( existsSync( join( root, 'docker-called-after-configuration' ) ), true );
+				assert.match( output.stdout, /Wikibase Suite is now running\./u );
+				assert.match( output.stdout, /Admin username:\s+CliAdmin/u );
+				assert.match( output.stdout, /Admin password:\s+\S+/u );
+				assert.doesNotMatch( output.stdout, /Database username:|CliDatabasePassword-2026/u );
+				assert.match( readFileSync( join( root, '.env' ), 'utf8' ), /^MW_ADMIN_PASS=$/mu );
+			} );
+		} );
 	} );
 
-	it( 'finishes CLI configuration before starting lifecycle operations', () => {
-		verifyCliInstallWaitsForConfiguration();
+	describe( 'image selection', () => {
+		it( 'uses installation manifest images for declared Compose services', () => {
+			withTemporaryDirectory( 'manifest', ( root ) => {
+				const commit = 'a1b2c3d4e5f678901234567890abcdef12345678';
+				const tag = 'pr-942-a1b2c3d4e5f6';
+				copyFileSync(
+					fileURLToPath( new URL( '../../../docker-compose.yml', import.meta.url ) ),
+					join( root, 'docker-compose.yml' )
+				);
+				const manifest = {
+					schemaVersion: 1,
+					source: { commit },
+					images: Object.fromEntries(
+						[ ...runtimeImageNames( root ), 'wbs-tools', 'unused-build-target' ].map(
+							( name ) => [ name, `ghcr.io/wmde/wikibase/${ name }:${ tag }` ]
+						)
+					)
+				};
+				const script = `
+					globalThis.fetch = async () => ({
+						ok: true,
+						json: async () => (${ JSON.stringify( manifest ) })
+					});
+					const { applyInstallationManifest } = await import( './dist/lib/installation-manifest.js' );
+					await applyInstallationManifest({
+						repositoryRoot: '/app/wbs',
+						manifestUrl: 'https://example.test/manifest.json',
+						resolvedSha: '${ commit }'
+					});
+				`;
+				const result = runTools( root, [ '--input-type=module', '--eval', script ], {
+					environment: { WBS_DIR: '/app/wbs' }
+				} );
+				assert.equal( result.status, 0, result.stderr );
+				const override = readFileSync( join( root, 'docker-compose.override.yml' ), 'utf8' );
+				assert.match( override, /wikibase-jobrunner:\n[ ]{4}image: "ghcr\.io\/wmde\/wikibase\/wikibase:pr-942-a1b2c3d4e5f6"/u );
+				assert.doesNotMatch( override, /unused-build-target/u );
+			} );
+		} );
+
+		it( 'selects all configured local images for a non-interactive source build', () => {
+			withTemporaryDirectory( 'source-build', ( root ) => {
+				writeConfiguration( root, {}, 'services:\n  wikibase:\n    image: wikibase/wikibase:8\n' );
+				mkdirSync( join( root, 'development' ) );
+				writeFileSync( join( root, 'development/docker-compose.yml' ), 'services: {}\n' );
+				writeFileSync( join( root, 'docker-arguments' ), '' );
+				const script = `
+					const { up } = await import( './dist/lib/compose.js' );
+					await up({ build: true });
+				`;
+				const result = runTools( root, [ '--input-type=module', '--eval', script ], {
+					environment: {
+						WBS_DIR: '/app/wbs',
+						ENV_FILE_PATH: '/app/wbs/.env',
+						WBS_LOCAL_IMAGE_REPOSITORY: 'registry.example.test/wikibase',
+						WBS_LOCAL_IMAGE_TAG: 'test-tag'
+					},
+					fakeDocker: shellScript`
+#!/bin/sh
+printf "%s\\n" "$@" >> /app/wbs/docker-arguments
+printf "%s\\n" --- >> /app/wbs/docker-arguments
+`
+				} );
+				assert.equal( result.status, 0, result.stderr );
+				assert.match( readFileSync( join( root, 'docker-arguments' ), 'utf8' ), /pnpm exec tsx wbs-dev\.ts build all/u );
+				assert.match( readFileSync( join( root, '.wbs/local-images.override.yml' ), 'utf8' ), /wikibase:\n[ ]{4}image: "registry\.example\.test\/wikibase\/wikibase:test-tag"/u );
+			} );
+		} );
+
+		it( 'allows configured remote local images to be pulled', () => {
+			withTemporaryDirectory( 'remote-local-images', ( root ) => {
+				writeConfiguration( root, {}, 'services:\n  wikibase:\n    image: wikibase/wikibase:8\n' );
+				const script = `
+					const { up } = await import( './dist/lib/compose.js' );
+					await up({ localImages: true, update: true });
+				`;
+				const result = runTools( root, [ '--input-type=module', '--eval', script ], {
+					environment: {
+						WBS_DIR: '/app/wbs',
+						ENV_FILE_PATH: '/app/wbs/.env',
+						WBS_LOCAL_IMAGE_REPOSITORY: 'ghcr.io/example/wikibase',
+						WBS_LOCAL_IMAGE_TAG: 'ci-build',
+						WBS_LOCAL_IMAGE_PULL_POLICY: 'always'
+					},
+					fakeDocker: shellScript`
+#!/bin/sh
+exit 0
+`
+				} );
+				assert.equal( result.status, 0, result.stderr );
+				const override = readFileSync( join( root, '.wbs/local-images.override.yml' ), 'utf8' );
+				assert.match( override, /wikibase:\n[ ]{4}image: "ghcr\.io\/example\/wikibase\/wikibase:ci-build"/u );
+				assert.doesNotMatch( override, /pull_policy/u );
+			} );
+		} );
+	} );
+
+	describe( 'installation worker', () => {
+		it( 'reports worker failures to the browser event log', () => {
+			withTemporaryDirectory( 'worker-failure', ( root ) => {
+				writeConfiguration( root );
+				writeFileSync( join( root, 'install-request' ), 'ready\n' );
+				const result = runTools( root, [ '/app/dist/wbs.js', 'install', 'worker' ], {
+					environment: {
+						WBS_DIR: '/app/wbs',
+						ENV_FILE_PATH: '/app/wbs/.env',
+						WBS_LOG_PATH: '/app/wbs/wbs.log',
+						INSTALLATION_LOG_PATH: '/app/wbs/installation.log',
+						LAUNCH_TRIGGER_PATH: '/app/wbs/install-request'
+					},
+					fakeDocker: shellScript`
+#!/bin/sh
+echo "simulated image pull failure" >&2
+exit 42
+`
+				} );
+				assert.notEqual( result.status, 0 );
+				assert.match( readFileSync( join( root, 'wbs.log' ), 'utf8' ), /simulated image pull failure/u );
+				assert.match( readFileSync( join( root, 'installation.log' ), 'utf8' ), /Installation failed: docker exited with status 42\. \[installation_failed\]/u );
+			} );
+		} );
+
+		it( 'keeps the network-facing installer separate from the Docker socket', () => {
+			const { web, worker } = installerContainerInspections();
+			assert.equal( web.Mounts.some( ( mount ) => mount.Destination === '/var/run/docker.sock' ), false );
+			assert.equal( worker.HostConfig.NetworkMode, 'none' );
+			assert.equal( worker.Mounts.some( ( mount ) => mount.Source === '/var/run/docker.sock' && mount.Destination === '/var/run/docker.sock' ), true );
+		} );
 	} );
 } );
