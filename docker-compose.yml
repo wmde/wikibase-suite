@@ -18,6 +18,9 @@ services:
       - ./config/extensions:/var/www/html/extensions/extensions:z
       - wikibase-image-data:/var/www/html/images
       - quickstatements-data:/quickstatements/data
+      # The QLever export endpoint reads this internal credential on every
+      # request. The updater creates it as root:33 with mode 0640 in query-data.
+      - query-data:/qlever-data:ro
     env_file:
       - ${WBS_DIR:-.}/.wbs/version
     environment:
@@ -36,6 +39,7 @@ services:
       WDQS_PUBLIC_FRONTEND_URL: https://${WDQS_PUBLIC_HOST}
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: ${WIKIMEDIA_OAUTH_CONSUMER_TOKEN:-}
       WIKIMEDIA_OAUTH_SECRET_TOKEN: ${WIKIMEDIA_OAUTH_SECRET_TOKEN:-}
+      QLEVER_EXPORT_TOKEN_FILE: /qlever-data/qlever-export-token
     healthcheck:
       test: curl --silent --fail localhost/wiki/Main_Page
       interval: 10s
@@ -128,6 +132,7 @@ services:
       WIKIBASE_URL: http://wikibase
       WIKIBASE_RDF_BASE: https://${WIKIBASE_PUBLIC_HOST}
       QLEVER_URL: http://query:7001
+      QLEVER_EXPORT_TOKEN_FILE: /data/qlever-export-token
     volumes:
       - query-data:/data
     healthcheck:

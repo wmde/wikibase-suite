@@ -75,9 +75,10 @@ full baseline export and index.
 
 Replace the initial API-per-entity full bootstrap with a QLever-specific
 Wikibase extension. The extension will expose an authenticated, bounded,
-entity-framed RDF export endpoint. The QLever-side integration image will own
-export chunks, checkpoints, index construction, and replay; WBS will compose
-the services and eventually provide a guided migration workflow.
+entity-framed RDF export endpoint using Wikibase's own EntityData RDF
+serialization. The QLever-side integration image will own export chunks,
+checkpoints, index construction, and replay; WBS will compose the services and
+eventually provide a guided migration workflow.
 
 This phase will define a recovery policy for expired Recent Changes retention,
 prove interruption/resume behaviour, and extend benchmarks beyond a small

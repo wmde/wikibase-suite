@@ -1,0 +1,21 @@
+{
+	"name": "WikibaseQLever",
+	"version": "0.1.0",
+	"author": [ "Wikibase Suite contributors" ],
+	"url": "https://github.com/wmde/wikibase-suite",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseQLever\\": "includes/"
+	},
+	"APIModules": {
+		"qleverexport": "MediaWiki\\Extension\\WikibaseQLever\\ApiQLeverExport"
+	},
+	"config": {
+		"QleverExportTokenFile": {
+			"value": false,
+			"path": false
+		}
+	},
+	"manifest_version": 2
+}

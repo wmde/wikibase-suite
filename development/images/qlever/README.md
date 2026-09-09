@@ -34,6 +34,9 @@ The following environment variables control the default `server` command:
 On first start, the QLever wrapper generates its private mutation token in
 `/data/qlever-access-token`. The updater reads that token from the same
 query-data volume; operators do not configure or copy it through `.env`.
+The updater separately creates the credential used only for its authenticated
+Wikibase export requests. Both credentials remain in the shared Docker volume,
+not in Compose configuration or the host environment.
 
 ## Internal filesystem layout
 

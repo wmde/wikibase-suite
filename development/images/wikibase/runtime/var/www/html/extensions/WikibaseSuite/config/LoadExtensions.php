@@ -60,3 +60,7 @@ if ( $wikimediaLoginEnabled ) {
 
 # Wikibase Suite integration
 wfLoadExtension( 'WikibaseSuite' );
+
+// Internal, authenticated export endpoint used by the QLever integration.
+// It stays inert unless its token file is mounted by a deployment.
+wfLoadExtension( 'WikibaseQLever' );

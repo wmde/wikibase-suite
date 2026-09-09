@@ -13,6 +13,7 @@ services:
     environment:
       WIKIBASE_URL: http://wikibase
       WIKIBASE_RDF_BASE: ${WIKIBASE_URL}
+      QLEVER_EXPORT_TOKEN_FILE: /data/qlever-export-token
       BOOTSTRAP_FORCE: "true"
 
   query-indexer:

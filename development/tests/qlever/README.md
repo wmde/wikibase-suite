@@ -4,10 +4,10 @@ This document describes the development/test synchronizer fixture. Full export
 and static indexing are deliberately not part of the root Suite Compose runtime
 until Wikibase Suite has a supported user-facing bootstrap workflow.
 
-`entity_graph_dump.php` discovers the installed Wikibase entity namespaces and
-bootstraps QLever with one named graph per entity. For a custom entity type
-whose namespace cannot be discovered from its content model, set
-`WIKIBASE_ENTITY_NAMESPACES` to its comma-separated namespace IDs.
+`entity_graph_dump.php` bootstraps QLever with one named graph per entity. It
+requests bounded chunks from the authenticated Wikibase QLever export endpoint,
+stores each completed chunk durably, and resumes an interrupted export from its
+last completed chunk.
 `updater.php` polls Wikibase Recent Changes and performs **entity RDF
 replacement** with Graph Store `PUT`: it replaces that entity's complete
 N-Triples snapshot in its named graph. It does not replace anything in
@@ -16,11 +16,11 @@ queries, so the existing frontend continues to work.
 
 ## Bootstrap cutover
 
-The bootstrap dump records the latest Wikibase Recent Changes cursor before it
+The bootstrap records the latest Wikibase Recent Changes cursor before it
 starts exporting. After QLever has indexed the dump and starts, the updater
-replays every later change. An edit that happens while the dump or index is
+replays every later change. An edit that happens while export or indexing is
 being built is therefore not lost; replaying a snapshot already present in the
-dump is idempotent. Stop the updater while rebuilding, and use the normal
+export is idempotent. Use the normal
 `query-bootstrap` then `query-indexer` one-shots from the development test
 overlay to perform the cutover.
 
@@ -37,7 +37,7 @@ establish a fresh cursor) before resuming. This makes a retention gap an
 actionable failure rather than invisible stale query data.
 
 Bootstrap is an exclusive operation. Normal `docker compose up` reuses an
-existing QLever index. The dump creates a shared lock only for the initial
+existing QLever index. The export creates a shared lock only for the initial
 index or an explicitly forced bootstrap; a live
 updater acknowledges it and pauses, and the indexer removes it only after the
 replacement index succeeds. This keeps the updater paused across both dump and
@@ -50,6 +50,10 @@ set `BOOTSTRAP_FORCE=true` for `query-bootstrap`; the successful dump marks the
 indexer rebuild as required. The indexer clears QLever's derived persisted
 update file before rebuilding, so old deltas cannot be replayed over the new
 static index.
+
+If the export one-shot is interrupted, rerun it with `BOOTSTRAP_FORCE=true`.
+Its durable checkpoint makes that invocation resume at the first incomplete
+chunk; do not delete the checkpoint or chunk directory when recovering.
 
 ```sh
 docker compose -f docker-compose.yml -f development/tests/qlever/docker-compose.override.yml \
