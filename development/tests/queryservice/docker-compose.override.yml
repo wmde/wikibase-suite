@@ -1,0 +1,48 @@
+# Keep the legacy Blazegraph test suite independent from the QLever runtime
+# service names. This overlay supplies the WDQS pair and points the test proxy
+# at them; normal Suite Compose continues to use QLever.
+services:
+  wdqs:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    command: /runBlazegraph.sh
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    profiles: [ queryservice ]
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    volumes:
+      - wdqs-data:/wdqs/data
+    healthcheck:
+      test: curl --silent --fail localhost:9999/bigdata/namespace/wdq/sparql
+      interval: 10s
+      start_period: 2m
+
+  wdqs-updater:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    command: /runUpdate.sh
+    depends_on:
+      wdqs:
+        condition: service_healthy
+    profiles: [ queryservice ]
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    environment:
+      WIKIBASE_CONCEPT_URI: http://${WIKIBASE_PUBLIC_HOST}
+
+  query-ui:
+    depends_on: !override
+      wdqs:
+        condition: service_healthy
+    profiles: [ queryservice ]
+
+  traefik:
+    volumes: !override
+      - ./queryservice/traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro
+
+volumes:
+  wdqs-data:
