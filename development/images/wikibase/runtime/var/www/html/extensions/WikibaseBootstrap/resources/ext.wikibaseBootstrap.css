@@ -1,0 +1,106 @@
+.ext-wikibase-bootstrap-catalog__table {
+	width: 100% !important;
+	max-width: none;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.ext-wikibase-bootstrap-catalog__table th,
+.ext-wikibase-bootstrap-catalog__table td {
+	padding: 8px 12px;
+	text-align: left;
+}
+
+.ext-wikibase-bootstrap-catalog__table thead th {
+	border-top: 1px solid var( --border-color-muted, #c8ccd1 );
+	font-weight: 700;
+}
+
+.ext-wikibase-bootstrap-catalog__ontology {
+	width: 34%;
+}
+
+.ext-wikibase-bootstrap-catalog__ontology-cell {
+	font-weight: 600;
+	text-align: left;
+}
+
+.ext-wikibase-bootstrap-catalog__action-column {
+	width: 15em;
+}
+
+.ext-wikibase-bootstrap-catalog__table th,
+.ext-wikibase-bootstrap-catalog__table td {
+	vertical-align: top;
+	background: transparent !important;
+}
+
+.ext-wikibase-bootstrap-catalog__bundle-description {
+	margin: 8px 0;
+	font-weight: normal;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata {
+	display: grid;
+	grid-template-columns: max-content minmax( 0, 1fr );
+	column-gap: 8px;
+	row-gap: 4px;
+	margin: 0;
+	font-size: 0.875em;
+	color: var( --color-subtle, #54595d );
+}
+
+.ext-wikibase-bootstrap-catalog__metadata > div {
+	display: contents;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata dt {
+	font-weight: 600;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata dd {
+	margin: 0;
+}
+
+.ext-wikibase-bootstrap-catalog__summary {
+	color: var( --color-subtle, #54595d );
+	font-weight: normal;
+}
+
+.ext-wikibase-bootstrap-catalog__row > th,
+.ext-wikibase-bootstrap-catalog__row > td {
+	border-bottom: 1px solid var( --border-color-subtle, #eaecf0 );
+}
+
+.ext-wikibase-bootstrap-catalog__row:last-child > th,
+.ext-wikibase-bootstrap-catalog__row:last-child > td {
+	border-bottom: 0;
+}
+
+.ext-wikibase-bootstrap-catalog__action {
+	vertical-align: top;
+}
+
+.ext-wikibase-bootstrap-catalog__action-content {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.ext-wikibase-bootstrap-reset__confirmation {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.ext-wikibase-bootstrap-reset__confirmation label {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.ext-wikibase-bootstrap-reset__confirmation .cdx-text-input {
+	width: 14em;
+}

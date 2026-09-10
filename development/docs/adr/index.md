@@ -34,3 +34,4 @@ Current ADRs include:
 - [22 - WBS Tools foundation](0022-wbs-tools-foundation.md)
 - [23 - release preflight checks](0023-release-preflight.md)
 - [24 - WBS upgrade command](0024-wbs-upgrade-command.md)
+- [25 - bootstrap ontology capability](0025-bootstrap-ontology-capability.md)

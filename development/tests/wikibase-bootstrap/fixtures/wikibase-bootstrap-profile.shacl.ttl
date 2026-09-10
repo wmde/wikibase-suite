@@ -1,0 +1,89 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix wbb: <https://wikiba.se/bootstrap#> .
+
+# Wikibase Suite bootstrap profile, version 1 (draft).
+# Entity IRIs are source keys. An importer assigns local P/Q IDs and resolves
+# wbb:claim references using the source-IRI-to-local-ID mapping for that run.
+
+wbb:BootstrapEntityShape
+	a sh:NodeShape ;
+	sh:targetSubjectsOf wbb:kind ;
+	sh:nodeKind sh:IRI ;
+	sh:property [
+		sh:path wbb:kind ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+		sh:in ( wbb:Item wbb:Property wbb:SeedItem ) ;
+	] ;
+	sh:property [
+		sh:path rdfs:label ;
+		sh:minCount 1 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path dcterms:description ;
+		sh:nodeKind sh:Literal ;
+	] .
+
+wbb:BootstrapPropertyShape
+	a sh:NodeShape ;
+	sh:target [
+		a sh:SPARQLTarget ;
+		sh:select """
+			SELECT ?this WHERE { ?this wbb:kind wbb:Property . }
+		""" ;
+	] ;
+	sh:property [
+		sh:path wbb:datatype ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+		sh:in (
+			"wikibase-item" "wikibase-property" "string" "external-id" "url"
+			"time" "quantity" "monolingualtext" "globe-coordinate" "commonsMedia"
+		) ;
+	] .
+
+wbb:BootstrapClaimShape
+	a sh:NodeShape ;
+	sh:targetObjectsOf wbb:claim ;
+	sh:property [
+		sh:path wbb:property ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+		sh:nodeKind sh:IRI ;
+		sh:node [
+			sh:property [
+				sh:path wbb:kind ;
+				sh:hasValue wbb:Property ;
+			] ;
+		] ;
+	] ;
+	sh:property [
+		sh:path wbb:value ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+		sh:or (
+			[ sh:nodeKind sh:IRI ]
+			[ sh:nodeKind sh:Literal ]
+		) ;
+	] .
+
+wbb:BootstrapReferenceShape
+	a sh:NodeShape ;
+	sh:targetSubjectsOf rdfs:subClassOf, rdfs:subPropertyOf, owl:inverseOf ;
+	sh:property [
+		sh:path rdfs:subClassOf ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:property [
+		sh:path rdfs:subPropertyOf ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:property [
+		sh:path owl:inverseOf ;
+		sh:nodeKind sh:IRI ;
+	] .
