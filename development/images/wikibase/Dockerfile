@@ -88,6 +88,8 @@ RUN set -eux; \
 # hadolint ignore=DL3006,DL3029
 FROM --platform=${COMPOSER_IMAGE_PLATFORM} ${COMPOSER_IMAGE_URL} AS composer
 
+ARG MEDIAWIKI_VERSION
+
 COPY --from=mediawiki --chown=nobody:nogroup /var/www/html /var/www/html
 WORKDIR /var/www/html
 
@@ -103,6 +105,8 @@ RUN set -eux; \
         ; \
     rm -rf /var/lib/apt/lists/*
 USER nobody
+
+ENV COMPOSER_ROOT_VERSION=${MEDIAWIKI_VERSION}
 
 COPY --chown=nobody:nogroup --chmod=755 build/extensions.json /tmp/extensions.json
 COPY --chown=nobody:nogroup --chmod=755 build/InstallExtensions.php /tmp/InstallExtensions.php
