@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { BAKE_MANIFEST, readBakeScalar, replaceBakeValue } from './bake.js';
 import type { RepositoryContext } from './context.js';
@@ -24,7 +24,8 @@ export function discoverImageNames(context: RepositoryContext): string[] {
 			(entry) =>
 				entry.isDirectory() &&
 				!entry.name.startsWith('_') &&
-				entry.name !== 'node_modules'
+				entry.name !== 'node_modules' &&
+				existsSync(join(context.imagesRoot, entry.name, BAKE_MANIFEST))
 		)
 		.map((entry) => entry.name)
 		.sort();
