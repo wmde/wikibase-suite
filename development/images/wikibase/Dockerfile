@@ -107,10 +107,9 @@ USER nobody
 COPY --chown=nobody:nogroup --chmod=755 build/extensions.json /tmp/extensions.json
 COPY --chown=nobody:nogroup --chmod=755 build/InstallExtensions.php /tmp/InstallExtensions.php
 COPY --chown=nobody:nogroup --chmod=755 build/patches /tmp/patches
-COPY --chown=nobody:nogroup --chmod=755 runtime/var/www/html/extensions /tmp/wbs-local-sources/runtime/var/www/html/extensions
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN php /tmp/InstallExtensions.php /tmp/extensions.json /tmp/wbs-local-sources && \
+RUN php /tmp/InstallExtensions.php /tmp/extensions.json && \
     rm -rf composer.lock && \
     composer update --no-dev -vv -n
 
