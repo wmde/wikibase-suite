@@ -117,6 +117,8 @@ RUN php /tmp/InstallExtensions.php /tmp/extensions.json && \
 
 # ###########################################################################
 # hadolint ignore=DL3006
+# The neutral Wikibase runtime. Product variants add their own configuration
+# ownership and local extensions in stages below.
 FROM mediawiki AS wikibase
 
 LABEL org.opencontainers.image.source="https://github.com/wmde/wikibase-suite"
@@ -141,15 +143,33 @@ RUN chmod o-w /var/www/html && \
     ln -s /var/www/html/ /var/www/html/w && \
     chown www-data /var/www/html/images -R
 
-# Copy image-owned runtime files into their final container paths.
-COPY runtime/ /
+# Shared runtime files used by all Wikibase variants.
+COPY runtime/entrypoint.sh /entrypoint.sh
+COPY runtime/healthcheck.sh /healthcheck.sh
+COPY runtime/etc/ /etc/
+COPY runtime/usr/ /usr/
 
 # Enable the static Apache configuration for short URLs and VisualEditor.
 RUN a2enmod rewrite && a2enconf mediawiki
 
 RUN chmod 755 \
     /entrypoint.sh \
-    /healthcheck.sh \
+    /healthcheck.sh
+
+ENV MW_WG_SITENAME=wikibase \
+    MW_WG_LANGUAGE_CODE=en
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["web"]
+
+# ###########################################################################
+# Suite-specific derivative and the default published Wikibase image.
+FROM wikibase AS wikibase-suite
+
+# Copy image-owned Suite runtime files into their final container paths.
+COPY runtime/var/www/html/extensions/WikibaseSuite/ /var/www/html/extensions/WikibaseSuite/
+
+RUN chmod 755 \
     /var/www/html/extensions/WikibaseSuite/setup/setup.sh \
     /var/www/html/extensions/WikibaseSuite/setup/migration/migrate.sh \
     /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
@@ -161,16 +181,11 @@ RUN printf '%s-%s\n' "$WIKIBASE_IMAGE_VERSION" "$(date -u +%s%N)" \
     > /var/www/html/extensions/WikibaseSuite/setup/last-update
 
 ENV DB_NAME=my_wiki \
-    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php \
-    MW_WG_SITENAME=wikibase \
-    MW_WG_LANGUAGE_CODE=en
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["web"]
+    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php
 
 # ###########################################################################
-# Cloud-specific derivative. The normal Wikibase image remains the target
-# above; this stage is selected only by the wikibase-cloud Bake target.
+# Cloud-specific derivative. It starts from the neutral Wikibase runtime, not
+# the Suite variant, and is selected only by the wikibase-cloud Bake target.
 FROM wikibase AS wikibase-cloud
 
 # Cloud job code uses pcntl. Score and its LilyPond dependency are supplied by
