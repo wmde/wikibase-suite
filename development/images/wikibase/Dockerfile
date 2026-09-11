@@ -17,6 +17,8 @@ RUN apt-get update; \
         gettext-base \
         librsvg2-bin \
         imagemagick \
+        # Required by Score MediaWiki Extension
+        lilypond \
         # Required by SyntaxHighlighting MediaWiki Extension
         python3 \
         # Required by Scribunto MediaWiki Extension
@@ -52,9 +54,9 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
         opcache \
         ; \
     \
-    pecl install APCu-5.1.21; \
+    pecl install APCu-5.1.21 redis-6.3.0; \
         docker-php-ext-enable \
-        apcu \
+        apcu redis \
         ; \
     rm -r /tmp/pear; \
     \
@@ -115,6 +117,8 @@ RUN php /tmp/InstallExtensions.php /tmp/extensions.json && \
 
 # ###########################################################################
 # hadolint ignore=DL3006
+# The neutral Wikibase runtime. Product variants add their own configuration
+# ownership and local extensions in stages below.
 FROM mediawiki AS wikibase
 
 LABEL org.opencontainers.image.source="https://github.com/wmde/wikibase-suite"
@@ -139,15 +143,59 @@ RUN chmod o-w /var/www/html && \
     ln -s /var/www/html/ /var/www/html/w && \
     chown www-data /var/www/html/images -R
 
-# Copy image-owned runtime files into their final container paths.
-COPY runtime/ /
+# Shared runtime files used by all Wikibase variants.
+COPY runtime/entrypoint.sh /entrypoint.sh
+COPY runtime/healthcheck.sh /healthcheck.sh
+COPY runtime/etc/ /etc/
+COPY runtime/usr/ /usr/
 
 # Enable the static Apache configuration for short URLs and VisualEditor.
 RUN a2enmod rewrite && a2enconf mediawiki
 
 RUN chmod 755 \
     /entrypoint.sh \
-    /healthcheck.sh \
+    /healthcheck.sh
+
+ENV MW_WG_SITENAME=wikibase \
+    MW_WG_LANGUAGE_CODE=en
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["web"]
+
+# ###########################################################################
+# Cloud-specific derivative. It starts from the neutral Wikibase runtime, not
+# the Suite variant, and is selected only by the wikibase-cloud Bake target.
+FROM wikibase AS wikibase-cloud
+
+# Cloud job code uses pcntl. Score and its LilyPond dependency are supplied by
+# the shared image alongside the other optional extensions.
+RUN docker-php-ext-install pcntl
+
+# Cloud runtime files mirror their final paths, just as the Suite runtime files
+# above do. They are copied only by this Cloud-derived target.
+COPY --chown=nobody:nogroup runtime-cloud/ /
+
+# Cloud owns the selected configuration entry point and bypasses Suite setup.
+ENV MW_CONFIG_FILE=/opt/wikibase-cloud/CloudSettings.php
+
+# Cloud disables localization recaching during normal requests. Build its cache
+# through the static database-less maintenance profile instead.
+ARG LOCALIZATION_CACHE_THREAD_COUNT=1
+RUN WBS_DOMAIN=maint php /var/www/html/maintenance/run.php rebuildLocalisationCache \
+        --threads="${LOCALIZATION_CACHE_THREAD_COUNT}" \
+        --no-database \
+        --skip-message-purge \
+        --no-progress
+
+# ###########################################################################
+# Suite-specific derivative and the default published Wikibase image. Keeping
+# this final stage also preserves the Suite result for direct Docker builds.
+FROM wikibase AS wikibase-suite
+
+# Copy image-owned Suite runtime files into their final container paths.
+COPY runtime/var/www/html/extensions/WikibaseSuite/ /var/www/html/extensions/WikibaseSuite/
+
+RUN chmod 755 \
     /var/www/html/extensions/WikibaseSuite/setup/setup.sh \
     /var/www/html/extensions/WikibaseSuite/setup/migration/migrate.sh \
     /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
@@ -159,9 +207,4 @@ RUN printf '%s-%s\n' "$WIKIBASE_IMAGE_VERSION" "$(date -u +%s%N)" \
     > /var/www/html/extensions/WikibaseSuite/setup/last-update
 
 ENV DB_NAME=my_wiki \
-    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php \
-    MW_WG_SITENAME=wikibase \
-    MW_WG_LANGUAGE_CODE=en
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["web"]
+    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php

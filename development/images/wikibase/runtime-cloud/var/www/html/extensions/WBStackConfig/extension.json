@@ -1,0 +1,10 @@
+{
+	"name": "WBStackConfig",
+	"version": "0.1.0",
+	"author": ["Wikibase Cloud and Wikibase Suite contributors"],
+	"description": "Packaged WBStack MediaWiki configuration",
+	"type": "other",
+	"license-name": "GPL-2.0-or-later",
+	"manifest_version": 2
+}
+

@@ -68,6 +68,8 @@ function "image_tags" {
 }
 
 target "wikibase-base" {
+  target = "wikibase-suite"
+
   args = {
     WIKIBASE_IMAGE_VERSION = IMAGE_VERSION
     MEDIAWIKI_VERSION      = MEDIAWIKI.version
@@ -83,6 +85,27 @@ target "wikibase-base" {
     "org.opencontainers.image.source"      = "https://github.com/wmde/wikibase-suite"
     "org.opencontainers.image.licenses"    = "GPL-2.0-or-later"
   }
+}
+
+# A neutral Wikibase runtime for externally owned configuration. It is an
+# implementation target for development and derivative images, not a release
+# target: callers must supply their own MW_CONFIG_FILE and configuration.
+target "wikibase-core-base" {
+  inherits = ["wikibase-base"]
+  target   = "wikibase"
+
+  labels = {
+    "org.opencontainers.image.title"       = "Wikibase core image"
+    "org.opencontainers.image.description" = "Wikibase runtime for externally managed configuration"
+    "org.opencontainers.image.version"     = IMAGE_VERSION
+    "org.opencontainers.image.source"      = "https://github.com/wmde/wikibase-suite"
+    "org.opencontainers.image.licenses"    = "GPL-2.0-or-later"
+  }
+}
+
+target "wikibase-core" {
+  inherits = ["wikibase-core-base"]
+  tags     = ["wikibase/wikibase-core:latest"]
 }
 
 target "wikibase" {
@@ -101,6 +124,26 @@ target "wikibase-release" {
     ],
     [for tag in TAGS : image_tags(tag)]
   )))
+}
+
+# Local proof-of-concept Cloud derivative. It intentionally has separate tags
+# and is not part of the default group or release targets.
+target "wikibase-cloud-base" {
+  inherits = ["wikibase-base"]
+  target   = "wikibase-cloud"
+
+  labels = {
+    "org.opencontainers.image.title"       = "Wikibase Cloud image proof of concept"
+    "org.opencontainers.image.description" = "Wikibase image with Cloud-specific runtime integration"
+    "org.opencontainers.image.version"     = IMAGE_VERSION
+    "org.opencontainers.image.source"      = "https://github.com/wmde/wikibase-suite"
+    "org.opencontainers.image.licenses"    = "GPL-2.0-or-later"
+  }
+}
+
+target "wikibase-cloud" {
+  inherits = ["wikibase-cloud-base"]
+  tags     = ["wikibase/wikibase-cloud:latest"]
 }
 
 group "default" {

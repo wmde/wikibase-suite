@@ -1,0 +1,81 @@
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "domain": "maintenance",
+    "sitename": "Maintenance",
+    "deleted_at": null,
+    "created_at": "2019-10-28 10:44:54",
+    "updated_at": "2019-10-28 10:44:54",
+    "wiki_db": {
+      "id": 1,
+      "name": "mwdb_somedb",
+      "prefix": "mwt_someprefix",
+      "user": "mwu_someuser",
+      "password": "somepassword",
+      "version": "mw1.43-wbs1",
+      "wiki_id": 1,
+      "created_at": "2019-10-28 10:44:54",
+      "updated_at": "2019-10-28 10:44:54"
+    },
+    "wiki_queryservice_namespace": {
+      "id": 1,
+      "namespace": "qsns_somenamespace",
+      "backend": "someservice:9999",
+      "wiki_id": 1,
+      "created_at": "2019-10-27 12:53:52",
+      "updated_at": "2019-10-27 12:53:52"
+    },
+    "settings": [
+      {
+        "id": 1,
+        "name": "wgSecretKey",
+        "value": "somesecret",
+        "wiki_id": 1,
+        "created_at": "2019-10-28 10:44:54",
+        "updated_at": "2019-10-28 10:44:54"
+      },
+      {
+        "id": 2,
+        "name": "wwExtEnableWikibaseLexeme",
+        "value": "1",
+        "wiki_id": 1,
+        "created_at": "2019-10-28 10:44:54",
+        "updated_at": "2019-10-28 10:44:54"
+      },
+      {
+        "id": 3,
+        "name": "wwExtEnableInviteSignup",
+        "value": "1",
+        "wiki_id": 1,
+        "created_at": "2019-10-28 10:44:54",
+        "updated_at": "2019-10-28 10:44:54"
+      },
+      {
+        "id": 4,
+        "name": "wwExtEnableConfirmAccount",
+        "value": "1",
+        "wiki_id": 1,
+        "created_at": "2019-10-28 10:44:54",
+        "updated_at": "2019-10-28 10:44:54"
+      },
+      {
+        "id": 5,
+        "name": "nyurikThatSrcEnable",
+        "value": "1",
+        "wiki_id": 1,
+        "created_at": "2019-10-28 10:44:54",
+        "updated_at": "2019-10-28 10:44:54"
+      },
+      {
+        "id": 6,
+        "name": "wwExtEnableElasticSearch",
+        "value": "1",
+        "wiki_id": 1,
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
+      }
+    ]
+  }
+}
+

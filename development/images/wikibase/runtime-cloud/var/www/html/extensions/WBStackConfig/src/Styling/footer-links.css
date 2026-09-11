@@ -1,0 +1,72 @@
+#footer {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#footer-info {
+    flex: 0 0 100%;
+}
+
+#footer-places {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    /* min-width to prevent links from becoming unreadable */
+    min-width: 250px;
+}
+
+#footer-icons {
+    margin-left: auto;
+}
+
+#footer-places-privacy {
+    order: 1;
+}
+
+#footer-places-copyrights {
+    order: 2;
+}
+
+#footer-places-about {
+    order: 3;
+}
+
+#footer-places-disclaimers {
+    order: 4;
+}
+
+#footer-places-mobileview {
+    order: 5;
+}
+
+.skin-minerva #footer-places-desktop-toggle {
+    order: 5;
+}
+
+#footer-places::after {
+    order: 6;
+    content: "";
+    flex-basis: 100%;
+    height: 0;
+}
+
+#footer-places-wikibase-cloud-privacy-policy {
+    order: 7;
+}
+
+#footer-places-dsa-information {
+    order: 8;
+}
+
+#footer-places-report-illegal-content {
+    order: 9;
+}
+
+.skin-minerva #footer-places-report-illegal-content::after {
+    display: none;
+}
+
+.skin-minerva #footer-places li {
+    display: inline-block !important;
+}
+

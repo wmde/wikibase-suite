@@ -1,0 +1,42 @@
+{
+	"name": "WBStackInternal",
+	"version": "0.1.0",
+	"author": ["Wikibase Cloud and Wikibase Suite contributors"],
+	"descriptionmsg": "wbstackinternal-desc",
+	"type": "other",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.46"
+	},
+	"AutoloadNamespaces": {
+		"WBStack\\Internal\\": "src/",
+		"WBStackInternal\\": "includes/"
+	},
+	"APIModules": {
+		"wbstackInit": "WBStack\\Internal\\ApiWbStackInit",
+		"wbstackPlatformOauthGet": "WBStack\\Internal\\ApiWbStackOauthGet",
+		"wbstackElasticSearchInit": "WBStack\\Internal\\ApiWbStackElasticSearchInit",
+		"wbstackForceSearchIndex": "WBStack\\Internal\\ApiWbStackForceSearchIndex",
+		"wbstackQueueSearchIndexBatches": "WBStack\\Internal\\ApiWbStackQueueSearchIndexBatches",
+		"wbstackSiteStatsUpdate": "WBStack\\Internal\\ApiWbStackSiteStatsUpdate"
+	},
+	"GroupPermissions": {
+		"platform": {
+			"mwoauthproposeconsumer": true,
+			"mwoauthmanageconsumer": true,
+			"mwoauthviewprivate": true,
+			"mwoauthupdateownconsumer": true
+		}
+	},
+	"config": {
+		"WBStackInternalTenantDomain": {
+			"value": null,
+			"description": "Tenant domain propagated to MediaWiki maintenance subprocesses"
+		}
+	},
+	"MessagesDirs": {
+		"WBStackInternal": ["i18n"]
+	},
+	"manifest_version": 2
+}
+
