@@ -96,4 +96,4 @@ services:
           - opensearch.svc
 
 volumes:
-  mysql-data:
+  mysql-data: {}
