@@ -11,6 +11,7 @@ use RuntimeException;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Term\Fingerprint;
@@ -77,6 +78,7 @@ class BootstrapService {
 
 		$revisions = [];
 		$sourceIds = [];
+		$guidGenerator = new GuidGenerator();
 		$store = WikibaseRepo::getEntityStore();
 		foreach ( $plan['properties'] as $propertyPlan ) {
 			$property = new Property(
@@ -111,7 +113,10 @@ class BootstrapService {
 						new PropertyValueSnak(
 							new NumericPropertyId( $sourceIds[$claim['property']] ),
 							new StringValue( $claim['value'] )
-						)
+						),
+						null,
+						null,
+						$guidGenerator->newGuid( $property->getId() )
 					)
 				);
 			}
