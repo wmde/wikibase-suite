@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         imageName: ${{ fromJSON(needs.setup.outputs.images) }}
-        architecture: ${{ fromJSON((inputs.build_arm64 || inputs.test_arm64) && '["amd64","arm64"]' || '["amd64"]') }}
+        architecture: ${{ fromJSON((inputs.build_arm64 || inputs.test_arm64 || vars.WBS_RELEASE_ARM64 == 'true') && '["amd64","arm64"]' || '["amd64"]') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -150,7 +150,7 @@ jobs:
     if: >-
       always() &&
       needs.setup.outputs.should_skip != 'true' &&
-      inputs.build_arm64 &&
+      (inputs.build_arm64 || inputs.test_arm64 || vars.WBS_RELEASE_ARM64 == 'true') &&
       needs.build.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -191,7 +191,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJSON(needs.setup.outputs.test_targets) }}
-        architecture: ${{ fromJSON(inputs.test_arm64 && '["amd64","arm64"]' || '["amd64"]') }}
+        architecture: ${{ fromJSON((inputs.test_arm64 || vars.WBS_RELEASE_ARM64 == 'true') && '["amd64","arm64"]' || '["amd64"]') }}
 
     steps:
       - uses: actions/checkout@v4

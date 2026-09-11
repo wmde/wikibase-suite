@@ -19,8 +19,11 @@ env:
   BUILD_CACHE_PUSH: "true"
 
 jobs:
+  # The default release path publishes one AMD64 manifest directly. It does
+  # not create an OCI image index from a single platform.
   publish:
-    name: publish release image
+    name: publish AMD64 release image
+    if: vars.WBS_RELEASE_ARM64 != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 120
 
@@ -80,4 +83,149 @@ jobs:
           password: ${{ secrets.WBS_PUBLISH_TOKEN }}
           repository: wikibase/${{ steps.release.outputs.image_name }}
           readme-filepath: development/images/${{ steps.release.outputs.image_name }}/README.md
+          enable-url-completion: true
+
+  publish_amd64:
+    name: publish AMD64 release digest
+    if: vars.WBS_RELEASE_ARM64 == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-environment
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
+
+      - name: Resolve the release image
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "image_name=${RELEASE_TAG%%@*}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the AMD64 release image by digest
+        id: digest
+        uses: ./.github/actions/build-image-digest
+        with:
+          image_name: ${{ steps.release.outputs.image_name }}
+          platform: linux/amd64
+
+  publish_arm64:
+    name: publish (arm64)
+    if: vars.WBS_RELEASE_ARM64 == 'true'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-environment
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
+          # Two Composer source images are AMD64-only intermediate stages. All
+          # final-image stages still execute natively on this ARM64 runner.
+          qemu_platforms: amd64
+
+      - name: Resolve the release image
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "image_name=${RELEASE_TAG%%@*}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the ARM64 release image by digest
+        id: digest
+        uses: ./.github/actions/build-image-digest
+        with:
+          image_name: ${{ steps.release.outputs.image_name }}
+          platform: linux/arm64
+
+  publish_manifest:
+    name: publish multi-platform release image
+    needs:
+      - publish_amd64
+      - publish_arm64
+    if: >-
+      vars.WBS_RELEASE_ARM64 == 'true' &&
+      needs.publish_amd64.result == 'success' &&
+      needs.publish_arm64.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-environment
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
+
+      - name: Resolve and publish the multi-platform release tags
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          AMD64_DIGEST: ${{ needs.publish_amd64.outputs.digest }}
+          ARM64_DIGEST: ${{ needs.publish_arm64.outputs.digest }}
+        working-directory: development
+        run: |
+          set -euo pipefail
+          image_name=${RELEASE_TAG%%@*}
+          bake_json=$(IMAGE_REPOSITORY="wikibase/$image_name" TAGS=latest \
+            docker buildx bake \
+              --file "images/$image_name/docker-bake.hcl" \
+              --print \
+              --push \
+              "${image_name}-release")
+          release_tags=$(jq -ce \
+            --arg target "${image_name}-release" \
+            '.target[$target].tags' <<< "$bake_json")
+          echo "IMAGE_NAME=$image_name" >> "$GITHUB_ENV"
+          image="wikibase/$image_name"
+          tag_arguments=()
+          while IFS= read -r release_tag; do
+            tag_arguments+=(--tag "$release_tag")
+          done < <(jq -r '.[]' <<< "$release_tags")
+          docker buildx imagetools create \
+            "${tag_arguments[@]}" \
+            "$image@$AMD64_DIGEST" \
+            "$image@$ARM64_DIGEST"
+
+      - name: Prepare image documentation links for Docker Hub
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+        run: |
+          set -euo pipefail
+          readme="development/images/$IMAGE_NAME/README.md"
+
+          # Docker Hub URL completion resolves links from the repository root,
+          # while the checked-in READMEs use paths relative to their directory.
+          # Normalize only the disposable Actions checkout; source stays portable.
+          # TODO: Once main represents the latest released state rather than active
+          # development, replace this normalization with stable default-branch links.
+          sed -i \
+            -e "s#](\\./#](development/images/$IMAGE_NAME/#g" \
+            -e 's#](\.\./\.\./\.\./#](#g' \
+            "$readme"
+
+          if grep -nE '\]\((\./|\.\./)' "$readme"; then
+            echo "Unresolved relative documentation link in $readme." >&2
+            exit 1
+          fi
+
+      - name: Publish image documentation to Docker Hub
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: wmdetravisbot
+          password: ${{ secrets.WBS_PUBLISH_TOKEN }}
+          repository: wikibase/${{ env.IMAGE_NAME }}
+          readme-filepath: development/images/${{ env.IMAGE_NAME }}/README.md
           enable-url-completion: true
