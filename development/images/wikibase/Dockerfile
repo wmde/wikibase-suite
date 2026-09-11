@@ -163,27 +163,6 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["web"]
 
 # ###########################################################################
-# Suite-specific derivative and the default published Wikibase image.
-FROM wikibase AS wikibase-suite
-
-# Copy image-owned Suite runtime files into their final container paths.
-COPY runtime/var/www/html/extensions/WikibaseSuite/ /var/www/html/extensions/WikibaseSuite/
-
-RUN chmod 755 \
-    /var/www/html/extensions/WikibaseSuite/setup/setup.sh \
-    /var/www/html/extensions/WikibaseSuite/setup/migration/migrate.sh \
-    /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
-
-# Docker reuses this layer when the image inputs are unchanged. When a build
-# changes those inputs, this versioned last-update value lets WBS run its
-# updater once.
-RUN printf '%s-%s\n' "$WIKIBASE_IMAGE_VERSION" "$(date -u +%s%N)" \
-    > /var/www/html/extensions/WikibaseSuite/setup/last-update
-
-ENV DB_NAME=my_wiki \
-    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php
-
-# ###########################################################################
 # Cloud-specific derivative. It starts from the neutral Wikibase runtime, not
 # the Suite variant, and is selected only by the wikibase-cloud Bake target.
 FROM wikibase AS wikibase-cloud
@@ -207,3 +186,25 @@ RUN WBS_DOMAIN=maint php /var/www/html/maintenance/run.php rebuildLocalisationCa
         --no-database \
         --skip-message-purge \
         --no-progress
+
+# ###########################################################################
+# Suite-specific derivative and the default published Wikibase image. Keeping
+# this final stage also preserves the Suite result for direct Docker builds.
+FROM wikibase AS wikibase-suite
+
+# Copy image-owned Suite runtime files into their final container paths.
+COPY runtime/var/www/html/extensions/WikibaseSuite/ /var/www/html/extensions/WikibaseSuite/
+
+RUN chmod 755 \
+    /var/www/html/extensions/WikibaseSuite/setup/setup.sh \
+    /var/www/html/extensions/WikibaseSuite/setup/migration/migrate.sh \
+    /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
+
+# Docker reuses this layer when the image inputs are unchanged. When a build
+# changes those inputs, this versioned last-update value lets WBS run its
+# updater once.
+RUN printf '%s-%s\n' "$WIKIBASE_IMAGE_VERSION" "$(date -u +%s%N)" \
+    > /var/www/html/extensions/WikibaseSuite/setup/last-update
+
+ENV DB_NAME=my_wiki \
+    MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php
