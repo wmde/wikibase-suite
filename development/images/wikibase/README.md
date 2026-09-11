@@ -108,6 +108,10 @@ To enable Wikimedia login:
    docker compose up -d
    ```
 
+### Outbound email
+
+To send email, configure an external SMTP relay in `LocalSettings.php` using MediaWiki's [`$wgSMTP`](https://www.mediawiki.org/wiki/Manual:$wgSMTP) settings. Also configure `$wgPasswordSender` and `$wgEmergencyContact` with an address accepted by the relay. This image does not include a local sendmail-compatible service, but includes the TLS and certificate support needed to connect to an external relay.
+
 ### Visibility and ecosystem statistics
 
 Help Wikimedia Deutschland understand the size and diversity of the Wikibase ecosystem by setting `METADATA_CALLBACK=true`. This includes your Wikibase in Wikimedia Deutschland's ecosystem statistics and registers its public URLs with the metadata service. Set `METADATA_CALLBACK=false` to opt out.
