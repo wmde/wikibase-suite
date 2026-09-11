@@ -2,7 +2,8 @@
 
 # Image-owned default extension configuration. Simple extensions use MediaWiki's
 # standard loader; extension profiles group image-specific configuration and
-# conditional or multi-extension setup.
+# conditional or multi-extension setup. Optional profiles are available for
+# inclusion from /config/LocalSettings.php but do not change WBS defaults.
 
 $extensionProfilesPath = __DIR__ . '/extension-profiles';
 $openSearchEnabled = isset( $elasticsearchHost );
