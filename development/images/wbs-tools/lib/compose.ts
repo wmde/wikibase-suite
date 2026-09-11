@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { join } from 'node:path';
 import { parseEnvContent } from './validation.js';
 import { captureProcess, runProcess } from './command-runner.js';
-import { composeOverride, runtimeImageNames } from './compose-image-overrides.js';
+import { composeOverride, runtimeImageNames, suiteImageServices } from './compose-image-overrides.js';
 
 export type SuiteOptions = {
 	update?: boolean;
@@ -14,6 +14,11 @@ export type SuiteOptions = {
 export type ResetOptions = {
 	environment: boolean;
 	data: boolean;
+};
+
+export type ComposeConfiguration = {
+	name?: unknown;
+	services?: Record<string, { image?: unknown }>;
 };
 
 const repositoryRoot = process.env.WBS_DIR || '/app/wbs';
@@ -44,80 +49,94 @@ function localImagesOverridePath(): string {
 	return join( repositoryRoot, '.wbs/local-images.override.yml' );
 }
 
-function writeLocalImagesOverride(): string {
+function baseComposeArgs( root = repositoryRoot ): string[] {
+	const args = [
+		'compose',
+		'--project-directory', root,
+		'--file', join( root, 'docker-compose.yml' )
+	];
+	const composeEnvFile = process.env.ENV_FILE_PATH || join( root, '.env' );
+	if ( existsSync( composeEnvFile ) ) {
+		args.push( '--env-file', composeEnvFile );
+	}
+	const conventionalOverride = join( root, 'docker-compose.override.yml' );
+	if ( existsSync( conventionalOverride ) ) {
+		args.push( '--file', conventionalOverride );
+	}
+	return args;
+}
+
+export async function composeConfiguration( root = repositoryRoot ): Promise<ComposeConfiguration> {
+	const result = await captureProcess( 'docker', [
+		...baseComposeArgs( root ), 'config', '--format', 'json'
+	] );
+	if ( result.exitCode !== 0 ) {
+		throw new Error( `Could not resolve Docker Compose configuration: ${ result.stderr.trim() }` );
+	}
+	try {
+		return JSON.parse( result.stdout ) as ComposeConfiguration;
+	} catch {
+		throw new Error( 'Could not parse Docker Compose configuration.' );
+	}
+}
+
+async function writeLocalImagesOverride(): Promise<string> {
 	const repository = process.env.WBS_LOCAL_IMAGE_REPOSITORY || 'wikibase';
 	const tag = process.env.WBS_LOCAL_IMAGE_TAG || 'latest';
 	const pullPolicy = process.env.WBS_LOCAL_IMAGE_PULL_POLICY === 'always' ?
 		{} : { pullPolicy: 'never' as const };
-	const images = Object.fromEntries( runtimeImageNames( repositoryRoot ).map(
+	const services = suiteImageServices( await composeConfiguration() );
+	const images = Object.fromEntries( runtimeImageNames( services ).map(
 		( imageName ) => [ imageName, `${ repository }/${ imageName }:${ tag }` ]
 	) );
 	const path = localImagesOverridePath();
 	mkdirSync( join( repositoryRoot, '.wbs' ), { recursive: true } );
-	writeFileSync( path, composeOverride( repositoryRoot, images, pullPolicy ), { mode: 0o600 } );
+	writeFileSync( path, composeOverride( services, images, pullPolicy ), { mode: 0o600 } );
 	return path;
 }
 
-function composeArgs( localImages = false ): string[] {
-	const args = [
-		'compose',
-		'--project-directory', repositoryRoot
-	];
-	if ( existsSync( envFile ) ) {
-		args.push( '--env-file', envFile );
-	}
+async function composeArgs( localImages = false ): Promise<string[]> {
+	const args = baseComposeArgs();
 	if ( localImages ) {
-		args.push( '--file', join( repositoryRoot, 'docker-compose.yml' ) );
-		const conventionalOverride = join( repositoryRoot, 'docker-compose.override.yml' );
-		if ( existsSync( conventionalOverride ) ) {
-			args.push( '--file', conventionalOverride );
-		}
-		args.push( '--file', writeLocalImagesOverride() );
+		args.push( '--file', await writeLocalImagesOverride() );
 	}
 	return args;
 }
 
 export async function composeServicesAreRunning( localImages = false ): Promise<boolean> {
 	const result = await captureProcess( 'docker', [
-		...composeArgs( localImages ), 'ps', '--services', '--status', 'running'
+		...await composeArgs( localImages ), 'ps', '--services', '--status', 'running'
 	] );
 	return result.exitCode === 0 && result.stdout.trim().length > 0;
 }
 
 export async function composeServicesExist( localImages = false ): Promise<boolean> {
 	const result = await captureProcess( 'docker', [
-		...composeArgs( localImages ), 'ps', '--services', '--all'
+		...await composeArgs( localImages ), 'ps', '--services', '--all'
 	] );
 	return result.exitCode === 0 && result.stdout.trim().length > 0;
 }
 
-async function composeVolumesExist( localImages = false ): Promise<boolean> {
-	const config = await captureProcess( 'docker', [
-		...composeArgs( localImages ), 'config', '--format', 'json'
-	] );
-	if ( config.exitCode !== 0 ) {
-		return false;
-	}
-	let projectName: string;
+async function composeVolumesExist(): Promise<boolean> {
 	try {
-		projectName = String( ( JSON.parse( config.stdout ) as { name?: unknown } ).name || '' );
+		const projectName = String( ( await composeConfiguration() ).name || '' );
+		if ( !projectName ) {
+			return false;
+		}
+		const volumes = await captureProcess( 'docker', [
+			'volume', 'ls', '--quiet', '--filter', `label=com.docker.compose.project=${ projectName }`
+		] );
+		return volumes.exitCode === 0 && volumes.stdout.trim().length > 0;
 	} catch {
 		return false;
 	}
-	if ( !projectName ) {
-		return false;
-	}
-	const volumes = await captureProcess( 'docker', [
-		'volume', 'ls', '--quiet', '--filter', `label=com.docker.compose.project=${ projectName }`
-	] );
-	return volumes.exitCode === 0 && volumes.stdout.trim().length > 0;
 }
 
 export async function installedSuiteExists( localImages = false ): Promise<boolean> {
 	return existsSync( instanceSettingsFile ) ||
 		existsSync( localSettingsFile ) ||
 		await composeServicesExist( localImages ) ||
-		await composeVolumesExist( localImages );
+		await composeVolumesExist();
 }
 
 async function buildImages(): Promise<void> {
@@ -140,7 +159,7 @@ export async function up( options: SuiteOptions = {} ): Promise<void> {
 		console.log( 'Building Wikibase Suite images from this checkout...' );
 		await buildImages();
 	}
-	const args = composeArgs( localImages );
+	const args = await composeArgs( localImages );
 	if ( options.update ) {
 		console.log( 'Pulling selected Wikibase Suite images...' );
 		await runProcess( 'docker', [ ...args, 'pull' ] );
@@ -151,11 +170,11 @@ export async function up( options: SuiteOptions = {} ): Promise<void> {
 }
 
 export async function down(): Promise<void> {
-	await runProcess( 'docker', [ ...composeArgs(), 'down' ] );
+	await runProcess( 'docker', [ ...await composeArgs(), 'down' ] );
 }
 
 export async function status(): Promise<void> {
-	await runProcess( 'docker', [ ...composeArgs(), 'ps' ] );
+	await runProcess( 'docker', [ ...await composeArgs(), 'ps' ] );
 }
 
 export async function reset( options: ResetOptions ): Promise<void> {
@@ -163,7 +182,7 @@ export async function reset( options: ResetOptions ): Promise<void> {
 	if ( options.data ) {
 		await runProcess(
 			'docker',
-			[ ...composeArgs(), 'down', '--volumes' ],
+			[ ...await composeArgs(), 'down', '--volumes' ],
 			{ quiet: true }
 		);
 		for ( const filename of [
