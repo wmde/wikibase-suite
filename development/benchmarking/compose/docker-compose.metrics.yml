@@ -1,0 +1,59 @@
+name: wbs-benchmark-metrics
+
+# Run beside a Suite installation, not as part of its normal stack:
+#   docker compose -f development/benchmarking/compose/docker-compose.metrics.yml up -d
+#
+# WBS_BENCHMARK_NETWORK defaults to the root compose network. Set it explicitly
+# if the target installation uses another Compose project name.
+services:
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.55.1
+    restart: unless-stopped
+    privileged: true
+    command:
+      - --housekeeping_interval=5s
+      - --docker_only=true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - metrics
+      - suite
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - metrics
+
+  prometheus:
+    image: prom/prometheus:v3.8.1
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "${WBS_BENCHMARK_PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - metrics
+      - suite
+
+networks:
+  metrics:
+  suite:
+    external: true
+    name: ${WBS_BENCHMARK_NETWORK:-wbs-deploy_default}
+
+volumes:
+  prometheus-data:

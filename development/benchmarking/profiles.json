@@ -1,0 +1,31 @@
+{
+  "format": "wbs-benchmark-profiles/v1",
+  "profiles": {
+    "wikibase-suite-8gb": {
+      "host_memory_bytes": 8589934592,
+      "purpose": "Capacity characterization of the standard Wikibase Suite stack on a dedicated 8 GiB VPS.",
+      "services": [
+        "mysql",
+        "wikibase",
+        "wikibase-jobrunner",
+        "elasticsearch",
+        "wdqs",
+        "wdqs-updater"
+      ],
+      "storage_services": ["mysql", "elasticsearch", "wdqs"]
+    },
+    "qlever-4gb": {
+      "host_memory_bytes": 4294967296,
+      "purpose": "Future capacity characterization of the QLever-enabled stack on a dedicated 4 GiB VPS.",
+      "services": [
+        "mysql",
+        "wikibase",
+        "wikibase-jobrunner",
+        "elasticsearch",
+        "qlever",
+        "qlever-updater"
+      ],
+      "storage_services": ["mysql", "elasticsearch", "qlever"]
+    }
+  }
+}

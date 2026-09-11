@@ -1,0 +1,6 @@
+# Downloaded/generated corpus artifacts and measurements are intentionally local.
+/corpora/
+/results/*
+!/results/.gitkeep
+*.sqlite
+__pycache__/
