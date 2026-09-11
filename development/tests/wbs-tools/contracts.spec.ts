@@ -4,7 +4,6 @@ import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSy
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { INSTALLER_TEMP_ROOT, installerContainerInspections, toolsImage } from './test-environment.js';
-import { runtimeImageNames } from '../../images/wbs-tools/lib/compose-image-overrides.js';
 
 const defaultConfiguration = {
 	WIKIBASE_PUBLIC_HOST: 'wikibase.test',
@@ -175,7 +174,7 @@ touch /app/wbs/docker-called-after-configuration
 	} );
 
 	describe( 'image selection', () => {
-		it( 'uses installation manifest images for declared Compose services', () => {
+		it( 'uses installation manifest images for resolved Compose services', () => {
 			withTemporaryDirectory( 'manifest', ( root ) => {
 				const commit = 'a1b2c3d4e5f678901234567890abcdef12345678';
 				const tag = 'pr-942-a1b2c3d4e5f6';
@@ -183,11 +182,31 @@ touch /app/wbs/docker-called-after-configuration
 					fileURLToPath( new URL( '../../../docker-compose.yml', import.meta.url ) ),
 					join( root, 'docker-compose.yml' )
 				);
+				mkdirSync( join( root, '.wbs' ), { recursive: true } );
+				copyFileSync(
+					fileURLToPath( new URL( '../../../.wbs/version', import.meta.url ) ),
+					join( root, '.wbs/version' )
+				);
+				writeFileSync(
+					join( root, '.env' ),
+					[ ...Object.entries( { ...defaultConfiguration, METADATA_CALLBACK: 'false' } )
+						.map( ( [ name, value ] ) => `${ name }=${ value }` ), '' ].join( '\n' )
+				);
+				writeFileSync(
+					join( root, 'resolved-compose.json' ),
+					execFileSync( 'docker', [
+						'compose', '--project-directory', root,
+						'--file', join( root, 'docker-compose.yml' ),
+						'--env-file', join( root, '.env' ),
+						'config', '--format', 'json'
+					], { encoding: 'utf8' } )
+				);
 				const manifest = {
 					schemaVersion: 1,
 					source: { commit },
 					images: Object.fromEntries(
-						[ ...runtimeImageNames( root ), 'wbs-tools', 'unused-build-target' ].map(
+						[ 'wikibase', 'opensearch', 'quickstatements', 'wdqs', 'wdqs-frontend',
+							'wbs-tools', 'unused-build-target' ].map(
 							( name ) => [ name, `ghcr.io/wmde/wikibase/${ name }:${ tag }` ]
 						)
 					)
@@ -205,7 +224,17 @@ touch /app/wbs/docker-called-after-configuration
 					});
 				`;
 				const result = runTools( root, [ '--input-type=module', '--eval', script ], {
-					environment: { WBS_DIR: '/app/wbs' }
+					environment: { WBS_DIR: '/app/wbs' },
+					fakeDocker: shellScript`
+#!/bin/sh
+for argument in "$@"; do
+  if [ "$argument" = config ]; then
+    cat /app/wbs/resolved-compose.json
+    exit 0
+  fi
+done
+exit 0
+`
 				} );
 				assert.equal( result.status, 0, result.stderr );
 				const override = readFileSync( join( root, 'docker-compose.override.yml' ), 'utf8' );
@@ -235,10 +264,19 @@ touch /app/wbs/docker-called-after-configuration
 #!/bin/sh
 printf "%s\\n" "$@" >> /app/wbs/docker-arguments
 printf "%s\\n" --- >> /app/wbs/docker-arguments
+for argument in "$@"; do
+  if [ "$argument" = config ]; then
+    printf '%s\n' '{"services":{"wikibase":{"image":"wikibase/wikibase:8"}}}'
+    exit 0
+  fi
+done
 `
 				} );
 				assert.equal( result.status, 0, result.stderr );
-				assert.match( readFileSync( join( root, 'docker-arguments' ), 'utf8' ), /pnpm exec tsx wbs-dev\.ts build all/u );
+				const dockerArguments = readFileSync( join( root, 'docker-arguments' ), 'utf8' );
+				assert.match( dockerArguments, /pnpm exec tsx wbs-dev\.ts build all/u );
+				assert.match( dockerArguments, /--env-file\n\/app\/wbs\/\.env/u );
+				assert.match( dockerArguments, /--file\n\/app\/wbs\/docker-compose\.yml/u );
 				assert.match( readFileSync( join( root, '.wbs/local-images.override.yml' ), 'utf8' ), /wikibase:\n[ ]{4}image: "registry\.example\.test\/wikibase\/wikibase:test-tag"/u );
 			} );
 		} );
@@ -260,6 +298,12 @@ printf "%s\\n" --- >> /app/wbs/docker-arguments
 					},
 					fakeDocker: shellScript`
 #!/bin/sh
+for argument in "$@"; do
+  if [ "$argument" = config ]; then
+    printf '%s\n' '{"services":{"wikibase":{"image":"wikibase/wikibase:8"}}}'
+    exit 0
+  fi
+done
 exit 0
 `
 				} );
