@@ -274,7 +274,8 @@ export default class TestEnv {
 
 	protected async startServices(): Promise<void> {
 		this.testLog.info( '▶️  Starting Wikibase Suite services' );
-		await this.runDockerComposeCmd( 'up -d --wait' );
+		// A cold MediaWiki install can exceed Compose's 60-second default on CI.
+		await this.runDockerComposeCmd( 'up -d --wait --wait-timeout 180' );
 	}
 
 	protected async stopServices( removeVolumes: boolean = true ): Promise<void> {

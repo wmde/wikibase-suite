@@ -53,7 +53,7 @@ describe('wbs-dev command contracts', () => {
 		assert.equal(test.status, 0, test.stderr);
 		assert.deepEqual((JSON.parse(test.stdout) as string[]).slice(0, 2), [
 			'wbs-dev-tools',
-			'extensions'
+			'opensearch'
 		]);
 	});
 

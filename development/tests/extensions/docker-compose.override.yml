@@ -1,5 +1,0 @@
-services:
-  wikibase:
-    volumes:
-      - ./extensions/LocalSettings.php:/test-settings/LocalSettings.php:ro
-      - ./extensions/extensions:/var/www/html/extensions/extensions

@@ -7,10 +7,10 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | Test Suite | Type | What It Covers |
 | --- | --- | --- |
 | `wbs-dev-tools` | Tooling | The `wbs-dev` CLI, development commands, and shared development libraries. |
-| `repo` | Integration | Core Wikibase repository behavior; runs up to three WDIO workers. |
+| `wikibase` | Integration | Core Wikibase repository behavior; runs up to three WDIO workers. |
 | `upgrade` | Integration | Upgrades from earlier Wikibase Suite configuration and data layouts. |
-| `extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
-| `repo-client` | Integration | Repository/client federation and change dispatch. |
+| `wikibase-extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
+| `wikibase-client` | Integration | Repository/client federation and change dispatch. |
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
@@ -28,13 +28,13 @@ wbs-dev test all
 wbs-dev test wbs-dev-tools
 
 # Run one integration suite
-wbs-dev test repo-client
+wbs-dev test wikibase-client
 
 # Run multiple suites
-wbs-dev test repo wdqs
+wbs-dev test wikibase wdqs
 
 # Run one spec within a suite's environment
-wbs-dev test extensions --spec extensions/babel.spec.ts
+wbs-dev test wikibase-extensions --spec wikibase-extensions/babel.spec.ts
 
 # Start a suite's services and leave them running
 wbs-dev test wdqs --setup
@@ -46,7 +46,7 @@ wbs-dev test wdqs --setup
 
 - Name spec files after the feature or service behavior they cover. Use Mocha `describe` and `it` descriptions that state the observable behavior.
 - Read service URLs and credentials from `testEnv.vars`; do not hard-code local ports, hostnames, or credentials.
-- Create unique test data when practical and do not rely on spec execution order. The `repo` suite can run several WDIO workers concurrently.
+- Create unique test data when practical and do not rely on spec execution order. The `wikibase` suite can run several WDIO workers concurrently.
 - Prefer page objects for repeated UI flows and WebdriverIO expectations or `browser.waitUntil` for asynchronous behavior. Use a fixed `browser.pause` only when no observable condition is available, and explain why in the spec.
 - Keep assertions in the spec so the behavior being verified remains visible; helpers should primarily arrange state or expose reusable interactions.
 - Run the smallest relevant spec while iterating, then its complete suite before submitting the change. Test commands build the local images unless `--skip-build` is given.

@@ -4,12 +4,12 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'extensions',
+	name: 'wikibase-extensions',
 	maxInstances: 3,
-	specs: [ 'extensions/*.spec.ts' ],
+	specs: [ 'wikibase-extensions/*.spec.ts' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
-		'extensions/docker-compose.override.yml'
+		'wikibase-extensions/docker-compose.override.yml'
 	]
 } );
 

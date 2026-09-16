@@ -15,7 +15,7 @@ services:
         condition: service_healthy
     restart: always
     volumes:
-      - ./repo-client/tmp/client-config:/config
+      - ./wikibase-client/tmp/client-config:/config
       - ./_setup/client-LoadExtensions.php:/var/www/html/extensions/WikibaseSuite/config/LoadExtensions.php:ro
       - ./_setup/client-extra-install.sh:/extra-install.sh
       - ./${OUTPUT_DIR}:/var/log/mediawiki
