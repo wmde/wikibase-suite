@@ -4,9 +4,9 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'queryservice',
-	specs: [ 'queryservice/*.spec.ts' ],
-	composeProfiles: [ 'wdqs', 'queryservice-ui' ]
+	name: 'wdqs',
+	specs: [ 'wdqs/*.spec.ts' ],
+	composeProfiles: [ 'wdqs', 'wdqs-frontend' ]
 } );
 
 export const config = wdioConfig( testEnv );

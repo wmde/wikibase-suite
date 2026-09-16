@@ -11,7 +11,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `upgrade` | Integration | Upgrades from earlier Wikibase Suite configuration and data layouts. |
 | `extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
 | `repo-client` | Integration | Repository/client federation and change dispatch. |
-| `queryservice` | Integration | WDQS, updater, and the Query Service UI through the `wdqs` and `queryservice-ui` Compose profiles. |
+| `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
@@ -31,13 +31,13 @@ wbs-dev test wbs-dev-tools
 wbs-dev test repo-client
 
 # Run multiple suites
-wbs-dev test repo queryservice
+wbs-dev test repo wdqs
 
 # Run one spec within a suite's environment
 wbs-dev test extensions --spec extensions/babel.spec.ts
 
 # Start a suite's services and leave them running
-wbs-dev test queryservice --setup
+wbs-dev test wdqs --setup
 ```
 
 ## Write Tests
@@ -102,7 +102,7 @@ CI uses `--skip-build` and supplies `WBS_TEST_IMAGE_REGISTRY` and `WBS_TEST_IMAG
 
 ### Architecture Coverage in CI
 
-CI always runs every suite above against the native AMD64 image set. The suites collectively exercise all distributed images: Wikibase through the repository, extension, client, and installer scenarios; WDQS through `wdqs` and its frontend through `queryservice-ui`; QuickStatements through `quickstatements`; OpenSearch through `opensearch`; and WBS Tools through its end-to-end suite.
+CI always runs every suite above against the native AMD64 image set. The suites collectively exercise all distributed images: Wikibase through the repository, extension, client, and installer scenarios; WDQS through `wdqs` and its frontend through `wdqs-frontend`; QuickStatements through `quickstatements`; OpenSearch through `opensearch`; and WBS Tools through its end-to-end suite.
 
 Create Release repeats the complete target matrix on native ARM64 runners when `WBS_RELEASE_ARM64=true`. Pull requests and pushes to `main` remain AMD64-only.
 

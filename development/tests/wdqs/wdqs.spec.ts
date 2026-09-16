@@ -57,7 +57,7 @@ const federatedSparqlRequest = async (
 	return String( result.data );
 };
 
-describe( 'QueryService', function () {
+describe( 'WDQS', function () {
 	it( 'Should be able to get sparql endpoint', async function () {
 		const result = await browser.makeRequest(
 			`${ testEnv.vars.WDQS_URL }/sparql`
@@ -90,7 +90,7 @@ describe( 'QueryService', function () {
 		expect( result.status ).toEqual( 404 );
 	} );
 
-	it( 'Should show up with property in queryservice ui after creation', async function () {
+	it( 'Should show up with property in the WDQS frontend after creation', async function () {
 		const itemLabel = 'T267743-';
 		const propertyValue = 'PropertyExampleStringValue';
 
@@ -178,7 +178,7 @@ describe( 'QueryService', function () {
 		).resolves.toEqual( true );
 	} );
 
-	it( 'Should not show up in queryservice ui after deletion', async function () {
+	it( 'Should not show up in the WDQS frontend after deletion', async function () {
 		const itemId = await WikibaseApi.createItem(
 			getTestString( 'T267743-' )
 		);

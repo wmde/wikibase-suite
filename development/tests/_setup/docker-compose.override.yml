@@ -43,7 +43,7 @@ services:
 
   wdqs-frontend:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-frontend:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ queryservice-ui ]
+    profiles: [ wdqs-frontend ]
     volumes:
       - ./${WBS_TEST_CONFIG_DIR}:/config
     environment:
