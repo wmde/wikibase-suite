@@ -137,7 +137,10 @@ export default class TestEnv {
 
 	public async exitPrompt(): Promise<void> {
 		if ( !process.stdout.isTTY ) {
-			return null;
+			// A non-interactive runner cannot answer the failure prompt. Do not
+			// strand its isolated Compose project (or its volumes) in that case.
+			await this.down();
+			return;
 		}
 
 		console.log(

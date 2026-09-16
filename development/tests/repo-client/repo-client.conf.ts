@@ -9,6 +9,7 @@ export const testEnv = TestEnv.create( {
 		'repo-client/*.spec.ts',
 		'repo-client/extensions/*.spec.ts'
 	],
+	composeProfiles: [ 'wdqs' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
 		'repo-client/docker-compose.override.yml'

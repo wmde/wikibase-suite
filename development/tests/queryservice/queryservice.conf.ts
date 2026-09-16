@@ -6,7 +6,7 @@ export const testEnv = TestEnv.create( {
 	...defaultSettings,
 	name: 'queryservice',
 	specs: [ 'queryservice/*.spec.ts' ],
-	composeProfiles: [ 'queryservice' ]
+	composeProfiles: [ 'wdqs', 'queryservice-ui' ]
 } );
 
 export const config = wdioConfig( testEnv );
