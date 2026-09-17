@@ -1,1 +1,2 @@
 build/wdqs-frontend/*.patch whitespace=-space-before-tab
+development/images/wdqs-qlever-proxy/build/*.patch whitespace=-blank-at-eol

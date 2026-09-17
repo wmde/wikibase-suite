@@ -1,0 +1,55 @@
+diff --git a/src/main/java/org/wikimedia/wdqs/events/EventGateSettings.java b/src/main/java/org/wikimedia/wdqs/events/EventGateSettings.java
+index de92faa..4d45712 100644
+--- a/src/main/java/org/wikimedia/wdqs/events/EventGateSettings.java
++++ b/src/main/java/org/wikimedia/wdqs/events/EventGateSettings.java
+@@ -10,6 +10,9 @@ import io.smallrye.config.WithDefault;
+ 
+ @ConfigMapping(prefix = "eventgate")
+ public interface EventGateSettings {
++    @WithDefault("false")
++    boolean enabled();
++
+     @WithDefault("wdqs_internal.sparql_query.v2")
+     String stream();
+ 
+diff --git a/src/main/java/org/wikimedia/wdqs/events/QueryEventFilters.java b/src/main/java/org/wikimedia/wdqs/events/QueryEventFilters.java
+index 4651d96..47b3ab0 100644
+--- a/src/main/java/org/wikimedia/wdqs/events/QueryEventFilters.java
++++ b/src/main/java/org/wikimedia/wdqs/events/QueryEventFilters.java
+@@ -26,6 +26,7 @@ import org.wikimedia.wdqs.exception.ExceptionMappers;
+ import io.quarkus.logging.Log;
+ import io.vertx.core.http.HttpServerRequest;
+ import io.vertx.ext.web.RoutingContext;
++import jakarta.enterprise.inject.Instance;
+ import jakarta.inject.Inject;
+ import jakarta.ws.rs.container.ContainerResponseContext;
+ 
+@@ -37,7 +38,7 @@ public class QueryEventFilters {
+ 
+     @Inject
+     @RestClient
+-    EventGateClient eventGateClient;
++    Instance<EventGateClient> eventGateClient;
+ 
+     /// Combine the header values in `request` that have the same key into a comma-separated list of values.
+     Map<String, String> getRequestHeaders(HttpServerRequest request) {
+@@ -89,6 +90,10 @@ public class QueryEventFilters {
+     /// Create an event based on the context and post it to eventGateClient.
+     @ServerResponseFilter
+     public void pushEvent(RoutingContext routingContext, ContainerResponseContext responseContext) {
++        if (!eventGateSettings.enabled()) {
++            return;
++        }
++
+         // Run this filter only on /sparql requests.
+         if (routingContext.normalizedPath() == null || !routingContext.normalizedPath().equals("/sparql")) {
+             return;
+@@ -134,7 +139,7 @@ public class QueryEventFilters {
+         Log.debug("Posting event: " + event.toString());
+ 
+         // Post the QueryEvent to EventGate, asynchronously.
+-        eventGateClient.postEventAsync(event).subscribe().with(
++        eventGateClient.get().postEventAsync(event).subscribe().with(
+                 // Log exceptions. TODO: Decide whether to log valid error responses.
+                 (Void success) -> {
+                 },
