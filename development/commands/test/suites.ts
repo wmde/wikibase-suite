@@ -18,7 +18,8 @@ export function discoverSuiteNames( context: RepositoryContext ): string[] {
 			( entry ) =>
 				entry.isDirectory() &&
 				!entry.name.startsWith( '_' ) &&
-				entry.name !== 'node_modules'
+				entry.name !== 'node_modules' &&
+				existsSync( suiteConfigPath( context, entry.name ) )
 		)
 		.map( ( entry ) => entry.name )
 		.sort();

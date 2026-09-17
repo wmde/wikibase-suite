@@ -88,6 +88,7 @@ target "wikibase-base" {
 target "wikibase" {
   inherits = ["wikibase-base"]
   tags     = image_tags(TAGS[0])
+  output   = [{ type = "docker" }]
 }
 
 target "wikibase-release" {

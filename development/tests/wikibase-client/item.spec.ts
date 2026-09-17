@@ -88,7 +88,7 @@ describe( 'Item', function () {
 	it( 'Should be able to create site-links from item to client', async function () {
 		// Create a site-link on a the Main_Page
 		await page.open(
-			`/wiki/Special:SetSiteLink/Q1?site=client_wiki&page=${ pageTitle }`
+			`/wiki/Special:SetSiteLink/${ itemId }?site=client_wiki&page=${ pageTitle }`
 		);
 		await $( '#wb-setsitelink-submit button' ).click();
 
@@ -99,6 +99,41 @@ describe( 'Item', function () {
 		await expect( $( '.wikibase-sitelinklistview-listview li' ) ).toHaveText(
 			new RegExp( pageTitle )
 		);
+	} );
+
+	it( 'Should expose client sitelinks in EntityData and Query Service RDF', async function () {
+		const entityData = await browser.makeRequest(
+			`${ testEnv.vars.WIKIBASE_URL }/wiki/Special:EntityData/${ itemId }.nt`
+		);
+		expect( entityData.data ).toContain( '<http://schema.org/about>' );
+		expect( entityData.data ).toContain( `<${ testEnv.vars.WIKIBASE_CLIENT_URL }/wiki/${ pageTitle }>` );
+
+		let bindings: Array<{ article: { value: string }; site: { value: string } }> = [];
+		await browser.waitUntil( async () => {
+			const response = await browser.makeRequest(
+				`${ testEnv.vars.WDQS_URL }/sparql`,
+				{
+					params: {
+						query: `SELECT ?article ?site WHERE {
+							?article <http://schema.org/about> <${ testEnv.vars.WIKIBASE_URL }/entity/${ itemId }> ;
+								<http://schema.org/isPartOf> ?site ;
+								<http://schema.org/name> ${ JSON.stringify( pageTitle ) }@en
+						}`,
+						format: 'json'
+					}
+				}
+			);
+			bindings = response.data.results.bindings;
+			return bindings.length > 0;
+		}, {
+			interval: 1000,
+			timeoutMsg: 'Expected the client sitelink to be indexed as queryable RDF'
+		} );
+
+		expect( bindings ).toEqual( [ {
+			article: { type: 'uri', value: `${ testEnv.vars.WIKIBASE_CLIENT_URL }/wiki/${ pageTitle }` },
+			site: { type: 'uri', value: `${ testEnv.vars.WIKIBASE_CLIENT_URL }/` }
+		} ] );
 	} );
 
 	it( 'Should be able to see site-link change is dispatched to client', async function () {

@@ -6,9 +6,9 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create({
 	...defaultSettings,
-	name: 'repo',
+	name: 'wikibase',
 	maxInstances: 3,
-	specs: ['repo/*.spec.ts']
+	specs: ['wikibase/*.spec.ts']
 });
 
 testEnv.settings.vars.MEDIAWIKI_VERSION = readBakeValue(

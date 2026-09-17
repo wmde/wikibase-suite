@@ -176,9 +176,9 @@ export function registerTestCommand(
 				'  wbs-dev test --list=json',
 				'  wbs-dev test',
 				'  wbs-dev test wbs-dev-tools',
-				'  wbs-dev test repo queryservice --headed',
-				'  wbs-dev test repo --spec repo/special-new-item.spec.ts',
-				'  wbs-dev test repo --setup',
+				'  wbs-dev test wikibase wdqs --headed',
+				'  wbs-dev test wikibase --spec wikibase/special-new-item.spec.ts',
+				'  wbs-dev test wikibase --setup',
 				'  wbs-dev test all --shard 1/2'
 			].join( '\n' )
 		)
