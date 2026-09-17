@@ -12,6 +12,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wikibase-extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
 | `wikibase-client` | Integration | Repository/client federation and change dispatch. |
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
+| [`qlever`](./qlever/README.md) | Integration | Development-only full export/index, entity-graph incremental updater, and direct SPARQL queries. |
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |

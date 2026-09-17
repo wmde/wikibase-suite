@@ -9,7 +9,7 @@ export const testEnv = TestEnv.create( {
 		'wikibase-client/*.spec.ts',
 		'wikibase-client/extensions/*.spec.ts'
 	],
-	composeProfiles: [ 'wdqs' ],
+	composeProfiles: [ 'qlever', 'wdqs-frontend' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
 		'wikibase-client/docker-compose.override.yml'

@@ -4,10 +4,15 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'wdqs',
-	specs: [ 'wdqs/*.spec.ts' ],
-	// Runs against qlever, not wdqs
-	composeProfiles: [ 'qlever', 'wdqs-frontend' ]
+	name: 'qlever',
+	specs: [ 'qlever/*.spec.ts' ],
+	composeProfiles: [ 'qlever', 'qlever-compat' ],
+	composeFiles: [
+		'../../docker-compose.yml',
+		'_setup/docker-compose.override.yml',
+		'qlever/docker-compose.override.yml',
+		'qlever/docker-compose.wdqs-blazegraph.yml'
+	]
 } );
 
 export const config = wdioConfig( testEnv );
