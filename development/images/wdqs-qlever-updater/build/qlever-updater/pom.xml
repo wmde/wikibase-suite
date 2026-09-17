@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Built against the Bake-pinned Foundation WDQS Common release. -->
+    <parent>
+        <groupId>org.wikimedia</groupId>
+        <artifactId>wmf-jvm-parent-pom</artifactId>
+        <version>1.101</version>
+    </parent>
+
+    <artifactId>wdqs-qlever-updater</artifactId>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <wmf-maven-tool-configs.version>1.42</wmf-maven-tool-configs.version>
+        <wdqs-common.version>0.1.0</wdqs-common.version>
+        <jackson.version>2.17.1</jackson.version>
+    </properties>
+
+    <dependencies>
+        <!-- Foundation's canonical Wikibase RDF transformation and model. -->
+        <dependency>
+            <groupId>org.wikimedia.wdqs</groupId>
+            <artifactId>wdqs-common</artifactId>
+            <version>${wdqs-common.version}</version>
+            <exclusions>
+                <exclusion><groupId>ch.qos.logback</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>com.fasterxml.jackson.dataformat</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>com.fasterxml.jackson.datatype</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>com.github.rholder</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>com.github.spotbugs</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>com.lexicalscope.jewelcli</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>de.thetaphi</groupId><artifactId>forbiddenapis</artifactId></exclusion>
+                <exclusion><groupId>io.dropwizard.metrics</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId></exclusion>
+                <exclusion><groupId>org.apache.httpcomponents</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>org.apache.kafka</groupId><artifactId>kafka-clients</artifactId></exclusion>
+                <exclusion><groupId>org.eclipse.jetty</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>org.wikimedia.utils</groupId><artifactId>http-client-utils</artifactId></exclusion>
+                <exclusion><groupId>net.logstash.logback</groupId><artifactId>*</artifactId></exclusion>
+                <exclusion><groupId>org.slf4j</groupId><artifactId>jcl-over-slf4j</artifactId></exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-ntriples</artifactId>
+            <version>5.3.2</version>
+        </dependency>
+        <!-- Compile-time only: this command intentionally owns stdin/stdout. -->
+        <dependency>
+            <groupId>de.thetaphi</groupId>
+            <artifactId>forbiddenapis</artifactId>
+            <version>3.7</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <configLocation>org/wikimedia/build/tools/checkstyle/checkstyle.xml</configLocation>
+                    <suppressionsLocation>org/wikimedia/build/tools/checkstyle/suppressions.xml</suppressionsLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.16.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.wikimedia</groupId>
+                        <artifactId>wmf-maven-tool-configs</artifactId>
+                        <version>${wmf-maven-tool-configs.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>wdqs-qlever-updater</finalName>
+                            <!-- Exclude logging integrations the updater does not use. -->
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>ch.qos.logback:*</exclude>
+                                    <exclude>io.dropwizard.metrics:*</exclude>
+                                    <exclude>net.logstash.logback:*</exclude>
+                                    <exclude>org.slf4j:jcl-over-slf4j</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.wikimedia.wikibase.qlever.updater.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
