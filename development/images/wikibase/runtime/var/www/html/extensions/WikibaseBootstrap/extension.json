@@ -1,0 +1,44 @@
+{
+	"name": "WikibaseBootstrap",
+	"version": "0.1.0",
+	"author": ["Wikibase Suite Team"],
+	"url": "https://www.mediawiki.org/wiki/Wikibase/Suite",
+	"namemsg": "wikibasebootstrap-extensionname",
+	"descriptionmsg": "wikibasebootstrap-desc",
+	"type": "specialpage",
+	"license-name": "BSD-3-Clause",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseBootstrap\\": "includes/"
+	},
+	"ResourceModules": {
+		"ext.wikibaseBootstrap.apply": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"localBasePath": "",
+			"packageFiles": [
+				"resources/ext.wikibaseBootstrap/init.js",
+				"resources/ext.wikibaseBootstrap/OntologyBootstrapApp.vue"
+			],
+			"styles": ["resources/ext.wikibaseBootstrap.css"],
+			"codexComponents": ["CdxButton", "CdxDialog", "CdxMessage", "CdxTextInput"],
+		"dependencies": ["codex-styles"]
+		}
+	},
+	"SpecialPages": {
+		"OntologyBootstrap": "MediaWiki\\Extension\\WikibaseBootstrap\\SpecialOntologyBootstrap"
+	},
+	"Hooks": {
+		"SidebarBeforeOutput": "MediaWiki\\Extension\\WikibaseBootstrap\\SidebarHooks::onSidebarBeforeOutput"
+	},
+	"AvailableRights": ["bootstrapontology", "resetwikibaseentities"],
+	"GroupPermissions": {
+		"sysop": { "bootstrapontology": true, "resetwikibaseentities": true }
+	},
+	"MessagesDirs": { "WikibaseBootstrap": ["i18n"] },
+	"config": {
+		"WikibaseBootstrapBundleDirectory": {
+			"value": "/var/www/html/extensions/WikibaseBootstrap/ontologies",
+			"public": false
+		}
+	},
+	"manifest_version": 2
+}

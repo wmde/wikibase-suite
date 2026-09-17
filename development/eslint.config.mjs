@@ -80,6 +80,18 @@ export default defineConfigWithVueTs(
 		}
 	},
 	{
+		// MediaWiki ResourceLoader packages extension Vue modules as CommonJS.
+		name: 'wikibase-bootstrap/resource-loader',
+		files: [ 'images/wikibase/runtime/var/www/html/extensions/WikibaseBootstrap/**/*.{js,vue}' ],
+		languageOptions: {
+			globals: { ...globals.browser, require: 'readonly' }
+		},
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off',
+			'vue/block-lang': 'off'
+		}
+	},
+	{
 		...mocha.configs.recommended,
 		name: 'wbs/mocha',
 		files: testFiles,
