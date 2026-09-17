@@ -9,6 +9,8 @@ pnpm
 **/.env
 
 docker-compose.override.yml
+!development/tests/qlever/docker-compose.override.yml
+!development/tests/wdqs/docker-compose.override.yml
 /.wbs/*
 !/.wbs/version
 

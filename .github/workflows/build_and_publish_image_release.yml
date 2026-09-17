@@ -5,6 +5,9 @@ on:
     tags:
       - 'opensearch@*'
       - 'quickstatements@*'
+      - 'qlever@*'
+      - 'wdqs-qlever-updater@*'
+      - 'wdqs-qlever-proxy@*'
       - 'wbs-tools@*'
       - 'wdqs@*'
       - 'wdqs-frontend@*'

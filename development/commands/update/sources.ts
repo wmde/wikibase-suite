@@ -4,6 +4,8 @@ import { BAKE_MANIFEST } from '../../lib/bake.js';
 import type { RepositoryContext } from '../../lib/context.js';
 import type { FileUpdate } from '../../lib/file-updates.js';
 import { quickStatementsSourceProvider } from './projects/quickstatements.js';
+import { wdqsQleverProxySourceProvider } from './projects/wdqs-qlever-proxy.js';
+import { wdqsQleverUpdaterSourceProvider } from './projects/wdqs-qlever-updater.js';
 import { wdqsFrontendSourceProvider } from './projects/wdqs-frontend.js';
 import { wdqsSourceProvider } from './projects/wdqs.js';
 import { wikibaseSourceProvider } from './projects/wikibase.js';
@@ -17,6 +19,8 @@ const providers = [
 	wikibaseSourceProvider,
 	wdqsSourceProvider,
 	wdqsFrontendSourceProvider,
+	wdqsQleverProxySourceProvider,
+	wdqsQleverUpdaterSourceProvider,
 	quickStatementsSourceProvider
 ];
 

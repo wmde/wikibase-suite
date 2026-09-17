@@ -31,15 +31,21 @@ services:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/opensearch:${WBS_TEST_IMAGE_TAG:-latest}
     profiles: [ opensearch ]
 
-  wdqs:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ wdqs ]
+  qlever:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/qlever:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ qlever ]
 
-  wdqs-updater:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ wdqs ]
+  wdqs-qlever-updater:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-qlever-updater:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ qlever ]
     environment:
-      WIKIBASE_CONCEPT_URI: http://${WIKIBASE_PUBLIC_HOST}
+      # EntityData uses the test suite's public HTTP origin in RDF subjects.
+      # Keep the updater's transformer aligned with those IRIs.
+      WIKIBASE_RDF_BASE: ${WIKIBASE_URL}
+
+  wdqs-qlever-proxy:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-qlever-proxy:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ qlever ]
 
   wdqs-frontend:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-frontend:${WBS_TEST_IMAGE_TAG:-latest}
