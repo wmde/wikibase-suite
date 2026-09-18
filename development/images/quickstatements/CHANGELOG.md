@@ -1,3 +1,7 @@
+# Unreleased
+
+- Adds an optional image-owned healthcheck script.
+
 # 1.2.1 (2026-09-03)
 
 ## Dependency updates

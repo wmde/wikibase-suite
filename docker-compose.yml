@@ -37,7 +37,7 @@ services:
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: ${WIKIMEDIA_OAUTH_CONSUMER_TOKEN:-}
       WIKIMEDIA_OAUTH_SECRET_TOKEN: ${WIKIMEDIA_OAUTH_SECRET_TOKEN:-}
     healthcheck:
-      test: curl --silent --fail localhost/wiki/Main_Page
+      test: /healthcheck.sh
       interval: 10s
       start_period: 5m
 
@@ -98,7 +98,7 @@ services:
         soft: 65536
         hard: 65536
     healthcheck:
-      test: curl --silent --fail localhost:9200
+      test: /healthcheck.sh
       interval: 10s
       start_period: 2m
 
@@ -119,7 +119,7 @@ services:
     volumes:
       - wdqs-data:/wdqs/data
     healthcheck:
-      test: curl --silent --fail localhost:9999/bigdata/namespace/wdq/sparql
+      test: /healthcheck.sh
       interval: 10s
       start_period: 2m
 
@@ -149,7 +149,7 @@ services:
       WDQS_PUBLIC_URL: https://${WDQS_PUBLIC_HOST}/sparql
       WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/w/api.php
     healthcheck:
-      test: curl --silent --fail localhost
+      test: /healthcheck.sh
       interval: 10s
       start_period: 2m
 
@@ -165,7 +165,7 @@ services:
       QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
       WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}
     healthcheck:
-      test: curl --silent --fail localhost
+      test: /healthcheck.sh
       interval: 10s
       start_period: 2m
 
