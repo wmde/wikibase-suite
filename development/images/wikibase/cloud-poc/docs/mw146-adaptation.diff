@@ -1,0 +1,541 @@
+# WBStack MediaWiki adaptation diff
+# Baseline: https://github.com/wbstack/mediawiki/tree/220017feecaf1332086d0efc4518796916ead509
+# Comparison: mapped source files versus Wikibase Suite Cloud package.
+# Whitespace-only changes are intentionally omitted (-w).
+# Packaging-only additions (extension manifests, assets, Apache configuration, and CloudSettings.php) are omitted.
+
+--- a/wbstack-mediawiki/dist-persist/LocalSettings.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackConfig/bootstrap.php
+@@ -1,5 +1,44 @@
+ <?php
+
+-// This file is just a minimal stub file that loads the main settings from the wbstack directory.
+-// That is where "the magic" happens
+-require_once __DIR__ . '/wbstack/src/Settings/LocalSettings.php';
++require_once __DIR__ . '/src/loadShim.php';
++
++$requestDomain = PHP_SAPI === 'cli'
++	? getenv( 'WBS_DOMAIN' )
++	: ( $_SERVER['SERVER_NAME'] ?? '' );
++
++if ( !is_string( $requestDomain ) || $requestDomain === '' ) {
++	echo PHP_SAPI === 'cli'
++		? 'WBS_DOMAIN is required for a Cloud CLI workload.'
++		: 'SERVER_NAME is required for a Cloud web request.';
++	exit( 1 );
++}
++
++try {
++	WBStack\Info\GlobalSet::forDomain( $requestDomain );
++} catch ( WBStack\Info\GlobalSetException $exception ) {
++	if ( PHP_SAPI !== 'cli' ) {
++		http_response_code( $exception->getCode() );
++	}
++	echo $exception->getMessage();
++	exit( 1 );
++}
++
++/*
++ * Open question for Cloud: is interception before WebStart actually required?
++ * Specifically, can an old tenant schema prevent LocalSettings.php and
++ * extension registration from completing before update.php can be launched?
++ * The internal APIs remain an extension; this one action stays here until that
++ * earlier timing is known to be unnecessary.
++ */
++if (
++	PHP_SAPI !== 'cli'
++	&& getenv( 'WBSTACK_LOAD_MW_INTERNAL' ) === 'yes'
++	&& basename( $_SERVER['SCRIPT_FILENAME'] ?? '' ) === 'api.php'
++	&& ( $_GET['action'] ?? '' ) === 'wbstackUpdate'
++) {
++	require_once dirname( __DIR__ ) . '/WBStackInternal/src/Instance.php';
++	require_once dirname( __DIR__ ) . '/WBStackInternal/src/MaintenanceCommand.php';
++	require_once dirname( __DIR__ ) . '/WBStackInternal/src/PreApiWbStackUpdate.php';
++	( new WBStack\Internal\PreApiWbStackUpdate() )->execute();
++	exit( 0 );
++}
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Settings/Hooks.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackConfig/src/Settings/Hooks.php
+@@ -48,7 +48,8 @@
+     private static $hasScheduledDeferredUpdate = false;
+
+     public static function registerUpdate( $title ) {
+-        self::$titles[$title->getPrefixedDBkey()] = [ $title->getDBkey(), $title->getNamespace() ];
++        $key = $title->getNamespace() . ':' . $title->getDBkey();
++        self::$titles[$key] = [ $title->getDBkey(), $title->getNamespace() ];
+         self::scheduleDeferredUpdateIfNeeded();
+     }
+
+@@ -89,20 +90,20 @@
+     WBStackPageUpdateHandler::registerUpdate( $wikiPage->getTitle() );
+ };
+
+-// https://www.mediawiki.org/wiki/Manual:Hooks/ArticleDeleteComplete
+-$wgHooks['ArticleDeleteComplete'][] = function ( $wikiPage, &$user, $reason, $id, $content, $logEntry, $archivedRevisionCount ) {
+-    WBStackPageUpdateHandler::registerUpdate( $wikiPage->getTitle() );
++// https://www.mediawiki.org/wiki/Manual:Hooks/PageDeleteComplete
++$wgHooks['PageDeleteComplete'][] = function ( $page, $deleter, $reason, $id, $revision, $logEntry, $archivedRevisionCount ) {
++    WBStackPageUpdateHandler::registerUpdate( $page );
+ };
+
+-// https://www.mediawiki.org/wiki/Manual:Hooks/TitleMoveComplete
+-$wgHooks['TitleMoveComplete'][] = function ( $title, $newTitle, $user, $oldid, $newid, $reason, $revision ) {
++// https://www.mediawiki.org/wiki/Manual:Hooks/PageMoveComplete
++$wgHooks['PageMoveComplete'][] = function ( $title, $newTitle, $user, $oldid, $newid, $reason, $revision ) {
+     WBStackPageUpdateHandler::registerUpdate( $title );
+     WBStackPageUpdateHandler::registerUpdate( $newTitle );
+ };
+
+-// https://www.mediawiki.org/wiki/Manual:Hooks/ArticleDeleteComplete
+-$wgHooks['ArticleUndelete'][] = function ( $title, $create, $comment, $oldPageId, $restoredPages ) {
+-    WBStackPageUpdateHandler::registerUpdate( $title );
++// https://www.mediawiki.org/wiki/Manual:Hooks/PageUndeleteComplete
++$wgHooks['PageUndeleteComplete'][] = function ( $page, $restorer, $reason, $revision, $logEntry, $restoredRevisionCount, $created, $restoredPageIds ) {
++    WBStackPageUpdateHandler::registerUpdate( $page );
+ };
+
+ //// CUSTOM User account login and creation logs
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Settings/LocalSettings.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackConfig/src/Settings/LocalSettings.php
+@@ -28,7 +28,7 @@
+ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
+ $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
+ $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+-$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
++$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $IP, $wwIsLocalisationRebuild );
+ $wwDockerCompose = getenv('WBSTACK_DOCKER_COMPOSE') === 'yes';
+
+ $wwUseMailgunExtension = true; // default for wbstack
+@@ -42,6 +42,7 @@
+
+ // No error output or debugging in production
+ ini_set( 'display_errors', 0 );
++ini_set( 'memory_limit', '256M' );
+ $wgShowExceptionDetails = false;
+ if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wwDomainSaysLocal ) {
+     ini_set( 'display_errors', 1 );
+@@ -107,6 +108,10 @@
+ $wgDBname = $wikiInfo->wiki_db->name;
+ $wgDBprefix = $wikiInfo->wiki_db->prefix . '_';
+ $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
++$wgDBtype = 'mysql';
++$wgDBserver = getenv('MW_DB_SERVER_MASTER');
++$wgDBuser = $wikiInfo->wiki_db->user;
++$wgDBpassword = $wikiInfo->wiki_db->password;
+
+ $wgDBservers = [
+     [
+@@ -184,7 +189,7 @@
+ if( $wgLogos["1x"] === null ) {
+     // Fallback to the mediawiki logo without the wgLogo overlay
+     $wgLogos = [
+-        "1x" => "/w/resources/assets/wikibase_cloud.svg",
++        "1x" => "/w/extensions/WBStackConfig/resources/assets/wikibase_cloud.svg",
+     ];
+ }
+
+@@ -208,17 +213,17 @@
+     ],
+     "poweredby" => [
+         "mediawiki" => [
+-            "src" => "/w/resources/assets/poweredby_mediawiki.svg",
++            "src" => "/w/extensions/WBStackConfig/resources/assets/poweredby_mediawiki.svg",
+             "url" => "https://www.mediawiki.org/",
+             "alt" => "Powered by MediaWiki",
+         ],
+         "wikibase" => [
+-            "src" => "/w/resources/assets/poweredby_wikibase.svg",
++            "src" => "/w/extensions/WBStackConfig/resources/assets/poweredby_wikibase.svg",
+             "url" => "https://wikibase.cloud/",
+             "alt" => "Powered by Wikibase",
+         ],
+         "wbstack" => [
+-            "src" => "/w/resources/assets/basedon_wbstack.svg",
++            "src" => "/w/extensions/WBStackConfig/resources/assets/basedon_wbstack.svg",
+             "url" => "https://wbstack.com/",
+             "alt" => "Based on WBStack",
+         ],
+@@ -229,7 +234,7 @@
+     if ( $key === 'places' ) {
+         $addFooterLink = function ( string $label, string $url ) use ( &$footerlinks ) {
+             $key = strtolower( str_replace( ' ', '-', $label ) );
+-            $footerlinks[ $key ] = Html::element(
++            $footerlinks[ $key ] = MediaWiki\Html\Html::element(
+                 'a',
+                 [
+                     'href' => $url,
+@@ -250,8 +255,8 @@
+ // Custom CSS styling
+ $wgResourceModules[ 'wbstack.styling' ] = array(
+     'styles' => [ 'footer-badges.css', 'footer-links.css' ],
+-    'localBasePath' => "$IP/wbstack/src/Styling",
+-    'remoteBasePath' => "$wgScriptPath/wbstack/src/Styling"
++    'localBasePath' => dirname( __DIR__ ) . '/Styling',
++    'remoteBasePath' => "$wgScriptPath/extensions/WBStackConfig/src/Styling"
+ );
+ $wgHooks[ 'BeforePageDisplay' ][] = 'onBeforePageDisplay';
+ function onBeforePageDisplay( &$out, &$skin ) {
+@@ -361,20 +366,18 @@
+ ## ---          Skins            --- ##
+ #######################################
+ wfLoadSkin( 'Vector' );
+-wfLoadSkin( 'Timeless' );
+-wfLoadSkin( 'Modern' );
+ wfLoadSkin( 'MinervaNeue' );
+
+-// TODO allow turning some skins on and off?
+-$wgDefaultSkin = $wikiInfo->getSetting('wgDefaultSkin');
+-if( $wgDefaultSkin === null ) {
+-    // Fallback to vector
+-    $wgDefaultSkin = "vector";
+-}
++// Cloud deliberately ignores the per-wiki legacy skin setting in this POC.
++// Vector 2022 is the sole supported site-default skin during the MediaWiki
++// 1.46 migration. Minerva remains loaded only for MobileFrontend below.
++$wgDefaultSkin = 'vector-2022';
+
+ #######################################
+ ## ---        Extensions         --- ##
+ #######################################
++wfLoadExtension( 'WBStackConfig' );
++
+ wfLoadExtension( 'SyntaxHighlight_GeSHi' );
+ wfLoadExtension( 'RevisionSlider' );
+ wfLoadExtension( 'TorBlock' );
+@@ -385,6 +388,9 @@
+ # TODO load again once there is a fix for localization cache reload without DBhttps://phabricator.wikimedia.org/T237148
+ #wfLoadExtension( 'Gadgets' );
+ wfLoadExtension( 'OAuth' );
++$wgMWOAuthSharedUserIDs = true;
++$wgMWOAuthSharedUserSource = 'local';
++$wgVirtualDomainsMapping['virtual-oauth'] = [ 'db' => false ];
+ wfLoadExtension( 'JsonConfig' );
+ wfLoadExtension( 'Math' );
+ wfLoadExtension( 'Kartographer' );
+@@ -554,10 +560,10 @@
+ #######################################
+ ## ---          Wikibase         --- ##
+ #######################################
+-wfLoadExtension( 'WikibaseRepository', "$wgBaseDirectory/extensions/Wikibase/extension-repo.json" );
+-require_once "$wgBaseDirectory/extensions/Wikibase/repo/ExampleSettings.php";
+-wfLoadExtension( 'WikibaseClient', "$wgBaseDirectory/extensions/Wikibase/extension-client.json" );
+-require_once "$wgBaseDirectory/extensions/Wikibase/client/ExampleSettings.php";
++wfLoadExtension( 'WikibaseRepository', "$IP/extensions/Wikibase/extension-repo.json" );
++require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
++wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
++require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
+
+ $wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
+ if($wwWikibaseStringLengthString) {
+@@ -631,8 +637,7 @@
+ $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
+
+ // Enable mul language code
+-$wgWBRepoSettings['tmpEnableMulLanguageCode'] = true;
+-$wgWBRepoSettings['tmpAlwaysShowMulLanguageCode'] = true;
++$wgWBRepoSettings['enableMulLanguageCode'] = true;
+
+ # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
+ if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Settings/Localization.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackConfig/src/Settings/Localization.php
+@@ -19,6 +19,9 @@
+     }
+
+     private function addLocalization( $path ) {
++        if ( !is_file( $path ) ) {
++            return;
++        }
+         $processor = new ExtensionProcessor();
+         $processor->extractInfoFromFile( $path );
+         $info = $processor->getExtractedInfo();
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/loadInternal.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackConfig/src/loadInternal.php
+@@ -1,29 +1,8 @@
+ <?php
+
+-# Load things that are only needed internally
+-# This is called from within settings
+-
+-# Double check that we want to do this
+ if ( getenv('WBSTACK_LOAD_MW_INTERNAL') !== 'yes' ) {
+     echo 'no!';
+     die(1);
+ }
+
+-// Load the files
+-require_once __DIR__ . '/Internal/WbStackPlatformReservedUser.php';
+-require_once __DIR__ . '/Internal/ApiWbStackInitMainPage.php';
+-require_once __DIR__ . '/Internal/ApiWbStackInit.php';
+-require_once __DIR__ . '/Internal/ApiWbStackOauthGet.php';
+-require_once __DIR__ . '/Internal/ApiWbStackElasticSearchInit.php';
+-require_once __DIR__ . '/Internal/ApiWbStackForceSearchIndex.php';
+-require_once __DIR__ . '/Internal/ApiWbStackQueueSearchIndexBatches.php';
+-require_once __DIR__ . '/Internal/ApiWbStackSiteStatsUpdate.php';
+-
+-
+-// Register the internal MediaWiki API modules
+-$wgAPIModules['wbstackInit'] = \WBStack\Internal\ApiWbStackInit::class;
+-$wgAPIModules['wbstackPlatformOauthGet'] = \WBStack\Internal\ApiWbStackOauthGet::class;
+-$wgAPIModules['wbstackElasticSearchInit'] = \WBStack\Internal\ApiWbStackElasticSearchInit::class;
+-$wgAPIModules['wbstackForceSearchIndex'] = \WBStack\Internal\ApiWbStackForceSearchIndex::class;
+-$wgAPIModules['wbstackQueueSearchIndexBatches'] = \WBStack\Internal\ApiWbStackQueueSearchIndexBatches::class;
+-$wgAPIModules['wbstackSiteStatsUpdate'] = \WBStack\Internal\ApiWbStackSiteStatsUpdate::class;
++wfLoadExtension( 'WBStackInternal' );
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackElasticSearchInit.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackElasticSearchInit.php
+@@ -12,15 +12,16 @@
+     public function isWriteMode() {return true;}
+     public function isInternal() {return true;}
+     public function execute() {
+-        global $wgBaseDirectory;
+-
+         @set_time_limit( 60*5 ); // 5 mins maybe D:
+		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
+
+		$cluster = $this->getParameter( 'cluster' );
+-		$parameters = '--cluster ' . escapeshellarg( $cluster );
+-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php ' . $parameters;
+-		exec($cmd, $out, $return);
++		$commandResult = MaintenanceCommand::run(
++			'extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php',
++			[ '--cluster', (string)$cluster ]
++		);
++		$out = $commandResult['output'];
++		$return = $commandResult['return'];
+
+		// Return appropriate result
+		$res = [
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackForceSearchIndex.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackForceSearchIndex.php
+@@ -12,17 +12,23 @@
+     public function isWriteMode() {return true;}
+     public function isInternal() {return true;}
+     public function execute() {
+-        global $wgBaseDirectory;
+-
+         @set_time_limit( 60*5 ); // 5 mins maybe D:
+		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
+
+         $fromId = $this->getParameter('fromId');
+         $toId = $this->getParameter('toId');
+
+-        $parameters = "--skipLinks 1 --indexOnSkip 1 --fromId " . escapeshellarg( $fromId ) . " --toId " . escapeshellarg( $toId );
+-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
+-		exec($cmd, $out, $return);
++		$commandResult = MaintenanceCommand::run(
++			'extensions/CirrusSearch/maintenance/ForceSearchIndex.php',
++			[
++				'--skipLinks', '1',
++				'--indexOnSkip', '1',
++				'--fromId', (string)$fromId,
++				'--toId', (string)$toId,
++			]
++		);
++		$out = $commandResult['output'];
++		$return = $commandResult['return'];
+
+		// Return appropriate result
+		$res = [
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackInit.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackInit.php
+@@ -148,7 +148,7 @@
+         $user = WbStackPlatformReservedUser::getUser();
+         $comment = \CommentStoreComment::newUnsavedComment( '(automated) add default content' );
+
+-		$title = \Title::newMainPage();
++		$title = MediaWikiServices::getInstance()->getTitleFactory()->newMainPage();
+         $page = new \WikiPage( $title );
+         $text = ApiWbStackInitMainPage::TEXT;
+
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackOauthGet.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackOauthGet.php
+@@ -18,7 +18,7 @@
+     public function isInternal() {return true;}
+
+     private function getScheme(): String {
+-        $isLocal = preg_match("/(\w\.localhost)/", $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain) === 1;
++        $isLocal = preg_match("/(\w\.localhost)/", Instance::domain()) === 1;
+         return $isLocal ? 'http://' : 'https://';
+     }
+
+@@ -32,7 +32,7 @@
+
+         // If it doesnt exist, make sure the user and consumer do
+         if (!$consumerData) {
+-            $callbackUrl = $this->getScheme() . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
++            $callbackUrl = $this->getScheme() . Instance::domain() . $this->getParameter('callbackUrlTail');
+
+             WbStackPlatformReservedUser::createIfNotExists();
+             WbStackPlatformReservedUser::createOauthConsumer(
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackQueueSearchIndexBatches.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackQueueSearchIndexBatches.php
+@@ -10,14 +10,16 @@
+     public function isWriteMode() {return true;}
+     public function isInternal() {return true;}
+     public function execute() {
+-        global $wgBaseDirectory;
+-
+         @set_time_limit( 60*5 ); // 5 mins maybe D:
+		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
+
+-        $parameters = "--skipLinks --indexOnSkip --buildChunks 10000";
+-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters . ' 2>&1';
+-		exec($cmd, $out, $return);
++		$commandResult = MaintenanceCommand::run(
++			'extensions/CirrusSearch/maintenance/ForceSearchIndex.php',
++			[ '--skipLinks', '--indexOnSkip', '--buildChunks', '10000' ],
++			true
++		);
++		$out = $commandResult['output'];
++		$return = $commandResult['return'];
+
+		// Return appropriate result
+		$res = [
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/ApiWbStackSiteStatsUpdate.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/ApiWbStackSiteStatsUpdate.php
+@@ -10,13 +10,15 @@
+     public function isWriteMode() {return true;}
+     public function isInternal() {return true;}
+     public function execute() {
+-        global $wgBaseDirectory;
+-
+         @set_time_limit( 60*5 ); // 5 mins maybe D:
+		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
+
+-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/maintenance/initSiteStats.php --update --active';
+-		exec($cmd, $out, $return);
++		$commandResult = MaintenanceCommand::run(
++			'maintenance/initSiteStats.php',
++			[ '--update', '--active' ]
++		);
++		$out = $commandResult['output'];
++		$return = $commandResult['return'];
+
+		// Return appropriate result
+		$res = [
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/PreApiWbStackUpdate.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/PreApiWbStackUpdate.php
+@@ -16,9 +16,9 @@
+		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
+
+		// Run update.php
+-		$mwPath = realpath( __DIR__ . '/../../../' );
+-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $mwPath . '/maintenance/update.php --quick';
+-		exec($cmd, $out, $return);
++		$commandResult = MaintenanceCommand::run( 'maintenance/update.php', [ '--quick' ] );
++		$out = $commandResult['output'];
++		$return = $commandResult['return'];
+
+		// Return appropriate result
+		$res = [
+--- a/wbstack-mediawiki/dist-persist/wbstack/src/Internal/WbStackPlatformReservedUser.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/WbStackPlatformReservedUser.php
+@@ -79,7 +79,7 @@
+         $context = \RequestContext::getMain();
+         $context->setUser( self::getUser() );
+
+-        $dbw = \MediaWiki\Extension\OAuth\Backend\Utils::getCentralDB( DB_PRIMARY );
++        $dbw = \MediaWiki\Extension\OAuth\Backend\Utils::getOAuthDB( DB_PRIMARY );
+         $control = new \MediaWiki\Extension\OAuth\Control\ConsumerSubmitControl( $context, $data, $dbw );
+         $status = $control->submit();
+
+@@ -88,7 +88,8 @@
+             return false;
+         }
+
+-        $cmr = $status->value['result']['consumer'];
++        $statusValue = $status->getValue();
++        $cmr = $statusValue['result']['consumer'];
+
+         $data = [
+             'action' => 'approve',
+@@ -115,7 +116,7 @@
+             return false;
+         }
+
+-        $db = \MediaWiki\Extension\OAuth\Backend\Utils::getCentralDB( DB_REPLICA );
++        $db = \MediaWiki\Extension\OAuth\Backend\Utils::getOAuthDB( DB_REPLICA );
+
+         // $c is a Consumer
+         // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/src/Backend/Consumer.php
+--- a/wbstack-mediawiki/dist-persist/health.php
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/health.php
+@@ -1,3 +1,6 @@
+ <?php
+
++declare( strict_types=1 );
++
++// A shallow Cloud probe. It deliberately does not resolve a tenant.
+ echo "It's Alive!";
+--- a/dev/null
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/Instance.php
+@@ -0,0 +1,26 @@
++<?php
++
++namespace WBStack\Internal;
++
++use RuntimeException;
++
++final class Instance {
++	public static function domain(): string {
++		$domain = $GLOBALS['wgWBStackInternalTenantDomain'] ?? null;
++
++		if ( ( !is_string( $domain ) || $domain === '' ) && defined( 'WBSTACK_INFO_GLOBAL' ) ) {
++			$legacyInfo = $GLOBALS[constant( 'WBSTACK_INFO_GLOBAL' )] ?? null;
++			$domain = is_object( $legacyInfo ) ? ( $legacyInfo->requestDomain ?? null ) : null;
++		}
++
++		if ( !is_string( $domain ) || $domain === '' ) {
++			$domain = getenv( 'WBS_DOMAIN' ) ?: ( $_SERVER['SERVER_NAME'] ?? '' );
++		}
++
++		if ( !is_string( $domain ) || $domain === '' ) {
++			throw new RuntimeException( 'Unable to determine the WBStack tenant domain.' );
++		}
++
++		return strtolower( $domain );
++	}
++}
+--- a/dev/null
++++ b/wikibase-suite/development/images/wikibase/runtime-cloud/var/www/html/extensions/WBStackInternal/src/MaintenanceCommand.php
+@@ -0,0 +1,39 @@
++<?php
++
++namespace WBStack\Internal;
++
++final class MaintenanceCommand {
++	/**
++	 * @param string[] $arguments
++	 * @return array{return:int,output:string[]}
++	 */
++	public static function run(
++		string $script,
++		array $arguments = [],
++		bool $captureStderr = false
++	): array {
++		$installPath = defined( 'MW_INSTALL_PATH' )
++			? MW_INSTALL_PATH
++			: dirname( __DIR__, 3 );
++		$command = [
++			'env',
++			'WBS_DOMAIN=' . Instance::domain(),
++			'php',
++			$installPath . '/' . ltrim( $script, '/' ),
++			...$arguments,
++		];
++		$escapedCommand = implode( ' ', array_map( 'escapeshellarg', $command ) );
++		if ( $captureStderr ) {
++			$escapedCommand .= ' 2>&1';
++		}
++
++		$output = [];
++		$returnCode = 0;
++		exec( $escapedCommand, $output, $returnCode );
++
++		return [
++			'return' => $returnCode,
++			'output' => $output,
++		];
++	}
++}
