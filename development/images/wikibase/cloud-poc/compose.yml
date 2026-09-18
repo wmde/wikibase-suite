@@ -1,0 +1,99 @@
+name: wikibase-cloud-poc
+
+x-wikibase-cloud-environment: &wikibase-cloud-environment
+  WBSTACK_DOCKER_COMPOSE: "yes"
+  WBSTACK_LOAD_MW_INTERNAL: "yes"
+  PLATFORM_API_BACKEND_HOST: api.svc
+  MW_LOCAL_HOST_PORT: "5440"
+  MW_DB_SERVER_MASTER: mysql.svc
+  MW_ELASTICSEARCH_HOST: opensearch.svc
+  MW_ELASTICSEARCH_PORT: "9200"
+  MW_REDIS_SERVER_READ: redis.svc
+  MW_REDIS_SERVER_WRITE: redis.svc
+  MW_REDIS_CACHE_SERVER_READ: redis.svc
+  MW_REDIS_CACHE_SERVER_WRITE: redis.svc
+  MW_REDIS_PASSWORD: ""
+  MW_MAILGUN_DISABLED: "yes"
+  MW_EMAIL_DOMAIN: wikibase.test
+  MW_LOG_TO_STDERR: "yes"
+  MW_ALLOWED_PROXY_CIDR: 172.16.0.0/12
+
+services:
+  wikibase:
+    image: wikibase/wikibase-cloud:latest
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      opensearch:
+        condition: service_started
+    ports:
+      - "5440:80"
+    environment: *wikibase-cloud-environment
+    networks:
+      default:
+        aliases:
+          - cloud1.wikibase.test
+          - cloud2.wikibase.test
+
+  bootstrap:
+    image: wikibase/wikibase-cloud:latest
+    depends_on:
+      mysql:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment: *wikibase-cloud-environment
+    volumes:
+      - ./bootstrap.sh:/bootstrap.sh:ro
+    command: [ "bash", "/bootstrap.sh" ]
+
+  api:
+    image: php:8.3-cli
+    command: [ "php", "-S", "0.0.0.0:80", "/app/router.php" ]
+    volumes:
+      - ./fake-api:/app:ro
+    networks:
+      default:
+        aliases:
+          - api.svc
+
+  mysql:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: cloud-root-password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      default:
+        aliases:
+          - mysql.svc
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      default:
+        aliases:
+          - redis.svc
+
+  opensearch:
+    image: wikibase/opensearch:latest
+    environment:
+      discovery.type: single-node
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    networks:
+      default:
+        aliases:
+          - opensearch.svc
+
+volumes:
+  mysql-data: {}
