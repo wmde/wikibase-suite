@@ -1,0 +1,58 @@
+# A test-only Blazegraph reference implementation. It follows the same
+# Wikibase instance as QLever, using the shipping WDQS Blazegraph updater (and
+# therefore its upstream RDF Munger). Compatibility specs compare its SPARQL
+# results with QLever's.
+services:
+  qlever:
+    environment:
+      # Exercise real federation within the fixture, without depending on a public service.
+      QLEVER_SERVICE_ALLOWED_IRI_PREFIXES: https://query.wikidata.org/ http://wdqs-blazegraph:9999/
+
+  wdqs-blazegraph:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    command: /runBlazegraph.sh
+    profiles: [ qlever-compat ]
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    volumes:
+      - wdqs-blazegraph-data:/wdqs/data
+    environment:
+      WIKIBASE_HOST: wikibase
+      WDQS_HOST: wdqs-blazegraph
+      WDQS_PORT: "9999"
+    healthcheck:
+      test: curl --silent --fail localhost:9999/bigdata/namespace/wdq/sparql
+      interval: 10s
+      start_period: 2m
+
+  wdqs-blazegraph-updater:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    command: /runUpdate.sh
+    profiles: [ qlever-compat ]
+    depends_on:
+      wdqs-blazegraph:
+        condition: service_healthy
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    environment:
+      WIKIBASE_HOST: wikibase
+      WIKIBASE_SCHEME: http
+      WIKIBASE_CONCEPT_URI: ${WIKIBASE_URL}
+      WDQS_HOST: wdqs-blazegraph
+      WDQS_PORT: "9999"
+      # The upstream updater requires an explicit list. QLever discovers the
+      # enabled entity namespaces from Wikibase, so include Lexeme here to
+      # keep the reference target equivalent to this compatibility suite.
+      WDQS_ENTITY_NAMESPACES: "120,122,146"
+
+volumes:
+  wdqs-blazegraph-data:

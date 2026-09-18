@@ -1,0 +1,11 @@
+[DEFAULT]
+NAME = wikibase
+
+[index]
+INPUT_FILES = wikibase.nq
+MULTI_INPUT_JSON = [{ "cmd": "cat wikibase.nq", "format": "nq", "parallel": "true" }]
+SETTINGS_JSON = { "ascii-prefixes-only": false, "num-triples-per-batch": 10000 }
+STXXL_MEMORY = 256M
+
+[runtime]
+SYSTEM = native

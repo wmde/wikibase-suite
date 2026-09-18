@@ -292,6 +292,12 @@
       "source": {
         "path": "runtime/var/www/html/extensions/WikibaseSuite"
       }
+    },
+    {
+      "name": "WikibaseQLever",
+      "source": {
+        "path": "runtime/var/www/html/extensions/WikibaseQLever"
+      }
     }
   ]
 }

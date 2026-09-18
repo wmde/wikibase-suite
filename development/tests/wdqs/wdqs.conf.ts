@@ -6,7 +6,8 @@ export const testEnv = TestEnv.create( {
 	...defaultSettings,
 	name: 'wdqs',
 	specs: [ 'wdqs/*.spec.ts' ],
-	composeProfiles: [ 'wdqs', 'wdqs-frontend' ]
+	// Runs against qlever, not wdqs
+	composeProfiles: [ 'qlever', 'wdqs-frontend' ]
 } );
 
 export const config = wdioConfig( testEnv );
