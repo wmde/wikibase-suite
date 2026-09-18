@@ -100,7 +100,7 @@ This fixture evaluates Recent Changes polling without a streaming platform.
 It does not establish that Foundation's streaming pipeline would be unsuitable
 for Suite. A separate evaluation would need to account for event delivery,
 replay and reconciliation as well as the minimum service and resource costs.
-See the [ADR](../../docs/adr/0025-evaluate-qlever-query-service.md) for the
+See the [ADR](../../docs/adr/0026-evaluate-qlever-query-service.md) for the
 relationship to Foundation's implementation and migration plans.
 
 Schedule `reconcile --all --repair` at an interval suitable
