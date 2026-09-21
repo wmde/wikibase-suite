@@ -15,6 +15,7 @@
 			"server": "${WIKIBASE_PUBLIC_URL}",
 			"api": "${WIKIBASE_PUBLIC_URL}/w/api.php",
 			"pageBase": "${WIKIBASE_PUBLIC_URL}/wiki/",
+			"entityBase": "${WIKIBASE_PUBLIC_URL}/entity/",
 			"toolBase": "${QUICKSTATEMENTS_PUBLIC_URL}/",
 			"types": {
 				"P": {

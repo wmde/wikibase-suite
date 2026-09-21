@@ -186,6 +186,23 @@ describe( 'QuickStatements', function () {
 		).toEqual( 'Will it blend?' );
 	} );
 
+	it( 'Should be able to add a quantity with a unit', async function () {
+		const itemId = await WikibaseApi.createItem( 'quantity-item', {} );
+		const unitId = await WikibaseApi.createItem( 'quantity-unit', {} );
+		const quantityPropertyId = await WikibaseApi.getProperty( 'quantity' );
+		const unitNumber = unitId.replace( 'Q', '' );
+
+		await browser.executeQuickStatement(
+			`${ itemId }|${ quantityPropertyId }|5U${ unitNumber }`
+		);
+
+		const responseData = await SpecialEntityDataPage.getData( itemId );
+		expect(
+			responseData.entities[ itemId ].claims[ quantityPropertyId ][ 0 ].mainsnak
+				.datavalue.value.unit
+		).toEqual( `${ testEnv.vars.WIKIBASE_URL }/entity/${ unitId }` );
+	} );
+
 	describe( 'Should be able to add qualifiers to statements with a range of datatypes', function () {
 		// should be disabled for dynamic tests
 		mainSnakDataTypes.forEach( ( mainSnakDataType ) => {
