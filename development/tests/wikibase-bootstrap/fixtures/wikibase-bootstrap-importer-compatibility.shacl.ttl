@@ -1,0 +1,100 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wbbs: <https://wikiba.se/bootstrap#> .
+
+# This shape describes the restricted RDF convention consumed by upstream
+# ttl2wb.py. It is not a general OWL profile and does not prescribe Suite's
+# future local-ID-safe bootstrap profile.
+
+wbbs:ImporterEntityShape
+	a sh:NodeShape ;
+	sh:targetClass owl:Class, owl:NamedIndividual, owl:ObjectProperty, owl:DatatypeProperty ;
+	sh:property [
+		sh:path rdfs:label ;
+		sh:minCount 1 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path dcterms:description ;
+		sh:minCount 1 ;
+		sh:nodeKind sh:Literal ;
+	] .
+
+wbbs:ImporterItemShape
+	a sh:NodeShape ;
+	sh:targetClass owl:Class, owl:NamedIndividual ;
+	sh:property [
+		sh:path skos:note ;
+		sh:qualifiedValueShape [
+			sh:nodeKind sh:Literal ;
+			sh:pattern "^Wikibase ID: Q[1-9][0-9]*$" ;
+		] ;
+		sh:qualifiedMinCount 1 ;
+		sh:qualifiedMaxCount 1 ;
+	] .
+
+wbbs:ImporterPropertyShape
+	a sh:NodeShape ;
+	sh:targetClass owl:ObjectProperty, owl:DatatypeProperty ;
+	sh:property [
+		sh:path skos:note ;
+		sh:qualifiedValueShape [
+			sh:nodeKind sh:Literal ;
+			sh:pattern "^Wikibase ID: P[1-9][0-9]*$" ;
+		] ;
+		sh:qualifiedMinCount 1 ;
+		sh:qualifiedMaxCount 1 ;
+	] ;
+	sh:property [
+		sh:path skos:note ;
+		sh:qualifiedValueShape [
+			sh:nodeKind sh:Literal ;
+			sh:pattern "^Wikibase datatype: [A-Za-z][A-Za-z-]*$" ;
+		] ;
+		sh:qualifiedMinCount 1 ;
+		sh:qualifiedMaxCount 1 ;
+	] ;
+	sh:property [
+		sh:path owl:equivalentProperty ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:property [
+		sh:path wbbs:P1 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path wbbs:P4 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path wbbs:P6 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path wbbs:P7 ;
+		sh:nodeKind sh:Literal ;
+	] ;
+	sh:property [
+		sh:path wbbs:P8 ;
+		sh:nodeKind sh:Literal ;
+	] .
+
+wbbs:ImporterReferenceShape
+	a sh:NodeShape ;
+	sh:targetSubjectsOf rdfs:subClassOf, rdfs:subPropertyOf, owl:inverseOf ;
+	sh:property [
+		sh:path rdfs:subClassOf ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:property [
+		sh:path rdfs:subPropertyOf ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:property [
+		sh:path owl:inverseOf ;
+		sh:nodeKind sh:IRI ;
+	] .

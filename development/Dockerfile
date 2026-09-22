@@ -39,7 +39,8 @@ RUN python3 -m venv /root/venv && \
     /root/venv/bin/pip install --no-cache-dir --upgrade \
         pip \
         setuptools \
-        black
+        black \
+        pyshacl==0.40.1
 
 WORKDIR /workspace/development
 
