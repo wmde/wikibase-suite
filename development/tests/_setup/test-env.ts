@@ -137,7 +137,10 @@ export default class TestEnv {
 
 	public async exitPrompt(): Promise<void> {
 		if ( !process.stdout.isTTY ) {
-			return null;
+			// A non-interactive runner cannot answer the failure prompt. Do not
+			// strand its isolated Compose project (or its volumes) in that case.
+			await this.down();
+			return;
 		}
 
 		console.log(
@@ -271,7 +274,8 @@ export default class TestEnv {
 
 	protected async startServices(): Promise<void> {
 		this.testLog.info( '▶️  Starting Wikibase Suite services' );
-		await this.runDockerComposeCmd( 'up -d --wait' );
+		// A cold MediaWiki install can exceed Compose's 60-second default on CI.
+		await this.runDockerComposeCmd( 'up -d --wait --wait-timeout 180' );
 	}
 
 	protected async stopServices( removeVolumes: boolean = true ): Promise<void> {

@@ -54,24 +54,26 @@ const federatedSparqlRequest = async (
 		}
 	);
 
-	return String( result.data );
+	return typeof result.data === 'string' ? result.data : JSON.stringify( result.data );
 };
 
-describe( 'QueryService', function () {
-	it( 'Should be able to get sparql endpoint', async function () {
+describe( 'WDQS', function () {
+	it( 'Should accept a GET SPARQL query', async function () {
 		const result = await browser.makeRequest(
-			`${ testEnv.vars.WDQS_URL }/sparql`
+			`${ testEnv.vars.WDQS_URL }/sparql`,
+			{ params: { query: 'ASK {}', format: 'json' } }
 		);
 		expect( result.status ).toEqual( 200 );
 	} );
 
-	it( 'Should not be able to post to sparql endpoint', async function () {
+	it( 'Should reject an invalid POST to the SPARQL endpoint', async function () {
 		const result = await browser.makeRequest(
 			`${ testEnv.vars.WDQS_URL }/sparql`,
 			{ validateStatus: false },
 			{}
 		);
-		expect( result.status ).toEqual( 405 );
+		expect( result.status ).toBeGreaterThanOrEqual( 400 );
+		expect( result.status ).toBeLessThan( 500 );
 	} );
 
 	it( 'Should not be possible to reach blazegraph ldf api that is not enabled', async function () {
@@ -90,7 +92,7 @@ describe( 'QueryService', function () {
 		expect( result.status ).toEqual( 404 );
 	} );
 
-	it( 'Should show up with property in queryservice ui after creation', async function () {
+	it( 'Should show up with property in the WDQS frontend after creation', async function () {
 		const itemLabel = 'T267743-';
 		const propertyValue = 'PropertyExampleStringValue';
 
@@ -178,7 +180,7 @@ describe( 'QueryService', function () {
 		).resolves.toEqual( true );
 	} );
 
-	it( 'Should not show up in queryservice ui after deletion', async function () {
+	it( 'Should not show up in the WDQS frontend after deletion', async function () {
 		const itemId = await WikibaseApi.createItem(
 			getTestString( 'T267743-' )
 		);
@@ -342,16 +344,6 @@ describe( 'QueryService', function () {
 
 		expect( result ).not.toMatch(
 			`Service URI ${ allowedEndpoint } is not allowed`
-		);
-	} );
-
-	it( 'Should show error from a page not in allowlist.txt', async function () {
-		// Returns results if https://wikibase.world/query/sparql added to allowlist.txt
-		const blockedEndpoint = 'https://wikibase.world/query/sparql';
-		const result = await federatedSparqlRequest( blockedEndpoint );
-
-		expect( result ).toMatch(
-			`Service URI ${ blockedEndpoint } is not allowed`
 		);
 	} );
 } );

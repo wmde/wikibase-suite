@@ -4,12 +4,19 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'extensions',
-	maxInstances: 3,
-	specs: [ 'extensions/*.spec.ts' ],
+	name: 'wikibase-client',
+	specs: [
+		'wikibase-client/*.spec.ts',
+		'wikibase-client/extensions/*.spec.ts'
+	],
+	composeProfiles: [ 'wdqs' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
-		'extensions/docker-compose.override.yml'
+		'wikibase-client/docker-compose.override.yml'
+	],
+	configurationDirectories: [
+		'wikibase-client/tmp/config',
+		'wikibase-client/tmp/client-config'
 	]
 } );
 
