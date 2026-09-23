@@ -20,5 +20,6 @@
 	"ontologybootstrap-ready-to-apply": "This empty Wikibase is eligible. Apply $1 properties from the selected bundle.",
 	"ontologybootstrap-apply": "Apply bundled ontology",
 	"ontologybootstrap-bundled-minimal": "Minimal bootstrap ontology",
-	"ontologybootstrap-bundled-extended": "Extended bootstrap ontology"
+	"ontologybootstrap-bundled-extended": "Extended bootstrap ontology",
+	"wikibasedashboard": "Wikibase dashboard"
 }
