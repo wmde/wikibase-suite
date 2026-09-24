@@ -12,6 +12,8 @@ Related documents:
 - [The MediaWiki 1.46 adaptation review](docs/mw146-adaptation.md) compares the
   WBStack-derived runtime code packaged into the `wikibase-cloud` image with
   its recorded upstream revision. It includes a [semantic diff](docs/mw146-adaptation.diff).
+- [Cloud Kubernetes validation](docs/kubernetes-validation.md) records the
+  isolated full-stack rehearsal of the Suite-built Cloud image and its result.
 
 ## Build and run the fixture
 

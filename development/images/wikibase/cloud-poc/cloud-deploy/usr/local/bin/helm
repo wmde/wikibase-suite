@@ -1,0 +1,3 @@
+#!/bin/sh
+export GODEBUG=netdns=cgo${GODEBUG:+,$GODEBUG}
+exec /usr/local/bin/helm-real "$@"

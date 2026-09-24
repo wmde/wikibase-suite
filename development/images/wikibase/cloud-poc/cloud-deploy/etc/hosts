@@ -1,0 +1,4 @@
+# Add this managed line to /etc/hosts after minikube tunnel assigns its
+# LoadBalancer address.  It is intentionally only the POC addition, rather
+# than a copy of Ubuntu's generated /etc/hosts file.
+10.96.129.101 wbaas.dev www.wbaas.dev local-test-wiki.wbaas.dev
