@@ -1,8 +1,8 @@
 # Cloud Kubernetes validation
 
 This record extends the [Cloud Compose POC](../README.md) with one practical
-question: can the `wikibase-cloud` image built by Wikibase Suite start in the
-complete local Wikibase Cloud Kubernetes stack?
+question: can the `wikibase-cloud` image built by Wikibase Suite serve a new
+tenant in the complete local Wikibase Cloud Kubernetes stack?
 
 It records one VPS rehearsal. It does not propose a Cloud migration policy,
 production deployment, or a hosted test-suite programme.
@@ -16,76 +16,67 @@ Cloud image was built natively on that host with:
 development/wbs-dev build wikibase --load wikibase-cloud
 ```
 
-The image was loaded into Minikube and substituted for the `mediawiki-143`
-Helm release. All four MediaWiki roles started successfully and reported
-MediaWiki 1.46.0. The Platform API, Cloud tenant resolution, and an existing
-POC wiki's basic home-page request all worked during the temporary swap.
+The POC retained the working `mediawiki-143` release and added a parallel
+`mediawiki-146` release that uses `wikibase/wikibase-cloud:wbs-wikibase-poc`.
+All four roles started successfully. The API POC image supplied a
+`mw1.46-wbs1` database pool, and its host resolver maps that schema version to
+the 1.46 release.
 
-A fresh tenant also received a public URL and returned HTTP 200, but its 1.46
-initialization logged:
+A disposable new tenant was allocated `mw1.46-wbs1`, initialized through the
+Cloud API, and served on the public wildcard domain. Its site-info endpoint
+returned HTTP 200 and `MediaWiki 1.46.0`; the Wikibase entity API also returned
+HTTP 200. Platform Nginx reported that its API requests were routed to
+`mediawiki-146-app-api`.
 
-```text
-Error 1054: Unknown column 'cl_target_id' in 'on clause'
-```
+This demonstrates the new-tenant path without migrating an existing 1.43
+tenant. The 1.43 release remains the rollback path throughout the rehearsal.
 
-The Cloud database pool still supplied a `mw1.43-wbs2` schema. Replacing the
-application image does not migrate that schema. The release was immediately
-rolled back to its original 1.43 image after collecting this result.
+## Important implementation detail
 
-This is useful evidence for the image POC: the Suite image can start under the
-current Cloud deployment contract, while Cloud's tenant database lifecycle is
-a separate integration requirement.
+The first direct Helm install of the parallel release used only the local POC
+values file. That left `PLATFORM_API_BACKEND_HOST` at its template placeholder,
+so the initial `wbstackInit` call failed. The release now composes the same
+production defaults used by `mediawiki-143` with the POC local values. This
+supplies the real service addresses, Redis secret references, and resource
+settings; the POC file only overrides the image and its reduced CPU requests.
 
-## Current VPS result
+The API Argo Application has an upstream GitHub chart source, so its POC image
+and database-version parameters are applied as a runtime JSON patch. The
+non-secret patch and the temporary low-capacity rollout strategy are mirrored
+in [the deployment configuration](../cloud-deploy/README.md).
 
-The VPS has been returned to its known-good state:
+## Validation performed
 
-- all `mediawiki-143` roles use `ghcr.io/wbstack/mediawiki:sha-7df52d9`;
-- the Cloud API and UI applications are Synced and Healthy;
-- the original and fresh disposable POC wikis return HTTP 200;
-- the locally built `wikibase/wikibase-cloud` image remains available for a
-  later rehearsal.
+- all four `mediawiki-146` deployments use the Suite-built Cloud image;
+- a newly created tenant is assigned `mw1.46-wbs1`;
+- the public tenant API reports `MediaWiki 1.46.0` and serves `wbgetentities`;
+- Platform Nginx routes that tenant to the `mediawiki-146` API service;
+- the existing `mediawiki-143` release remains running alongside it.
 
-The full host setup, known omissions, and restart instructions are captured in
-[the configuration mirror](../cloud-deploy/README.md). It includes the Caddy,
-Minikube tunnel, Helm resolver, host-alias, and Argo parameter files needed to
-recreate the VPS environment without copying credentials or Terraform state.
+The shared Query Service scheduler in this local stack currently logs a
+missing `QsCheckpoint` while creating batches. That pre-existing stack-level
+failure means an end-to-end Query Service update has not yet been verified for
+the 1.46 tenant; it is separate from the successful tenant initialization and
+request routing above.
 
-## Resume checklist
+## Existing tenants
 
-The next POC increment is deliberately a **fresh 1.46 tenant**, not a
-cloud-wide upgrade. It should preserve the current `mediawiki-143` release and
-its `mw1.43-wbs2` tenants as the rollback path.
+The new-tenant result does not migrate any existing `mw1.43-wbs2` database.
+That requires a separate, reversible rehearsal. The existing
+`k8s/jobs/mediawikiUpdate.sh` job is the candidate mechanism: run it against a
+`mediawiki-146` backend with `mw1.43-wbs2` as the source version and
+`mw1.46-wbs1` as the destination. Verify the upgraded tenant before considering
+any broader cutover policy.
 
-1. In the sibling `wbstack/api` repository, create a dedicated POC branch. Follow its `database/mw/README.md` process against the 1.46 Cloud
-   image to generate a fresh schema, conventionally `mw1.46-wbs1.sql`, under
-   `database/mw/new/`.
-2. Add `mw1.46-wbs1` to `config/mw-db-version-map.php`, mapped to `146`. Set
-   the Cloud API's provision and use versions to `mw1.46-wbs1` for this
-   isolated environment. Its `ProvisionWikiDbJob` will then replenish that
-   versioned database pool, and the host resolver will route its tenants to
-   `mediawiki-146`.
-3. In the sibling `wbstack/wbaas-deploy` repository, create a separate
-   `mediawiki-146` Helm release using the Suite-built Cloud image. Do not
-   replace `mediawiki-143`; the two releases are the POC's safe coexistence
-   mechanism.
-4. Push each experimental branch to the VPS `vps-poc` remote, build and deploy
-   the updated API image where required, then reconcile the deployment. A
-   source checkout alone does not change the running API.
-5. Wait for a pre-provisioned `mw1.46-wbs1` database, create a brand-new wiki,
-   and verify that all four `mediawiki-146` roles start and that the wiki can
-   perform the representative Wikibase and Query Service flows.
+## Reproduce the POC
 
-Only after the fresh-tenant route works should the disposable existing tenant
-be migrated. The existing `k8s/jobs/mediawikiUpdate.sh` job supplies the
-mechanism: run it against a `mediawiki-146` backend, with `mw1.43-wbs2` as the
-source version and `mw1.46-wbs1` as the destination. That is a separate,
-reversible rehearsal; it is not needed to establish the new-tenant POC.
-
-## Scope boundary
-
-The next technical question is how Cloud should supply a schema compatible with
-MediaWiki 1.46 before a tenant is served by this image, and how existing tenant
-databases should be updated. That work belongs to Cloud's own database-pool and
-deployment lifecycle. It is intentionally not designed or implemented in this
-Suite POC branch.
+1. Recreate the VPS and base stack using [the configuration mirror](../cloud-deploy/README.md).
+2. Build and load the Suite `wikibase-cloud` image on the VPS.
+3. Build the API POC image containing the 1.46 schema and load both images into
+   Minikube.
+4. Deploy `mediawiki-146` from the `WBS-WikiBase-POC` branch of the private
+   deployment remote, then apply the API JSON patch and reconcile it.
+5. Reapply the capacity rollout strategy if a Helm or Argo rollout stalls on
+   the VPS, wait for a pre-provisioned database, and create a fresh tenant.
+6. Verify the MediaWiki version, entity API, and Platform Nginx routing before
+   attempting an existing-tenant migration.

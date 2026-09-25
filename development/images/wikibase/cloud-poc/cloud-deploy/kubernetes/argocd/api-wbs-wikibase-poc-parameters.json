@@ -1,0 +1,15 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/sources/0/helm/parameters",
+    "value": [
+      { "name": "wbstack.subdomainSuffix", "value": ".cloud-poc.wikibase-test-one.de" },
+      { "name": "wbstack.uiurl", "value": "https://cloud-poc.wikibase-test-one.de" },
+      { "name": "image.repository", "value": "wbstack-api-poc" },
+      { "name": "image.tag", "value": "wbs-wikibase-poc" },
+      { "name": "image.pullPolicy", "value": "IfNotPresent" },
+      { "name": "wbstack.wikiDbProvisionVersion", "value": "mw1.46-wbs1" },
+      { "name": "wbstack.wikiDbUseVersion", "value": "mw1.46-wbs1" }
+    ]
+  }
+]

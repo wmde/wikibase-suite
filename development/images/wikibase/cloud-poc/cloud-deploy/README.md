@@ -18,6 +18,8 @@ The full repeatable setup and the reason for each deviation are in the
 | `etc/hosts` | append its managed record to `/etc/hosts` |
 | `etc/cloud/templates/hosts.debian.tmpl` | append its managed record to the distribution's cloud-init template |
 | `kubernetes/argocd/*.yaml` | apply with the documented `kubectl patch --type merge --patch-file` commands |
+| `kubernetes/argocd/api-wbs-wikibase-poc-parameters.json` | apply to the existing `api` Application with `kubectl patch --type json --patch-file`; this replaces its chart parameter list |
+| `kubernetes/rollout/poc-capacity-strategy.md` | reapply the documented temporary rollout strategy after Helm or Argo reconciliation |
 
 ## Private POC Git remotes
 
@@ -37,6 +39,11 @@ Then fetch and explicitly switch the relevant VPS checkout. This transfer does
 not deploy a change: API source changes require an image build and deployment
 reconciliation, while deployment-source changes require their normal render
 and reconciliation steps.
+
+The live API Application still sources its chart from upstream GitHub, so the
+private VPS branch is deliberately not an Argo source. The 1.46 rehearsal uses
+`api-wbs-wikibase-poc-parameters.json` as an explicit runtime overlay after
+building and loading `wbstack-api-poc:wbs-wikibase-poc` into Minikube.
 
 ## Values that must be refreshed for a rebuilt cluster
 
