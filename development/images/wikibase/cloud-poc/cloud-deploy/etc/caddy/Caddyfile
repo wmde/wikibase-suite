@@ -1,0 +1,22 @@
+{
+	on_demand_tls {
+		interval 2m
+		burst 10
+	}
+}
+
+cloud-poc.wikibase-test-one.de {
+	reverse_proxy https://10.96.129.101 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+		header_up Host www.wbaas.dev
+	}
+}
+
+*.cloud-poc.wikibase-test-one.de {
+	tls {
+		on_demand
+	}
+	reverse_proxy http://10.110.42.50:8080
+}

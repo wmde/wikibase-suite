@@ -1,0 +1,10 @@
+# Apply with:
+# kubectl -n argocd patch application ui --type merge --patch-file ui-public-domain-patch.yaml
+# This is a JSON merge patch for the existing Application. It relies on the
+# current upstream Application layout, whose first source is the UI chart.
+spec:
+  sources:
+    - helm:
+        parameters:
+          - name: ui.subdomainSuffix
+            value: .cloud-poc.wikibase-test-one.de

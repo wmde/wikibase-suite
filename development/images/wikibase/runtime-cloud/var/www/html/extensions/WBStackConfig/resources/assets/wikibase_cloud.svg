@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Ebene_1"
+   data-name="Ebene 1"
+   viewBox="0 0 449.99999 449.99999"
+   version="1.1"
+   sodipodi:docname="wikibase_cloud vertical_square.svg"
+   width="135"
+   height="135"
+   inkscape:version="1.3 (0e150ed, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview32"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.575937"
+     inkscape:cx="246.52"
+     inkscape:cy="146.26219"
+     inkscape:window-width="1888"
+     inkscape:window-height="1212"
+     inkscape:window-x="662"
+     inkscape:window-y="47"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Ebene_1" />
+  <defs
+     id="defs16">
+    <style
+       id="style1">&#10;      .cls-1 {&#10;        fill: #0063bf;&#10;      }&#10;&#10;      .cls-2 {&#10;        fill: #396;&#10;      }&#10;&#10;      .cls-3 {&#10;        fill: url(#Unbenannter_Verlauf_10);&#10;      }&#10;&#10;      .cls-4 {&#10;        fill: url(#Unbenannter_Verlauf_5);&#10;      }&#10;&#10;      .cls-5 {&#10;        fill: url(#Unbenannter_Verlauf);&#10;      }&#10;    </style>
+    <linearGradient
+       id="Unbenannter_Verlauf"
+       data-name="Unbenannter Verlauf"
+       x1="148.39999"
+       y1="1343.88"
+       x2="297.98999"
+       y2="1343.88"
+       gradientTransform="matrix(1,0,0,-1,0,1462.46)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#59a4d9"
+         id="stop1" />
+      <stop
+         offset=".08"
+         stop-color="#4d9bd5"
+         id="stop2" />
+      <stop
+         offset=".34"
+         stop-color="#2b83cb"
+         id="stop3" />
+      <stop
+         offset=".58"
+         stop-color="#1371c4"
+         id="stop4" />
+      <stop
+         offset=".81"
+         stop-color="#0566c0"
+         id="stop5" />
+      <stop
+         offset="1"
+         stop-color="#0063bf"
+         id="stop6" />
+    </linearGradient>
+    <linearGradient
+       id="Unbenannter_Verlauf_10"
+       data-name="Unbenannter Verlauf 10"
+       x1="107.06"
+       y1="1343.88"
+       x2="178.75999"
+       y2="1343.88"
+       gradientTransform="matrix(1,0,0,-1,0,1462.46)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#5cb075"
+         id="stop7" />
+      <stop
+         offset="0"
+         stop-color="#5baf74"
+         id="stop8" />
+      <stop
+         offset=".36"
+         stop-color="#45a36c"
+         id="stop9" />
+      <stop
+         offset=".7"
+         stop-color="#379b67"
+         id="stop10" />
+      <stop
+         offset="1"
+         stop-color="#396"
+         id="stop11" />
+    </linearGradient>
+    <linearGradient
+       id="Unbenannter_Verlauf_5"
+       data-name="Unbenannter Verlauf 5"
+       x1="51.299999"
+       y1="1343.89"
+       x2="125.88"
+       y2="1343.89"
+       gradientTransform="matrix(1,0,0,-1,0,1462.46)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#cd2e29"
+         id="stop12" />
+      <stop
+         offset=".19"
+         stop-color="#ba1d1a"
+         id="stop13" />
+      <stop
+         offset=".44"
+         stop-color="#a70c0b"
+         id="stop14" />
+      <stop
+         offset=".71"
+         stop-color="#9c0302"
+         id="stop15" />
+      <stop
+         offset="1"
+         stop-color="#900"
+         id="stop16" />
+    </linearGradient>
+  </defs>
+  <g
+     id="g18" />
+  <g
+     id="g33"
+     transform="translate(-20.04625,33.3325)">
+    <path
+       class="cls-5"
+       d="M 296.42,114.78 226.99,45.35 c -2.1,-2.1 -5.5,-2.1 -7.6,0 l -40.64,40.64 28.79,28.79 c 2.1,2.1 2.1,5.5 0,7.6 l -28.79,28.79 40.64,40.64 c 2.1,2.1 5.5,2.1 7.6,0 l 69.43,-69.43 c 2.1,-2.1 2.1,-5.5 0,-7.6 z"
+       id="path16"
+       style="fill:url(#Unbenannter_Verlauf)" />
+    <path
+       class="cls-3"
+       d="m 148.45,119.19 c -0.05,-0.4 -0.05,-0.81 0,-1.21 0.13,-1.17 0.62,-2.3 1.51,-3.19 L 178.75,86 152.58,59.83 c -1.14,-1.14 -2.65,-1.63 -4.13,-1.54 -1.26,0.08 -2.5,0.58 -3.46,1.54 l -37.93,37.93 17.41,17.41 c 1.89,1.89 1.89,4.95 0,6.84 l -17.41,17.41 37.93,37.93 c 0.96,0.96 2.2,1.46 3.46,1.54 1.48,0.09 3,-0.41 4.13,-1.54 l 26.17,-26.17 -28.79,-28.79 c -0.89,-0.89 -1.38,-2.03 -1.51,-3.19 v 0 z"
+       id="path17"
+       style="fill:url(#Unbenannter_Verlauf_10)" />
+    <path
+       class="cls-4"
+       d="M 90.03,114.78 107.06,97.75 92.01,82.7 c -1.89,-1.89 -4.95,-1.89 -6.84,0 l -32.46,32.46 c -1.89,1.89 -1.89,4.95 0,6.84 l 32.46,32.46 c 1.89,1.89 4.95,1.89 6.84,0 l 15.05,-15.05 -17.03,-17.03 c -2.1,-2.1 -2.1,-5.5 0,-7.6 z"
+       id="path18"
+       style="fill:url(#Unbenannter_Verlauf_5)" />
+    <g
+       id="g32">
+      <g
+         id="g26">
+        <path
+           class="cls-1"
+           d="M 132.87,222.2 116.2,273.21 H 103.52 L 92.29,238.7 80.71,273.26 H 68.09 L 51.3,222.25 h 12.27 l 11.52,35.84 12.04,-35.84 h 10.94 l 11.64,36.19 11.87,-36.19 h 11.29 v -0.06 z"
+           id="path19" />
+        <path
+           class="cls-1"
+           d="m 139.42,222.2 h 11.81 v 51.01 h -11.81 z"
+           id="path20" />
+        <path
+           class="cls-1"
+           d="m 181.91,253.18 -6.83,7.12 v 12.91 H 163.33 V 222.2 h 11.75 v 23.85 l 22.58,-23.85 h 13.14 l -21.13,22.75 22.41,28.25 H 198.3 l -16.38,-20.03 v 0 z"
+           id="path21" />
+        <path
+           class="cls-1"
+           d="m 217.29,222.2 h 11.81 v 51.01 h -11.81 z"
+           id="path22" />
+        <path
+           class="cls-1"
+           d="m 287.98,259.31 c 0,8.8 -7.01,13.9 -20.38,13.9 H 241.2 V 222.2 h 24.95 c 12.74,0 19.34,5.33 19.34,13.26 0,5.09 -2.61,9.03 -6.77,11.23 5.62,1.85 9.26,6.19 9.26,12.62 z m -35.03,-28.2 v 12.04 h 11.75 c 5.73,0 8.92,-2.03 8.92,-6.08 0,-4.05 -3.13,-5.96 -8.92,-5.96 z m 23.16,26.98 c 0,-4.28 -3.3,-6.37 -9.38,-6.37 h -13.78 v 12.62 h 13.78 c 6.08,0 9.38,-1.91 9.38,-6.25 z"
+           id="path23" />
+        <path
+           class="cls-1"
+           d="m 330.59,262.32 h -23.68 l -4.52,10.94 h -12.1 l 22.75,-51.01 h 11.64 l 22.81,51.01 H 335.1 l -4.52,-10.94 v 0 z m -3.76,-8.97 -8.11,-19.51 -8.11,19.51 h 16.21 z"
+           id="path24" />
+        <path
+           class="cls-1"
+           d="m 348.77,268.23 3.99,-8.92 c 4.28,3.13 10.71,5.33 16.85,5.33 7.01,0 9.84,-2.32 9.84,-5.44 0,-9.55 -29.64,-3.01 -29.64,-21.94 0,-8.68 7.01,-15.92 21.48,-15.92 6.43,0 12.97,1.51 17.72,4.52 l -3.65,8.97 c -4.75,-2.72 -9.61,-3.99 -14.13,-3.99 -7.01,0 -9.73,2.61 -9.73,5.85 0,9.38 29.64,2.89 29.64,21.65 0,8.51 -7.06,15.81 -21.65,15.81 -8.05,0 -16.21,-2.43 -20.73,-5.91 v 0 z"
+           id="path25" />
+        <path
+           class="cls-1"
+           d="m 438.8,263.77 v 9.5 h -39.49 v -51.01 h 38.56 v 9.5 h -26.81 v 11 h 23.68 v 9.21 h -23.68 v 11.81 h 27.73 z"
+           id="path26" />
+      </g>
+      <g
+         id="g31">
+        <path
+           class="cls-2"
+           d="m 54.71,313.16 c 0,-15.4 11.81,-26.4 27.67,-26.4 8.8,0 16.21,3.18 21.02,9.03 l -7.58,7.01 c -3.42,-3.94 -7.7,-5.96 -12.85,-5.96 -9.55,0 -16.33,6.72 -16.33,16.33 0,9.61 6.77,16.33 16.33,16.33 5.09,0 9.38,-2.03 12.85,-6.08 l 7.58,7.01 c -4.81,5.91 -12.16,9.09 -21.07,9.09 -15.81,0.06 -27.62,-10.94 -27.62,-26.34 v 0 z"
+           id="path27" />
+        <path
+           class="cls-2"
+           d="m 111.34,287.62 h 11.81 v 41.4 h 25.59 v 9.61 h -37.4 z"
+           id="path28" />
+        <path
+           class="cls-2"
+           d="m 151.29,313.16 c 0,-15.17 11.81,-26.4 27.91,-26.4 16.1,0 27.91,11.17 27.91,26.4 0,15.23 -11.87,26.4 -27.91,26.4 -16.04,0 -27.91,-11.23 -27.91,-26.4 z m 43.89,0 c 0,-9.67 -6.83,-16.33 -15.98,-16.33 -9.15,0 -15.98,6.66 -15.98,16.33 0,9.67 6.83,16.33 15.98,16.33 9.15,0 15.98,-6.66 15.98,-16.33 z"
+           id="path29" />
+        <path
+           class="cls-2"
+           d="m 215.61,316.23 v -28.54 h 11.81 v 28.14 c 0,9.67 4.23,13.72 11.35,13.72 7.12,0 11.35,-3.99 11.35,-13.72 v -28.14 h 11.64 v 28.54 c 0,15 -8.63,23.33 -23.1,23.33 -14.47,0 -23.04,-8.34 -23.04,-23.33 z"
+           id="path30" />
+        <path
+           class="cls-2"
+           d="m 273.45,287.62 h 23.16 c 16.67,0 28.14,10.07 28.14,25.53 0,15.46 -11.46,25.53 -28.14,25.53 h -23.16 v -51.07 z m 22.64,41.34 c 10.13,0 16.79,-6.08 16.79,-15.81 0,-9.73 -6.66,-15.81 -16.79,-15.81 h -10.77 v 31.61 h 10.77 z"
+           id="path31" />
+      </g>
+    </g>
+  </g>
+</svg>

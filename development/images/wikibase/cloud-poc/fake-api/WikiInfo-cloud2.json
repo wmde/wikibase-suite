@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "data": {
+    "id": 2,
+    "domain": "cloud2.wikibase.test",
+    "sitename": "Cloud POC Two",
+    "wiki_db": {
+      "id": 2,
+      "name": "mwdb_cloud2",
+      "prefix": "mwt_cloud2",
+      "user": "mwu_someuser",
+      "password": "somepassword",
+      "version": "mw1.46-cloud-poc",
+      "wiki_id": 2
+    },
+    "wiki_queryservice_namespace": {
+      "id": 2,
+      "namespace": "cloud2",
+      "backend": "wdqs:9999",
+      "wiki_id": 2
+    },
+    "settings": [
+      { "name": "wgSecretKey", "value": "cloud-poc-two-secret" },
+      { "name": "wwExtEnableWikibaseLexeme", "value": "1" },
+      { "name": "wwExtEnableConfirmAccount", "value": "1" },
+      { "name": "wwExtEnableInviteSignup", "value": "1" },
+      { "name": "nyurikThatSrcEnable", "value": "1" },
+      { "name": "wwExtEnableElasticSearch", "value": "1" }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+# Apply with:
+# kubectl -n argocd patch application api --type merge --patch-file api-public-domain-patch.yaml
+# This is a JSON merge patch for the existing Application. It relies on the
+# current upstream Application layout, whose first source is the API chart.
+spec:
+  sources:
+    - helm:
+        parameters:
+          - name: wbstack.subdomainSuffix
+            value: .cloud-poc.wikibase-test-one.de
+          - name: wbstack.uiurl
+            value: https://cloud-poc.wikibase-test-one.de
