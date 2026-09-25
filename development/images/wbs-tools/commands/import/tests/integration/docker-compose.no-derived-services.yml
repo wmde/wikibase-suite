@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE: bulk_test
+      MARIADB_USER: bulk_test
+      MARIADB_PASSWORD: bulk-test-only
+      MARIADB_ROOT_PASSWORD: bulk-root-test-only
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 2s
+      timeout: 5s
+      retries: 40
+    volumes:
+      - database:/var/lib/mysql
+  wikibase:
+    image: ${BULK_TEST_IMAGE:-wikibase/wikibase:8.1.0}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MW_CONFIG_FILE: /test/LocalSettingsNoDerived.php
+    volumes:
+      - ./LocalSettingsNoDerived.php:/test/LocalSettingsNoDerived.php:ro
+      - ../..:/opt/wbs-bulk-import:ro
+      - ${BULK_TEST_WORKSPACE}:/import-test
+    ports:
+      - "127.0.0.1::80"
+volumes:
+  database:

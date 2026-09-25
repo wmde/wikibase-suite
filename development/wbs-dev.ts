@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import process from 'node:process';
 import { registerBuildCommand } from './commands/build/command.js';
+import { registerBenchmarkCommand } from './commands/benchmark/command.js';
 import { registerInstallerDevCommand } from './commands/installer-dev/command.js';
 import { registerLintCommand } from './commands/lint/command.js';
 import { registerReleaseCommand } from './commands/release/command.js';
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
 		.enablePositionalOptions();
 
 	registerBuildCommand(program, context);
+	registerBenchmarkCommand(program, context);
 	registerInstallerDevCommand(program, context);
 	registerTestCommand(program, context);
 	registerLintCommand(program, context);

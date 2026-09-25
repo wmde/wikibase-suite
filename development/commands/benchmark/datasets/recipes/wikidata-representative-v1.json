@@ -1,0 +1,16 @@
+{
+  "format": "wbs-benchmark-selection-recipe/v1",
+  "purpose": "Representative entity-shape capacity corpus; not a connected-graph workload.",
+  "requires_complete_dump_profile": true,
+  "selection": {
+    "mode": "profile-proportional-stratified-sampling",
+    "stable_seed": "wikibase-suite-representative-v1",
+    "statement_buckets": ["0", "1", "2-4", "5-9", "10-24", "25-99", "100+"],
+    "heavy_tail": {"bucket": "100+", "minimum_item_fraction": 0.02}
+  },
+  "triple_target": {
+    "kind": "calibrated-visible-rdf-triples",
+    "tolerance_fraction": 0.05,
+    "authority": "post-import COUNT(*) on the selected query-service RDF contract"
+  }
+}

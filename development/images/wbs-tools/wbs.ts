@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import process from 'node:process';
 import { registerDownCommand } from './commands/down.js';
 import { registerInstallCommand } from './commands/install.js';
+import { registerImportCommand } from './commands/import/command.js';
 import { registerResetCommand } from './commands/reset.js';
 import { registerStatusCommand } from './commands/status.js';
 import { registerUpCommand } from './commands/up.js';
@@ -19,6 +20,7 @@ async function main(): Promise<void> {
 		.showSuggestionAfterError();
 
 	registerInstallCommand( program );
+	registerImportCommand( program );
 	registerUpCommand( program );
 	registerDownCommand( program );
 	registerStatusCommand( program );

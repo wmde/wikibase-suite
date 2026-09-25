@@ -1,0 +1,9 @@
+{
+  "format": "wbs-scholarly-corpus-recipe/v1",
+  "parquet": "statements.parquet",
+  "snapshot_revision": "REPLACE_WITH_IMMUTABLE_SOURCE_REVISION",
+  "parquet_sha256": "REPLACE_WITH_PARQUET_SHA256",
+  "dump": "wikidata-entities.json.gz",
+  "seed": "wbs-scholarly-v1",
+  "limit": 1000
+}

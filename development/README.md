@@ -76,6 +76,22 @@ wbs-dev update all
 
 The command checks supported upstream dependencies, proposes release versions, and generates changelog drafts as unstaged changes for review. For more information on using `wbs-dev update` in addition to the full release workflow see the [release guide](./docs/release.md).
 
+## Benchmarking and bulk import
+
+`wbs-dev benchmark` owns corpus preparation, importer throughput experiments and
+resource collection on existing Suite installations. See the
+[benchmark command guide](commands/benchmark/README.md) for the working commands
+and the remaining workload/capacity work.
+
+`wbs import prepare/load` is the separate operator capability for loading a
+fresh Wikibase. Its implementation and correctness tests live in
+[WBS Tools' import command](images/wbs-tools/commands/import/README.md).
+It remains in development; full recovery and derived-service reconciliation
+must be completed before production support.
+
+Architecture and resumption points: [bulk import ADR](docs/adr/0025-bulk-import-capability.md)
+and [benchmark ADR](docs/adr/0026-reproducible-suite-capacity-benchmarks.md).
+
 ## Developing the browser installer
 
 The installer begins with a host-side bootstrap script that checks the environment, obtains the selected WBS checkout and tools image, and then delegates configuration and installation to the containerized WBS Tools application. See the [WBS Tools image overview](./images/wbs-tools/README.md) for its scope and architecture.

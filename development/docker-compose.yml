@@ -19,6 +19,8 @@ services:
     scale: 0
     working_dir: /workspace/development
     stop_grace_period: 1s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - 9229:9229
       - 4211:4211

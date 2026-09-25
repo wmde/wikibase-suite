@@ -1,0 +1,21 @@
+name: wbs-benchmark-datasets
+
+# One-shot dataset preparation only. It does not join the Suite Docker network,
+# depend on, or modify any running Wikibase service. Set WBS_BENCHMARK_DATA_DIR
+# to an absolute host directory containing large inputs and outputs.
+services:
+  truthy-selector:
+    build:
+      context: ..
+      dockerfile: Dockerfile.duckdb
+    image: wbs-benchmark-duckdb:1.4.0
+    working_dir: /workspace
+    entrypoint:
+      - python
+      - /workspace/development/commands/benchmark/scripts/select_truthy_scholarly_qids.py
+      - --duckdb-python
+    environment:
+      HOME: /tmp
+    volumes:
+      - ../../../..:/workspace:ro
+      - ${WBS_BENCHMARK_DATA_DIR:?Set WBS_BENCHMARK_DATA_DIR to an absolute data directory}:/data

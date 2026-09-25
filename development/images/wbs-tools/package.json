@@ -9,7 +9,7 @@
 		"dev:server": "tsx watch web/server.ts",
 		"build": "pnpm run typecheck:client && pnpm run build:client && pnpm run build:server",
 		"build:client": "vite build --config web/vite.config.ts",
-		"build:server": "tsc -p tsconfig.server.json && cp lib/common-passwords-top-100000.txt dist/lib/",
+		"build:server": "tsc -p tsconfig.server.json && cp lib/common-passwords-top-100000.txt dist/lib/ && node commands/import/package-runtime.mjs",
 		"typecheck:client": "vue-tsc --noEmit -p tsconfig.json"
 	},
 	"dependencies": {

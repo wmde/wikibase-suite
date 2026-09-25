@@ -7,8 +7,8 @@ import importlib.util
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-IMPORTER_PATH = ROOT / "development/benchmarking/scripts/import_wikibase.py"
+ROOT = Path(__file__).resolve().parents[4]
+IMPORTER_PATH = ROOT / "development/commands/benchmark/scripts/import_wikibase.py"
 SPEC = importlib.util.spec_from_file_location("benchmark_importer", IMPORTER_PATH)
 assert SPEC and SPEC.loader
 IMPORTER = importlib.util.module_from_spec(SPEC)

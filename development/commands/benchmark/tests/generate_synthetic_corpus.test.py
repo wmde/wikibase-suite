@@ -10,8 +10,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-GENERATOR = ROOT / "development/benchmarking/scripts/generate_synthetic_corpus.py"
+ROOT = Path(__file__).resolve().parents[4]
+GENERATOR = ROOT / "development/commands/benchmark/scripts/generate_synthetic_corpus.py"
 
 
 class GenerateSyntheticCorpusTest(unittest.TestCase):

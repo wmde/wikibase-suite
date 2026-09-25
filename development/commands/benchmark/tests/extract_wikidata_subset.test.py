@@ -11,8 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-EXTRACTOR = ROOT / "development/benchmarking/scripts/extract_wikidata_subset.py"
+ROOT = Path(__file__).resolve().parents[4]
+EXTRACTOR = ROOT / "development/commands/benchmark/scripts/extract_wikidata_subset.py"
 
 
 def item(identifier: str, target: str | None = None) -> dict[str, object]:

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 from datetime import UTC, datetime
@@ -20,8 +21,8 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-ROOT = Path(__file__).resolve().parents[3]
-PROFILES = ROOT / "development/benchmarking/profiles.json"
+ROOT = Path(__file__).resolve().parents[4]
+PROFILES = ROOT / "development/commands/benchmark/profiles.json"
 
 
 def command(*arguments: str) -> str:
@@ -109,7 +110,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument(
         "--profile",
         default="wikibase-suite-8gb",
-        help="Capacity profile from development/benchmarking/profiles.json.",
+        help="Capacity profile from development/commands/benchmark/profiles.json.",
     )
     result.add_argument(
         "--project",
@@ -125,11 +126,11 @@ def parser() -> argparse.ArgumentParser:
         "--output",
         type=Path,
         required=True,
-        help="JSON file to create beneath development/benchmarking/results/.",
+        help="JSON file to create in the caller's ignored evidence directory.",
     )
     result.add_argument(
         "--prometheus-url",
-        default="http://localhost:9090",
+        default=os.environ.get("WBS_BENCHMARK_PROMETHEUS_URL", "http://localhost:9090"),
         help="Optional Prometheus endpoint; use an empty value to skip its instant metrics.",
     )
     return result

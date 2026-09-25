@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE: bulk_test
+      MARIADB_USER: bulk_test
+      MARIADB_PASSWORD: bulk-test-only
+      MARIADB_ROOT_PASSWORD: bulk-root-test-only
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 2s
+      timeout: 5s
+      retries: 40
+    volumes:
+      - database:/var/lib/mysql
+  search:
+    image: ${BULK_TEST_SEARCH_IMAGE:-wikibase/opensearch:1}
+    environment:
+      discovery.type: single-node
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://localhost:9200]
+      interval: 3s
+      timeout: 5s
+      retries: 50
+  wikibase:
+    image: ${BULK_TEST_IMAGE:-wikibase/wikibase:8.1.0}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      search:
+        condition: service_healthy
+    environment:
+      MW_CONFIG_FILE: /test/LocalSettings.php
+      WBS_DISABLE_CIRRUS_UPDATES: ${WBS_DISABLE_CIRRUS_UPDATES:-0}
+    volumes:
+      - ./LocalSettings.php:/test/LocalSettings.php:ro
+      - ../..:/opt/wbs-bulk-import:ro
+      - ${BULK_TEST_WORKSPACE}:/import-test
+    ports:
+      - "127.0.0.1::80"
+volumes:
+  database:

@@ -1,0 +1,7 @@
+FROM python:3.12-slim-bookworm
+
+# This image is intentionally isolated from the Suite application images. Pin
+# DuckDB so the selection order and Parquet reader version are recorded and
+# repeatable across benchmark hosts.
+RUN pip install --no-cache-dir duckdb==1.4.0 \
+    && python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"

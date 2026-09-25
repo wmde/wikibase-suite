@@ -1,7 +1,7 @@
 name: wbs-benchmark-metrics
 
 # Run beside a Suite installation, not as part of its normal stack:
-#   docker compose -f development/benchmarking/compose/docker-compose.metrics.yml up -d
+#   docker compose -f development/commands/benchmark/compose/docker-compose.metrics.yml up -d
 #
 # WBS_BENCHMARK_NETWORK defaults to the root compose network. Set it explicitly
 # if the target installation uses another Compose project name.

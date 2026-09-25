@@ -24,7 +24,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV WBS_TOOLS_VERSION=${WBS_TOOLS_VERSION}
 
-RUN apk add --no-cache bash docker-cli docker-cli-compose git openssl curl
+RUN apk add --no-cache bash docker-cli docker-cli-compose git openssl curl python3
 
 COPY --from=build /app ./
 
