@@ -59,6 +59,23 @@ failure means an end-to-end Query Service update has not yet been verified for
 the 1.46 tenant; it is separate from the successful tenant initialization and
 request routing above.
 
+## Test administrator access
+
+The current Cloud initialization creates and promotes the requested MediaWiki
+user, but supplies no password. It asks MediaWiki to send a reset email. Mail
+delivery is not configured on this VPS, so a disposable POC administrator can
+be given a temporary password with the tenant-aware maintenance command:
+
+```sh
+kubectl -n default exec -i deploy/mediawiki-146-app-backend -- \
+  env WBS_DOMAIN=<tenant-domain> php maintenance/run.php changePassword \
+  --user='<administrator>' --passwordstdin
+```
+
+Supply the temporary password on standard input and replace it after login.
+This is a VPS test-only operational workaround; it does not change tenant
+initialization or Cloud authentication code.
+
 ## Existing tenants
 
 The new-tenant result does not migrate any existing `mw1.43-wbs2` database.
