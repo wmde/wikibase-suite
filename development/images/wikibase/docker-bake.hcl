@@ -8,7 +8,7 @@ variable "IMAGE_NAME" {
 }
 
 variable "IMAGE_VERSION" {
-  default = "8.1.0"
+  default = "8.1.1"
 
   validation {
     condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
