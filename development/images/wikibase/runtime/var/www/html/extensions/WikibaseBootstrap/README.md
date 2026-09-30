@@ -1,17 +1,17 @@
 # Bundled bootstrap ontologies
 
-These files are reviewed source assets for the in-development bootstrap
-extension at `/var/www/html/extensions/WikibaseBootstrap/ontologies/`; no
-runtime network request is made to obtain them.
+These files are reviewed source assets for the `WikibaseBootstrap` extension
+at `/var/www/html/extensions/WikibaseBootstrap/ontologies/`; no runtime network
+request is made to obtain them.
 
 Source: [`olea/wikibase-bootstrap`](https://gitlab.wikimedia.org/olea/wikibase-bootstrap/),
 commit `40892e31fd812c9b1402506d1ee86cfc215e1dd6` (2026-04-08).
 
-The source ontology data declares CC0 1.0 Universal. The Suite copies its
-semantic content into the local-ID-independent Suite profile: source IRIs are
-stable keys, while the server-owned importer allocates the actual local `P…`
-IDs. The upstream Python importer is intentionally not used because it assumes
-fixed local IDs.
+The source ontology data declares CC0 1.0 Universal. The Suite profile
+preserves the source property and ontology metadata while replacing fixed local
+IDs with stable source IRIs; the server-owned importer then allocates the local
+`P…` IDs. Explicit `wbb:claim` entries encode the Wikibase statements that the
+upstream converter derives from its `owl:equivalentProperty` mappings.
 
 The minimal and extended variants remain separate user-visible choices.
 
@@ -26,5 +26,5 @@ Run this command from the MediaWiki installation directory. It only applies to
 an eligible empty Wikibase, just like the Special page.
 
 The feature-local validation assets and pySHACL runner live in
-`development/tests/wikibase-bootstrap/`. They are deliberately not production
-dependencies or an upload validator yet.
+`development/tests/wikibase-bootstrap/`. They are development and CI
+dependencies, not runtime dependencies of the extension.

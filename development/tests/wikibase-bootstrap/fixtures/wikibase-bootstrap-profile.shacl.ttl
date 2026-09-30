@@ -5,7 +5,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix wbb: <https://wikiba.se/bootstrap#> .
 
-# Wikibase Suite bootstrap profile, version 1 (draft).
+# Wikibase Suite bootstrap profile, version 1.
 # Entity IRIs are source keys. An importer assigns local P/Q IDs and resolves
 # wbb:claim references using the source-IRI-to-local-ID mapping for that run.
 
@@ -86,4 +86,26 @@ wbb:BootstrapReferenceShape
 	sh:property [
 		sh:path owl:inverseOf ;
 		sh:nodeKind sh:IRI ;
+	] .
+
+# The upstream converter materializes every owl:equivalentProperty assertion
+# as an exact-match property statement. The Suite profile must carry the same
+# instruction explicitly because its importer intentionally does not interpret
+# arbitrary OWL predicates at runtime.
+wbb:EquivalentPropertyClaimShape
+	a sh:NodeShape ;
+	sh:targetSubjectsOf owl:equivalentProperty ;
+	sh:sparql [
+		sh:message "Every owl:equivalentProperty requires a matching exact-match bootstrap claim." ;
+		sh:select """
+			SELECT $this WHERE {
+				$this owl:equivalentProperty ?equivalentProperty .
+				FILTER NOT EXISTS {
+					$this wbb:claim [
+						wbb:property <https://wikiba.se/bootstrap/entity/exact-match> ;
+						wbb:value ?equivalentProperty
+					] .
+				}
+			}
+		""" ;
 	] .

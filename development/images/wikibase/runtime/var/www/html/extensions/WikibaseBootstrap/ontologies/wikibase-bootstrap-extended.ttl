@@ -51,13 +51,14 @@ wbbs:exact-match a owl:DatatypeProperty ;
 	rdfs:label "exact match"@en ;
 	dcterms:description "skos:exactMatch"@en ;
 	owl:equivalentProperty skos:exactMatch ;
+	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2004/02/skos/core#exactMatch> ] ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P2888" ] .
 
 wbbs:wikidata-entity-id a owl:DatatypeProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "external-id" ;
 	rdfs:label "Wikidata Entity ID"@en ;
-	dcterms:description "Maps a local entity to its corresponding Wikidata entity ID."@en ;
+	dcterms:description "used to indicate a mapping (of some undefined nature, but can be further specified by individual Wikibases) from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
 	wbb:claim [ wbb:property wbbs:formatter-uri ; wbb:value "http://www.wikidata.org/entity/$1" ] ;
 	wbb:claim [ wbb:property wbbs:formatter-uri-for-rdf ; wbb:value "http://www.wikidata.org/entity/$1" ] .
 
@@ -65,14 +66,14 @@ wbbs:formatter-uri a owl:DatatypeProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "string" ;
 	rdfs:label "formatter URI"@en ;
-	dcterms:description "URI template from which $1 is replaced with the property value."@en ;
+	dcterms:description "web page URI; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URI changes, add a new statement with preferred rank"@en ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1630" ] .
 
 wbbs:formatter-uri-for-rdf a owl:DatatypeProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "string" ;
 	rdfs:label "formatter URI for RDF"@en ;
-	dcterms:description "URI template for the RDF resource identified by a property value."@en ;
+	dcterms:description "formatter URI for RDF resource: URI template from which \"$1\" can be automatically replaced with the effective property value on items (it is the URI of the resources, not the URI of the RDF file describing it)"@en ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1921" ] .
 
 wbbs:inverse-of a owl:ObjectProperty ;
@@ -81,14 +82,16 @@ wbbs:inverse-of a owl:ObjectProperty ;
 	rdfs:label "inverse of"@en ;
 	dcterms:description "owl:inverseOf"@en ;
 	owl:equivalentProperty owl:inverseOf ;
+	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2002/07/owl#inverseOf> ] ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1696" ] .
 
 wbbs:depicts a owl:ObjectProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "wikibase-item" ;
 	rdfs:label "depicts"@en ;
-	dcterms:description "Entity visually depicted in an image, described in a work, or otherwise incorporated into a medium."@en ;
+	dcterms:description "entity visually depicted in an image, literarily described in a work, or otherwise incorporated into an audiovisual or other medium"@en ;
 	owl:equivalentProperty foaf:depicts ;
+	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://xmlns.com/foaf/0.1/depicts> ] ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P180" ] .
 
 wbbs:is-part-of a owl:ObjectProperty ;
@@ -97,6 +100,7 @@ wbbs:is-part-of a owl:ObjectProperty ;
 	rdfs:label "is part of"@en ;
 	dcterms:description "dcterms:isPartOf"@en ;
 	owl:equivalentProperty dcterms:isPartOf ;
+	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://purl.org/dc/terms/isPartOf> ] ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P361" ] .
 
 wbbs:same-as a owl:ObjectProperty ;
@@ -105,6 +109,7 @@ wbbs:same-as a owl:ObjectProperty ;
 	rdfs:label "same as"@en ;
 	dcterms:description "owl:sameAs"@en ;
 	owl:equivalentProperty owl:sameAs ;
+	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2002/07/owl#sameAs> ] ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P2888" ] .
 
 wbbs:bundle a owl:Ontology ;
@@ -114,7 +119,7 @@ wbbs:bundle a owl:Ontology ;
 		"Tuukka Hastrup",
 		"Tomás Saorín",
 		"Juan Antonio Pastor Sánchez" ;
-	dcterms:description "The minimal bootstrap set plus four commonly useful relationship properties."@en ;
+	dcterms:description "An essential set of entities for new Wikibase instances, mapped with Wikidata and selected by practicalities and common use" ;
 	dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
 	dcterms:publisher <http://www.wikidata.org/entity/Q51033881> ;
 	dcterms:rights "CC0 1.0 Universal" ;

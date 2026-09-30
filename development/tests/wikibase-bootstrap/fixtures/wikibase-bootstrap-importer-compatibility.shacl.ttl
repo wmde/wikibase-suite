@@ -7,8 +7,8 @@
 @prefix wbbs: <https://wikiba.se/bootstrap#> .
 
 # This shape describes the restricted RDF convention consumed by upstream
-# ttl2wb.py. It is not a general OWL profile and does not prescribe Suite's
-# future local-ID-safe bootstrap profile.
+# ttl2wb.py. It is not a general OWL profile and does not prescribe the
+# Suite's local-ID-safe bootstrap profile.
 
 wbbs:ImporterEntityShape
 	a sh:NodeShape ;

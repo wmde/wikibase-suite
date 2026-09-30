@@ -41,7 +41,7 @@ same run. Both interfaces use the same server-owned service, which rechecks
 eligibility immediately before applying a bundle.
 
 The bundled Turtle retains upstream attribution, licence, provenance, and
-version metadata. Its narrow profile is checked with pySHACL in development
+version metadata. Its narrow profile is checked with pySHACL by the test suite
 and CI. The running extension deliberately has no Python or RDF/SHACL runtime
 dependency: it reads only the reviewed bundled profile.
 
@@ -56,10 +56,20 @@ while providing a more accessible onboarding path for users who want a
 community-curated foundation.
 
 Application is not transactional. A request failure can leave a partially
-created bundle, and this first version has no durable run record, retry flow,
-or recovery tooling. The reset facility likewise has no maintenance lock or
-audit record. These limits are acceptable only for the deliberately narrow,
+created bundle, and the capability has no durable run record, retry flow, or
+recovery tooling. The reset facility likewise has no maintenance lock or audit
+record. These limits are acceptable only for the deliberately narrow,
 new-instance use case.
+
+The bundles include the standard Wikibase properties used to describe
+external-identifier formatter and canonical RDF URI templates. Configuring
+Wikibase to use those properties is deliberately not part of this capability.
+A default P7/P8 configuration would improve the normal fresh-instance path,
+but could point to unrelated or deleted properties on an instance whose
+identifiers had previously been allocated. The feature therefore leaves that
+optional configuration to Wikibase operators and its upstream documentation. A
+later follow-up may provide a safer configuration workflow or Suite-specific
+guidance.
 
 ## Explicitly out of scope
 

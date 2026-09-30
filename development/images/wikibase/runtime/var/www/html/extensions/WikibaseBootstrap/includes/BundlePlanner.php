@@ -74,7 +74,7 @@ class BundlePlanner {
 	/** @return array{value: string, language: string}|null */
 	private function literal( string $body, string $predicate ): ?array {
 		if ( !preg_match(
-			'/' . preg_quote( $predicate, '/' ) . '\s+"((?:[^"\\\\]|\\.)*)"(?:@([A-Za-z-]+))?/',
+			'/' . preg_quote( $predicate, '/' ) . '\s+"((?:[^"\\\\]|\\\\.)*)"(?:@([A-Za-z-]+))?/',
 			$body,
 			$match
 		) ) {
