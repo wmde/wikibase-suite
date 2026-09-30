@@ -22,6 +22,10 @@ class SpecialWikibaseDashboard extends SpecialPage {
 		[ $itemCount, $propertyCount ] = $this->getEntityCounts();
 		$tripleCount = $this->getTripleCount();
 
+		$newItemUrl = SpecialPage::getTitleFor( 'NewItem' )->getLocalURL();
+		$newPropertyUrl = SpecialPage::getTitleFor( 'NewProperty' )->getLocalURL();
+		$importPropertiesUrl = SpecialPage::getTitleFor( 'OntologyBootstrap' )->getLocalURL();
+
 		// Placeholder banner
 		$output->addHTML(
 			'<div style="background: #eaecf0; border: 1px solid #a2a9b1; padding: 12px 16px; margin-bottom: 16px; border-radius: 2px;">' .
@@ -43,7 +47,7 @@ class SpecialWikibaseDashboard extends SpecialPage {
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
 								'<span>' . htmlspecialchars( (string)$itemCount ) . '</span>' .
-								'<button class="mw-ui-button mw-ui-quiet" type="button">Add item</button>' .
+								'<a class="mw-ui-button mw-ui-quiet" href="' . htmlspecialchars( $newItemUrl ) . '">Add item</a>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
@@ -52,7 +56,7 @@ class SpecialWikibaseDashboard extends SpecialPage {
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
 								'<span>' . htmlspecialchars( (string)$propertyCount ) . '</span>' .
-								'<button class="mw-ui-button mw-ui-quiet" type="button">Add property</button>' .
+								'<a class="mw-ui-button mw-ui-quiet" href="' . htmlspecialchars( $newPropertyUrl ) . '">Add property</a>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
@@ -82,7 +86,7 @@ class SpecialWikibaseDashboard extends SpecialPage {
 
 		$output->addHTML(
 			'<div style="margin-top: 16px;">' .
-				'<button class="mw-ui-button mw-ui-progressive" type="button">Import a set of properties</button>' .
+				'<button class="mw-ui-button mw-ui-progressive" type="button" href="' . htmlspecialchars( $importPropertiesUrl ) . '">Import a set of properties</button>' .
 			'</div>'
 		);
 	}
