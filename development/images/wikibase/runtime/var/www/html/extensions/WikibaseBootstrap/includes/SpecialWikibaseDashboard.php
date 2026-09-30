@@ -3,6 +3,9 @@
 namespace MediaWiki\Extension\WikibaseBootstrap;
 
 use SpecialPage;
+use SiteStats;
+use Wikibase\Repo\WikibaseRepo;
+use MediaWiki\MediaWikiServices;
 
 class SpecialWikibaseDashboard extends SpecialPage {
 
@@ -15,6 +18,9 @@ class SpecialWikibaseDashboard extends SpecialPage {
 		$this->outputHeader();
 
 		$output = $this->getOutput();
+
+		[ $itemCount, $propertyCount ] = $this->getEntityCounts();
+		$tripleCount = $this->getTripleCount();
 
 		// Placeholder banner
 		$output->addHTML(
@@ -36,7 +42,7 @@ class SpecialWikibaseDashboard extends SpecialPage {
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Items</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
-								'<span>12</span>' .
+								'<span>' . htmlspecialchars( (string)$itemCount ) . '</span>' .
 								'<button class="mw-ui-button mw-ui-quiet" type="button">Add item</button>' .
 							'</div>' .
 						'</td>' .
@@ -45,16 +51,16 @@ class SpecialWikibaseDashboard extends SpecialPage {
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Properties</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
-								'<span>34</span>' .
+								'<span>' . htmlspecialchars( (string)$propertyCount ) . '</span>' .
 								'<button class="mw-ui-button mw-ui-quiet" type="button">Add property</button>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
 					'<tr>' .
-						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Truples</td>' .
+						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Triples</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
-								'<span>99.9%</span>' .
+								'<span>' . htmlspecialchars( $tripleCount !== null ? (string)$tripleCount : 'n/a' ) . '</span>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
@@ -74,15 +80,58 @@ class SpecialWikibaseDashboard extends SpecialPage {
 			'</div>'
 		);
 
-		// Button at the bottom
 		$output->addHTML(
 			'<div style="margin-top: 16px;">' .
 				'<button class="mw-ui-button mw-ui-progressive" type="button">Import a set of properties</button>' .
 			'</div>'
 		);
+	}
 
-		// $output->addModules( 'ext.wikibaseBootstrap.dashboard' );
-		// $output->addHTML( '<div id="wikibase-dashboard-app">asdf</div>' );
+	/**
+	 * @return int[] [ $itemCount, $propertyCount ]
+	 */
+	private function getEntityCounts(): array {
+		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
+
+		$itemNs = $namespaceLookup->getEntityNamespace( 'item' );
+		$propertyNs = $namespaceLookup->getEntityNamespace( 'property' );
+
+		$itemCount = $itemNs !== null ? SiteStats::pagesInNs( $itemNs ) : 0;
+		$propertyCount = $propertyNs !== null ? SiteStats::pagesInNs( $propertyNs ) : 0;
+
+		return [ $itemCount, $propertyCount ];
+	}
+
+	/**
+	 * @return int|null null if the query service isn't reachable/configured
+	 */
+	private function getTripleCount(): ?int {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$endpoint = $config->has( 'WBRepoSettings' )
+			? ( $config->get( 'WBRepoSettings' )['sparqlEndpoint'] ?? null )
+			: null;
+
+		if ( $endpoint === null ) {
+			return null;
+		}
+
+		$query = 'SELECT (COUNT(*) AS ?count) WHERE { ?s ?p ?o }';
+		$url = $endpoint . '?query=' . urlencode( $query ) . '&format=json';
+
+		$options = [ 'timeout' => 5 ];
+		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()
+			->create( $url, $options, __METHOD__ );
+		$req->setHeader( 'Accept', 'application/sparql-results+json' );
+
+		$status = $req->execute();
+		if ( !$status->isOK() ) {
+			return null;
+		}
+
+		$data = json_decode( $req->getContent(), true );
+		return isset( $data['results']['bindings'][0]['count']['value'] )
+			? (int)$data['results']['bindings'][0]['count']['value']
+			: null;
 	}
 
 	public function getGroupName() {
