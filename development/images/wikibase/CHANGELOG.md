@@ -1,3 +1,17 @@
+# 8.1.1 (2026-09-30)
+
+## Dependency updates
+
+- Wikibase REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+log/eaa851d89d36136ab718f1fe5fa81a8b770c0d59..e2f3a9ce8d964d231ae5b15a6f46765b4f6f0b72)).
+- WikibaseEdtf master ([Diff](https://github.com/ProfessionalWiki/WikibaseEdtf/compare/3bfad88a9a71222e9ddc3df2b80f095be059b365...23d233ca8a5b29de55735b276b682f115eaff688)).
+- EntitySchema REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/EntitySchema/+log/a2702db104ca5e3060cc98d1646f5a5facf41ae3..36cb3b08f8ad64d88fa41b83ebc1b9c1809e303e)).
+- Babel REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Babel/+log/a6ca7bbc50cf8292dc9624d8e6fb8dba87d8af92..a74fe25a2ad893c20c5905bd0b8ca46b8c770737)).
+- cldr REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/cldr/+log/d4ca0930e7a972848038b18aaf9c3a2fc1bbffc7..3735a309027d82ddca71e3ad19aa6a4e1a21e911)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/UniversalLanguageSelector/+log/f914eba81f7f7196140febbfce3ed6e17d65ba22..b088469c714fdf835cd398181aee4d8496789d6e)).
+- CirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/CirrusSearch/+log/3e6305b1f0643b17279179f0a9965c911de6f48d..a435ba5d7025c5a14b99c69f6f9ab84b9d7b126f)).
+- WikibaseCirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseCirrusSearch/+log/febb2a2765eb98d18e1bbb9e1e1c72d04c726d3e..4b954b114234f353fb4d3f2292041a82d67003c3)).
+- OAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/OAuth/+log/35bf322abd9c41e760ac0d56d451f1669e68f7ec..2722c662c8bfe930bd17f578fde2878a9f0fa67d)).
+
 # 8.1.0 (2026-09-03)
 
 ## Changes

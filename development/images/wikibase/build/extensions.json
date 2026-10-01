@@ -6,7 +6,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Wikibase",
         "ref": "refs/heads/REL1_46",
-        "commit": "eaa851d89d36136ab718f1fe5fa81a8b770c0d59",
+        "commit": "e2f3a9ce8d964d231ae5b15a6f46765b4f6f0b72",
         "patches": [
           "wikibase-submodules-from-github-instead-of-phabricator.patch"
         ]
@@ -17,7 +17,7 @@
       "source": {
         "repo": "https://github.com/ProfessionalWiki/WikibaseEdtf.git",
         "ref": "refs/heads/master",
-        "commit": "3bfad88a9a71222e9ddc3df2b80f095be059b365"
+        "commit": "23d233ca8a5b29de55735b276b682f115eaff688"
       }
     },
     {
@@ -25,7 +25,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/EntitySchema",
         "ref": "refs/heads/REL1_46",
-        "commit": "a2702db104ca5e3060cc98d1646f5a5facf41ae3"
+        "commit": "36cb3b08f8ad64d88fa41b83ebc1b9c1809e303e"
       }
     },
     {
@@ -57,7 +57,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Babel",
         "ref": "refs/heads/REL1_46",
-        "commit": "a6ca7bbc50cf8292dc9624d8e6fb8dba87d8af92"
+        "commit": "a74fe25a2ad893c20c5905bd0b8ca46b8c770737"
       }
     },
     {
@@ -65,7 +65,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/cldr",
         "ref": "refs/heads/REL1_46",
-        "commit": "d4ca0930e7a972848038b18aaf9c3a2fc1bbffc7"
+        "commit": "3735a309027d82ddca71e3ad19aa6a4e1a21e911"
       }
     },
     {
@@ -73,7 +73,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/UniversalLanguageSelector",
         "ref": "refs/heads/REL1_46",
-        "commit": "f914eba81f7f7196140febbfce3ed6e17d65ba22"
+        "commit": "b088469c714fdf835cd398181aee4d8496789d6e"
       }
     },
     {
@@ -89,7 +89,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/CirrusSearch",
         "ref": "refs/heads/REL1_46",
-        "commit": "3e6305b1f0643b17279179f0a9965c911de6f48d"
+        "commit": "a435ba5d7025c5a14b99c69f6f9ab84b9d7b126f"
       }
     },
     {
@@ -97,7 +97,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseCirrusSearch",
         "ref": "refs/heads/REL1_46",
-        "commit": "febb2a2765eb98d18e1bbb9e1e1c72d04c726d3e"
+        "commit": "4b954b114234f353fb4d3f2292041a82d67003c3"
       }
     },
     {
@@ -105,7 +105,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/OAuth",
         "ref": "refs/heads/REL1_46",
-        "commit": "35bf322abd9c41e760ac0d56d451f1669e68f7ec",
+        "commit": "2722c662c8bfe930bd17f578fde2878a9f0fa67d",
         "patches": [
           "mediawiki-extensions-OAuth-same-domain.patch"
         ]
