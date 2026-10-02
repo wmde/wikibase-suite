@@ -34,33 +34,31 @@ class SpecialWikibaseDashboard extends SpecialPage {
 		);
 
 		$output->addHTML(
-			'<div style="display: flex; gap: 16px; align-items: flex-start;">' .
+			'<div style="display: flex; align-items: flex-start; justify-content: space-between; padding: 0px 20px">' .
 
-				'<table style="border-collapse: collapse; flex: 0 0 auto;">' .
-					'<caption style="font-weight: bold; text-align: left; padding-bottom: 6px;">Your Wikibase Ontology</caption>' .
-					'<tr>' .
-						'<th style="border: 1px solid #a2a9b1; padding: 6px 12px; background: #f8f9fa;">Name</th>' .
-						'<th style="border: 1px solid #a2a9b1; padding: 6px 12px; background: #f8f9fa;">Value</th>' .
+				'<table style="border-collapse: collapse; flex: 0 0 auto; width: 400px; height: 185px;">' .
+					'<tr style="height: 25%">' .
+						'<th colspan="2" style="border: 1px solid #a2a9b1; padding: 6px 12px; text-align: left;">Your Wikibase Ontology</th>' .
 					'</tr>' .
-					'<tr>' .
-						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Items</td>' .
+					'<tr style="height: 25%">' .
+						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px; width: 35%">Items</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
 								'<span>' . htmlspecialchars( (string)$itemCount ) . '</span>' .
-								'<a class="mw-ui-button mw-ui-quiet" href="' . htmlspecialchars( $newItemUrl ) . '">Add item</a>' .
+								'<a class="mw-ui-button mw-ui-progressive" style="width: 100px; height: 30px; font-size: 10px;" href="' . htmlspecialchars( $newItemUrl ) . '">Add item</a>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
-					'<tr>' .
+					'<tr style="height: 25%">' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Properties</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
 								'<span>' . htmlspecialchars( (string)$propertyCount ) . '</span>' .
-								'<a class="mw-ui-button mw-ui-quiet" href="' . htmlspecialchars( $newPropertyUrl ) . '">Add property</a>' .
+								'<a class="mw-ui-button mw-ui-progressive" style="width: 100px; height: 30px; font-size: 10px;" href="' . htmlspecialchars( $newPropertyUrl ) . '">Add property</a>' .
 							'</div>' .
 						'</td>' .
 					'</tr>' .
-					'<tr>' .
+					'<tr style="height: 25%">' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">Triples</td>' .
 						'<td style="border: 1px solid #a2a9b1; padding: 6px 12px;">' .
 							'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' .
@@ -70,7 +68,7 @@ class SpecialWikibaseDashboard extends SpecialPage {
 					'</tr>' .
 				'</table>' .
 
-				'<div style="border: 1px solid #a2a9b1; padding: 12px 16px; background: #f8f9fa; flex: 1 1 auto; max-width: 400px;">' .
+				'<div style="border: 1px solid #a2a9b1; padding: 12px 16px; flex: 1 1 auto; max-width: 400px; height: 160px">' .
 					'<p><b>Help and resources:</b></p>' .
 					'<ul>' .
 						'<li>How to add data</li>' .
@@ -85,8 +83,8 @@ class SpecialWikibaseDashboard extends SpecialPage {
 		);
 
 		$output->addHTML(
-			'<div style="margin-top: 16px;">' .
-				'<button class="mw-ui-button mw-ui-progressive" type="button" href="' . htmlspecialchars( $importPropertiesUrl ) . '">Import a set of properties</button>' .
+			'<div style="margin-top: 16px; padding-left: 20px">' .
+				'<a class="mw-ui-button mw-ui-progressive" style="width: 400px;" href="' . htmlspecialchars( $importPropertiesUrl ) . '">Import a set of properties</a>' .
 			'</div>'
 		);
 	}
