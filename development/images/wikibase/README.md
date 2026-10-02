@@ -95,6 +95,20 @@ using the normal MediaWiki instructions for that extension. A complete
 externally managed configuration continues to control its own extension
 loading.
 
+### Bootstrap an initial ontology
+
+To get started with a new Wikibase without any entities, you can bootstrap an
+initial set of properties. These community-curated bundles include properties
+mapped to Wikidata and common RDF and OWL vocabularies, providing a shared
+starting point for interoperable data.
+
+To apply an initial ontology, open **Ontology bootstrap** from the Wikibase
+sidebar when no active entities exist, or visit
+`https://<your-wikibase-host>/wiki/Special:OntologyBootstrap` to see the available options.
+
+To configure links from external identifiers created with these properties, see
+[Wikibase's configuration guide for external identifiers](https://www.mediawiki.org/wiki/Wikibase/Installation/Advanced_configuration#Define_links_for_external_identifiers).
+
 ### Login with Wikimedia
 
 To enable Wikimedia login:
