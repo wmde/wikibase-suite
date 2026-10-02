@@ -26,10 +26,13 @@ class SpecialWikibaseDashboard extends SpecialPage {
 		$newPropertyUrl = SpecialPage::getTitleFor( 'NewProperty' )->getLocalURL();
 		$importPropertiesUrl = SpecialPage::getTitleFor( 'OntologyBootstrap' )->getLocalURL();
 
+		$scriptPath = MediaWikiServices::getInstance()->getMainConfig()->get( 'ScriptPath' );
+		$bannerImageUrl = $scriptPath . '/extensions/WikibaseSuite/resources/assets/wbs_dashboard_banner.png';
+
 		// Placeholder banner
 		$output->addHTML(
-			'<div style="background: #eaecf0; border: 1px solid #a2a9b1; padding: 12px 16px; margin-bottom: 16px; border-radius: 2px;">' .
-				'<strong>Placeholder:</strong> This dashboard is under construction.' .
+			'<div style="margin-bottom: 16px;">' .
+				'<img src="' . htmlspecialchars( $bannerImageUrl ) . '" alt="Wikibase" style="max-width: 100%; height: auto;">' .
 			'</div>'
 		);
 
