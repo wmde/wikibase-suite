@@ -24,7 +24,9 @@
 		}
 	},
 	"SpecialPages": {
-		"OntologyBootstrap": "MediaWiki\\Extension\\WikibaseBootstrap\\SpecialOntologyBootstrap"
+		"OntologyBootstrap": "MediaWiki\\Extension\\WikibaseBootstrap\\SpecialOntologyBootstrap",
+		"WikibaseDashboard": "MediaWiki\\Extension\\WikibaseBootstrap\\SpecialWikibaseDashboard"
+
 	},
 	"Hooks": {
 		"SidebarBeforeOutput": "MediaWiki\\Extension\\WikibaseBootstrap\\SidebarHooks::onSidebarBeforeOutput"
