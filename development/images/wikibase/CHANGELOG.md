@@ -1,3 +1,16 @@
+# 8.1.2 (2026-10-02)
+
+## Dependency updates
+
+- MediaWiki from 1.46.0 to 1.46.1 ([Release notes](https://www.mediawiki.org/wiki/Release_notes/1.46)).
+- Wikibase REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+log/e2f3a9ce8d964d231ae5b15a6f46765b4f6f0b72..ffdfef103e954d4cfa3ecf70ab66861087170b6d)).
+- EntitySchema REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/EntitySchema/+log/36cb3b08f8ad64d88fa41b83ebc1b9c1809e303e..a3233dd642c62a8727aca5a25703d4a4fe195481)).
+- Babel REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Babel/+log/a74fe25a2ad893c20c5905bd0b8ca46b8c770737..7a2a49a625e1e88db8c8d03fb672f3d1d06d4b71)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/UniversalLanguageSelector/+log/b088469c714fdf835cd398181aee4d8496789d6e..8b092b01f31353a2a4cedb23b3c7763f0d3659f8)).
+- Elastica REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Elastica/+log/3a4dafa5edfb99ed4f9401ad77be6e62e59faa1c..0d389ac706c5d04fbfad767cc630429c22c19082)).
+- CirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/CirrusSearch/+log/a435ba5d7025c5a14b99c69f6f9ab84b9d7b126f..31f225d73fd8337e91dc540eecf0549ec046704b)).
+- OAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/OAuth/+log/2722c662c8bfe930bd17f578fde2878a9f0fa67d..7e34a420279f1fa097fe2b5b6a2733edf644485d)).
+
 # 8.1.1 (2026-09-30)
 
 ## Dependency updates
