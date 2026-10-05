@@ -1,3 +1,21 @@
+# 8.1.2 (2026-10-05)
+
+## Dependency updates
+
+- MediaWiki from 1.46.0 to 1.46.2 ([Release notes](https://phabricator.wikimedia.org/source/mediawiki/browse/REL1_46/RELEASE-NOTES-1.46)).
+- Wikibase REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+log/e2f3a9ce8d964d231ae5b15a6f46765b4f6f0b72..822e4ea226eb6d6bd988316eca04a464d38f1289)).
+- EntitySchema REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/EntitySchema/+log/36cb3b08f8ad64d88fa41b83ebc1b9c1809e303e..493143aecc5a8828c4e63d480d8106c4b6da7f90)).
+- WikibaseManifest REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseManifest/+log/c2bc551300acad1331cbc210ab7d00b5dd71af0c..6393ad94da90dbbfd4566839b879fcdf76eff08d)).
+- Babel REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Babel/+log/a74fe25a2ad893c20c5905bd0b8ca46b8c770737..24dd6313a79c7b6c34a739331709d17dafba4b17)).
+- cldr REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/cldr/+log/3735a309027d82ddca71e3ad19aa6a4e1a21e911..036ce126463e4ccda416afae17eb9dfc6f7006ba)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/UniversalLanguageSelector/+log/b088469c714fdf835cd398181aee4d8496789d6e..b24dde40118e10fb1aaf4ab353dd978f10e2db30)).
+- Elastica REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Elastica/+log/3a4dafa5edfb99ed4f9401ad77be6e62e59faa1c..a3326af107aafd75f6958e8b4ae8e3d00f22b65f)).
+- CirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/CirrusSearch/+log/a435ba5d7025c5a14b99c69f6f9ab84b9d7b126f..31f225d73fd8337e91dc540eecf0549ec046704b)).
+- WikibaseCirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseCirrusSearch/+log/4b954b114234f353fb4d3f2292041a82d67003c3..02f1727ebda1c54fdb5b4537c18912e0cf42916d)).
+- OAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/OAuth/+log/2722c662c8bfe930bd17f578fde2878a9f0fa67d..54cae417f5e1c4df51281e9415b9c5c8e6791d27)).
+- PluggableAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/PluggableAuth/+log/ee69d0ddede47c665a737c398289d733c9a7f402..d1e588302c7ccb7806b04f46f62a9b5c34ea1715)).
+- WSOAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WSOAuth/+log/b57d90e6527e2b85be6df39c98d698d610fcc619..13896db4ff33255576203bfb535e6889070d96e5)).
+
 # 8.1.1 (2026-09-30)
 
 ## Dependency updates
