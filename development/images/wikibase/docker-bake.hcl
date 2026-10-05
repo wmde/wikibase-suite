@@ -34,7 +34,7 @@ variable "MEDIAWIKI" {
   default = {
     version       = "1.46.0"
     source        = "https://releases.wikimedia.org/mediawiki/"
-    release_notes = "https://www.mediawiki.org/wiki/Release_notes/{line}"
+    release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }
 
