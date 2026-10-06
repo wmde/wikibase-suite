@@ -8,7 +8,7 @@ variable "IMAGE_NAME" {
 }
 
 variable "IMAGE_VERSION" {
-  default = "8.1.1"
+  default = "8.1.2"
 
   validation {
     condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
@@ -32,9 +32,9 @@ variable "TAGS" {
 
 variable "MEDIAWIKI" {
   default = {
-    version       = "1.46.0"
+    version       = "1.46.2"
     source        = "https://releases.wikimedia.org/mediawiki/"
-    release_notes = "https://www.mediawiki.org/wiki/Release_notes/{line}"
+    release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }
 

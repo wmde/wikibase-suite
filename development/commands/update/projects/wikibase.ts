@@ -36,8 +36,16 @@ function settings(contents: string) {
 		notes: String(value.release_notes)
 	};
 }
+function mediaWikiLine(version: string) {
+	return version.replace(/\.\d+$/u, '');
+}
+function mediaWikiBranchName(version: string) {
+	return `REL${mediaWikiLine(version).replace('.', '_')}`;
+}
 function notesUrl(settingsValue: ReturnType<typeof settings>, version: string) {
-	return settingsValue.notes.replace('{line}', version.replace(/\.\d+$/u, ''));
+	return settingsValue.notes
+		.replace('{line}', mediaWikiLine(version))
+		.replace('{branch}', mediaWikiBranchName(version));
 }
 function registry(contents: string): Registry {
 	const value = JSON.parse(contents) as Registry;
@@ -50,12 +58,11 @@ function git(source: Extension['source']): source is GitSource {
 		source && 'repo' in source && 'ref' in source && 'commit' in source
 	);
 }
-function isWmfRef(ref: string) {
+function isMediaWikiBranchRef(ref: string) {
 	return /^refs\/heads\/REL\d+_\d+$/u.test(ref);
 }
-function wmfRef(version: string) {
-	const [major, minor] = version.split('.');
-	return `refs/heads/REL${major}_${minor}`;
+function mediaWikiBranchRef(version: string) {
+	return `refs/heads/${mediaWikiBranchName(version)}`;
 }
 
 async function versions(line: string, source: string) {
@@ -223,7 +230,8 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 		const changes = [...base.changes];
 		for (const item of value.extensions) {
 			if (!git(item.source)) continue;
-			if (isWmfRef(item.source.ref)) item.source.ref = wmfRef(version);
+			if (isMediaWikiBranchRef(item.source.ref))
+				item.source.ref = mediaWikiBranchRef(version);
 			const source = gitSourcePin(item.source);
 			const before = item.source.commit;
 			const next = await source.resolve();
