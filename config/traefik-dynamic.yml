@@ -17,10 +17,10 @@ http:
         servers:
           - url: "http://wdqs-frontend:80"
 
-    quickstatements:
+    quickstatements3:
       loadBalancer:
         servers:
-          - url: "http://quickstatements:80"
+          - url: "http://quickstatements3:8000"
 
   routers:
     wikibase-router:
@@ -38,7 +38,7 @@ http:
 
     quickstatements-router:
       rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && PathPrefix(`/tools/quickstatements`)'
-      service: quickstatements
+      service: quickstatements3
       middlewares: [ quickstatements-redirectregex, quickstatements-stripprefix ]
 
   middlewares:

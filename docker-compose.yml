@@ -17,7 +17,7 @@ services:
       - ./config:/config:z
       - ./config/extensions:/var/www/html/extensions/extensions:z
       - wikibase-image-data:/var/www/html/images
-      - quickstatements-data:/quickstatements/data
+      - quickstatements3-data:/quickstatements3/data
     env_file:
       - ${WBS_DIR:-.}/.wbs/version
     environment:
@@ -63,7 +63,8 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASS}
-      MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MARIADB_ROOT_PASSWORD: ${DB_PASS}
+      MARIADB_ROOT_HOST: "%"
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
       start_period: 1m
@@ -153,21 +154,28 @@ services:
       interval: 10s
       start_period: 2m
 
-  quickstatements:
-    image: wikibase/quickstatements:1
+  quickstatements3:
+    image: wikibase/quickstatements3:1
     depends_on:
       wikibase:
         condition: service_healthy
     restart: unless-stopped
     volumes:
-      - quickstatements-data:/quickstatements/data
+      - quickstatements3-data:/quickstatements3/data:ro
     environment:
       QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
       WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}
+      QS3_URL_PREFIX: /tools/quickstatements
+      QS3_CONFIG_FILE: /quickstatements3/data/runtime.json
+      DJANGO_ALLOWED_HOSTS: ${WIKIBASE_PUBLIC_HOST},localhost,127.0.0.1
+      CSRF_TRUSTED_ORIGINS: https://${WIKIBASE_PUBLIC_HOST}
+      OAUTH_ACCESS_TOKEN_URL: http://wikibase/w/rest.php/oauth2/access_token
+      OAUTH_PROFILE_URL: http://wikibase/w/rest.php/oauth2/resource/profile
+      WIKIBASE_API_URL: http://wikibase
     healthcheck:
-      test: curl --silent --fail localhost
+      test: curl --silent --fail localhost:8000/
       interval: 10s
-      start_period: 2m
+      start_period: 3m
 
   # --------------------------------------------------
   # C. REVERSE PROXY AND SSL SERVICES
@@ -223,6 +231,6 @@ volumes:
   # B. EXTRA WIKIBASE SUITE SERVICES DATA
   wdqs-data:
   elasticsearch-data:
-  quickstatements-data:
+  quickstatements3-data:
   # C. REVERSE PROXY AND SSL SERVICES DATA
   traefik-letsencrypt-data:

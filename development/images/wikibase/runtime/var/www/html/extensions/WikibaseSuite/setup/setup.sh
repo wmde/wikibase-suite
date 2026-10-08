@@ -19,6 +19,9 @@ set -eu
 
 setup_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 
+# OAuth 2 needs persistent signing keys for authorization and token requests.
+bash "$setup_directory/scripts/setup-oauth2-keys.sh"
+
 bash "$setup_directory/scripts/metadata-callback.sh" || true
 
 # Take wikibase-php.ini from user config if present
@@ -89,7 +92,7 @@ resume_fresh_installation() {
     fi
     if [ "$current_phase" = administrator-created ]; then
         bash "$setup_directory/scripts/create-opensearch-index.sh"
-        bash "$setup_directory/scripts/setup-quickstatements-oauth.sh"
+        bash "$setup_directory/scripts/setup-quickstatements3.sh"
 
         if [ -f /extra-install.sh ]; then
             bash /extra-install.sh
