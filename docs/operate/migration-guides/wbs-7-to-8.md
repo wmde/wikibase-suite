@@ -42,7 +42,7 @@ Follow these steps carefully and in order.
    cd ../..
    git clone https://github.com/wmde/wikibase-suite.git
    cd wikibase-suite
-   git checkout wbs@8.0.0
+   git checkout wbs@8.0.1
    ```
 
 3. Copy the Suite 7 environment and configuration into the Suite 8 checkout.
