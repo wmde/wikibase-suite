@@ -2,13 +2,79 @@
 
 namespace MediaWiki\Extension\WikibaseSuite;
 
-use OutputPage;
-use Skin;
-use SpecialPage;
+use ExtensionRegistry;
+use MediaWiki\Actions\ActionEntryPoint;
+use MediaWiki\Extension\WikibaseBootstrap\BootstrapService;
+use MediaWiki\Extension\WikibaseSuite\Utils;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Skin\Skin;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
 class Hooks {
+
+	public static function onTestCanonicalRedirect(
+		WebRequest $request,
+		Title $title,
+		OutputPage $output
+	): bool {
+		if ( self::redirectRootToDashboard( $request, $title, $output ) ) {
+			// We've set our own redirect, so skip core's redirect to /wiki/Main_Page.
+			return false;
+		}
+		return true;
+	}
+
+	public static function onBeforeInitialize(
+		Title $title,
+		$unused,
+		OutputPage $output,
+		User $user,
+		WebRequest $request,
+		ActionEntryPoint $mediaWiki
+	) {
+		self::redirectRootToDashboard( $request, $title, $output );
+	}
+
+	/**
+	 * @return bool true if a redirect to the dashboard was set
+	 */
+	private static function redirectRootToDashboard(
+		WebRequest $request,
+		Title $title,
+		OutputPage $output
+	): bool {
+		if ( !$title->isMainPage() ) {
+			return false;
+		}
+
+		// Only redirect the domain root, not an explicit /wiki/Main_Page URL.
+		if ( parse_url( $request->getRequestURL(), PHP_URL_PATH ) !== '/' ) {
+			return false;
+		}
+
+		if ( $request->getVal( 'redirect' ) === 'no' ) {
+			return false;
+		}
+
+		if ( !self::isWikibaseEmpty() ) {
+			return false;
+		}
+
+		$output->redirect( SpecialPage::getTitleFor( 'WikibaseDashboard' )->getLocalURL() );
+		return true;
+	}
+
+	private static function isWikibaseEmpty(): bool {
+		[ $itemCount, $propertyCount ] = Utils::getEntityCounts();
+		return $itemCount === 0 && $propertyCount === 0;
+	}
+
 	public static function onRegistration(): void {
-		if ( !\ExtensionRegistry::getInstance()->isLoaded( 'WikibaseManifest' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseManifest' ) ) {
 			return;
 		}
 
@@ -68,13 +134,16 @@ class Hooks {
 	}
 
 	public static function onSidebarBeforeOutput( Skin $skin, array &$sidebar ): void {
-		// These links target Wikibase Repository special pages and namespaces.
-		// A client-only wiki does not define the repository namespace constants.
 		if ( !defined( 'WB_NS_ITEM' ) ) {
 			return;
 		}
 
 		$wikibaseLinks = [
+			[
+				'text' => $skin->msg( 'wikibasedashboard' )->text(),
+				'href' => SpecialPage::getTitleFor( 'WikibaseDashboard' )->getLocalURL(),
+				'id'   => 'n-wbs-link-one',
+			],
 			[
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-create-item' )->text(),
 				'href' => SpecialPage::getTitleFor( 'NewItem' )->getLocalURL(),
@@ -117,9 +186,32 @@ class Hooks {
 			];
 		}
 
+		$ontologyBootstrapUrl = self::ontologyBootstrapUrlFor( $skin->getUser() );
+		if ( $ontologyBootstrapUrl !== null ) {
+			$wikibaseLinks[] = [
+				'text' => $skin->msg( 'ontologybootstrap' )->text(),
+				'href' => $ontologyBootstrapUrl,
+				'id' => 'n-ontology-bootstrap',
+				'active' => false,
+			];
+		}
+
 		self::insertBeforeToolbox( $sidebar, [
 			'wikibase-suite-sidebar' => $wikibaseLinks,
 		] );
+	}
+
+	public static function ontologyBootstrapUrlFor( User $user ): ?string {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseBootstrap' ) ||
+			!MediaWikiServices::getInstance()
+				->getSpecialPageFactory()
+				->exists( 'OntologyBootstrap' ) ||
+			!BootstrapService::newFromConfig()->isAvailableTo( $user )
+		) {
+			return null;
+		}
+
+		return SpecialPage::getTitleFor( 'OntologyBootstrap' )->getLocalURL();
 	}
 
 	private static function insertBeforeToolbox( array &$sidebar, array $sections ): void {
