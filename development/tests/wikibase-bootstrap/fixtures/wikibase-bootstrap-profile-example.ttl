@@ -1,0 +1,30 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wbb: <https://wikiba.se/bootstrap#> .
+@prefix example: <https://example.org/wikibase-bootstrap/> .
+
+# These IRIs are source keys. They do not prescribe local P or Q identifiers.
+
+example:instance-of
+	a owl:ObjectProperty ;
+	wbb:kind wbb:Property ;
+	wbb:datatype "wikibase-item" ;
+	rdfs:label "instance of"@en ;
+	dcterms:description "The class of which this entity is an instance."@en .
+
+example:class
+	a owl:Class ;
+	wbb:kind wbb:Item ;
+	rdfs:label "class"@en ;
+	dcterms:description "A group of entities with shared characteristics."@en .
+
+example:person
+	a owl:Class ;
+	wbb:kind wbb:Item ;
+	rdfs:label "person"@en ;
+	dcterms:description "An individual human being."@en ;
+	wbb:claim [
+		wbb:property example:instance-of ;
+		wbb:value example:class ;
+	] .
