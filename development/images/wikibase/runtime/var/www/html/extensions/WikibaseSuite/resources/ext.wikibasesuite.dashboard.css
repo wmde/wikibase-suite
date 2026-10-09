@@ -1,0 +1,76 @@
+.wbs-dashboard-banner {
+	margin-bottom: 16px;
+}
+
+.wbs-dashboard-banner img {
+	max-width: 100%;
+	height: auto;
+}
+
+.wbs-dashboard-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 0 20px;
+}
+
+.wbs-dashboard-table {
+	border-collapse: collapse;
+	flex: 0 0 auto;
+	width: 400px;
+	height: 185px;
+}
+
+.wbs-dashboard-table tr {
+	height: 25%;
+}
+
+.wbs-dashboard-table th {
+	border: 1px solid #a2a9b1;
+	padding: 6px 12px;
+	text-align: left;
+}
+
+.wbs-dashboard-table td {
+	border: 1px solid #a2a9b1;
+	padding: 6px 12px;
+}
+
+.wbs-dashboard-table td:first-child {
+	width: 35%;
+}
+
+.wbs-dashboard-cell-value {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.wbs-dashboard-action-button {
+	width: 100px;
+	height: 30px;
+	font-size: 10px !important;
+}
+
+.wbs-dashboard-help {
+	border: 1px solid #a2a9b1;
+	padding: 12px 16px;
+	flex: 1 1 auto;
+	max-width: 400px;
+	height: 160px;
+}
+
+.wbs-dashboard-import-row {
+	margin-top: 16px;
+	padding-left: 20px;
+}
+
+.wbs-dashboard-import-button {
+	width: 400px;
+}
+
+.mw-special-WikibaseDashboard .vector-page-titlebar,
+.mw-special-WikibaseDashboard .vector-page-toolbar {
+	display: none;
+}
