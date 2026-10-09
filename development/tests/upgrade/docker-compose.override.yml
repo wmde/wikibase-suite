@@ -1,4 +1,7 @@
 services:
+  wikibase:
+    volumes:
+      - ./upgrade:/migration-tests:ro
   mysql:
     volumes:
       - ./upgrade/fixtures/wbs-7/database.sql.gz:/docker-entrypoint-initdb.d/10-wbs-7.sql.gz:ro

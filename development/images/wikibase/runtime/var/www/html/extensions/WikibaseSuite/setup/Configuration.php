@@ -62,8 +62,9 @@ function phpAssignments( array $settings, ?string $elasticsearchHost = null ): s
 	return $output;
 }
 
-function customSettingsPreamble(): string {
+function customSettingsPreamble( string $beforeExtensions = '' ): string {
 	return "<?php\n\n" .
+		$beforeExtensions .
 		"# Optionally load a separate extension configuration file for existing WBS configurations.\n" .
 		"# New configuration can be written directly in this file.\n" .
 		"if ( is_file( __DIR__ . '/Extensions.php' ) ) {\n" .
