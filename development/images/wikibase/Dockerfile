@@ -109,7 +109,10 @@ COPY --chown=nobody:nogroup --chmod=755 build/InstallExtensions.php /tmp/Install
 COPY --chown=nobody:nogroup --chmod=755 build/patches /tmp/patches
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-RUN php /tmp/InstallExtensions.php /tmp/extensions.json && \
+# Use an identifiable agent for Gerrit's automated-traffic policy. Git propagates
+# this environment variable to the recursive submodule fetches it starts.
+RUN GIT_HTTP_USER_AGENT='WikibaseSuite-image-build/1.0 (+https://github.com/wmde/wikibase-suite)' \
+    php /tmp/InstallExtensions.php /tmp/extensions.json && \
     rm -rf composer.lock && \
     composer update --no-dev -vv -n
 
