@@ -6,7 +6,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Wikibase",
         "ref": "refs/heads/REL1_46",
-        "commit": "eaa851d89d36136ab718f1fe5fa81a8b770c0d59",
+        "commit": "324348a949555ec045b57b835c3e84f2bf18764e",
         "patches": [
           "wikibase-submodules-from-github-instead-of-phabricator.patch"
         ]
@@ -17,7 +17,7 @@
       "source": {
         "repo": "https://github.com/ProfessionalWiki/WikibaseEdtf.git",
         "ref": "refs/heads/master",
-        "commit": "3bfad88a9a71222e9ddc3df2b80f095be059b365"
+        "commit": "23d233ca8a5b29de55735b276b682f115eaff688"
       }
     },
     {
@@ -25,7 +25,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/EntitySchema",
         "ref": "refs/heads/REL1_46",
-        "commit": "a2702db104ca5e3060cc98d1646f5a5facf41ae3"
+        "commit": "8767fa92e3f30e4658b31e82efb242d92489c3f4"
       }
     },
     {
@@ -41,7 +41,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseManifest",
         "ref": "refs/heads/REL1_46",
-        "commit": "c2bc551300acad1331cbc210ab7d00b5dd71af0c"
+        "commit": "8c034383637dcfceb966f207367305cd5fbb9ef2"
       }
     },
     {
@@ -57,7 +57,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Babel",
         "ref": "refs/heads/REL1_46",
-        "commit": "a6ca7bbc50cf8292dc9624d8e6fb8dba87d8af92"
+        "commit": "173476e2bca8935ec93ae6d146baec5006d36695"
       }
     },
     {
@@ -65,7 +65,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/cldr",
         "ref": "refs/heads/REL1_46",
-        "commit": "d4ca0930e7a972848038b18aaf9c3a2fc1bbffc7"
+        "commit": "470ae38ff7a29ac596fb8ce519d2e4a1f8d02523"
       }
     },
     {
@@ -73,7 +73,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/UniversalLanguageSelector",
         "ref": "refs/heads/REL1_46",
-        "commit": "f914eba81f7f7196140febbfce3ed6e17d65ba22"
+        "commit": "8acd63baa3db207895e8811df53512402573decd"
       }
     },
     {
@@ -81,7 +81,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Elastica",
         "ref": "refs/heads/REL1_46",
-        "commit": "3a4dafa5edfb99ed4f9401ad77be6e62e59faa1c"
+        "commit": "a3326af107aafd75f6958e8b4ae8e3d00f22b65f"
       }
     },
     {
@@ -89,7 +89,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/CirrusSearch",
         "ref": "refs/heads/REL1_46",
-        "commit": "3e6305b1f0643b17279179f0a9965c911de6f48d"
+        "commit": "e0b04ff6cf0c06560f9255278dd74f6218d004f7"
       }
     },
     {
@@ -97,7 +97,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseCirrusSearch",
         "ref": "refs/heads/REL1_46",
-        "commit": "febb2a2765eb98d18e1bbb9e1e1c72d04c726d3e"
+        "commit": "5e404f0fea531ede4c9a92252d682bf8c160e86f"
       }
     },
     {
@@ -105,7 +105,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/OAuth",
         "ref": "refs/heads/REL1_46",
-        "commit": "35bf322abd9c41e760ac0d56d451f1669e68f7ec",
+        "commit": "f103f51c1da53be3112fdfd06fe1995b1e907a91",
         "patches": [
           "mediawiki-extensions-OAuth-same-domain.patch"
         ]
@@ -116,7 +116,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/PluggableAuth",
         "ref": "refs/heads/REL1_46",
-        "commit": "ee69d0ddede47c665a737c398289d733c9a7f402"
+        "commit": "d1e588302c7ccb7806b04f46f62a9b5c34ea1715"
       }
     },
     {
@@ -124,7 +124,7 @@
       "source": {
         "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WSOAuth",
         "ref": "refs/heads/REL1_46",
-        "commit": "b57d90e6527e2b85be6df39c98d698d610fcc619"
+        "commit": "0eb464df201ab7caf8264b2a84b4ef67ed309b94"
       }
     },
     {

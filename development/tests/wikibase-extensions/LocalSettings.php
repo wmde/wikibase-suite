@@ -8,4 +8,3 @@ $wgWBRepoSettings['sharedCacheDuration'] = 1;
 
 // Load user defined extension
 wfLoadExtension( 'extensions/WikibaseSuiteTestExtension' );
-

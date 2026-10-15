@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 import { discoverWdqsCandidates, wdqsSourceProvider } from './projects/wdqs.js';
 import {
 	discoverMediaWikiCandidates,
-	selectMediaWikiUpdate
+	selectMediaWikiUpdate,
+	wikibaseSourceProvider
 } from './projects/wikibase.js';
 import type { SourceUpdateInteraction } from './source-types.js';
 import {
@@ -118,6 +119,30 @@ describe('Wikibase source update provider', () => {
 		);
 
 		assert.equal(selected, '1.46.1');
+	});
+
+	it('links MediaWiki updates to the release branch notes', () => {
+		const previous = `variable "MEDIAWIKI" {
+  default = {
+    version       = "1.46.1"
+    source        = "https://releases.wikimedia.org/mediawiki/"
+    release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
+  }
+}
+`;
+		const next = replaceVariable(previous, 'MEDIAWIKI.version', '1.46.2');
+		assert.deepEqual(wikibaseSourceProvider.describeChanges(previous, next), [
+			{
+				variable: 'MEDIAWIKI.version',
+				description: 'MediaWiki',
+				previous: '1.46.1',
+				next: '1.46.2',
+				link: {
+					label: 'Release notes',
+					url: 'https://phabricator.wikimedia.org/source/mediawiki/browse/REL1_46/RELEASE-NOTES-1.46'
+				}
+			}
+		]);
 	});
 
 	it('keeps image package sources in the registry', () => {
