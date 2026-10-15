@@ -132,6 +132,12 @@
       "source": {
         "path": "runtime/var/www/html/extensions/WikibaseSuite"
       }
+    },
+    {
+      "name": "WikibaseBootstrap",
+      "source": {
+        "path": "runtime/var/www/html/extensions/WikibaseBootstrap"
+      }
     }
   ]
 }
