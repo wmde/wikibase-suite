@@ -14,6 +14,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
+| `wikibase-bootstrap` | Integration | SHACL conformance of the bundled ontology bootstrap profiles. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
 
 Integration suite settings live in `tests/<suite>/<suite>.conf.ts`. Each combines the published deployment Compose file with the shared test override and any suite-specific override. Test results are written beneath the suite's `results` directory; CI uploads them after a failure.
