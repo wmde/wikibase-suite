@@ -1,3 +1,23 @@
+# 8.2.0 (2026-10-09)
+
+## Changes
+
+- Adds Wikibase Dashboard with wikibase information and links for new users and redirects to this for base URL on Wikibases without any items or properties.
+- Fixes bug with migrations to versions before 8
+
+## Dependency updates
+
+- Wikibase REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+log/822e4ea226eb6d6bd988316eca04a464d38f1289..324348a949555ec045b57b835c3e84f2bf18764e)).
+- EntitySchema REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/EntitySchema/+log/493143aecc5a8828c4e63d480d8106c4b6da7f90..8767fa92e3f30e4658b31e82efb242d92489c3f4)).
+- WikibaseManifest REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseManifest/+log/6393ad94da90dbbfd4566839b879fcdf76eff08d..8c034383637dcfceb966f207367305cd5fbb9ef2)).
+- Babel REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Babel/+log/24dd6313a79c7b6c34a739331709d17dafba4b17..173476e2bca8935ec93ae6d146baec5006d36695)).
+- cldr REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/cldr/+log/036ce126463e4ccda416afae17eb9dfc6f7006ba..470ae38ff7a29ac596fb8ce519d2e4a1f8d02523)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/UniversalLanguageSelector/+log/b24dde40118e10fb1aaf4ab353dd978f10e2db30..8acd63baa3db207895e8811df53512402573decd)).
+- CirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/CirrusSearch/+log/31f225d73fd8337e91dc540eecf0549ec046704b..e0b04ff6cf0c06560f9255278dd74f6218d004f7)).
+- WikibaseCirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseCirrusSearch/+log/02f1727ebda1c54fdb5b4537c18912e0cf42916d..5e404f0fea531ede4c9a92252d682bf8c160e86f)).
+- OAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/OAuth/+log/54cae417f5e1c4df51281e9415b9c5c8e6791d27..f103f51c1da53be3112fdfd06fe1995b1e907a91)).
+- WSOAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WSOAuth/+log/13896db4ff33255576203bfb535e6889070d96e5..0eb464df201ab7caf8264b2a84b4ef67ed309b94)).
+
 # 8.1.2 (2026-10-05)
 
 ## Dependency updates

@@ -74,3 +74,8 @@ This guide explains how to upgrade Wikibase Suite (WBS) from version 3 to 4 whil
    docker compose up -d
    docker compose ps
    ```
+
+7. Recreate the Query Service index. WBS 4 updates the Query Service from
+   version 1 to version 2, changing the index format. Follow the [Query Service
+   data reload guidance](../../../development/images/wdqs/README.md#upgrading)
+   to reindex the service.

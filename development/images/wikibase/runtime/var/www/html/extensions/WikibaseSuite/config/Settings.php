@@ -15,6 +15,12 @@ if ( !is_readable( $wbsInstanceSettings ) ) {
 
 require $wbsInstanceSettings;
 require __DIR__ . '/DefaultSettings.php';
+
+$wbsBeforeExtensions = '/config/BeforeExtensions.php';
+if ( is_file( $wbsBeforeExtensions ) ) {
+	require $wbsBeforeExtensions;
+}
+
 require __DIR__ . '/LoadExtensions.php';
 
 $wbsCustomSettings = '/config/LocalSettings.php';
