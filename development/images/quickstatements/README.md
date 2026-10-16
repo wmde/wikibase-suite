@@ -71,6 +71,7 @@ The following paths can be used to extend this image. See the [Dockerfile](./Doc
 | `/var/www/html/quickstatements`             | Base QuickStatements directory |
 | `/var/www/html/quickstatements/public_html` | The Apache root folder         |
 | `/var/www/html/magnustools`                 | Base magnustools directory     |
+| `/healthcheck.sh`                            | Optional healthcheck script |
 | `/templates/config.json`                     | Template for QuickStatements' config.json (substituted to `/var/www/html/quickstatements/public_html/config.json` in `entrypoint.sh`)              |
 | `/templates/oauth.ini`                       | Template for QuickStatements' oauth.ini (substituted to `/quickstatements/data/oauth.ini` in `entrypoint.sh`)                                      |
 | `/templates/php.ini`                         | PHP config (default provided sets date.timezone to prevent php complaining substituted to `/usr/local/etc/php/conf.d/php.ini` in `entrypoint.sh` ) |

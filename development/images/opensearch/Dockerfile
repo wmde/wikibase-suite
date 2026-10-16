@@ -12,6 +12,7 @@ RUN \
     org.wikimedia.search:opensearch-extra:${OPENSEARCH_PLUGIN_WIKIMEDIA_EXTRA} && \
   /usr/share/opensearch/bin/opensearch-plugin install --batch \
     org.wikimedia.search.highlighter:cirrus-highlighter-opensearch-plugin:${OPENSEARCH_PLUGIN_WIKIMEDIA_HIGHLIGHTER}
+COPY --chmod=755 healthcheck.sh /healthcheck.sh
 COPY --chown=opensearch:opensearch \
   default.jvm.options \
   /usr/share/opensearch/config/jvm.options.d/wikibase.options

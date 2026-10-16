@@ -63,6 +63,7 @@ The following paths can be used to extend this image. See the [Dockerfile](./Doc
 
 | Path                         | Description                                                                                    |
 | ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| `/healthcheck.sh`            | Optional healthcheck script                                                                    |
 | `/wdqs/allowlist.txt`        | SPARQL endpoints allowed for federation                                                        |
 | `/wdqs/RWStore.properties`   | Properties for the service                                                                     |
 | `/templates/mwservices.json` | Template for MediaWiki services (populated and placed into `/wdqs/mwservices.json` at runtime) |
