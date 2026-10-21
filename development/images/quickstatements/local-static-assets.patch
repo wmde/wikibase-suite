@@ -1,0 +1,49 @@
+--- a/public_html/index.html
++++ b/public_html/index.html
+@@ -15,4 +15,4 @@
+-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css">
+-<link rel="stylesheet" href="https://tools-static.wmflabs.org/magnustools/resources/html/wikimedia.css">
+-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/oojs-ui/0.49.2/oojs-ui-wikimediaui.min.css">
+-<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.css">
++<link rel="stylesheet" href="assets/cdnjs/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css">
++<link rel="stylesheet" href="assets/magnustools/resources/html/wikimedia.css">
++<link rel="stylesheet" href="assets/cdnjs/ajax/libs/oojs-ui/0.49.2/oojs-ui-wikimediaui.min.css">
++<link rel="stylesheet" href="assets/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.css">
+@@ -20,7 +20,7 @@
+-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/vue/2.5.13/vue.min.js"></script>
+-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/vue-router/3.0.1/vue-router.min.js"></script>
+-<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+-<script src="https://tools-static.wmflabs.org/tooltranslate/tt.js"></script>
+-<script src="https://tools-static.wmflabs.org/magnustools/resources/js/wikidata.js"></script>
++<script src="assets/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
++<script src="assets/cdnjs/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
++<script src="assets/cdnjs/ajax/libs/vue/2.5.13/vue.min.js"></script>
++<script src="assets/cdnjs/ajax/libs/vue-router/3.0.1/vue-router.min.js"></script>
++<script src="assets/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
++<script src="assets/tooltranslate/tt.js"></script>
++<script src="assets/magnustools/resources/js/wikidata.js"></script>
+--- a/public_html/vue-component-loader.js
++++ b/public_html/vue-component-loader.js
+@@ -9 +9 @@
+-	components_base_url: 'https://tools-static.wmflabs.org/magnustools/resources/vue/',
++	components_base_url: 'assets/magnustools/resources/vue/',
+--- a/public_html/vue.js
++++ b/public_html/vue.js
+@@ -44 +44 @@
+-		vue_components.components_base_url = '../../magnustools/public_html/resources/vue/' ;
++		vue_components.components_base_url = 'assets/magnustools/resources/vue/' ;
+--- a/public_html/assets/tooltranslate/tt.js
++++ b/public_html/assets/tooltranslate/tt.js
+@@ -2 +2 @@
+-	Always include this file as https://tools-static.wmflabs.org/tooltranslate/tt.js
++	Always include this file as assets/tooltranslate/tt.js
+@@ -71 +71 @@
+-	this.tool_path = 'https://tools-static.wmflabs.org/tooltranslate/' ; // 'https://tooltranslate.toolforge.org/' ;
++	this.tool_path = 'assets/tooltranslate/' ; // 'https://tooltranslate.toolforge.org/' ;
+--- a/public_html/assets/magnustools/resources/vue/wd-link.html
++++ b/public_html/assets/magnustools/resources/vue/wd-link.html
+@@ -1 +1 @@
+-<script src="https://tools-static.wmflabs.org/magnustools/resources/js/wikidata.js"></script>
++<script src="assets/magnustools/resources/js/wikidata.js"></script>
