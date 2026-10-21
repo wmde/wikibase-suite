@@ -23,6 +23,8 @@ The command:
 
 MediaWiki, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl). Bundled extension sources and commits live in [`build/extensions.json`](./build/extensions.json), which is also consumed by the image build. The TypeScript provider updates both files together. The command confirms that releases and branches exist, but it cannot establish compatibility with local patches or the OpenSearch image.
 
+The image builds from the official MediaWiki release tarball, which includes bundled extensions and skins. The GitHub MediaWiki core mirror is a source checkout rather than an equivalent release bundle. Separately pinned Wikimedia extensions and Wikibase submodules are fetched from GitHub mirrors.
+
 ## Manual update
 
 The same update can be prepared manually:
