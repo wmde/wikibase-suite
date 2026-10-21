@@ -4,11 +4,11 @@
     {
       "name": "Wikibase",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Wikibase",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "324348a949555ec045b57b835c3e84f2bf18764e",
+        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb",
         "patches": [
-          "wikibase-submodules-from-github-instead-of-phabricator.patch"
+          "wikibase-submodules-to-github.patch"
         ]
       }
     },
@@ -23,7 +23,7 @@
     {
       "name": "EntitySchema",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/EntitySchema",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-EntitySchema.git",
         "ref": "refs/heads/REL1_46",
         "commit": "8767fa92e3f30e4658b31e82efb242d92489c3f4"
       }
@@ -39,7 +39,7 @@
     {
       "name": "WikibaseManifest",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseManifest",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest.git",
         "ref": "refs/heads/REL1_46",
         "commit": "8c034383637dcfceb966f207367305cd5fbb9ef2"
       }
@@ -55,15 +55,15 @@
     {
       "name": "Babel",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Babel",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-Babel.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "173476e2bca8935ec93ae6d146baec5006d36695"
+        "commit": "1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a"
       }
     },
     {
       "name": "cldr",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/cldr",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-cldr.git",
         "ref": "refs/heads/REL1_46",
         "commit": "470ae38ff7a29ac596fb8ce519d2e4a1f8d02523"
       }
@@ -71,15 +71,15 @@
     {
       "name": "UniversalLanguageSelector",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/UniversalLanguageSelector",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "8acd63baa3db207895e8811df53512402573decd"
+        "commit": "584a24c468593ba3c5a5e5bf8dbe399687212f98"
       }
     },
     {
       "name": "Elastica",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Elastica",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-Elastica.git",
         "ref": "refs/heads/REL1_46",
         "commit": "a3326af107aafd75f6958e8b4ae8e3d00f22b65f"
       }
@@ -87,15 +87,15 @@
     {
       "name": "CirrusSearch",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/CirrusSearch",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-CirrusSearch.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "e0b04ff6cf0c06560f9255278dd74f6218d004f7"
+        "commit": "a89f321d857906a8450295aee40793d61ef18543"
       }
     },
     {
       "name": "WikibaseCirrusSearch",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WikibaseCirrusSearch",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch.git",
         "ref": "refs/heads/REL1_46",
         "commit": "5e404f0fea531ede4c9a92252d682bf8c160e86f"
       }
@@ -103,9 +103,9 @@
     {
       "name": "OAuth",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/OAuth",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-OAuth.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "f103f51c1da53be3112fdfd06fe1995b1e907a91",
+        "commit": "80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1",
         "patches": [
           "mediawiki-extensions-OAuth-same-domain.patch"
         ]
@@ -114,7 +114,7 @@
     {
       "name": "PluggableAuth",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/PluggableAuth",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-PluggableAuth.git",
         "ref": "refs/heads/REL1_46",
         "commit": "d1e588302c7ccb7806b04f46f62a9b5c34ea1715"
       }
@@ -122,7 +122,7 @@
     {
       "name": "WSOAuth",
       "source": {
-        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/WSOAuth",
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-WSOAuth.git",
         "ref": "refs/heads/REL1_46",
         "commit": "0eb464df201ab7caf8264b2a84b4ef67ed309b94"
       }

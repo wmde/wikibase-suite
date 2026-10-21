@@ -1,0 +1,20 @@
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -3 +3 @@
+-	url = https://gerrit.wikimedia.org/r/data-values/value-view
++	url = https://github.com/wikimedia/data-values-value-view.git
+@@ -6 +6 @@
+-	url = https://phabricator.wikimedia.org/source/wikibase-serialization.git
++	url = https://github.com/wmde/WikibaseSerializationJavaScript.git
+@@ -9 +9 @@
+-	url = https://phabricator.wikimedia.org/source/datavalues-javascript.git
++	url = https://github.com/wmde/DataValuesJavaScript.git
+@@ -12 +12 @@
+-	url = https://phabricator.wikimedia.org/source/wikibase-data-model.git
++	url = https://github.com/wmde/WikibaseDataModelJavaScript.git
+@@ -15 +15 @@
+-	url = https://gerrit.wikimedia.org/r/wikibase/termbox
++	url = https://github.com/wikimedia/wikibase-termbox.git
+@@ -19 +19 @@
+-	url = https://gerrit.wikimedia.org/r/wikibase/javascript-api
++	url = https://github.com/wikimedia/wikibase-javascript-api.git

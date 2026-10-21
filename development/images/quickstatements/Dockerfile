@@ -10,6 +10,10 @@ ARG QUICKSTATEMENTS_COMMIT
 ARG MAGNUSTOOLS_COMMIT
 ARG MAGNUSTOOLS_ARCHIVE_SHA
 
+COPY prepare-static-assets.sh /tmp/prepare-static-assets.sh
+COPY local-static-assets.patch /tmp/local-static-assets.patch
+COPY assets/tooltranslate /tmp/tooltranslate-data
+
 RUN \
     git clone https://github.com/magnusmanske/quickstatements /tmp/quickstatements && \
     git -C /tmp/quickstatements checkout ${QUICKSTATEMENTS_COMMIT} && \
@@ -21,6 +25,11 @@ RUN \
     mkdir /tmp/magnustools && \
     tar -xzf /tmp/magnustools.tar.gz --strip-components=1 -C /tmp/magnustools && \
     rm /tmp/magnustools.tar.gz /tmp/magnustools.sha256
+
+# Fail the build if the pinned upstream sources no longer match our local URL patch.
+RUN sh /tmp/prepare-static-assets.sh && \
+    git -C /tmp/quickstatements apply --unidiff-zero --check /tmp/local-static-assets.patch && \
+    git -C /tmp/quickstatements apply --unidiff-zero /tmp/local-static-assets.patch
 
 WORKDIR /tmp/quickstatements
 RUN composer install --no-dev
