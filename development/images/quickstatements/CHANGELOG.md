@@ -1,3 +1,9 @@
+# 1.2.2 (2026-10-21)
+
+## Dependency updates
+
+- PHP base image from 8.3.8 to 8.3.36 (Apache, Debian Bookworm). *PHP 8.3.36 includes fixes for the critical vulnerabilities CVE-2026-109618 and CVE-2026-109619* ([PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)).
+
 # 1.2.1 (2026-09-03)
 
 ## Dependency updates

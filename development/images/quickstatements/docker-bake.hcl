@@ -1,7 +1,7 @@
 # QuickStatements image manifest. Runtime build policy is supplied by wbs-dev.
 
 variable "IMAGE_NAME" { default = "quickstatements" }
-variable "IMAGE_VERSION" { default = "1.2.1" }
+variable "IMAGE_VERSION" { default = "1.2.2" }
 variable "IMAGE_REPOSITORY" { default = "wikibase/quickstatements" }
 variable "TAGS" {
   type    = list(string)
@@ -43,7 +43,7 @@ variable "COMPOSER_IMAGE" {
 variable "PHP_IMAGE" {
   default = {
     image  = "php"
-    tag    = "8.3.8-apache-bookworm"
+    tag    = "8.3.36-apache-bookworm"
     source = "https://hub.docker.com/_/php"
     info   = "https://www.php.net/supported-versions.php"
   }
