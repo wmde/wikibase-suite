@@ -74,12 +74,14 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
 
 # MediaWiki setup
 WORKDIR /var/www/html
+ARG MEDIAWIKI_REPO
 ARG MEDIAWIKI_COMMIT
-# This prerelease check uses the REL1_47 source checkout. A GitHub archive
+# This prerelease check uses a pinned MediaWiki source checkout. A GitHub archive
 # omits MediaWiki's bundled extensions, skins, and vendor submodules.
 RUN set -eux; \
+    git config --global --add safe.directory /var/www/html; \
     git init .; \
-    git remote add origin https://github.com/wikimedia/mediawiki.git; \
+    git remote add origin "${MEDIAWIKI_REPO}"; \
     git fetch origin --depth 1 "${MEDIAWIKI_COMMIT}"; \
     git checkout FETCH_HEAD; \
     git submodule update --init --recursive --depth 1 --jobs 8; \
