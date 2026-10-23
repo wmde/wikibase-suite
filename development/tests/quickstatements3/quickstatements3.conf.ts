@@ -4,12 +4,13 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'quickstatements',
-	specs: [ 'quickstatements/*.spec.ts' ],
-	composeProfiles: [ 'quickstatements' ],
+	name: 'quickstatements3',
+	specs: [ 'quickstatements3/*.spec.ts' ],
+	envFiles: [ ...defaultSettings.envFiles, 'quickstatements3/test-services.env' ],
+	composeProfiles: [ 'quickstatements3' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
-		'quickstatements/docker-compose.override.yml'
+		'quickstatements3/docker-compose.override.yml'
 	]
 } );
 

@@ -1,13 +1,15 @@
 describe( 'OAuth extension', function () {
 	it( 'Should allow creating a same-host callback consumer', async function () {
-		const callbackUrl = `${ testEnv.vars.QUICKSTATEMENTS_URL }/api.php`;
+		const callbackUrl = `${ testEnv.vars.QUICKSTATEMENTS3_URL.replace( /^http:/, 'https:' ) }/auth/callback/`;
 		const consumerName = `WBS OAuth Test ${ Date.now() }`;
 		const createConsumerCommand = [
 			'exec -T wikibase',
 			'php /var/www/html/extensions/OAuth/maintenance/createOAuthConsumer.php',
 			'--approve',
 			`--callbackUrl "${ callbackUrl }"`,
-			'--callbackIsPrefix true',
+			'--oauthVersion 2',
+			'--oauth2GrantTypes authorization_code',
+			'--oauth2GrantTypes refresh_token',
 			`--user "${ testEnv.vars.MW_ADMIN_NAME }"`,
 			`--name "${ consumerName }"`,
 			'--description "Wikibase Suite OAuth smoke test"',

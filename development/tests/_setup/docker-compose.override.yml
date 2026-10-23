@@ -11,14 +11,15 @@ services:
     depends_on: !override
       mysql:
         condition: service_healthy
-    volumes:
+    volumes: !override
       - ./${WBS_TEST_CONFIG_DIR}:/config
       - wikibase-extensions:/var/www/html/extensions/extensions
+      - wikibase-image-data:/var/www/html/images
       - ./${OUTPUT_DIR}:/var/log/mediawiki
     environment:
       ELASTICSEARCH_HOST: !reset null
       MW_WG_SERVER: ${WIKIBASE_URL}
-      QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
+      QUICKSTATEMENTS3_PUBLIC_URL: ""
       WDQS_PUBLIC_FRONTEND_URL: http://${WDQS_PUBLIC_HOST}
       WDQS_PUBLIC_ENDPOINT_URL: http://${WDQS_PUBLIC_HOST}/sparql
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: test-wikimedia-consumer-token
@@ -26,6 +27,10 @@ services:
 
   wikibase-jobrunner:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+
+  mysql:
+    environment:
+      QUICKSTATEMENTS3_PUBLIC_URL: ""
 
   elasticsearch:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/opensearch:${WBS_TEST_IMAGE_TAG:-latest}
@@ -50,12 +55,12 @@ services:
       WDQS_PUBLIC_URL: http://${WDQS_PUBLIC_HOST}/sparql
       WIKIBASE_PUBLIC_URL: http://${WIKIBASE_PUBLIC_HOST}/w/api.php
 
-  quickstatements:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ quickstatements ]
+  quickstatements3:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements3:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ quickstatements3 ]
     environment:
       WIKIBASE_PUBLIC_URL: ${WIKIBASE_URL}
-      QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
+      QUICKSTATEMENTS3_PUBLIC_URL: ${QUICKSTATEMENTS3_URL}
 
   browser:
     image: ${TEST_BROWSER_IMAGE_URL}

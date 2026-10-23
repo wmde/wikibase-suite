@@ -17,10 +17,10 @@ http:
         servers:
           - url: "http://wdqs-frontend:80"
 
-    quickstatements:
+    quickstatements3:
       loadBalancer:
         servers:
-          - url: "http://quickstatements:80"
+          - url: "http://quickstatements3:8000"
 
   routers:
     wikibase-router:
@@ -36,10 +36,10 @@ http:
       rule: 'Host(`{{ env "WDQS_PUBLIC_HOST" }}`) && !PathPrefix(`/sparql`)'
       service: wdqs-frontend
 
-    quickstatements-router:
-      rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && PathPrefix(`/tools/quickstatements`)'
-      service: quickstatements
-      middlewares: [ quickstatements-redirectregex, quickstatements-stripprefix ]
+    quickstatements3-router:
+      rule: 'Host(`{{ env "WIKIBASE_PUBLIC_HOST" }}`) && PathPrefix(`/tools/quickstatements3`)'
+      service: quickstatements3
+      middlewares: [ quickstatements3-redirectregex, quickstatements3-stripprefix ]
 
   middlewares:
     wdqs-prefix:
@@ -65,12 +65,12 @@ http:
         average: 60
         period: 1m
 
-    quickstatements-redirectregex:
+    quickstatements3-redirectregex:
       redirectRegex:
-        regex: /tools/quickstatements$
-        replacement: /tools/quickstatements/
+        regex: /tools/quickstatements3$
+        replacement: /tools/quickstatements3/
         permanent: true
 
-    quickstatements-stripprefix:
+    quickstatements3-stripprefix:
       stripPrefix:
-        prefixes: [ /tools/quickstatements ]
+        prefixes: [ /tools/quickstatements3 ]

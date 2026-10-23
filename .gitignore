@@ -16,6 +16,7 @@ log
 config/*.ini
 config/*.json
 config/*.php
+config/oauth2-*.pem
 config/.last-update
 config/extensions/*
 !config/extensions/.gitkeep

@@ -19,6 +19,9 @@ set -eu
 
 setup_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 
+# OAuth 2 needs persistent signing keys for authorization and token requests.
+bash "$setup_directory/scripts/setup-oauth2-keys.sh"
+
 bash "$setup_directory/scripts/metadata-callback.sh" || true
 
 # Take wikibase-php.ini from user config if present
@@ -89,7 +92,7 @@ resume_fresh_installation() {
     fi
     if [ "$current_phase" = administrator-created ]; then
         bash "$setup_directory/scripts/create-opensearch-index.sh"
-        bash "$setup_directory/scripts/setup-quickstatements-oauth.sh"
+        bash "$setup_directory/scripts/setup-quickstatements3.sh"
 
         if [ -f /extra-install.sh ]; then
             bash /extra-install.sh
@@ -117,18 +120,21 @@ resume_interrupted_installation() {
 
 update_existing_installation() {
     # These values are inputs to initial setup. Existing configuration is authoritative.
+    # Keep MW_ADMIN_NAME to register the QS3 OAuth consumer on an existing wiki.
     unset \
         DB_SERVER DB_PASS DB_USER DB_NAME \
-        MW_ADMIN_NAME MW_ADMIN_EMAIL MW_ADMIN_PASS \
+        MW_ADMIN_EMAIL MW_ADMIN_PASS \
         MW_WG_SERVER MW_WG_LANGUAGE_CODE MW_WG_SITENAME \
         ELASTICSEARCH_HOST
     if [ -r "$image_last_update_file" ] && [ -r "$last_update_file" ] && \
         cmp -s "$image_last_update_file" "$last_update_file"; then
         echo "Wikibase image is already up to date."
+        bash "$setup_directory/scripts/setup-quickstatements3.sh"
         return
     fi
 
     php /var/www/html/maintenance/run.php update --quick
+    bash "$setup_directory/scripts/setup-quickstatements3.sh"
     record_last_update
 }
 
