@@ -90,7 +90,7 @@ You can now access your services using the hostnames you set in `.env`:
 - Wikibase: `https://<WIKIBASE_PUBLIC_HOST>`
 - Query Service web interface: `https://<WDQS_PUBLIC_HOST>`
 - Query Service SPARQL endpoint: `https://<WDQS_PUBLIC_HOST>/sparql`
-- QuickStatements: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements`
+- QuickStatements 3: `https://<WIKIBASE_PUBLIC_HOST>/tools/quickstatements3`
 
 > [!NOTE]
 > If anything goes wrong, see [Troubleshooting](../operate/troubleshooting.md).

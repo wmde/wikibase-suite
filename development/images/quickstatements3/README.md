@@ -4,17 +4,17 @@ This Suite image packages Wikimedia Brasil's QuickStatements 3 in one container.
 
 ## Suite integration
 
-The Suite Compose stack routes `/tools/quickstatements` to this image and connects it to Suite's MariaDB service. MariaDB provisions a separate `quickstatements3` database for the existing MediaWiki database user. The Wikibase setup lifecycle registers an approved OAuth 2 consumer with the exact `/auth/callback/` URL and writes the QS3 database connection, OAuth credentials, and Django secret to `/quickstatements3/data/runtime.json` in the private `quickstatements3-data` volume. Include that volume and the QS3 database in Suite backups.
+The Suite Compose stack routes `/tools/quickstatements3` to this image and connects it to Suite's MariaDB service. MariaDB provisions a separate `quickstatements3` database for the existing MediaWiki database user. The Wikibase setup lifecycle registers an approved OAuth 2 consumer with the exact `/auth/callback/` URL and writes the QS3 database connection, OAuth credentials, and Django secret to `/quickstatements3/data/runtime.json` in the private `quickstatements3-data` volume. Include that volume and the QS3 database in Suite backups.
 
 Wikibase setup uses `setup-quickstatements3.sh` to register the OAuth consumer when needed, then `setup-quickstatements3.php` to read MediaWiki's database connection and write `runtime.json` atomically. On later starts, the PHP script refreshes the database connection in that file while preserving the OAuth and Django credentials.
 
-The Suite Compose definition supplies MariaDB with an idempotent startup SQL file inside the MariaDB container. The MariaDB image creates the MediaWiki database from `MYSQL_DATABASE` on first boot; the startup SQL creates the separate `quickstatements3` database and grants the existing MediaWiki database user access to it. On a fresh volume, MariaDB invokes the SQL before creating `MYSQL_USER` and again when starting the final server, so the grant waits until that user exists. On an existing volume, it runs at startup without needing the MariaDB root password. QS3 uses the same database username and password as MediaWiki; Wikibase reads the connection from `InstanceSettings.php` after installation, falling back to environment values before that file exists. Sharing the database account means QS3 credentials also grant access to the MediaWiki database.
+Suite Compose mounts two ordered scripts from `scripts/mariadb-init-*.sh` into MariaDB. They compose a single idempotent `--init-file` that creates the MediaWiki database and, when `QUICKSTATEMENTS3_PUBLIC_URL` is set, the separate QS3 database. The MariaDB image creates `MYSQL_USER` from `MYSQL_PASSWORD` on first boot without `MYSQL_DATABASE`; the scripts grant that account access to each database once the user exists. On a fresh volume, MariaDB invokes the SQL before creating the user and again when starting the final server. On an existing volume, it runs at startup without needing the MariaDB root password. QS3 uses the same database username and password as MediaWiki; Wikibase reads the connection from `InstanceSettings.php` after installation, falling back to environment values before that file exists. Sharing the database account means QS3 credentials also grant access to the MediaWiki database.
 
 The fresh-install test created an OAuth 2 consumer with authorization-code and refresh-token grant types, the exact public callback URL, and the existing edit and high-volume grants. The Suite Compose network gives Traefik the public wiki hostname as an alias, so QS3 can use the public URL for browser authorization, token/profile requests, and Wikibase API calls while remaining inside the Docker network. The `quickstatements3` browser suite validates consent, token exchange, and batch edits through the alias using a local HTTP callback hostname allowed by OAuth 2. Repeat the end-to-end test with a trusted production-style TLS certificate. QS3 also requires autoconfirmed wiki accounts before batches can run; first-use eligibility and the local-wiki policy need further validation.
 
 The pinned QS3 source already sends `bot: true` on edits. The [Wikibase REST API fix in T421631](https://phabricator.wikimedia.org/T421631) lets non-bot users edit despite that flag and marks edits as bot edits only when the user has the bot right. Our MediaWiki 1.46 image pins a Wikibase `REL1_46` commit with the older behavior: it returns HTTP 403 for a non-bot user. The build-time patch in `deployment/patch_upstream.py` removes the flag to make QS3 work with this 1.46 image. Consequently, QS3 edits by bot accounts are not marked as bot edits. When Suite moves to MediaWiki 1.47, verify that the selected Wikibase `REL1_47` commit includes T421631, then remove the patch; it should no longer be needed.
 
-Wikibase skips QS3 provisioning unless both `QUICKSTATEMENTS_PUBLIC_URL` and the `/quickstatements3/data` mount are present. To replace broken OAuth credentials on a Suite installation, run:
+Wikibase skips QS3 provisioning unless both `QUICKSTATEMENTS3_PUBLIC_URL` and the `/quickstatements3/data` mount are present. To replace broken OAuth credentials on a Suite installation, run:
 
 ```sh
 docker compose run --rm --no-deps --entrypoint bash wikibase /var/www/html/extensions/WikibaseSuite/setup/scripts/setup-quickstatements3.sh --regenerate-oauth
@@ -22,7 +22,7 @@ docker compose up -d wikibase
 docker compose restart quickstatements3
 ```
 
-This works even if the Wikibase container is stopped because its previous QS3 configuration is broken. It registers a new approved OAuth 2 consumer and atomically replaces the credentials in `runtime.json`, preserving the Django secret. Users must authorize QS3 again. The previous consumer remains registered in MediaWiki and should be revoked separately if its credentials were compromised.
+This works even if the Wikibase container is stopped because its previous QS3 configuration is broken. It registers a new approved OAuth 2 consumer and atomically replaces the credentials in `runtime.json`, preserving the Django secret. Run it when moving an existing POC installation from `/tools/quickstatements` to `/tools/quickstatements3`, since OAuth callbacks must match the new URL. Users must authorize QS3 again. The previous consumer remains registered in MediaWiki and should be revoked separately if its credentials were compromised.
 
 ## Build and run locally
 
@@ -43,10 +43,10 @@ The image accepts these settings directly as environment variables or as keys in
 | `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` | Dedicated MariaDB database connection. `DB_SERVER` accepts `host` or `host:port`. |
 | `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET` | OAuth 2 client credentials. |
 | `WIKIBASE_PUBLIC_URL` | Public wiki base URL. Supplies defaults for OAuth authorization and the initial batch target. |
-| `QUICKSTATEMENTS_PUBLIC_URL` | Public QS3 URL. Supplies the path prefix, allowed host, and CSRF origin. |
+| `QUICKSTATEMENTS3_PUBLIC_URL` | Public QS3 URL. Supplies the path prefix, allowed host, and CSRF origin. |
 | `OAUTH_AUTHORIZATION_SERVER`, `DEFAULT_WIKIBASE_URL` | Optional overrides when the OAuth server and batch target differ from `WIKIBASE_PUBLIC_URL`. |
 | `OAUTH_ACCESS_TOKEN_URL`, `OAUTH_PROFILE_URL` | Optional endpoint overrides when OAuth endpoints differ from those derived from `OAUTH_AUTHORIZATION_SERVER`. |
-| `QS3_URL_PREFIX`, `DJANGO_ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` | Optional overrides for values derived from `QUICKSTATEMENTS_PUBLIC_URL`. |
+| `QS3_URL_PREFIX`, `DJANGO_ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` | Optional overrides for values derived from `QUICKSTATEMENTS3_PUBLIC_URL`. |
 | `DJANGO_SECRET_KEY` | Stable Django secret retained across container replacement. |
 
 For standalone use, supply these values through the environment or create the JSON file before starting the image. The database and user must already exist and have the privileges needed for Django migrations. The public wiki address must resolve and have a trusted TLS certificate from inside the QS3 container; an orchestrator can route that hostname to its reverse proxy. The image also accepts the previous POC's `DB_HOST`, `DB_PORT`, and `DB_PASSWORD` keys. These settings are separate from QS2's environment contract.

@@ -109,7 +109,7 @@ export function defaultFunctions(): void {
 	browser.addCommand(
 		'executeQuickStatements3',
 		async ( theQuery: string ): Promise<void> => {
-			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/batch/new/` );
+			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS3_URL }/batch/new/` );
 
 			// create a batch
 			const commandEditor = await $( 'textarea[name="commands"]' );

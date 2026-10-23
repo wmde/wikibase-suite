@@ -77,9 +77,10 @@ class Hooks {
 		}
 
 		global $wgWbManifestExternalServiceMapping;
-		$quickStatementsUrl = self::environmentUrl( 'QUICKSTATEMENTS_PUBLIC_URL' );
-		if ( $quickStatementsUrl !== null ) {
-			$wgWbManifestExternalServiceMapping['quickstatements'] = $quickStatementsUrl;
+		$quickStatements3Url = self::environmentUrl( 'QUICKSTATEMENTS3_PUBLIC_URL' );
+		if ( $quickStatements3Url !== null ) {
+			// Wikibase Manifest defines this service key independently of the QS image version.
+			$wgWbManifestExternalServiceMapping['quickstatements'] = $quickStatements3Url;
 		}
 
 		$queryServiceEndpoint = self::environmentUrl( 'WDQS_PUBLIC_ENDPOINT_URL' );
@@ -170,11 +171,11 @@ class Hooks {
 			],
 		];
 
-		$quickStatementsUrl = self::environmentUrl( 'QUICKSTATEMENTS_PUBLIC_URL' );
-		if ( $quickStatementsUrl !== null ) {
+		$quickStatements3Url = self::environmentUrl( 'QUICKSTATEMENTS3_PUBLIC_URL' );
+		if ( $quickStatements3Url !== null ) {
 			$wikibaseLinks[] = [
-				'text' => $skin->msg( 'wikibasesuite-sidebar-link-quickstatements' )->text(),
-				'href' => $quickStatementsUrl,
+				'text' => $skin->msg( 'wikibasesuite-sidebar-link-quickstatements3' )->text(),
+				'href' => $quickStatements3Url,
 				'id'   => 'n-wbs-link-five',
 			];
 		}
