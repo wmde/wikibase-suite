@@ -11,9 +11,10 @@ services:
     depends_on: !override
       mysql:
         condition: service_healthy
-    volumes:
+    volumes: !override
       - ./${WBS_TEST_CONFIG_DIR}:/config
       - wikibase-extensions:/var/www/html/extensions/extensions
+      - wikibase-image-data:/var/www/html/images
       - ./${OUTPUT_DIR}:/var/log/mediawiki
     environment:
       ELASTICSEARCH_HOST: !reset null
@@ -50,9 +51,9 @@ services:
       WDQS_PUBLIC_URL: http://${WDQS_PUBLIC_HOST}/sparql
       WIKIBASE_PUBLIC_URL: http://${WIKIBASE_PUBLIC_HOST}/w/api.php
 
-  quickstatements:
-    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ quickstatements ]
+  quickstatements3:
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements3:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ quickstatements3 ]
     environment:
       WIKIBASE_PUBLIC_URL: ${WIKIBASE_URL}
       QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}

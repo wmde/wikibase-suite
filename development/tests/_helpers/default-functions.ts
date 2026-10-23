@@ -104,49 +104,40 @@ export function defaultFunctions(): void {
 	);
 
 	/**
-	 * Execute quickstatements query
+	 * Execute a QuickStatements 3 batch
 	 */
 	browser.addCommand(
-		'executeQuickStatement',
+		'executeQuickStatements3',
 		async ( theQuery: string ): Promise<void> => {
-			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/#/` );
-			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/#/batch/new` );
+			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/batch/new/` );
 
 			// create a batch
-			const commandEditor = await $( '#qs-command-editor' );
+			const commandEditor = await $( 'textarea[name="commands"]' );
 			await commandEditor.waitForDisplayed();
 			await commandEditor.setValue( theQuery );
 
-			// click import
-			const importButton = await $( '.qs-new-batch-form button[type="submit"]' );
-			await importButton.waitForClickable();
-			await importButton.click();
+			const createButton = await $( 'input[type="submit"][value="Create"]' );
+			await createButton.waitForClickable();
+			await createButton.click();
 
-			// click run
-			const runButton = await $( "button[tt='run']" );
+			const runButton = await $( 'input[type="submit"][value="Save and run batch"]' );
 			await runButton.waitForClickable();
 			await runButton.click();
 
 			await browser.waitUntil(
 				async () => {
-					const commands = await $$( '.command_state' );
-					if ( ( await commands.length ) === 0 ) {
-						return false;
+					const status = await $( '#batchProgressDiv .progress-status .status' ).getText();
+					if ( status === 'ERROR' ) {
+						throw new Error( 'QuickStatements 3 batch failed.' );
 					}
-					const commandStateArray = await Promise.all(
-						await commands.map( async ( command ) =>
-							command.getAttribute( 'aria-label' )
-						)
-					);
-					return commandStateArray.every(
-						( commandState ) => commandState.toLowerCase().startsWith( 'done' )
-					);
+					return status === 'DONE';
 				},
 				{
 					timeout: settings.waitForTimeout,
-					timeoutMsg: 'Expected all QuickStatements commands to finish'
+					timeoutMsg: 'Expected QuickStatements 3 batch to finish'
 				}
 			);
+			expect( ( await $$( '#batchProgressDiv .status_error' ) ).length ).toEqual( 0 );
 		}
 	);
 

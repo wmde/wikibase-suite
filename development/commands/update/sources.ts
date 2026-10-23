@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { BAKE_MANIFEST } from '../../lib/bake.js';
 import type { RepositoryContext } from '../../lib/context.js';
 import type { FileUpdate } from '../../lib/file-updates.js';
-import { quickStatementsSourceProvider } from './projects/quickstatements.js';
 import { wdqsFrontendSourceProvider } from './projects/wdqs-frontend.js';
 import { wdqsSourceProvider } from './projects/wdqs.js';
 import { wikibaseSourceProvider } from './projects/wikibase.js';
@@ -16,8 +15,7 @@ import type {
 const providers = [
 	wikibaseSourceProvider,
 	wdqsSourceProvider,
-	wdqsFrontendSourceProvider,
-	quickStatementsSourceProvider
+	wdqsFrontendSourceProvider
 ];
 
 const providersByImage = new Map<string, SourceUpdateProvider>(

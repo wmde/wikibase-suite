@@ -13,7 +13,7 @@ WBS is a supported and tested Docker Compose configuration for deploying the fol
 - **[Query service](./development/images/wdqs/README.md):** SPARQL service for querying Wikibase data.
 - **[Query service frontend](./development/images/wdqs-frontend/README.md):** Web interface for SPARQL queries.
 - **[Query service updater](./development/images/wdqs/README.md):** Keeps query service data in sync with Wikibase.
-- **[QuickStatements](./development/images/quickstatements/README.md):** A web-based tool to import and manipulate large amounts of data.
+- **[QuickStatements 3](./development/images/quickstatements3/README.md):** A web-based tool to import and manipulate large amounts of data (prototype).
 - **[Traefik](https://hub.docker.com/_/traefik):** A reverse proxy that handles TLS termination and SSL certificate renewal through ACME.
 
 ## Getting started

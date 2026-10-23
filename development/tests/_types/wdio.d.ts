@@ -35,9 +35,9 @@ declare namespace WebdriverIO {
 		) => Promise<string>;
 
 		/**
-		 * Execute quickstatements query
+		 * Execute a QuickStatements 3 batch
 		 */
-		executeQuickStatement: ( theQuery: string ) => Promise<void>;
+		executeQuickStatements3: ( theQuery: string ) => Promise<void>;
 
 		/**
 		 * Moves browser to recent changes then asserts that a change is in the api result

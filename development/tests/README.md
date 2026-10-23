@@ -12,7 +12,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wikibase-extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
 | `wikibase-client` | Integration | Repository/client federation and change dispatch. |
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
-| `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
+| `quickstatements3` | Integration | QuickStatements 3 through the `quickstatements3` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
 
@@ -102,7 +102,7 @@ CI uses `--skip-build` and supplies `WBS_TEST_IMAGE_REGISTRY` and `WBS_TEST_IMAG
 
 ### Architecture Coverage in CI
 
-CI always runs every suite above against the native AMD64 image set. The suites collectively exercise all distributed images: Wikibase through the repository, extension, client, and installer scenarios; WDQS through `wdqs` and its frontend through `wdqs-frontend`; QuickStatements through `quickstatements`; OpenSearch through `opensearch`; and WBS Tools through its end-to-end suite.
+CI always runs every suite above against the native AMD64 image set. The suites collectively exercise all distributed images: Wikibase through the repository, extension, client, and installer scenarios; WDQS through `wdqs` and its frontend through `wdqs-frontend`; QuickStatements 3 through `quickstatements3`; OpenSearch through `opensearch`; and WBS Tools through its end-to-end suite.
 
 Create Release repeats the complete target matrix on native ARM64 runners when `WBS_RELEASE_ARM64=true`. Pull requests and pushes to `main` remain AMD64-only.
 
