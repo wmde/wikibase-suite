@@ -12,7 +12,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wikibase-extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
 | `wikibase-client` | Integration | Repository/client federation and change dispatch. |
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
-| `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
+| `quickstatements3` | Integration | QuickStatements 3 through the `quickstatements3` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
 | `ontology-presets` | Integration | Bundled preset validation and the administrator onboarding flow. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
@@ -103,7 +103,7 @@ CI uses `--skip-build` and supplies `WBS_TEST_IMAGE_REGISTRY` and `WBS_TEST_IMAG
 
 ### Architecture Coverage in CI
 
-PR/main and release CI run every suite against native AMD64 images. With `WBS_RELEASE_ARM64=true`, they also build and test on native ARM64 runners.
+PR/main and release CI run every suite against native AMD64 images. The suites cover Wikibase, WDQS, QuickStatements 3, OpenSearch, and WBS Tools. With `WBS_RELEASE_ARM64=true`, release CI also builds and tests on native ARM64 runners.
 
 The manual **Build and Test** inputs can additionally enable ARM64 for that run. Building ARM64 alone does not test it; enable **Run every test suite against the ARM64 image set too** for test coverage.
 
