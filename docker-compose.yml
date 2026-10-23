@@ -60,29 +60,21 @@ services:
       - /bin/bash
       - -ec
       - |
-        if [[ ! "$${MYSQL_USER:-}" =~ ^[A-Za-z_][A-Za-z0-9_]{0,79}$$ ]]; then
-          echo "A valid MYSQL_USER is required to provision Suite databases." >&2
-          exit 1
-        fi
-        # MariaDB accepts one --init-file. Compose the ordered, independently
-        # maintained SQL fragments before the server starts on every volume.
+        # Render environment-dependent SQL for fresh and existing volumes.
         init_file=/tmp/wbs-init.sql
-        : > "$$init_file"
-        for script in /usr/local/share/wbs/mariadb-init-*.sh; do
-          bash "$$script" >> "$$init_file"
-        done
-        chmod 0644 "$$init_file"
+        bash /usr/local/share/wbs/mariadb-init-databases.sh > "$$init_file"
+        chown mysql:mysql "$$init_file"
+        chmod 0600 "$$init_file"
         exec /usr/local/bin/docker-entrypoint.sh mariadbd --init-file="$$init_file"
     restart: unless-stopped
     volumes:
       - mysql-data:/var/lib/mysql
-      - ${WBS_DIR:-.}/scripts/mariadb-init-10-wikibase.sh:/usr/local/share/wbs/mariadb-init-10-wikibase.sh:ro
-      - ${WBS_DIR:-.}/scripts/mariadb-init-20-quickstatements3.sh:/usr/local/share/wbs/mariadb-init-20-quickstatements3.sh:ro
+      - ${WBS_DIR:-.}/scripts/mariadb-init-databases.sh:/usr/local/share/wbs/mariadb-init-databases.sh:ro
     environment:
-      DB_NAME: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASS}
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      WIKIBASE_DB_NAME: ${DB_NAME}
+      WBS_DB_USER: ${DB_USER}
+      WBS_DB_PASSWORD: ${DB_PASS}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
       QUICKSTATEMENTS3_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements3
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
