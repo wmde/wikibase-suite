@@ -26,6 +26,8 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
    - [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
    - [WBS tools (`wbs-tools`)](../images/wbs-tools/UPDATING.md)
 
+   For Wikibase, change only `MEDIAWIKI.ref` in its `docker-bake.hcl` when moving to a new MediaWiki release line. The updater resolves the commit and reads the version from that source; leave the ref unchanged for maintenance updates.
+
    The generated changes are local and unstaged: the command does not commit, tag, or push. Review them with `git diff`, including upstream comparisons, compatibility implications, version proposals, and changelog wording.
 
    WBS release identity and its exact WBS Tools image are recorded in the checked-in `.wbs/version` manifest. Preparing WBS Tools asks whether the current WBS release should adopt the proposed image; accepting also prepares the corresponding WBS patch, while declining keeps the products independent.

@@ -32,8 +32,12 @@ variable "TAGS" {
 
 variable "MEDIAWIKI" {
   default = {
+    # To select a new MediaWiki release line, change only this ref, then run wbs-dev update wikibase.
+    # The updater reads the version from that branch's source and pins its commit.
+    ref           = "refs/heads/REL1_46"
+    repo          = "https://github.com/wikimedia/mediawiki.git"
+    commit        = "d0d9a283f219a1c9487754dc96598080a4a4e30a"
     version       = "1.46.2"
-    source        = "https://releases.wikimedia.org/mediawiki/"
     release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }
@@ -70,7 +74,8 @@ function "image_tags" {
 target "wikibase-base" {
   args = {
     WIKIBASE_IMAGE_VERSION = IMAGE_VERSION
-    MEDIAWIKI_VERSION      = MEDIAWIKI.version
+    MEDIAWIKI_REPO         = MEDIAWIKI.repo
+    MEDIAWIKI_COMMIT       = MEDIAWIKI.commit
     COMPOSER_IMAGE_URL     = "${COMPOSER_IMAGE.image}:${COMPOSER_IMAGE.tag}"
     COMPOSER_IMAGE_PLATFORM = COMPOSER_IMAGE.platform
     PHP_IMAGE_URL          = "${PHP_IMAGE.image}:${PHP_IMAGE.tag}"

@@ -1,16 +1,17 @@
 import semver from 'semver';
 import { bakeObject, resolveBakeVariables } from '../../../lib/bake.js';
-import { strong } from '../presentation.js';
 import type {
 	SourceChange,
-	SourceUpdateInteraction,
+	SourcePin,
 	SourceUpdateProvider
 } from '../source-types.js';
 import {
 	changeLines,
+	describePinChanges,
 	gitRefName,
 	gitSourcePin,
 	pinLink,
+	planPins,
 	readVariable,
 	replaceVariable,
 	request
@@ -32,12 +33,13 @@ function settings(contents: string) {
 		'MEDIAWIKI'
 	);
 	return {
-		source: String(value.source).replace(/\/?$/u, '/'),
 		notes: String(value.release_notes)
 	};
 }
 function mediaWikiLine(version: string) {
-	return version.replace(/\.\d+$/u, '');
+	const parsed = semver.parse(version);
+	if (!parsed) throw new Error(`Invalid MediaWiki version "${version}".`);
+	return `${parsed.major}.${parsed.minor}`;
 }
 function mediaWikiBranchName(version: string) {
 	return `REL${mediaWikiLine(version).replace('.', '_')}`;
@@ -61,92 +63,36 @@ function git(source: Extension['source']): source is GitSource {
 function isMediaWikiBranchRef(ref: string) {
 	return /^refs\/heads\/REL\d+_\d+$/u.test(ref);
 }
-function mediaWikiBranchRef(version: string) {
-	return `refs/heads/${mediaWikiBranchName(version)}`;
-}
 
-async function versions(line: string, source: string) {
-	const page = await (await request(`${source}${line}/`)).text();
-	return [
-		...new Set(
-			[...page.matchAll(/mediawiki-(\d+\.\d+\.\d+)\.tar\.gz/gmu)].map(
-				(match) => match[1]
-			)
-		)
-	].sort(semver.rcompare);
-}
-export async function discoverMediaWikiCandidates(
-	currentVersion: string,
-	source = 'https://releases.wikimedia.org/mediawiki/'
-) {
-	const current = semver.parse(currentVersion);
-	if (!current)
-		throw new Error(`Invalid MEDIAWIKI_VERSION "${currentVersion}".`);
-	const base = source.replace(/\/?$/u, '/');
-	const page = await (await request(base)).text();
-	const lines = [
-		...new Set(
-			[...page.matchAll(/href="(\d+\.\d+)\//gmu)].map((match) => match[1])
-		)
-	]
-		.filter((line) => {
-			const value = semver.parse(`${line}.0`);
-			return value && semver.gte(value, `${current.major}.${current.minor}.0`);
-		})
-		.sort((a, b) => semver.rcompare(`${a}.0`, `${b}.0`));
-	const found = await Promise.all(
-		lines.map(async (line) => ({ line, versions: await versions(line, base) }))
+function mediaWikiPin(contents: string): SourcePin {
+	const value = bakeObject(
+		resolveBakeVariables(contents, process.cwd()),
+		'MEDIAWIKI'
 	);
-	const line = `${current.major}.${current.minor}`;
-	const maintenance = found.find((value) => value.line === line)?.versions[0];
-	const newerLine = found.find(
-		(value) => value.line !== line && value.versions.length
-	)?.versions[0];
+	const ref = String(value.ref);
 	return {
-		maintenance:
-			maintenance && semver.gt(maintenance, currentVersion)
-				? maintenance
-				: undefined,
-		newerLine
+		variable: 'MEDIAWIKI.commit',
+		description: `MediaWiki ${gitRefName(ref)}`,
+		...gitSourcePin({ repo: String(value.repo), ref })
 	};
 }
-export async function selectMediaWikiUpdate(
-	current: string,
-	candidates: { maintenance?: string; newerLine?: string },
-	interaction: Pick<SourceUpdateInteraction, 'confirm' | 'select'>
-) {
-	if (!candidates.maintenance && !candidates.newerLine)
-		return (await interaction.confirm('Refresh extensions?'))
-			? current
-			: undefined;
-	const selected = await interaction.select(
-		`Update ${strong('MediaWiki')}? (current: ${strong(current)})`,
-		[
-			...(candidates.maintenance
-				? [
-						{
-							value: candidates.maintenance,
-							label: `Update to ${strong(candidates.maintenance)} and refresh compatible extensions`
-						}
-					]
-				: []),
-			...(candidates.newerLine
-				? [
-						{
-							value: candidates.newerLine,
-							label: `Move to ${strong(candidates.newerLine)} and refresh compatible extensions`,
-							hint: 'requires major-version compatibility review'
-						}
-					]
-				: []),
-			{ value: 'skip', label: 'No' }
-		]
+
+export async function mediaWikiVersionAtCommit(repo: string, commit: string) {
+	const match = /^https:\/\/github\.com\/([^/]+\/[^/]+?)(?:\.git)?$/u.exec(
+		repo
 	);
-	return selected === 'skip'
-		? (await interaction.confirm('Refresh extensions?'))
-			? current
-			: undefined
-		: selected;
+	if (!match)
+		throw new Error(
+			`MediaWiki source version lookup requires a GitHub repository: ${repo}.`
+		);
+	const url = `https://raw.githubusercontent.com/${match[1]}/${commit}/includes/Defines.php`;
+	const source = await (await request(url)).text();
+	const version = /^define\(\s*'MW_VERSION'\s*,\s*'([^']+)'\s*\);$/mu.exec(
+		source
+	)?.[1];
+	if (!version || !semver.valid(version))
+		throw new Error(`Could not read a valid MW_VERSION from ${url}.`);
+	return version;
 }
 
 function registryChanges(previous: string, next: string): SourceChange[] {
@@ -178,35 +124,52 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 		const value = settings(next);
 		const before = readVariable(previous, 'MEDIAWIKI.version');
 		const after = readVariable(next, 'MEDIAWIKI.version');
-		return before === after
-			? []
-			: [
-					{
-						variable: 'MEDIAWIKI.version',
-						description: 'MediaWiki',
-						previous: before,
-						next: after,
-						link: { label: 'Release notes', url: notesUrl(value, after) }
-					}
-				];
+		return [
+			...(before === after
+				? []
+				: [
+						{
+							variable: 'MEDIAWIKI.version',
+							description: 'MediaWiki',
+							previous: before,
+							next: after,
+							link: { label: 'Release notes', url: notesUrl(value, after) }
+						}
+					]),
+			...describePinChanges(previous, next, [mediaWikiPin(next)])
+		];
 	},
 	plan: async (contents, interaction) => {
 		const value = settings(contents);
+		const ref = readVariable(contents, 'MEDIAWIKI.ref');
+		if (
+			!(await interaction.confirm(
+				`Refresh MediaWiki ${gitRefName(ref)} and extensions?`
+			))
+		)
+			return { contents, changes: [] };
 		const current = readVariable(contents, 'MEDIAWIKI.version');
-		const selected = await selectMediaWikiUpdate(
-			current,
-			await discoverMediaWikiCandidates(current, value.source),
-			interaction
+		const pinPlan = await planPins(contents, [mediaWikiPin(contents)]);
+		const commit = readVariable(pinPlan.contents, 'MEDIAWIKI.commit');
+		const selected = await mediaWikiVersionAtCommit(
+			readVariable(contents, 'MEDIAWIKI.repo'),
+			commit
 		);
-		if (!selected) return { contents, changes: [] };
+		if (
+			isMediaWikiBranchRef(ref) &&
+			ref !== `refs/heads/${mediaWikiBranchName(selected)}`
+		)
+			throw new Error(
+				`${ref} reports MW_VERSION ${selected}; check the configured MediaWiki ref.`
+			);
 		const next =
-			selected === current
-				? contents
-				: replaceVariable(contents, 'MEDIAWIKI.version', selected);
+			current === selected
+				? pinPlan.contents
+				: replaceVariable(pinPlan.contents, 'MEDIAWIKI.version', selected);
 		return {
 			contents: next,
-			changes:
-				selected === current
+			changes: [
+				...(selected === current
 					? []
 					: [
 							{
@@ -216,7 +179,9 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 								next: selected,
 								link: { label: 'Release notes', url: notesUrl(value, selected) }
 							}
-						],
+						]),
+				...pinPlan.changes
+			],
 			refreshSources: true
 		};
 	},
@@ -226,12 +191,11 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 			return { ...base, additionalContents: additional };
 		}
 		const value = registry(additional[REGISTRY_PATH]);
-		const version = readVariable(base.contents, 'MEDIAWIKI.version');
+		const ref = readVariable(base.contents, 'MEDIAWIKI.ref');
 		const changes = [...base.changes];
 		for (const item of value.extensions) {
 			if (!git(item.source)) continue;
-			if (isMediaWikiBranchRef(item.source.ref))
-				item.source.ref = mediaWikiBranchRef(version);
+			if (isMediaWikiBranchRef(item.source.ref)) item.source.ref = ref;
 			const source = gitSourcePin(item.source);
 			const before = item.source.commit;
 			const next = await source.resolve();
@@ -246,10 +210,7 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 			});
 		}
 		if (changes.length) interaction.note('Source update', changeLines(changes));
-		else
-			interaction.info(
-				'Dependencies are current.'
-			);
+		else interaction.info('Dependencies are current.');
 		return {
 			contents: base.contents,
 			changes,
