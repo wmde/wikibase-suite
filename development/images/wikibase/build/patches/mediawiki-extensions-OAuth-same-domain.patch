@@ -1,18 +1,10 @@
-diff --git a/src/Control/ConsumerSubmitControl.php b/src/Control/ConsumerSubmitControl.php
-index 94fd644..6edc2d1 100644
---- a/src/Control/ConsumerSubmitControl.php
-+++ b/src/Control/ConsumerSubmitControl.php
-@@ -165,13 +165,7 @@ class ConsumerSubmitControl extends SubmitControl {
- 						return StatusValue::newFatal(
- 							new ApiMessage( 'mwoauth-error-callback-url-must-be-https', 'invalid_callback_url' )
- 						);
--					} elseif ( $clientIsConfidential && WikiMap::getWikiFromUrl( $s ) ) {
--						// Reduce noise from clueless people using Wikipedia's URL as callback
--						// (except for public clients; it can be valid e.g. for gadgets).
--						return StatusValue::newGood()->warning(
--							new ApiMessage( 'mwoauth-error-callback-server-url', 'invalid_callback_url' )
--						);
- 					} elseif ( ( $isOAuth2 || !$vals['callbackIsPrefix'] )
- 						&& in_array( $urlParts['path'] ?? '', [ '', '/' ], true )
- 						&& !( $urlParts['query'] ?? false )
- 						&& !( $urlParts['fragment'] ?? false )
+diff --git a/src/Control/ConsumerValidator.php b/src/Control/ConsumerValidator.php
+--- a/src/Control/ConsumerValidator.php
++++ b/src/Control/ConsumerValidator.php
+@@ -416,6 +415,0 @@ class ConsumerValidator {
+-		} elseif ( $clientIsConfidential && WikiMap::getWikiFromUrl( $url ) ) {
+-			// Reduce noise from clueless people using Wikipedia's URL as callback
+-			// (except for public clients; it can be valid e.g. for gadgets).
+-			return StatusValue::newGood()->warning(
+-				new ApiMessage( 'mwoauth-error-callback-server-url', 'invalid_callback_url' )
+-			);
