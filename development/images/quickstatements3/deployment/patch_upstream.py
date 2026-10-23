@@ -1,33 +1,17 @@
 import sys
 from pathlib import Path
 
+# Compatibility with Suite's MediaWiki 1.46 / Wikibase REL1_46 pin.
+# QS3 main sends bot=true so accounts with the bot right get bot-marked edits.
+# The Wikibase REST API fix in https://phabricator.wikimedia.org/T421631
+# ignores that flag for accounts without the right, but our pinned REL1_46
+# commit still rejects their edits with HTTP 403. Remove the flag for now so
+# ordinary users can edit; bot accounts' QS3 edits will not be bot-marked.
+# When Suite moves to MediaWiki 1.47, verify its pinned Wikibase REL1_47
+# commit includes T421631, then remove this patch and its Dockerfile step.
 
 models_file = Path(sys.argv[1])
 models = models_file.read_text()
-old = '''    @property
-    def rest_endpoint_url(self):
-        return f"{self.url}/w/rest.php"
-
-    @property
-    def api_endpoint(self):
-        return f"{self.url}/w/api.php"
-'''
-new = '''    @property
-    def api_base_url(self):
-        return settings.WIKIBASE_API_URL or self.url
-
-    @property
-    def rest_endpoint_url(self):
-        return f"{self.api_base_url}/w/rest.php"
-
-    @property
-    def api_endpoint(self):
-        return f"{self.api_base_url}/w/api.php"
-'''
-if models.count(old) != 1:
-    raise SystemExit("Expected one upstream Wikibase endpoint block")
-models = models.replace(old, new)
-
 old_bot_edit = '''        body = self.api_payload(client)
         body["bot"] = True
         body["comment"] = self.edit_summary()

@@ -31,11 +31,6 @@ replacements = (
         'LOGIN_URL = (os.getenv("QS3_URL_PREFIX", "").rstrip("/") + "/auth/login/") or "/auth/login/"',
     ),
     (
-        'DEFAULT_WIKIBASE_URL = os.getenv("DEFAULT_WIKIBASE_URL", "https://www.wikidata.org")',
-        'DEFAULT_WIKIBASE_URL = os.getenv("DEFAULT_WIKIBASE_URL", "https://www.wikidata.org")\n'
-        'WIKIBASE_API_URL = os.getenv("WIKIBASE_API_URL", "").rstrip("/")',
-    ),
-    (
         '    "django.middleware.common.CommonMiddleware",\n',
         '    "django.middleware.common.CommonMiddleware",\n'
         '    "qsts3_subpath_middleware.PrefixRootRedirectMiddleware",\n',
