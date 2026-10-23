@@ -56,6 +56,19 @@ services:
 
   mysql:
     image: mariadb:10.11
+    entrypoint:
+      - /bin/bash
+      - -ec
+      - |
+        if [[ ! "$${MYSQL_USER:-}" =~ ^[A-Za-z_][A-Za-z0-9_]{0,79}$$ ]]; then
+          echo "A valid MYSQL_USER is required to provision QuickStatements 3." >&2
+          exit 1
+        fi
+        init_file=/tmp/quickstatements3-init.sql
+        printf 'CREATE DATABASE IF NOT EXISTS `quickstatements3` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\nGRANT ALL PRIVILEGES ON `quickstatements3`.* TO '\''%s'\''@'\''%%'\'';\n' \
+          "$$MYSQL_USER" > "$$init_file"
+        chmod 0644 "$$init_file"
+        exec /usr/local/bin/docker-entrypoint.sh mariadbd --init-file="$$init_file"
     restart: unless-stopped
     volumes:
       - mysql-data:/var/lib/mysql
@@ -63,8 +76,7 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASS}
-      MARIADB_ROOT_PASSWORD: ${DB_PASS}
-      MARIADB_ROOT_HOST: "%"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
       start_period: 1m
@@ -165,13 +177,6 @@ services:
     environment:
       QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
       WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}
-      QS3_URL_PREFIX: /tools/quickstatements
-      QS3_CONFIG_FILE: /quickstatements3/data/runtime.json
-      DJANGO_ALLOWED_HOSTS: ${WIKIBASE_PUBLIC_HOST},localhost,127.0.0.1
-      CSRF_TRUSTED_ORIGINS: https://${WIKIBASE_PUBLIC_HOST}
-      OAUTH_ACCESS_TOKEN_URL: http://wikibase/w/rest.php/oauth2/access_token
-      OAUTH_PROFILE_URL: http://wikibase/w/rest.php/oauth2/resource/profile
-      WIKIBASE_API_URL: http://wikibase
     healthcheck:
       test: curl --silent --fail localhost:8000/
       interval: 10s
@@ -184,6 +189,11 @@ services:
   # This is the reverse proxy and SSL service
   traefik:
     image: traefik:3
+    networks:
+      default:
+        aliases:
+          - ${WIKIBASE_PUBLIC_HOST}
+          - ${WDQS_PUBLIC_HOST}
     command:
       # traefik static configuration via command line
       # enable accesslog
