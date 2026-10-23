@@ -16,9 +16,13 @@ A [Docker image](https://docs.docker.com/get-started/docker-concepts/the-basics/
 
 The SPARQL service for a Wikibase instance. It is often referred to as WDQS, short for Wikidata Query Service.
 
-## QuickStatements
+## QuickStatements 2
 
-[QuickStatements](https://github.com/magnusmanske/quickstatements) is an independently developed web tool for importing and editing Wikibase data in batches. WBS packages it in the QuickStatements Docker Image and configures its connection to Wikibase using OAuth.
+[QuickStatements 2](https://github.com/magnusmanske/quickstatements) is an independently developed web tool for importing and editing Wikibase data in batches. Earlier WBS releases packaged it in the `wikibase/quickstatements` image and configured it with OAuth 1.
+
+## QuickStatements 3
+
+[QuickStatements 3](https://github.com/WikimediaBrasil/QuickStatements3) is a separate Django application for Wikibase batch edits. The WBS prototype packages it in the `wikibase/quickstatements3` image and configures it with OAuth 2 and a separate MariaDB database.
 
 ## Wikibase
 
@@ -32,4 +36,4 @@ Wikibase Suite (WBS) is the full deployable Wikibase product, including its Dock
 
 ## Wikibase Suite (WBS) Docker Images
 
-Wikibase Suite (WBS) Docker Images are published and tested as components of WBS, including Wikibase, Query Service, Query Service frontend, OpenSearch, and QuickStatements. Each image is released and versioned separately from WBS and can be used independently in other service configurations. They are sometimes referred to as Wikibase Suite (WBS) Images or WBS Images.
+Wikibase Suite (WBS) Docker Images are published and tested as components of WBS, including Wikibase, Query Service, Query Service frontend, OpenSearch, and QuickStatements 2. The QuickStatements 3 image is currently a prototype. Each published image is released and versioned separately from WBS and can be used independently in other service configurations. They are sometimes referred to as Wikibase Suite (WBS) Images or WBS Images.

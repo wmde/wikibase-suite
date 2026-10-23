@@ -1,6 +1,6 @@
 # Installing Wikibase Suite (WBS)
 
-Wikibase Suite (WBS) is a production-ready Wikibase software bundle for self-hosting a public knowledge graph similar to Wikidata. It includes MediaWiki, Wikibase, Query Service, QuickStatements, and HTTPS routing for a public instance.
+Wikibase Suite (WBS) is a production-ready Wikibase software bundle for self-hosting a public knowledge graph similar to Wikidata. It includes MediaWiki, Wikibase, Query Service, QuickStatements 3, and HTTPS routing for a public instance.
 
 For installation without the browser-based installer, see [Manual Installation](./install-via-cli.md).
 
@@ -135,7 +135,7 @@ All Wikibase Suite components will be downloaded and installed. This may take a 
 
 ### Congratulations: You have installed your own Wikibase instance!
 
-You can directly access your Wikibase, the Query Service and QuickStatements. Everything is configured and ready to use.
+You can directly access your Wikibase, the Query Service and QuickStatements 3. Everything is configured and ready to use.
 
 Note: **Download the configuration file.**
 

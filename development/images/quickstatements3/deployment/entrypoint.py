@@ -19,11 +19,11 @@ if os.environ.get("QS3_CONFIG_FILE") or os.path.isfile(config_file):
     for name, value in config.items():
         os.environ.setdefault(name, str(value))
 
-quickstatements_public_url = os.environ.get("QUICKSTATEMENTS_PUBLIC_URL")
-if quickstatements_public_url:
-    parsed_url = urlsplit(quickstatements_public_url)
+quickstatements3_public_url = os.environ.get("QUICKSTATEMENTS3_PUBLIC_URL")
+if quickstatements3_public_url:
+    parsed_url = urlsplit(quickstatements3_public_url)
     if parsed_url.scheme not in ("http", "https") or not parsed_url.hostname:
-        sys.exit("QuickStatements 3 requires a valid QUICKSTATEMENTS_PUBLIC_URL.")
+        sys.exit("QuickStatements 3 requires a valid QUICKSTATEMENTS3_PUBLIC_URL.")
     os.environ.setdefault("QS3_URL_PREFIX", parsed_url.path.rstrip("/"))
     os.environ.setdefault(
         "DJANGO_ALLOWED_HOSTS", f"{parsed_url.hostname},localhost,127.0.0.1"
