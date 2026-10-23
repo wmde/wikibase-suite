@@ -5,8 +5,8 @@
       "name": "Wikibase",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb",
+        "ref": "refs/heads/REL1_47",
+        "commit": "5cc50677c039d9d9e8e21c329373d04ce13ab79a",
         "patches": [
           "wikibase-submodules-to-github.patch"
         ]
@@ -24,8 +24,8 @@
       "name": "EntitySchema",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-EntitySchema.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "8767fa92e3f30e4658b31e82efb242d92489c3f4"
+        "ref": "refs/heads/REL1_47",
+        "commit": "aa0b3fc811c221dc5c71bf2141b855f022aabf6e"
       }
     },
     {
@@ -40,8 +40,8 @@
       "name": "WikibaseManifest",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "8c034383637dcfceb966f207367305cd5fbb9ef2"
+        "ref": "refs/heads/REL1_47",
+        "commit": "ebd539878cd6abf219ca602e06a2ab2eeb211d33"
       }
     },
     {
@@ -56,56 +56,56 @@
       "name": "Babel",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Babel.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a"
+        "ref": "refs/heads/REL1_47",
+        "commit": "98ff0edb31071c18d38453b33546515cd83b77a7"
       }
     },
     {
       "name": "cldr",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-cldr.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "470ae38ff7a29ac596fb8ce519d2e4a1f8d02523"
+        "ref": "refs/heads/REL1_47",
+        "commit": "cb9ad78029f7f82b6bc100befa9818d3a240e12a"
       }
     },
     {
       "name": "UniversalLanguageSelector",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "584a24c468593ba3c5a5e5bf8dbe399687212f98"
+        "ref": "refs/heads/REL1_47",
+        "commit": "a1dfd405ed037f174d36cd96e3864856765919ad"
       }
     },
     {
       "name": "Elastica",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Elastica.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "a3326af107aafd75f6958e8b4ae8e3d00f22b65f"
+        "ref": "refs/heads/REL1_47",
+        "commit": "dd33b27e304020cb7562524f74480d23afe7397e"
       }
     },
     {
       "name": "CirrusSearch",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-CirrusSearch.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "a89f321d857906a8450295aee40793d61ef18543"
+        "ref": "refs/heads/REL1_47",
+        "commit": "45f214117d3a89e11721898846ba460f0310d1f2"
       }
     },
     {
       "name": "WikibaseCirrusSearch",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "5e404f0fea531ede4c9a92252d682bf8c160e86f"
+        "ref": "refs/heads/REL1_47",
+        "commit": "7007b9ade30176ff9f88255236d6cd3e37dd656b"
       }
     },
     {
       "name": "OAuth",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-OAuth.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1",
+        "ref": "refs/heads/REL1_47",
+        "commit": "705a03fa4ab8ae555a960a3f498567d93a5aa2ed",
         "patches": [
           "mediawiki-extensions-OAuth-same-domain.patch"
         ]
@@ -115,16 +115,16 @@
       "name": "PluggableAuth",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-PluggableAuth.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "d1e588302c7ccb7806b04f46f62a9b5c34ea1715"
+        "ref": "refs/heads/REL1_47",
+        "commit": "393752565845895751b1636cd338e085247de522"
       }
     },
     {
       "name": "WSOAuth",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WSOAuth.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "0eb464df201ab7caf8264b2a84b4ef67ed309b94"
+        "ref": "refs/heads/REL1_47",
+        "commit": "bc18eed1d54dc0e95f403596a9d4beda6ab89e3b"
       }
     },
     {

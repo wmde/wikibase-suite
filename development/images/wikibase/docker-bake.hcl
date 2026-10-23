@@ -32,8 +32,9 @@ variable "TAGS" {
 
 variable "MEDIAWIKI" {
   default = {
-    version       = "1.46.2"
-    source        = "https://releases.wikimedia.org/mediawiki/"
+    version       = "1.47.0-beta"
+    commit        = "7fd765c053fb54d3aa0aeafcce1ba870d41aac9e"
+    source        = "https://github.com/wikimedia/mediawiki/tree/REL1_47"
     release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }
@@ -70,7 +71,7 @@ function "image_tags" {
 target "wikibase-base" {
   args = {
     WIKIBASE_IMAGE_VERSION = IMAGE_VERSION
-    MEDIAWIKI_VERSION      = MEDIAWIKI.version
+    MEDIAWIKI_COMMIT       = MEDIAWIKI.commit
     COMPOSER_IMAGE_URL     = "${COMPOSER_IMAGE.image}:${COMPOSER_IMAGE.tag}"
     COMPOSER_IMAGE_PLATFORM = COMPOSER_IMAGE.platform
     PHP_IMAGE_URL          = "${PHP_IMAGE.image}:${PHP_IMAGE.tag}"

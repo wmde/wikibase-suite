@@ -74,13 +74,16 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
 
 # MediaWiki setup
 WORKDIR /var/www/html
-ARG MEDIAWIKI_VERSION
-# Set the user agent as releases.wikimedia.org will 403 us otherwise
-# hadolint ignore=DL4006
+ARG MEDIAWIKI_COMMIT
+# This prerelease check uses the REL1_47 source checkout. A GitHub archive
+# omits MediaWiki's bundled extensions, skins, and vendor submodules.
 RUN set -eux; \
-    curl -A "Mozilla/5.0" -fSL "https://releases.wikimedia.org/mediawiki/$(echo ${MEDIAWIKI_VERSION} | cut -d. -f1,2)/mediawiki-${MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \
-    tar -x --strip-components=1 -f mediawiki.tar.gz; \
-    rm -r mediawiki.tar.gz; \
+    git init .; \
+    git remote add origin https://github.com/wikimedia/mediawiki.git; \
+    git fetch origin --depth 1 "${MEDIAWIKI_COMMIT}"; \
+    git checkout FETCH_HEAD; \
+    git submodule update --init --recursive --depth 1 --jobs 8; \
+    find . -name .git -prune -exec rm -rf {} +; \
     install -d /var/log/mediawiki -o www-data
 
 # ###########################################################################
