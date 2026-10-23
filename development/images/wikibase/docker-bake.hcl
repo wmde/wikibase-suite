@@ -8,7 +8,7 @@ variable "IMAGE_NAME" {
 }
 
 variable "IMAGE_VERSION" {
-  default = "8.1.2"
+  default = "8.2.1"
 
   validation {
     condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
@@ -56,7 +56,7 @@ variable "COMPOSER_IMAGE" {
 variable "PHP_IMAGE" {
   default = {
     image  = "php"
-    tag    = "8.3.23-apache-bookworm"
+    tag    = "8.3.36-apache-bookworm"
     source = "https://hub.docker.com/_/php"
     info   = "https://www.php.net/supported-versions.php"
   }

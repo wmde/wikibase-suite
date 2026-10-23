@@ -15,9 +15,14 @@
 		"wikibasesuite": "MediaWiki\\Extension\\WikibaseSuite\\ApiQueryWikibaseSuite"
 	},
 	"Hooks": {
+		"BeforeInitialize": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onBeforeInitialize",
 		"BeforePageDisplay": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onBeforePageDisplay",
 		"SoftwareInfo": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onSoftwareInfo",
-		"SidebarBeforeOutput": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onSidebarBeforeOutput"
+		"SidebarBeforeOutput": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onSidebarBeforeOutput",
+		"TestCanonicalRedirect": "MediaWiki\\Extension\\WikibaseSuite\\Hooks::onTestCanonicalRedirect"
+	},
+	"SpecialPages": {
+		"WikibaseDashboard": "MediaWiki\\Extension\\WikibaseSuite\\SpecialWikibaseDashboard"
 	},
 	"ResourceModules": {
 		"ext.wikibasesuite.vector2022": {
@@ -25,6 +30,19 @@
 		},
 		"ext.wikibasesuite.pinAnonymousMainMenu": {
 			"scripts": ["resources/pinAnonymousMainMenu.js"]
+		},
+		"ext.wikibasesuite.dashboard": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"packageFiles": [
+				"resources/ext.wikibasesuite.dashboard/init.js",
+				"resources/ext.wikibasesuite.dashboard/WikibaseDashboardApp.vue"
+			],
+			"styles": ["resources/ext.wikibasesuite.dashboard/dashboard.css"],
+			"codexComponents": ["CdxMessage", "CdxButton"],
+			"dependencies": ["codex-styles"]
+		},
+		"ext.wikibasesuite.dashboard.styles": {
+			"styles": ["resources/ext.wikibasesuite.dashboard.css"]
 		}
 	},
 	"ResourceFileModulePaths": {
