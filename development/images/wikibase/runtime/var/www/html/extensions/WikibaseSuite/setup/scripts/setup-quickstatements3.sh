@@ -2,21 +2,35 @@
 
 set -euo pipefail
 
-config_file=/quickstatements3/data/runtime.json
-if [[ -s "$config_file" ]]; then
-    echo "QuickStatements 3 credentials are already provisioned."
+if [[ $# -gt 1 || ( $# -eq 1 && "$1" != "--regenerate-oauth" ) ]]; then
+    echo "Usage: setup-quickstatements3.sh [--regenerate-oauth]" >&2
+    exit 2
+fi
+regenerate_oauth=${1:-}
+
+data_directory=/quickstatements3/data
+if [[ ! -d "$data_directory" || -z "${QUICKSTATEMENTS_PUBLIC_URL:-}" ]]; then
+    if [[ -n "$regenerate_oauth" ]]; then
+        echo "QuickStatements 3 requires a mounted data directory and QUICKSTATEMENTS_PUBLIC_URL." >&2
+        exit 1
+    fi
     exit 0
 fi
-if [[ -z "${QUICKSTATEMENTS_PUBLIC_URL:-}" ]]; then
-    echo "QUICKSTATEMENTS_PUBLIC_URL is required to provision QuickStatements 3 OAuth."
+
+if [[ -z "$regenerate_oauth" && -s "$data_directory/runtime.json" ]]; then
+    php /var/www/html/extensions/WikibaseSuite/setup/scripts/setup-quickstatements3.php \
+        "$data_directory"
+    echo "QuickStatements 3 database password synchronized."
+    exit 0
+fi
+
+if [[ -z "${MW_ADMIN_NAME:-}" ]]; then
+    echo "MW_ADMIN_NAME is required to provision QuickStatements 3 OAuth."
     exit 1
 fi
 
 temporary_directory=$(mktemp -d)
 trap 'rm -rf "$temporary_directory"' EXIT
-
-php /var/www/html/extensions/WikibaseSuite/setup/scripts/provision-quickstatements3-database.php \
-    > "$temporary_directory/database.json"
 
 callback_url="${QUICKSTATEMENTS_PUBLIC_URL%/}/auth/callback/"
 php /var/www/html/extensions/OAuth/maintenance/createOAuthConsumer.php \
@@ -34,9 +48,10 @@ php /var/www/html/extensions/OAuth/maintenance/createOAuthConsumer.php \
     --version 3.0.0 \
     --jsonOnSuccess > "$temporary_directory/oauth.json"
 
-php /var/www/html/extensions/WikibaseSuite/setup/scripts/write-quickstatements3-config.php \
-    "$temporary_directory/database.json" \
-    "$temporary_directory/oauth.json" \
-    "$config_file"
-chmod 0600 "$config_file"
-echo "QuickStatements 3 database and OAuth 2 credentials provisioned."
+php /var/www/html/extensions/WikibaseSuite/setup/scripts/setup-quickstatements3.php \
+    "$data_directory" \
+    "$temporary_directory/oauth.json"
+echo "QuickStatements 3 database access and OAuth 2 credentials provisioned."
+if [[ -n "$regenerate_oauth" ]]; then
+    echo "Restart QuickStatements 3 to load the new OAuth credentials."
+fi
