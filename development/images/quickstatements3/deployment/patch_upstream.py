@@ -12,15 +12,15 @@ from pathlib import Path
 
 models_file = Path(sys.argv[1])
 models = models_file.read_text()
-old_bot_edit = '''        body = self.api_payload(client)
+old_bot_edit = """        body = self.api_payload(client)
         body["bot"] = True
         body["comment"] = self.edit_summary()
         return body
-'''
-new_bot_edit = '''        body = self.api_payload(client)
+"""
+new_bot_edit = """        body = self.api_payload(client)
         body["comment"] = self.edit_summary()
         return body
-'''
+"""
 if models.count(old_bot_edit) != 1:
     raise SystemExit("Expected one upstream bot-edit payload block")
 models_file.write_text(models.replace(old_bot_edit, new_bot_edit))

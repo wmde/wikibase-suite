@@ -14,8 +14,16 @@ class PrefixRootRedirectMiddleware:
         if self.prefix and location:
             parts = urlsplit(location)
             if not parts.scheme and not parts.netloc and parts.path.startswith("/"):
-                if parts.path != self.prefix and not parts.path.startswith(self.prefix + "/"):
+                if parts.path != self.prefix and not parts.path.startswith(
+                    self.prefix + "/"
+                ):
                     response["Location"] = urlunsplit(
-                        (parts.scheme, parts.netloc, self.prefix + parts.path, parts.query, parts.fragment)
+                        (
+                            parts.scheme,
+                            parts.netloc,
+                            self.prefix + parts.path,
+                            parts.query,
+                            parts.fragment,
+                        )
                     )
         return response
