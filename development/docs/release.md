@@ -22,7 +22,7 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
    - [Wikibase (`wikibase`)](../images/wikibase/UPDATING.md)
    - [Query Service (`wdqs`)](../images/wdqs/UPDATING.md)
    - [Query Service frontend (`wdqs-frontend`)](../images/wdqs-frontend/UPDATING.md)
-   - [QuickStatements (`quickstatements`)](../images/quickstatements/UPDATING.md)
+   - [QuickStatements 3 (`quickstatements3`)](../images/quickstatements3/README.md)
    - [OpenSearch (`opensearch`)](../images/opensearch/UPDATING.md)
    - [WBS tools (`wbs-tools`)](../images/wbs-tools/UPDATING.md)
 

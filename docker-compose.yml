@@ -64,9 +64,20 @@ services:
           echo "A valid MYSQL_USER is required to provision QuickStatements 3." >&2
           exit 1
         fi
+        # On a fresh volume, MariaDB first runs the init file before creating
+        # MYSQL_USER, then runs it again when starting the final server.
         init_file=/tmp/quickstatements3-init.sql
-        printf 'CREATE DATABASE IF NOT EXISTS `quickstatements3` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\nGRANT ALL PRIVILEGES ON `quickstatements3`.* TO '\''%s'\''@'\''%%'\'';\n' \
-          "$$MYSQL_USER" > "$$init_file"
+        cat > "$$init_file" <<SQL
+        CREATE DATABASE IF NOT EXISTS quickstatements3 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        SET @qs3_grant = IF(
+          EXISTS(SELECT 1 FROM mysql.user WHERE User = '$$MYSQL_USER' AND Host = '%'),
+          'GRANT ALL PRIVILEGES ON quickstatements3.* TO ''$$MYSQL_USER''@''%''',
+          'DO 0'
+        );
+        PREPARE qs3_stmt FROM @qs3_grant;
+        EXECUTE qs3_stmt;
+        DEALLOCATE PREPARE qs3_stmt;
+        SQL
         chmod 0644 "$$init_file"
         exec /usr/local/bin/docker-entrypoint.sh mariadbd --init-file="$$init_file"
     restart: unless-stopped

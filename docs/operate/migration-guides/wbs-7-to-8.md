@@ -19,7 +19,7 @@ Follow these steps carefully and in order.
    - [WBS changelog](../../../CHANGELOG.md)
    - [Wikibase image changelog](../../../development/images/wikibase/CHANGELOG.md)
    - [OpenSearch image changelog](../../../development/images/opensearch/CHANGELOG.md)
-   - [QuickStatements image changelog](../../../development/images/quickstatements/CHANGELOG.md)
+   - [QuickStatements image changelog](https://github.com/wmde/wikibase-suite/blob/quickstatements@1.2.3/development/images/quickstatements/CHANGELOG.md)
 
 2. Follow [Backing Up and Restoring](../backup-and-restore.md) to back up the
    existing deployment. The backup procedure stops WBS, so continue directly

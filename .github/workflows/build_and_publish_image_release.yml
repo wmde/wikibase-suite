@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - 'opensearch@*'
-      - 'quickstatements@*'
+      - 'quickstatements3@*'
       - 'wbs-tools@*'
       - 'wdqs@*'
       - 'wdqs-frontend@*'
