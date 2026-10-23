@@ -65,7 +65,7 @@ must be set explicitly.
 | `WDQS_PUBLIC_FRONTEND_URL`   |         | Public URL of the WDQS frontend, such as [wikibase/wdqs-frontend](https://hub.docker.com/r/wikibase/wdqs-frontend). Used by WikibaseManifest and by `<sparql tryit="1">` links. Leave unset to disable WDQS integration. |
 | `WIKIMEDIA_OAUTH_CONSUMER_TOKEN` | | Consumer token from a Wikimedia OAuth 1.0a consumer. Wikimedia login is active only when this and the secret token below are provided.                                                    |
 | `WIKIMEDIA_OAUTH_SECRET_TOKEN` | | Secret token from that consumer.                                                                                                                                                            |
-| `QUICKSTATEMENTS_PUBLIC_URL` |         | Public URL of QuickStatements. When `/quickstatements3/data` is mounted, Wikibase also uses it to provision the QS3 OAuth 2 consumer and runtime configuration. Leave it unset to skip QS3 provisioning. If this URL or the OAuth credentials change, use the [QS3 recovery command](../quickstatements3/README.md#suite-integration). |
+| `QUICKSTATEMENTS3_PUBLIC_URL` |         | Public URL of QuickStatements 3. When `/quickstatements3/data` is mounted, Wikibase also uses it to provision the QS3 OAuth 2 consumer and runtime configuration. Leave it unset to skip QS3 provisioning. If this URL or the OAuth credentials change, use the [QS3 recovery command](../quickstatements3/README.md#suite-integration). |
 
 ## Features
 

@@ -9,9 +9,9 @@ fi
 regenerate_oauth=${1:-}
 
 data_directory=/quickstatements3/data
-if [[ ! -d "$data_directory" || -z "${QUICKSTATEMENTS_PUBLIC_URL:-}" ]]; then
+if [[ ! -d "$data_directory" || -z "${QUICKSTATEMENTS3_PUBLIC_URL:-}" ]]; then
     if [[ -n "$regenerate_oauth" ]]; then
-        echo "QuickStatements 3 requires a mounted data directory and QUICKSTATEMENTS_PUBLIC_URL." >&2
+        echo "QuickStatements 3 requires a mounted data directory and QUICKSTATEMENTS3_PUBLIC_URL." >&2
         exit 1
     fi
     exit 0
@@ -32,7 +32,7 @@ fi
 temporary_directory=$(mktemp -d)
 trap 'rm -rf "$temporary_directory"' EXIT
 
-callback_url="${QUICKSTATEMENTS_PUBLIC_URL%/}/auth/callback/"
+callback_url="${QUICKSTATEMENTS3_PUBLIC_URL%/}/auth/callback/"
 php /var/www/html/extensions/OAuth/maintenance/createOAuthConsumer.php \
     --approve \
     --callbackUrl "$callback_url" \

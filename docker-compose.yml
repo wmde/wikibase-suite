@@ -31,7 +31,7 @@ services:
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
       ELASTICSEARCH_HOST: elasticsearch
-      QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
+      QUICKSTATEMENTS3_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements3
       WDQS_PUBLIC_ENDPOINT_URL: https://${WDQS_PUBLIC_HOST}/sparql
       WDQS_PUBLIC_FRONTEND_URL: https://${WDQS_PUBLIC_HOST}
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: ${WIKIMEDIA_OAUTH_CONSUMER_TOKEN:-}
@@ -61,33 +61,29 @@ services:
       - -ec
       - |
         if [[ ! "$${MYSQL_USER:-}" =~ ^[A-Za-z_][A-Za-z0-9_]{0,79}$$ ]]; then
-          echo "A valid MYSQL_USER is required to provision QuickStatements 3." >&2
+          echo "A valid MYSQL_USER is required to provision Suite databases." >&2
           exit 1
         fi
-        # On a fresh volume, MariaDB first runs the init file before creating
-        # MYSQL_USER, then runs it again when starting the final server.
-        init_file=/tmp/quickstatements3-init.sql
-        cat > "$$init_file" <<SQL
-        CREATE DATABASE IF NOT EXISTS quickstatements3 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-        SET @qs3_grant = IF(
-          EXISTS(SELECT 1 FROM mysql.user WHERE User = '$$MYSQL_USER' AND Host = '%'),
-          'GRANT ALL PRIVILEGES ON quickstatements3.* TO ''$$MYSQL_USER''@''%''',
-          'DO 0'
-        );
-        PREPARE qs3_stmt FROM @qs3_grant;
-        EXECUTE qs3_stmt;
-        DEALLOCATE PREPARE qs3_stmt;
-        SQL
+        # MariaDB accepts one --init-file. Compose the ordered, independently
+        # maintained SQL fragments before the server starts on every volume.
+        init_file=/tmp/wbs-init.sql
+        : > "$$init_file"
+        for script in /usr/local/share/wbs/mariadb-init-*.sh; do
+          bash "$$script" >> "$$init_file"
+        done
         chmod 0644 "$$init_file"
         exec /usr/local/bin/docker-entrypoint.sh mariadbd --init-file="$$init_file"
     restart: unless-stopped
     volumes:
       - mysql-data:/var/lib/mysql
+      - ${WBS_DIR:-.}/scripts/mariadb-init-10-wikibase.sh:/usr/local/share/wbs/mariadb-init-10-wikibase.sh:ro
+      - ${WBS_DIR:-.}/scripts/mariadb-init-20-quickstatements3.sh:/usr/local/share/wbs/mariadb-init-20-quickstatements3.sh:ro
     environment:
-      MYSQL_DATABASE: ${DB_NAME}
+      DB_NAME: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASS}
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      QUICKSTATEMENTS3_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements3
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
       start_period: 1m
@@ -186,7 +182,7 @@ services:
     volumes:
       - quickstatements3-data:/quickstatements3/data:ro
     environment:
-      QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
+      QUICKSTATEMENTS3_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements3
       WIKIBASE_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}
     healthcheck:
       test: curl --silent --fail localhost:8000/

@@ -19,7 +19,7 @@ services:
     environment:
       ELASTICSEARCH_HOST: !reset null
       MW_WG_SERVER: ${WIKIBASE_URL}
-      QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
+      QUICKSTATEMENTS3_PUBLIC_URL: ""
       WDQS_PUBLIC_FRONTEND_URL: http://${WDQS_PUBLIC_HOST}
       WDQS_PUBLIC_ENDPOINT_URL: http://${WDQS_PUBLIC_HOST}/sparql
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: test-wikimedia-consumer-token
@@ -27,6 +27,10 @@ services:
 
   wikibase-jobrunner:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+
+  mysql:
+    environment:
+      QUICKSTATEMENTS3_PUBLIC_URL: ""
 
   elasticsearch:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/opensearch:${WBS_TEST_IMAGE_TAG:-latest}
@@ -56,7 +60,7 @@ services:
     profiles: [ quickstatements3 ]
     environment:
       WIKIBASE_PUBLIC_URL: ${WIKIBASE_URL}
-      QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
+      QUICKSTATEMENTS3_PUBLIC_URL: ${QUICKSTATEMENTS3_URL}
 
   browser:
     image: ${TEST_BROWSER_IMAGE_URL}

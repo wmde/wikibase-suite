@@ -59,12 +59,12 @@ describe( 'QuickStatements 3', function () {
 	let propertyURL = null;
 
 	it( 'Should be able to load the start page', async function () {
-		await browser.url( testEnv.vars.QUICKSTATEMENTS_URL );
+		await browser.url( testEnv.vars.QUICKSTATEMENTS3_URL );
 		await expect( $( 'h1' ) ).toHaveText( 'Welcome to QuickStatements 3.0' );
 	} );
 
 	it( 'Should be able to log in', async function () {
-		await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/auth/login/` );
+		await browser.url( `${ testEnv.vars.QUICKSTATEMENTS3_URL }/auth/login/` );
 		await $( 'input[type="submit"][value="Sign in with Wikimedia account"]' ).click();
 
 		// login after redirect
@@ -91,7 +91,7 @@ describe( 'QuickStatements 3', function () {
 	} );
 
 	it( 'Should be able to click batch button and be taken to the next page', async function () {
-		await browser.url( testEnv.vars.QUICKSTATEMENTS_URL );
+		await browser.url( testEnv.vars.QUICKSTATEMENTS3_URL );
 		await $( 'main article a[href$="/batch/new/"]' ).click();
 
 		await expect( $( 'textarea[name="commands"]' ) ).toExist();
@@ -315,7 +315,7 @@ describe( 'QuickStatements 3', function () {
 	} );
 
 	it( 'Should show batches for the current user', async function () {
-		await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/batches/Admin/` );
+		await browser.url( `${ testEnv.vars.QUICKSTATEMENTS3_URL }/batches/Admin/` );
 
 		await expect( $( 'h2' ) ).toHaveText( /Last batches from Admin/ );
 	} );

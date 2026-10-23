@@ -25,7 +25,7 @@ describe( 'WikibaseManifest', function () {
 		  testEnv.vars.WDQS_URL
 		);
 		expect( data.external_services.quickstatements ).toEqual(
-		  testEnv.vars.QUICKSTATEMENTS_URL
+		  testEnv.vars.QUICKSTATEMENTS3_URL
 		);
 	} );
 } );

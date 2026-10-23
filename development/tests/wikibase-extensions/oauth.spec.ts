@@ -1,6 +1,6 @@
 describe( 'OAuth extension', function () {
 	it( 'Should allow creating a same-host callback consumer', async function () {
-		const callbackUrl = `${ testEnv.vars.QUICKSTATEMENTS_URL.replace( /^http:/, 'https:' ) }/auth/callback/`;
+		const callbackUrl = `${ testEnv.vars.QUICKSTATEMENTS3_URL.replace( /^http:/, 'https:' ) }/auth/callback/`;
 		const consumerName = `WBS OAuth Test ${ Date.now() }`;
 		const createConsumerCommand = [
 			'exec -T wikibase',
