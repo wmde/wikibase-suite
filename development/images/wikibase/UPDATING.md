@@ -15,24 +15,24 @@ wbs-dev update wikibase
 The command:
 
 1. Discovers the latest stable maintenance release in the current MediaWiki line and the newest newer stable release line, when available.
-2. Asks whether to update MediaWiki, refresh extensions without changing MediaWiki, or skip Wikibase.
-3. Links a proposed MediaWiki update to the release notes for that line, which contain the changes for each maintenance release.
+2. Asks whether to update MediaWiki, refresh its current release-branch commit and extensions, or skip Wikibase.
+3. Resolves the MediaWiki commit from the configured `ref`, changing that ref when a new release line is selected. The changelog links version changes to release notes and commit changes to a source diff.
 4. Resolves every bundled Wikimedia extension to the latest commit on the selected MediaWiki `REL` branch without asking for each extension separately.
 5. Resolves the configured community extensions from their development branches.
 6. Presents current-to-proposed commit ranges, drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
 MediaWiki, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl). Bundled extension sources and commits live in [`build/extensions.json`](./build/extensions.json), which is also consumed by the image build. The TypeScript provider updates both files together. The command confirms that releases and branches exist, but it cannot establish compatibility with local patches or the OpenSearch image.
 
-The image builds from the official MediaWiki release tarball, which includes bundled extensions and skins. The GitHub MediaWiki core mirror is a source checkout rather than an equivalent release bundle. Separately pinned Wikimedia extensions and Wikibase submodules are fetched from GitHub mirrors.
+The image builds from a pinned MediaWiki source checkout. Its bundled extensions, skins, and vendor submodules are fetched from GitHub mirrors. The `version` field supplies release metadata and the `mw` image tag; `repo` and `commit` select the exact build source, while `ref` tells the updater which branch to refresh.
 
 ## Manual update
 
 The same update can be prepared manually:
 
 1. Find the available [MediaWiki releases](https://releases.wikimedia.org/mediawiki/) and decide whether to use the latest maintenance release in the current line, move to a newer stable line, or leave `MEDIAWIKI_VERSION` unchanged.
-2. Set `MEDIAWIKI.version` in [`docker-bake.hcl`](./docker-bake.hcl) when changing MediaWiki.
-3. Derive the extension branch as `REL<major>_<minor>` from that version—for example, MediaWiki 1.46 uses `REL1_46`.
-4. Resolve the head of that branch for every Wikimedia-maintained extension in `build/extensions.json` and update its `source.commit` value.
+2. Set `MEDIAWIKI.version` in [`docker-bake.hcl`](./docker-bake.hcl) when changing MediaWiki, and set `MEDIAWIKI.ref` to the corresponding `REL<major>_<minor>` branch—for example, `REL1_47`.
+3. Resolve that branch head and update `MEDIAWIKI.commit`, including when the version has not changed.
+4. Resolve the head of the same branch for every Wikimedia-maintained extension in `build/extensions.json` and update its `source.commit` value.
 5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, and WikibaseInWikitext and update their `source.commit` values.
 6. Review the MediaWiki release notes and every resulting commit range before building or testing the image.
 

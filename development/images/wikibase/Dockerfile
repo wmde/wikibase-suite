@@ -80,11 +80,15 @@ ARG MEDIAWIKI_COMMIT
 # omits MediaWiki's bundled extensions, skins, and vendor submodules.
 RUN set -eux; \
     git config --global --add safe.directory /var/www/html; \
+    git config --global url."https://github.com/wikimedia/mediawiki-extensions-".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/extensions/"; \
+    git config --global url."https://github.com/wikimedia/mediawiki-skins-".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/skins/"; \
+    git config --global url."https://github.com/wikimedia/mediawiki-vendor".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/vendor"; \
+    git config --global url."https://github.com/wikimedia/VisualEditor.git".insteadOf "https://gerrit.wikimedia.org/r/VisualEditor/VisualEditor.git"; \
     git init .; \
     git remote add origin "${MEDIAWIKI_REPO}"; \
     git fetch origin --depth 1 "${MEDIAWIKI_COMMIT}"; \
     git checkout FETCH_HEAD; \
-    git submodule update --init --recursive --depth 1 --jobs 8; \
+    git submodule update --init --recursive --depth 1 --jobs 2; \
     find . -name .git -prune -exec rm -rf {} +; \
     install -d /var/log/mediawiki -o www-data
 

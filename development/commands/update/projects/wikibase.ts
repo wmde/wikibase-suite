@@ -3,14 +3,17 @@ import { bakeObject, resolveBakeVariables } from '../../../lib/bake.js';
 import { strong } from '../presentation.js';
 import type {
 	SourceChange,
+	SourcePin,
 	SourceUpdateInteraction,
 	SourceUpdateProvider
 } from '../source-types.js';
 import {
 	changeLines,
+	describePinChanges,
 	gitRefName,
 	gitSourcePin,
 	pinLink,
+	planPins,
 	readVariable,
 	replaceVariable,
 	request
@@ -32,12 +35,13 @@ function settings(contents: string) {
 		'MEDIAWIKI'
 	);
 	return {
-		source: String(value.source).replace(/\/?$/u, '/'),
 		notes: String(value.release_notes)
 	};
 }
 function mediaWikiLine(version: string) {
-	return version.replace(/\.\d+$/u, '');
+	const parsed = semver.parse(version);
+	if (!parsed) throw new Error(`Invalid MediaWiki version "${version}".`);
+	return `${parsed.major}.${parsed.minor}`;
 }
 function mediaWikiBranchName(version: string) {
 	return `REL${mediaWikiLine(version).replace('.', '_')}`;
@@ -63,6 +67,19 @@ function isMediaWikiBranchRef(ref: string) {
 }
 function mediaWikiBranchRef(version: string) {
 	return `refs/heads/${mediaWikiBranchName(version)}`;
+}
+
+function mediaWikiPin(contents: string): SourcePin {
+	const value = bakeObject(
+		resolveBakeVariables(contents, process.cwd()),
+		'MEDIAWIKI'
+	);
+	const ref = String(value.ref);
+	return {
+		variable: 'MEDIAWIKI.commit',
+		description: `MediaWiki ${gitRefName(ref)}`,
+		...gitSourcePin({ repo: String(value.repo), ref })
+	};
 }
 
 async function versions(line: string, source: string) {
@@ -116,7 +133,7 @@ export async function selectMediaWikiUpdate(
 	interaction: Pick<SourceUpdateInteraction, 'confirm' | 'select'>
 ) {
 	if (!candidates.maintenance && !candidates.newerLine)
-		return (await interaction.confirm('Refresh extensions?'))
+		return (await interaction.confirm('Refresh MediaWiki and extensions?'))
 			? current
 			: undefined;
 	const selected = await interaction.select(
@@ -143,7 +160,7 @@ export async function selectMediaWikiUpdate(
 		]
 	);
 	return selected === 'skip'
-		? (await interaction.confirm('Refresh extensions?'))
+		? (await interaction.confirm('Refresh MediaWiki and extensions?'))
 			? current
 			: undefined
 		: selected;
@@ -178,35 +195,44 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 		const value = settings(next);
 		const before = readVariable(previous, 'MEDIAWIKI.version');
 		const after = readVariable(next, 'MEDIAWIKI.version');
-		return before === after
-			? []
-			: [
-					{
-						variable: 'MEDIAWIKI.version',
-						description: 'MediaWiki',
-						previous: before,
-						next: after,
-						link: { label: 'Release notes', url: notesUrl(value, after) }
-					}
-				];
+		return [
+			...(before === after
+				? []
+				: [
+						{
+							variable: 'MEDIAWIKI.version',
+							description: 'MediaWiki',
+							previous: before,
+							next: after,
+							link: { label: 'Release notes', url: notesUrl(value, after) }
+						}
+					]),
+			...describePinChanges(previous, next, [mediaWikiPin(next)])
+		];
 	},
 	plan: async (contents, interaction) => {
 		const value = settings(contents);
 		const current = readVariable(contents, 'MEDIAWIKI.version');
 		const selected = await selectMediaWikiUpdate(
 			current,
-			await discoverMediaWikiCandidates(current, value.source),
+			await discoverMediaWikiCandidates(current),
 			interaction
 		);
 		if (!selected) return { contents, changes: [] };
-		const next =
-			selected === current
-				? contents
-				: replaceVariable(contents, 'MEDIAWIKI.version', selected);
+		let next = contents;
+		if (selected !== current) {
+			next = replaceVariable(next, 'MEDIAWIKI.version', selected);
+			next = replaceVariable(
+				next,
+				'MEDIAWIKI.ref',
+				mediaWikiBranchRef(selected)
+			);
+		}
+		const pinPlan = await planPins(next, [mediaWikiPin(next)]);
 		return {
-			contents: next,
-			changes:
-				selected === current
+			contents: pinPlan.contents,
+			changes: [
+				...(selected === current
 					? []
 					: [
 							{
@@ -216,7 +242,9 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 								next: selected,
 								link: { label: 'Release notes', url: notesUrl(value, selected) }
 							}
-						],
+						]),
+				...pinPlan.changes
+			],
 			refreshSources: true
 		};
 	},
@@ -246,10 +274,7 @@ export const wikibaseSourceProvider: SourceUpdateProvider = {
 			});
 		}
 		if (changes.length) interaction.note('Source update', changeLines(changes));
-		else
-			interaction.info(
-				'Dependencies are current.'
-			);
+		else interaction.info('Dependencies are current.');
 		return {
 			contents: base.contents,
 			changes,
