@@ -3,5 +3,9 @@ services:
     volumes:
       - ./upgrade:/migration-tests:ro
   mysql:
+    environment:
+      # The fixture SQL has no USE statement; the MariaDB entrypoint selects
+      # this database when importing files from docker-entrypoint-initdb.d.
+      MARIADB_DATABASE: ${DB_NAME}
     volumes:
       - ./upgrade/fixtures/wbs-7/database.sql.gz:/docker-entrypoint-initdb.d/10-wbs-7.sql.gz:ro
