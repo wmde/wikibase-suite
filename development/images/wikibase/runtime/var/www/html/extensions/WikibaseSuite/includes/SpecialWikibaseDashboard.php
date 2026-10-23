@@ -82,6 +82,15 @@ class SpecialWikibaseDashboard extends SpecialPage {
 			'</div>'
 		);
 
+		$importPropertiesUrl = Hooks::ontologyBootstrapUrlFor( $this->getUser() );
+		if ( $importPropertiesUrl !== null ) {
+			$output->addHTML(
+				'<div class="wbs-dashboard-import-row">' .
+					'<a class="cdx-button cdx-button--fake-button cdx-button--fake-button--enabled cdx-button--action-progressive cdx-button--weight-primary wbs-dashboard-import-button" href="' . htmlspecialchars( $importPropertiesUrl ) . '">Import a set of properties</a>' .
+				'</div>'
+			);
+		}
+
 	}
 
 	public function getGroupName() {

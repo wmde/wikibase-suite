@@ -4,7 +4,9 @@ namespace MediaWiki\Extension\WikibaseSuite;
 
 use ExtensionRegistry;
 use MediaWiki\Actions\ActionEntryPoint;
+use MediaWiki\Extension\WikibaseBootstrap\BootstrapService;
 use MediaWiki\Extension\WikibaseSuite\Utils;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Request\WebRequest;
 use MediaWiki\Skin\Skin;
@@ -188,9 +190,32 @@ class Hooks {
 			];
 		}
 
+		$ontologyBootstrapUrl = self::ontologyBootstrapUrlFor( $skin->getUser() );
+		if ( $ontologyBootstrapUrl !== null ) {
+			$wikibaseLinks[] = [
+				'text' => $skin->msg( 'ontologybootstrap' )->text(),
+				'href' => $ontologyBootstrapUrl,
+				'id' => 'n-ontology-bootstrap',
+				'active' => false,
+			];
+		}
+
 		self::insertBeforeToolbox( $sidebar, [
 			'wikibase-suite-sidebar' => $wikibaseLinks,
 		] );
+	}
+
+	public static function ontologyBootstrapUrlFor( User $user ): ?string {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseBootstrap' ) ||
+			!MediaWikiServices::getInstance()
+				->getSpecialPageFactory()
+				->exists( 'OntologyBootstrap' ) ||
+			!BootstrapService::newFromConfig()->isAvailableTo( $user )
+		) {
+			return null;
+		}
+
+		return SpecialPage::getTitleFor( 'OntologyBootstrap' )->getLocalURL();
 	}
 
 	private static function insertBeforeToolbox( array &$sidebar, array $sections ): void {
