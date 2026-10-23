@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-
 settings_file = Path(sys.argv[1])
 settings = settings_file.read_text()
 
@@ -21,7 +20,7 @@ replacements = (
     (
         'STATIC_ROOT = os.getenv("STATIC_ROOT", os.path.join(BASE_DIR, "static"))',
         'QS3_URL_PREFIX = os.getenv("QS3_URL_PREFIX", "").rstrip("/")\n'
-        'FORCE_SCRIPT_NAME = QS3_URL_PREFIX or None\n'
+        "FORCE_SCRIPT_NAME = QS3_URL_PREFIX or None\n"
         'STATIC_URL = (QS3_URL_PREFIX + "/static/") if QS3_URL_PREFIX else "/static/"\n'
         'STATIC_ROOT = os.getenv("STATIC_ROOT", os.path.join(BASE_DIR, "static"))\n'
         'STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"',
