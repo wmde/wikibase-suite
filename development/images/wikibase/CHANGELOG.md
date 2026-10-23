@@ -1,3 +1,14 @@
+# 8.2.1 (2026-10-21)
+
+## Dependency updates
+
+- PHP base image from 8.3.23 to 8.3.36 (Apache, Debian Bookworm). *PHP 8.3.36 includes fixes for the critical vulnerabilities CVE-2026-109618 and CVE-2026-109619* ([PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)).
+- Wikibase REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+log/324348a949555ec045b57b835c3e84f2bf18764e..eecdda89725f7b89c634c006fdda21f21f754bdb)).
+- Babel REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Babel/+log/173476e2bca8935ec93ae6d146baec5006d36695..1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/UniversalLanguageSelector/+log/8acd63baa3db207895e8811df53512402573decd..584a24c468593ba3c5a5e5bf8dbe399687212f98)).
+- CirrusSearch REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/CirrusSearch/+log/e0b04ff6cf0c06560f9255278dd74f6218d004f7..a89f321d857906a8450295aee40793d61ef18543)).
+- OAuth REL1_46 ([Diff](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/OAuth/+log/f103f51c1da53be3112fdfd06fe1995b1e907a91..80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1)).
+
 # 8.2.0 (2026-10-09)
 
 ## Changes

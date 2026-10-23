@@ -1,3 +1,21 @@
+# 1.2.3 (2026-10-23)
+
+## Changes
+
+- Restores QuickStatements' original Toolforge static asset URLs now that the resources are available again. Remove the local asset preparation and the English-only ToolTranslate snapshot, restoring the pre-1.2.2 translation behavior.
+
+# 1.2.2 (2026-10-21)
+
+## Changes
+
+- Bundle the static files QuickStatements previously loaded from Toolforge so its interface starts while Toolforge is unavailable. This image currently bundles English interface translations only; ToolTranslate lists 47 languages for QuickStatements, so restoring the others requires a follow-up.
+
+## Dependency updates
+
+- PHP base image from 8.3.8 to 8.3.36 (Apache, Debian Bookworm). *PHP 8.3.36 includes fixes for the critical vulnerabilities CVE-2026-109618 and CVE-2026-109619* ([PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)).
+- MagnusTools master ([Diff](https://codeberg.org/magnusmanske/magnustools/compare/b5686e6b4bc8f95095eea295031718a9186d1510...ec79940688576567b12b90373cc091715e3dea06)).
+- QuickStatements master ([Diff](https://github.com/magnusmanske/quickstatements/compare/5daef4bcb4a99eea27b3a3ccc10cae21e6c746f9...558474da79766d8c7f9d7d0e727194f3cc9ade3a)).
+
 # 1.2.1 (2026-09-03)
 
 ## Dependency updates
