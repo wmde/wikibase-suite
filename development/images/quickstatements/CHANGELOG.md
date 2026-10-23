@@ -1,3 +1,9 @@
+# 1.2.3 (2026-10-23)
+
+## Changes
+
+- Restores QuickStatements' original Toolforge static asset URLs now that the resources are available again. Remove the local asset preparation and the English-only ToolTranslate snapshot, restoring the pre-1.2.2 translation behavior.
+
 # 1.2.2 (2026-10-21)
 
 ## Changes
