@@ -74,13 +74,22 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
 
 # MediaWiki setup
 WORKDIR /var/www/html
-ARG MEDIAWIKI_VERSION
-# Set the user agent as releases.wikimedia.org will 403 us otherwise
-# hadolint ignore=DL4006
+ARG MEDIAWIKI_REPO
+ARG MEDIAWIKI_COMMIT
+# Pin the MediaWiki source commit. GitHub archives omit
+# MediaWiki's bundled extensions, skins, and vendor submodules.
 RUN set -eux; \
-    curl -A "Mozilla/5.0" -fSL "https://releases.wikimedia.org/mediawiki/$(echo ${MEDIAWIKI_VERSION} | cut -d. -f1,2)/mediawiki-${MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \
-    tar -x --strip-components=1 -f mediawiki.tar.gz; \
-    rm -r mediawiki.tar.gz; \
+    git config --global --add safe.directory /var/www/html; \
+    git config --global url."https://github.com/wikimedia/mediawiki-extensions-".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/extensions/"; \
+    git config --global url."https://github.com/wikimedia/mediawiki-skins-".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/skins/"; \
+    git config --global url."https://github.com/wikimedia/mediawiki-vendor".insteadOf "https://gerrit.wikimedia.org/r/mediawiki/vendor"; \
+    git config --global url."https://github.com/wikimedia/VisualEditor.git".insteadOf "https://gerrit.wikimedia.org/r/VisualEditor/VisualEditor.git"; \
+    git init .; \
+    git remote add origin "${MEDIAWIKI_REPO}"; \
+    git fetch origin --depth 1 "${MEDIAWIKI_COMMIT}"; \
+    git checkout FETCH_HEAD; \
+    git submodule update --init --recursive --depth 1 --jobs 2; \
+    find . -name .git -prune -exec rm -rf {} +; \
     install -d /var/log/mediawiki -o www-data
 
 # ###########################################################################
@@ -102,6 +111,15 @@ RUN set -eux; \
         patch \
         ; \
     rm -rf /var/lib/apt/lists/*
+# Wikibase's submodule list differs between release lines; rewrite only URLs
+# encountered by Git rather than patching a particular .gitmodules layout.
+RUN set -eux; \
+    git config --system url."https://github.com/wikimedia/data-values-value-view.git".insteadOf "https://gerrit.wikimedia.org/r/data-values/value-view"; \
+    git config --system url."https://github.com/wmde/WikibaseSerializationJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/wikibase-serialization.git"; \
+    git config --system url."https://github.com/wmde/DataValuesJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/datavalues-javascript.git"; \
+    git config --system url."https://github.com/wmde/WikibaseDataModelJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/wikibase-data-model.git"; \
+    git config --system url."https://github.com/wikimedia/wikibase-termbox.git".insteadOf "https://gerrit.wikimedia.org/r/wikibase/termbox"; \
+    git config --system url."https://github.com/wikimedia/wikibase-javascript-api.git".insteadOf "https://gerrit.wikimedia.org/r/wikibase/javascript-api"
 USER nobody
 
 COPY --chown=nobody:nogroup --chmod=755 build/extensions.json /tmp/extensions.json

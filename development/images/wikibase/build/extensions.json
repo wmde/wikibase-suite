@@ -6,10 +6,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb",
-        "patches": [
-          "wikibase-submodules-to-github.patch"
-        ]
+        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb"
       }
     },
     {
