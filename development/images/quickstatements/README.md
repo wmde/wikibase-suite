@@ -4,8 +4,6 @@
 
 This image contains QuickStatements and the required Magnustools library. It is ready to be connected to MediaWiki OAuth on a Wikibase Docker Image.
 
-The image serves QuickStatements' JavaScript, styles, Vue templates, and ToolTranslate data from its own Apache document root. Its bundled ToolTranslate snapshot currently contains English only, although ToolTranslate lists 47 interface languages for QuickStatements. This does not change the Wikibase content language configured with `LANGUAGE_CODE`.
-
 > 💡 This image is part of [Wikibase Suite (WBS)](https://github.com/wmde/wikibase-suite/blob/main/README.md), which provides everything you need to run a Wikibase instance on your own server. For an integrated setup, see the [`docker-compose.yml` file in the full Wikibase Suite (WBS) configuration](https://github.com/wmde/wikibase-suite/blob/main/docker-compose.yml).
 
 ## Setup

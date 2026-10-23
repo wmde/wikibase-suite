@@ -1,7 +1,7 @@
 # QuickStatements image manifest. Runtime build policy is supplied by wbs-dev.
 
 variable "IMAGE_NAME" { default = "quickstatements" }
-variable "IMAGE_VERSION" { default = "1.2.2" }
+variable "IMAGE_VERSION" { default = "1.2.3" }
 variable "IMAGE_REPOSITORY" { default = "wikibase/quickstatements" }
 variable "TAGS" {
   type    = list(string)
