@@ -4,8 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { discoverWdqsCandidates, wdqsSourceProvider } from './projects/wdqs.js';
 import {
-	discoverMediaWikiCandidates,
-	selectMediaWikiUpdate,
+	mediaWikiVersionAtCommit,
 	wikibaseSourceProvider
 } from './projects/wikibase.js';
 import type { SourceUpdateInteraction } from './source-types.js';
@@ -33,92 +32,23 @@ describe('Wikibase source update provider', () => {
 		globalThis.fetch = originalFetch;
 	});
 
-	it('discovers maintenance and newer stable MediaWiki releases', async () => {
-		const pages = new Map([
-			[
-				'https://releases.wikimedia.org/mediawiki/',
-				'<a href="1.47/">1.47</a><a href="1.46/">1.46</a>'
-			],
-			[
-				'https://releases.wikimedia.org/mediawiki/1.47/',
-				'mediawiki-1.47.0.tar.gz mediawiki-1.47.0.tar.gz'
-			],
-			[
-				'https://releases.wikimedia.org/mediawiki/1.46/',
-				'mediawiki-1.46.2.tar.gz mediawiki-1.46.1.tar.gz'
-			]
-		]);
+	it('reads MediaWiki version from the selected source commit', async () => {
 		globalThis.fetch = async (input) => {
-			const url = String(input);
-			const page = pages.get(url);
-			assert.notEqual(page, undefined, `unexpected request ${url}`);
-			return new Response(page, { status: 200 });
+			assert.equal(
+				String(input),
+				'https://raw.githubusercontent.com/wikimedia/mediawiki/abc123/includes/Defines.php'
+			);
+			return new Response("define( 'MW_VERSION', '1.47.0-beta' );", {
+				status: 200
+			});
 		};
-
-		assert.deepEqual(await discoverMediaWikiCandidates('1.46.0'), {
-			maintenance: '1.46.2',
-			newerLine: '1.47.0'
-		});
-	});
-
-	it('offers to refresh MediaWiki and extensions when no stable release is newer', async () => {
-		const prompts: string[] = [];
-		const selected = await selectMediaWikiUpdate(
-			'1.46.0',
-			{},
-			{
-				confirm: async (message) => {
-					prompts.push(message);
-					return true;
-				},
-				select: async () => {
-					throw new Error('MediaWiki choices should not be shown.');
-				}
-			}
+		assert.equal(
+			await mediaWikiVersionAtCommit(
+				'https://github.com/wikimedia/mediawiki.git',
+				'abc123'
+			),
+			'1.47.0-beta'
 		);
-
-		assert.equal(selected, '1.46.0');
-		assert.deepEqual(prompts, ['Refresh MediaWiki and extensions?']);
-	});
-
-	it('offers update choices when a newer MediaWiki version exists', async () => {
-		const prompts: string[] = [];
-		const selected = await selectMediaWikiUpdate(
-			'1.46.0',
-			{ maintenance: '1.46.1' },
-			{
-				confirm: async (message) => {
-					prompts.push(message);
-					return false;
-				},
-				select: async (_message, options) => {
-					assert.equal(options.at(-1)?.label, 'No');
-					return options.at(-1)!.value;
-				}
-			}
-		);
-
-		assert.equal(selected, undefined);
-		assert.deepEqual(prompts, ['Refresh MediaWiki and extensions?']);
-	});
-
-	it('refreshes extensions implicitly with a MediaWiki update', async () => {
-		const selected = await selectMediaWikiUpdate(
-			'1.46.0',
-			{ maintenance: '1.46.1', newerLine: '1.47.0' },
-			{
-				confirm: async () => {
-					throw new Error('The refresh prompt should not be shown.');
-				},
-				select: async (_message, options) => {
-					assert.match(options[0].label, /compatible extensions/u);
-					assert.match(options[1].label, /compatible extensions/u);
-					return options[0].value;
-				}
-			}
-		);
-
-		assert.equal(selected, '1.46.1');
 	});
 
 	it('links MediaWiki updates to the release branch notes', () => {
@@ -156,8 +86,10 @@ describe('Wikibase source update provider', () => {
 		const nextCommit = '1111111111111111111111111111111111111111';
 		globalThis.fetch = async (input) => {
 			const url = String(input);
-			if (url === 'https://releases.wikimedia.org/mediawiki/')
-				return new Response('', { status: 200 });
+			if (url.includes('/includes/Defines.php'))
+				return new Response("define( 'MW_VERSION', '1.47.0-beta' );", {
+					status: 200
+				});
 			assert.equal(
 				url,
 				'https://api.github.com/repos/wikimedia/mediawiki/commits/REL1_47'
@@ -166,6 +98,7 @@ describe('Wikibase source update provider', () => {
 				status: 200
 			});
 		};
+		const prompts: string[] = [];
 		const additional = {
 			'build/extensions.json': JSON.stringify({
 				schemaVersion: 1,
@@ -173,9 +106,12 @@ describe('Wikibase source update provider', () => {
 			})
 		};
 		const interaction: SourceUpdateInteraction = {
-			confirm: async () => true,
+			confirm: async (message) => {
+				prompts.push(message);
+				return true;
+			},
 			select: async () => {
-				throw new Error('No stable release should be offered.');
+				throw new Error('Version selection should not be shown.');
 			},
 			note: () => undefined,
 			info: () => undefined
@@ -185,6 +121,7 @@ describe('Wikibase source update provider', () => {
 			additional,
 			interaction
 		);
+		assert.deepEqual(prompts, ['Refresh MediaWiki REL1_47 and extensions?']);
 		assert.equal(readVariable(plan.contents, 'MEDIAWIKI.commit'), nextCommit);
 		assert.equal(
 			readVariable(plan.contents, 'MEDIAWIKI.version'),
@@ -212,52 +149,85 @@ describe('Wikibase source update provider', () => {
 		);
 	});
 
-	it('switches the release branch before resolving a newer MediaWiki line', async () => {
+	it('derives the version after the configured release branch changes', async () => {
 		const previous = readFileSync(
 			resolve(WIKIBASE_IMAGE, 'docker-bake.hcl'),
 			'utf8'
 		);
-		const pages = new Map([
-			['https://releases.wikimedia.org/mediawiki/', '<a href="1.48/">1.48</a>'],
-			[
-				'https://releases.wikimedia.org/mediawiki/1.48/',
-				'mediawiki-1.48.0.tar.gz'
-			]
-		]);
+		const changedRef = replaceVariable(
+			previous,
+			'MEDIAWIKI.ref',
+			'refs/heads/REL1_48'
+		);
 		const nextCommit = '2222222222222222222222222222222222222222';
 		globalThis.fetch = async (input) => {
 			const url = String(input);
-			const page = pages.get(url);
-			if (page !== undefined) return new Response(page, { status: 200 });
-			assert.equal(
-				url,
-				'https://api.github.com/repos/wikimedia/mediawiki/commits/REL1_48'
-			);
-			return new Response(JSON.stringify({ sha: nextCommit }), {
+			if (url.includes('/includes/Defines.php'))
+				return new Response("define( 'MW_VERSION', '1.48.0-beta' );", {
+					status: 200
+				});
+			const commits = new Map([
+				[
+					'https://api.github.com/repos/wikimedia/mediawiki/commits/REL1_48',
+					nextCommit
+				],
+				[
+					'https://api.github.com/repos/wikimedia/mediawiki-extensions-Example/commits/REL1_48',
+					'3333333333333333333333333333333333333333'
+				]
+			]);
+			const sha = commits.get(url);
+			assert.ok(sha, `unexpected request ${url}`);
+			return new Response(JSON.stringify({ sha }), {
 				status: 200
 			});
 		};
-		const result = await wikibaseSourceProvider.plan(previous, {
-			confirm: async () => {
-				throw new Error('A newer stable release should be offered.');
-			},
-			select: async (_message, options) => {
-				const option = options.find(({ value }) => value === '1.48.0');
-				assert.ok(option);
-				return option.value;
-			},
-			note: () => undefined,
-			info: () => undefined
-		});
-		assert.equal(readVariable(result.contents, 'MEDIAWIKI.version'), '1.48.0');
+		const additional = {
+			'build/extensions.json': JSON.stringify({
+				schemaVersion: 1,
+				extensions: [
+					{
+						name: 'Example',
+						source: {
+							repo: 'https://github.com/wikimedia/mediawiki-extensions-Example.git',
+							ref: 'refs/heads/REL1_47',
+							commit: 'old-extension-commit'
+						}
+					}
+				]
+			})
+		};
+		const result = await wikibaseSourceProvider.planWithAdditional!(
+			changedRef,
+			additional,
+			{
+				confirm: async () => true,
+				select: async () => {
+					throw new Error('Version selection should not be shown.');
+				},
+				note: () => undefined,
+				info: () => undefined
+			}
+		);
+		const updatedExtensions = JSON.parse(
+			result.additionalContents!['build/extensions.json']
+		);
+		assert.equal(
+			readVariable(result.contents, 'MEDIAWIKI.version'),
+			'1.48.0-beta'
+		);
 		assert.equal(
 			readVariable(result.contents, 'MEDIAWIKI.ref'),
 			'refs/heads/REL1_48'
 		);
 		assert.equal(readVariable(result.contents, 'MEDIAWIKI.commit'), nextCommit);
+		assert.equal(
+			updatedExtensions.extensions[0].source.ref,
+			'refs/heads/REL1_48'
+		);
 		assert.deepEqual(
 			result.changes.map(({ variable }) => variable),
-			['MEDIAWIKI.version', 'MEDIAWIKI.commit']
+			['MEDIAWIKI.version', 'MEDIAWIKI.commit', 'Example.source.commit']
 		);
 	});
 

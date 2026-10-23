@@ -111,6 +111,16 @@ RUN set -eux; \
         patch \
         ; \
     rm -rf /var/lib/apt/lists/*
+# Wikibase's submodule list differs between release lines; rewrite only URLs
+# encountered by Git rather than patching a particular .gitmodules layout.
+ENV GIT_CONFIG_GLOBAL=/tmp/wikibase-submodule-gitconfig
+RUN set -eux; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wikimedia/data-values-value-view.git".insteadOf "https://gerrit.wikimedia.org/r/data-values/value-view"; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wmde/WikibaseSerializationJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/wikibase-serialization.git"; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wmde/DataValuesJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/datavalues-javascript.git"; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wmde/WikibaseDataModelJavaScript.git".insteadOf "https://phabricator.wikimedia.org/source/wikibase-data-model.git"; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wikimedia/wikibase-termbox.git".insteadOf "https://gerrit.wikimedia.org/r/wikibase/termbox"; \
+    git config --file "$GIT_CONFIG_GLOBAL" url."https://github.com/wikimedia/wikibase-javascript-api.git".insteadOf "https://gerrit.wikimedia.org/r/wikibase/javascript-api"
 USER nobody
 
 COPY --chown=nobody:nogroup --chmod=755 build/extensions.json /tmp/extensions.json

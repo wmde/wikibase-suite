@@ -32,11 +32,12 @@ variable "TAGS" {
 
 variable "MEDIAWIKI" {
   default = {
-    version       = "1.47.0-beta"
-    # As with extensions, ref names the release line and commit pins the build.
-    repo          = "https://github.com/wikimedia/mediawiki.git"
+    # To select a new MediaWiki release line, change only this ref, then run wbs-dev update wikibase.
+    # The updater reads the version from that branch's source and pins its commit.
     ref           = "refs/heads/REL1_47"
+    repo          = "https://github.com/wikimedia/mediawiki.git"
     commit        = "7fd765c053fb54d3aa0aeafcce1ba870d41aac9e"
+    version       = "1.47.0-beta"
     release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }

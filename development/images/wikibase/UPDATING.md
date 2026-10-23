@@ -6,7 +6,7 @@ Use this guide when the release refreshes MediaWiki or bundled extensions.
 
 ## Automated update
 
-The recommended workflow is:
+To move to a new MediaWiki release line, change only `MEDIAWIKI.ref` in [`docker-bake.hcl`](./docker-bake.hcl) to its branch (for example, `refs/heads/REL1_47`). For a maintenance update, leave the ref unchanged. Then run:
 
 ```bash
 wbs-dev update wikibase
@@ -14,24 +14,24 @@ wbs-dev update wikibase
 
 The command:
 
-1. Discovers the latest stable maintenance release in the current MediaWiki line and the newest newer stable release line, when available.
-2. Asks whether to update MediaWiki, refresh its current release-branch commit and extensions, or skip Wikibase.
-3. Resolves the MediaWiki commit from the configured `ref`, changing that ref when a new release line is selected. The changelog links version changes to release notes and commit changes to a source diff.
+1. Uses the configured `MEDIAWIKI.ref` to select the MediaWiki source branch.
+2. Asks whether to refresh MediaWiki and its extensions from that branch.
+3. Resolves the branch head, reads `MW_VERSION` from `includes/Defines.php` at that exact commit, and updates `MEDIAWIKI.commit` and `MEDIAWIKI.version` together. The changelog links version changes to release notes and commit changes to a source diff.
 4. Resolves every bundled Wikimedia extension to the latest commit on the selected MediaWiki `REL` branch without asking for each extension separately.
 5. Resolves the configured community extensions from their development branches.
 6. Presents current-to-proposed commit ranges, drafts the changelog, asks the operator to confirm the image version, and leaves every change unstaged for review with `git diff`.
 
-MediaWiki, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl). Bundled extension sources and commits live in [`build/extensions.json`](./build/extensions.json), which is also consumed by the image build. The TypeScript provider updates both files together. The command confirms that releases and branches exist, but it cannot establish compatibility with local patches or the OpenSearch image.
+MediaWiki, image dependencies, image version, and tag policy live in [`docker-bake.hcl`](./docker-bake.hcl). Bundled extension sources and commits live in [`build/extensions.json`](./build/extensions.json), which is also consumed by the image build. The TypeScript provider updates both files together. The command confirms that the configured branch exists, but it cannot establish compatibility with local patches or the OpenSearch image.
 
-The image builds from a pinned MediaWiki source checkout. Its bundled extensions, skins, and vendor submodules are fetched from GitHub mirrors. The `version` field supplies release metadata and the `mw` image tag; `repo` and `commit` select the exact build source, while `ref` tells the updater which branch to refresh.
+The image builds from a pinned MediaWiki source checkout. Its bundled extensions, skins, and vendor submodules are fetched from GitHub mirrors. The `version` field supplies release metadata and the `mw` image tag; the updater derives it from the pinned source, so operators do not edit it separately. `repo` and `commit` select the exact build source, while `ref` tells the updater which branch to refresh.
 
 ## Manual update
 
 The same update can be prepared manually:
 
-1. Find the available [MediaWiki releases](https://releases.wikimedia.org/mediawiki/) and decide whether to use the latest maintenance release in the current line, move to a newer stable line, or leave `MEDIAWIKI_VERSION` unchanged.
-2. Set `MEDIAWIKI.version` in [`docker-bake.hcl`](./docker-bake.hcl) when changing MediaWiki, and set `MEDIAWIKI.ref` to the corresponding `REL<major>_<minor>` branch—for example, `REL1_47`.
-3. Resolve that branch head and update `MEDIAWIKI.commit`, including when the version has not changed.
+1. Find the available [MediaWiki releases](https://releases.wikimedia.org/mediawiki/) and decide whether to remain on the current release line or move to another.
+2. Set `MEDIAWIKI.ref` in [`docker-bake.hcl`](./docker-bake.hcl) to the corresponding `REL<major>_<minor>` branch—for example, `refs/heads/REL1_47`.
+3. Resolve that branch head and update `MEDIAWIKI.commit`; read `MW_VERSION` from `includes/Defines.php` at the resolved commit and set `MEDIAWIKI.version` to the same value.
 4. Resolve the head of the same branch for every Wikimedia-maintained extension in `build/extensions.json` and update its `source.commit` value.
 5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, and WikibaseInWikitext and update their `source.commit` values.
 6. Review the MediaWiki release notes and every resulting commit range before building or testing the image.
