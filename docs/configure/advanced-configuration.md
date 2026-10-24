@@ -56,13 +56,25 @@ docker compose restart wikibase wikibase-jobrunner
 
 This configuration file allows you to control `wdqs-frontend`, the GUI for the Query Service.
 
+By default, query examples are loaded from the local Wikibase page `Project:SPARQL/examples`. Administrators can create that page and add local examples with `<sparql>` blocks. On startup, an existing configuration that still points at Wikidata is migrated by removing that legacy setting; a deliberately configured non-Wikidata examples source is preserved.
+
+To customize the displayed name, logo, or favicon, set `brand.title`, `brand.logo`, and `brand.favicon` in the same file. Custom logo and favicon URLs must be reachable by the browser:
+
+  ```json
+  {
+    "brand": {
+      "title": "My Wikibase Query Service",
+      "logo": "https://example.org/assets/query-logo.svg",
+      "favicon": "https://example.org/assets/favicon.ico"
+    }
+  }
+  ```
+
 After changing `config/wdqs-frontend-config.json`, restart the Query Service frontend:
 
 ```sh
 docker compose restart wdqs-frontend
 ```
-
-By default, query examples are loaded from the local Wikibase page `Project:SPARQL/examples`. Administrators can create that page and add local examples with `<sparql>` blocks. On startup, an existing configuration that still points at Wikidata is migrated by removing that legacy setting; a deliberately configured non-Wikidata examples source is preserved.
 
 ## docker-compose.override.yml
 
