@@ -98,12 +98,12 @@ loading.
 ### Bootstrap an initial ontology
 
 To get started with a Wikibase without active properties, you can bootstrap an
-initial set of properties. These community-curated bundles include properties
+initial set of properties. This community-curated set includes properties
 mapped to Wikidata and common RDF and OWL vocabularies, providing a shared
 starting point for interoperable data.
 
 To apply an initial ontology, visit
-`https://<your-wikibase-host>/wiki/Special:OntologyBootstrap` to see the available options.
+`https://<your-wikibase-host>/wiki/Special:OntologyBootstrap` to create the small set.
 
 To configure links from external identifiers created with these properties, see
 [Wikibase's configuration guide for external identifiers](https://www.mediawiki.org/wiki/Wikibase/Installation/Advanced_configuration#Define_links_for_external_identifiers).

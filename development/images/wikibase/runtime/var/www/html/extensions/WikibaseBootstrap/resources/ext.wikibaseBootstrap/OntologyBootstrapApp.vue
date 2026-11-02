@@ -9,49 +9,36 @@
 		</cdx-message>
 		<section class="ext-wikibase-bootstrap-catalog">
 			<h2>{{ message( 'ontologybootstrap-bundle-catalog-heading' ) }}</h2>
-			<table class="ext-wikibase-bootstrap-catalog__table" style="width: 100%; table-layout: fixed;">
-		<colgroup><col class="ext-wikibase-bootstrap-catalog__ontology"><col><col class="ext-wikibase-bootstrap-catalog__action-column"></colgroup>
-		<tbody>
-			<template v-for="bundle in bundles" :key="bundle.key">
-				<tr class="ext-wikibase-bootstrap-catalog__row">
-					<th scope="row" class="ext-wikibase-bootstrap-catalog__ontology-cell">
-						{{ bundle.title }}
-						<div class="ext-wikibase-bootstrap-catalog__bundle-description">
-							{{ bundle.description }} <template v-if="bundle.sourceUrl">{{ message( 'ontologybootstrap-bundle-derived-from' ) }} <a :href="bundle.sourceUrl" rel="noopener noreferrer">{{ message( 'ontologybootstrap-bundle-source-label' ) }}</a>.</template>
+			<div class="ext-wikibase-bootstrap-catalog__details">
+				<div>
+					<h3>{{ bundle.title }}</h3>
+					<p>{{ bundle.description }} <template v-if="bundle.sourceUrl">{{ message( 'ontologybootstrap-bundle-derived-from' ) }} <a :href="bundle.sourceUrl" rel="noopener noreferrer">{{ message( 'ontologybootstrap-bundle-source-label' ) }}</a>.</template></p>
+					<p class="ext-wikibase-bootstrap-catalog__summary">{{ message( 'ontologybootstrap-bundle-property-count', bundle.propertyCount ) }}</p>
+					<dl class="ext-wikibase-bootstrap-catalog__metadata">
+						<div v-if="bundle.version">
+							<dt>{{ message( 'ontologybootstrap-metadata-version' ) }}</dt>
+							<dd>{{ bundle.version }}</dd>
 						</div>
-						<span class="ext-wikibase-bootstrap-catalog__summary">{{ message( 'ontologybootstrap-bundle-property-count', bundle.propertyCount ) }}<br>{{ message( 'ontologybootstrap-bundle-item-class-count', bundle.itemCount ) }}</span>
-					</th>
-					<td class="ext-wikibase-bootstrap-catalog__description">
-						<dl class="ext-wikibase-bootstrap-catalog__metadata">
-							<div v-if="bundle.version">
-								<dt>{{ message( 'ontologybootstrap-metadata-version' ) }}</dt>
-								<dd>{{ bundle.version }}</dd>
-							</div>
-							<div v-if="bundle.license">
-								<dt>{{ message( 'ontologybootstrap-metadata-license' ) }}</dt>
-								<dd><a :href="bundle.license" rel="noopener noreferrer">{{ bundle.rights || bundle.license }}</a></dd>
-							</div>
-							<div v-if="bundle.publisher">
-								<dt>{{ message( 'ontologybootstrap-metadata-publisher' ) }}</dt>
-								<dd><a :href="bundle.publisher" rel="noopener noreferrer">{{ bundle.publisherLabel || bundle.publisher }}</a></dd>
-							</div>
-							<div v-if="bundle.contributors && bundle.contributors.length">
-								<dt>{{ message( 'ontologybootstrap-metadata-contributors' ) }}</dt>
-								<dd>{{ bundle.contributors.join( ', ' ) }}</dd>
-							</div>
-						</dl>
-					</td>
-					<td class="ext-wikibase-bootstrap-catalog__action">
-						<div class="ext-wikibase-bootstrap-catalog__action-content">
-							<div v-if="bundle.error" class="errorbox">{{ bundle.error }}</div>
-							<span v-else-if="bundle.disabled">{{ message( 'ontologybootstrap-unavailable' ) }}</span>
-							<cdx-button v-else action="progressive" weight="primary" @click="selectBundle( bundle )">{{ message( 'ontologybootstrap-apply' ) }}</cdx-button>
+						<div v-if="bundle.license">
+							<dt>{{ message( 'ontologybootstrap-metadata-license' ) }}</dt>
+							<dd><a :href="bundle.license" rel="noopener noreferrer">{{ bundle.rights || bundle.license }}</a></dd>
 						</div>
-					</td>
-				</tr>
-			</template>
-		</tbody>
-			</table>
+						<div v-if="bundle.publisher">
+							<dt>{{ message( 'ontologybootstrap-metadata-publisher' ) }}</dt>
+							<dd><a :href="bundle.publisher" rel="noopener noreferrer">{{ bundle.publisherLabel || bundle.publisher }}</a></dd>
+						</div>
+						<div v-if="bundle.contributors && bundle.contributors.length">
+							<dt>{{ message( 'ontologybootstrap-metadata-contributors' ) }}</dt>
+							<dd>{{ bundle.contributors.join( ', ' ) }}</dd>
+						</div>
+					</dl>
+				</div>
+				<div class="ext-wikibase-bootstrap-catalog__action">
+					<div v-if="bundle.error" class="errorbox">{{ bundle.error }}</div>
+					<span v-else-if="bundle.disabled">{{ message( 'ontologybootstrap-unavailable' ) }}</span>
+					<cdx-button v-else action="progressive" weight="primary" @click="showApplyDialog = true">{{ message( 'ontologybootstrap-apply' ) }}</cdx-button>
+				</div>
+			</div>
 		</section>
 		<section v-if="config.reset" class="ext-wikibase-bootstrap-reset">
 			<h2>{{ config.reset.summary }}</h2>
@@ -79,8 +66,8 @@
 			<cdx-message v-else type="error" :inline="true">{{ config.reset.tooMany }}</cdx-message>
 		</section>
 		<cdx-dialog
-			:open="pendingBundle !== null"
-			:title="pendingBundle ? message( 'ontologybootstrap-apply-dialog-title', pendingBundle.title ) : message( 'ontologybootstrap-apply' )"
+			:open="showApplyDialog"
+			:title="message( 'ontologybootstrap-apply-dialog-title', bundle.title )"
 			:primary-action="{ label: message( 'ontologybootstrap-apply' ), actionType: 'progressive' }"
 			:default-action="{ label: message( 'ontologybootstrap-cancel' ) }"
 			use-close-button
@@ -88,11 +75,10 @@
 			@primary="applyBundle"
 			@default="closeDialog"
 		>
-			<form v-if="pendingBundle" ref="applyForm" method="post" :action="config.pageUrl">
+			<form ref="applyForm" method="post" :action="config.pageUrl">
 				<input type="hidden" name="token" :value="config.token">
 				<input type="hidden" name="action" value="apply">
-				<input type="hidden" name="bundle" :value="pendingBundle.key">
-				<p>{{ message( 'ontologybootstrap-apply-confirmation', pendingBundle.propertyCount ) }}</p>
+				<p>{{ message( 'ontologybootstrap-apply-confirmation', bundle.propertyCount ) }}</p>
 			</form>
 		</cdx-dialog>
 	</section>
@@ -106,25 +92,22 @@ module.exports = {
 	components: { CdxButton, CdxDialog, CdxMessage, CdxTextInput },
 	data() {
 		return {
-			config: mw.config.get( 'wgWikibaseBootstrap' ) || { bundles: [], reset: null },
+			config: mw.config.get( 'wgWikibaseBootstrap' ) || { bundle: {}, reset: null },
 			resetConfirmation: '',
-			pendingBundle: null
+			showApplyDialog: false
 		};
 	},
 	computed: {
-		bundles() {
-			return this.config.bundles || [];
-		},
+		bundle() {
+			return this.config.bundle || {};
+		}
 	},
 	methods: {
 		message( key, ...parameters ) {
 			return mw.msg( key, ...parameters );
 		},
-		selectBundle( bundle ) {
-			this.pendingBundle = bundle;
-		},
 		closeDialog() {
-			this.pendingBundle = null;
+			this.showApplyDialog = false;
 		},
 		updateDialog( open ) {
 			if ( !open ) {

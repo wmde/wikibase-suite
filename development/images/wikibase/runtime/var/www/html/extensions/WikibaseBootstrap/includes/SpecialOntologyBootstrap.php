@@ -34,7 +34,6 @@ class SpecialOntologyBootstrap extends SpecialPage {
 		$resetState = $service->resetState();
 		$propertyCount = $resetState['propertyCount'];
 		$applyError = '';
-		$applyBundle = '';
 		$resetError = '';
 		$resetProgress = '';
 		$request = $this->getRequest();
@@ -42,12 +41,11 @@ class SpecialOntologyBootstrap extends SpecialPage {
 		$request->getSession()->remove( self::FLASH_SESSION_KEY );
 
 		if ( $request->wasPosted() && $request->getVal( 'action' ) === 'apply' ) {
-			$applyBundle = (string)$request->getVal( 'bundle' );
 			if ( !$this->getUser()->matchEditToken( $request->getVal( 'token' ) ) ) {
 				$applyError = $this->msg( 'ontologybootstrap-invalid-token' )->text();
 			} else {
 				try {
-					$result = $service->applyBundle( $applyBundle, $this->getUser() );
+					$result = $service->applyBundle( $this->getUser() );
 					$request->getSession()->set( self::FLASH_SESSION_KEY, [
 						'completed' => $result['propertyCount'],
 					] );
@@ -55,6 +53,8 @@ class SpecialOntologyBootstrap extends SpecialPage {
 					return;
 				} catch ( RuntimeException $exception ) {
 					$applyError = $exception->getMessage();
+					$resetState = $service->resetState();
+					$propertyCount = $resetState['propertyCount'];
 				}
 			}
 		}
@@ -100,7 +100,7 @@ class SpecialOntologyBootstrap extends SpecialPage {
 
 		$out->addJsConfigVars( 'wgWikibaseBootstrap', [
 			'summary' => $this->msg( 'ontologybootstrap-summary' )->text(),
-			'bundles' => $this->bundleCatalog( $service, $propertyCount, $applyBundle, $applyError ),
+			'bundle' => $this->bundleData( $service, $propertyCount, $applyError ),
 			'completed' => (int)( $completion['completed'] ?? 0 ),
 			'resetCompleted' => (int)( $completion['resetCompleted'] ?? 0 ),
 			'pageUrl' => $this->getPageTitle()->getLocalURL(),
@@ -116,37 +116,34 @@ class SpecialOntologyBootstrap extends SpecialPage {
 		$out->addHTML( Html::rawElement( 'div', [ 'id' => 'wikibase-bootstrap-app' ] ) );
 	}
 
-	/** @return list<array<string, mixed>> */
-	private function bundleCatalog(
+	/** @return array<string, mixed> */
+	private function bundleData(
 		BootstrapService $service,
 		int $propertyCount,
-		string $applyBundle,
 		string $applyError
 	): array {
-		$bundles = [];
-		foreach ( $this->bundles() as $key => $bundle ) {
-			$contents = file_get_contents( $bundle['path'] ) ?: '';
-			$plan = $service->planBundle( $key );
-			$metadata = $this->ontologyMetadata( $contents );
-			$bundles[] = [
-				'key' => $key,
-				'title' => $this->msg( $bundle['message'] )->text(),
-				'description' => $metadata['description'],
-				'contributors' => $metadata['contributors'],
-				'license' => $metadata['license'],
-				'publisher' => $metadata['publisher'],
-				'publisherLabel' => $metadata['publisherLabel'],
-				'rights' => $metadata['rights'],
-				'version' => $metadata['version'],
-				'sourceUrl' => $metadata['source'],
-				'propertyCount' => count( $plan['properties'] ),
-				'itemCount' => 0,
-				'disabled' => $propertyCount > 0,
-				'error' => $plan['errors'] === [] && $key === $applyBundle ?
-					$applyError : implode( ' ', $plan['errors'] ),
-			];
-		}
-		return $bundles;
+		$directory = rtrim(
+			(string)$this->getConfig()->get( 'WikibaseBootstrapBundleDirectory' ),
+			'/'
+		);
+		$contents = file_get_contents( "$directory/wikibase-bootstrap.ttl" ) ?: '';
+		$plan = $service->planBundle();
+		$metadata = $this->ontologyMetadata( $contents );
+		return [
+			'title' => $this->msg( 'ontologybootstrap-bundled' )->text(),
+			'description' => $metadata['description'],
+			'contributors' => $metadata['contributors'],
+			'license' => $metadata['license'],
+			'publisher' => $metadata['publisher'],
+			'publisherLabel' => $metadata['publisherLabel'],
+			'rights' => $metadata['rights'],
+			'version' => $metadata['version'],
+			'sourceUrl' => $metadata['source'],
+			'propertyCount' => count( $plan['properties'] ),
+			'disabled' => $propertyCount > 0,
+			'error' => $plan['errors'] === [] ?
+				$applyError : implode( ' ', $plan['errors'] ),
+		];
 	}
 
 	/**
@@ -271,23 +268,5 @@ class SpecialOntologyBootstrap extends SpecialPage {
 
 	private function bootstrapService(): BootstrapService {
 		return BootstrapService::newFromConfig();
-	}
-
-	/** @return array<string, array{message: string, path: string}> */
-	private function bundles(): array {
-		$directory = rtrim(
-			(string)$this->getConfig()->get( 'WikibaseBootstrapBundleDirectory' ),
-			'/'
-		);
-		return [
-			'minimal' => [
-				'message' => 'ontologybootstrap-bundled-minimal',
-				'path' => "$directory/wikibase-bootstrap.ttl",
-			],
-			'extended' => [
-				'message' => 'ontologybootstrap-bundled-extended',
-				'path' => "$directory/wikibase-bootstrap-extended.ttl",
-			],
-		];
 	}
 }

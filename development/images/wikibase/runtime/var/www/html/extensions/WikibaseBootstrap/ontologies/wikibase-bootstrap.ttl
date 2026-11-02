@@ -57,15 +57,15 @@ wbbs:wikidata-entity-id a owl:DatatypeProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "external-id" ;
 	rdfs:label "Wikidata Entity ID"@en ;
-	dcterms:description "used to indicate a mapping (of some undefined nature, but can be further specified by individual Wikibases) from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
+	dcterms:description "used to indicate a mapping from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
 	wbb:claim [ wbb:property wbbs:formatter-uri ; wbb:value "http://www.wikidata.org/entity/$1" ] ;
 	wbb:claim [ wbb:property wbbs:formatter-uri-for-rdf ; wbb:value "http://www.wikidata.org/entity/$1" ] .
 
 wbbs:formatter-uri a owl:DatatypeProperty ;
 	wbb:kind wbb:Property ;
 	wbb:datatype "string" ;
-	rdfs:label "formatter URI"@en ;
-	dcterms:description "web page URI; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URI changes, add a new statement with preferred rank"@en ;
+	rdfs:label "formatter URL"@en ;
+	dcterms:description "web page URL; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URL changes, add a new statement with preferred rank"@en ;
 	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1630" ] .
 
 wbbs:formatter-uri-for-rdf a owl:DatatypeProperty ;

@@ -17,7 +17,6 @@ class BootstrapOntology extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Apply a reviewed Wikibase Suite ontology bootstrap to a Wikibase without active properties.' );
-		$this->addOption( 'bundle', 'Bundle to apply: minimal or extended.', true, true );
 		$this->addOption( 'user', 'Existing user to attribute the edits to.', true, true );
 		$this->addOption( 'confirm', 'Required acknowledgement that this writes Wikibase properties.' );
 		$this->requireExtension( 'WikibaseBootstrap' );
@@ -25,7 +24,7 @@ class BootstrapOntology extends Maintenance {
 
 	public function execute(): void {
 		if ( !$this->hasOption( 'confirm' ) ) {
-			$this->fatalError( 'Pass --confirm to apply a bootstrap bundle.', 1 );
+			$this->fatalError( 'Pass --confirm to create the bootstrap properties.', 1 );
 		}
 		$user = MediaWikiServices::getInstance()
 			->getUserFactory()
@@ -35,14 +34,11 @@ class BootstrapOntology extends Maintenance {
 		}
 
 		try {
-			$result = BootstrapService::newFromConfig()->applyBundle(
-				$this->getOption( 'bundle' ),
-				$user
-			);
+			$result = BootstrapService::newFromConfig()->applyBundle( $user );
 		} catch ( RuntimeException $exception ) {
 			$this->fatalError( $exception->getMessage(), 1 );
 		}
-		$this->output( "Applied {$result['propertyCount']} properties from the {$this->getOption( 'bundle' )} bundle.\n" );
+		$this->output( "Applied {$result['propertyCount']} bootstrap properties.\n" );
 	}
 }
 

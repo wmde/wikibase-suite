@@ -10,7 +10,6 @@ profile="$fixture_dir/wikibase-bootstrap-profile.shacl.ttl"
 
 for bundle in \
 	"$bundle_dir/wikibase-bootstrap.ttl" \
-	"$bundle_dir/wikibase-bootstrap-extended.ttl" \
 	"$fixture_dir/wikibase-bootstrap-profile-example.ttl"; do
 	python3 -m pyshacl -s "$profile" "$bundle"
 done

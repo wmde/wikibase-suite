@@ -29,12 +29,10 @@ use Wikibase\Repo\WikibaseRepo;
 class BootstrapService {
 	public const RESET_PROPERTY_LIMIT = 25;
 
-	/** @var array<string, string> */
-	private array $bundlePaths;
+	private string $bundlePath;
 
-	/** @param array<string, string> $bundlePaths */
-	public function __construct( array $bundlePaths ) {
-		$this->bundlePaths = $bundlePaths;
+	public function __construct( string $bundlePath ) {
+		$this->bundlePath = $bundlePath;
 	}
 
 	public static function newFromConfig(): self {
@@ -44,18 +42,12 @@ class BootstrapService {
 				->get( 'WikibaseBootstrapBundleDirectory' ),
 			'/'
 		);
-		return new self( [
-			'minimal' => "$directory/wikibase-bootstrap.ttl",
-			'extended' => "$directory/wikibase-bootstrap-extended.ttl",
-		] );
+		return new self( "$directory/wikibase-bootstrap.ttl" );
 	}
 
 	/** @return array{properties: list<array<string, mixed>>, errors: string[]} */
-	public function planBundle( string $bundle ): array {
-		if ( !isset( $this->bundlePaths[$bundle] ) ) {
-			return [ 'properties' => [], 'errors' => [ 'Unknown bootstrap bundle.' ] ];
-		}
-		$contents = file_get_contents( $this->bundlePaths[$bundle] );
+	public function planBundle(): array {
+		$contents = file_get_contents( $this->bundlePath );
 		if ( $contents === false ) {
 			return [ 'properties' => [], 'errors' => [ 'The bootstrap bundle could not be read.' ] ];
 		}
@@ -65,7 +57,7 @@ class BootstrapService {
 	/**
 	 * @return array{propertyCount: int, sourceIds: array<string, string>}
 	 */
-	public function applyBundle( string $bundle, User $user ): array {
+	public function applyBundle( User $user ): array {
 		if ( !$user->isAllowed( 'bootstrapontology' ) ) {
 			throw new RuntimeException( 'You do not have permission to bootstrap this Wikibase.' );
 		}
@@ -73,7 +65,7 @@ class BootstrapService {
 			throw new RuntimeException( 'This Wikibase has active properties and cannot be bootstrapped.' );
 		}
 
-		$plan = $this->planBundle( $bundle );
+		$plan = $this->planBundle();
 		if ( $plan['errors'] !== [] ) {
 			throw new RuntimeException( implode( ' ', $plan['errors'] ) );
 		}
@@ -144,8 +136,8 @@ class BootstrapService {
 	}
 
 	/**
-	 * Determines whether the user has a bootstrap action available: applying a
-	 * bundle or safely resetting a small, unused property set.
+	 * Whether the user can apply the bundle or safely reset a small, unused
+	 * property set from the dashboard.
 	 */
 	public function isAvailableTo( User $user ): bool {
 		if ( !$user->isAllowed( 'bootstrapontology' ) ) {

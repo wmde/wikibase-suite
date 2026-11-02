@@ -24,7 +24,7 @@ particular local `P…` identifier.
 ## Decision
 
 Bundle a `WikibaseBootstrap` MediaWiki extension in the Wikibase image. This
-puts two reviewed, property-only ontology starting points directly where a new
+puts one reviewed, property-only ontology starting point directly where a new
 Wikibase administrator can use them, rather than requiring a separate Python
 or command-line bootstrap workflow. The feature is opt-in and is available
 only while Wikibase has no active properties.
@@ -63,7 +63,7 @@ recovery tooling. The reset facility likewise has no maintenance lock or audit
 record. These limits are acceptable only for the deliberately narrow,
 property-bootstrap use case.
 
-The bundles include the standard Wikibase properties used to describe
+The bundle includes the standard Wikibase properties used to describe
 external-identifier formatter and canonical RDF URI templates. Configuring
 Wikibase to use those properties is deliberately not part of this capability.
 A default P7/P8 configuration would improve the normal fresh-instance path,
