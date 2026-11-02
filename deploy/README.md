@@ -1,5 +1,8 @@
 # Wikibase Suite
 
+> [!WARNING]
+> This build contains alpha support for Federated Items, allowing Wikidata items to be used as values in this Wikibase instance. The feature is not stable yet, its API representation is still being developed, and Query Service integration is under active investigation.
+
 Wikibase Suite (WBS) helps you run your own [Wikibase](https://wikiba.se) on a server.
 
 WBS is a supported and tested Docker Compose configuration that facilitates deployment of the following services to a public Internet server:
