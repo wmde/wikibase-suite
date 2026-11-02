@@ -5,8 +5,8 @@
       "name": "Wikibase",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
-        "ref": "refs/heads/REL1_46",
-        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb"
+        "ref": "refs/heads/REL1_45",
+        "commit": "3817e3b9ed0d8b3cab11344f2122f23973d6e701"
       }
     },
     {
