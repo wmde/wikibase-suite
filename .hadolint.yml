@@ -11,7 +11,7 @@ ignored:
   - DL3025
   - DL3042
   - DL3045
-  - DL3066
+  - DL3066 # Existing named users are defined in the base images.
   - SC2034
   - SC2086
 
