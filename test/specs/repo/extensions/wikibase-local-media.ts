@@ -99,6 +99,14 @@ describe( 'WikibaseLocalMedia', function () {
 		await browser.keys( propertyLabel.split( '' ) );
 		await propertyIdSelector( propertyId, propertyLabel ).click();
 
+		await browser.waitUntil(
+			async () => browser.execute( () => {
+				const activeElement = document.activeElement;
+				return activeElement !== document.body &&
+					!activeElement.matches( 'a, .ui-entityselector-input' );
+			} ),
+			{ timeoutMsg: 'Expected focus to move to the local media value input' }
+		);
 		await browser.keys( 'image.png'.split( '' ) );
 
 		await $( '.wikibase-toolbar-button-save[aria-disabled="false"]' )
