@@ -1,6 +1,6 @@
 # Release guide
 
-Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into `main`.
+Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into the release branch for its WBS major version.
 
 WBS and each image are versioned independently according to the [WBS version policy](../../docs/reference/versions.md) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -38,7 +38,7 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
 
 4. Commit the release changes. If additional product commits changed the release contents, rerun `wbs-dev update` so that its version and changelog proposals include them, then review and commit the refreshed metadata.
 
-5. Merge the pull request into `main` after review and CI pass.
+5. Merge the pull request into the target release branch after review and CI pass.
 
 The update command can be rerun safely while preparing the release. It reconstructs each draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading.
 
@@ -46,13 +46,15 @@ The update command can be rerun safely while preparing the release. It reconstru
 
 Run **Create a WBS Release** in GitHub Actions:
 
-1. Select `main` and the product to release.
+1. Select the target release branch and the product to release.
 2. Leave **Validate and preview the release without creating tags** checked, run the workflow, and review the result.
 3. Clear that checkbox and run the workflow again to publish.
 
 Publish required images before WBS. **All projects** performs that ordering and waits for the images before publishing WBS.
 
 Create Release runs the complete build and test gate once before creating any release tags. Each resulting image-tag workflow then builds and publishes only that image instead of repeating the complete matrix. Release tags should therefore be created through Create Release rather than pushed manually. Existing tags are skipped, so interrupted runs can be repeated. Never move a published tag; release a correction as a new version.
+
+Wikibase image releases publish their full version, major, minor, and MediaWiki version tags first. After a successful publish, the workflow moves `wikibase/wikibase:latest` only when the new image version is higher than the version currently behind `latest`. The promotion runs serially across release branches; a maintenance release from an older line cannot move `latest` backward. If the current version cannot be read, promotion fails without changing `latest`.
 
 When ARM64 releases are enabled, image releases are built natively for AMD64 and ARM64 and published as one OCI image index. Each architecture is pushed by digest first; the release tags resolved from the image's `docker-bake.hcl` are created only after the required builds succeed.
 

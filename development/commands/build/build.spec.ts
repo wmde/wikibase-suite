@@ -24,6 +24,17 @@ function dryRun(...buildArguments: string[]): string {
 }
 
 describe('wbs-dev build', () => {
+	it('keeps latest out of the Wikibase release tags', () => {
+		const bake = JSON.parse(dryRun('--publish')) as {
+			target: Record<string, { tags: string[] }>;
+		};
+		const tags = bake.target['wikibase-release'].tags;
+		assert.ok(
+			tags.some((tag) => /^wikibase\/wikibase:\d+\.\d+\.\d+$/u.test(tag))
+		);
+		assert.ok(!tags.includes('wikibase/wikibase:latest'));
+	});
+
 	it('adds the scoped and legacy registry caches', () => {
 		const command = dryRun('--push');
 		assert.match(
