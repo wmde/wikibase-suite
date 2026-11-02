@@ -1,4 +1,4 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../helpers/pages/login.page.js';
 import SpecialListPropertiesPage from '../../helpers/pages/special/list-properties.page.js';
 import SpecialNewPropertyPage from '../../helpers/pages/special/new-property.page.js';
 import {
@@ -70,13 +70,6 @@ describe( 'Special:NewProperty', function () {
 	} );
 
 	it( 'Should be able to see newly created properties in list of properties special page', async function () {
-		await SpecialListPropertiesPage.open( {
-			dataType: wikibasePropertyString.urlName,
-			limit: 1000
-		} );
-		const numberOfPropertiesBefore =
-			await SpecialListPropertiesPage.properties.length;
-
 		await SpecialNewPropertyPage.open( {
 			datatype: wikibasePropertyString.urlName
 		} );
@@ -88,7 +81,12 @@ describe( 'Special:NewProperty', function () {
 		);
 		await SpecialNewPropertyPage.submit();
 
-		let numberOfPropertiesAfter: number;
+		const propertyUrl = await browser.getUrl();
+		const propertyIdMatch = propertyUrl.match( /Property:(P\d+)/ );
+		if ( !propertyIdMatch ) {
+			throw new Error( `Could not resolve property ID from URL: ${ propertyUrl }` );
+		}
+		const propertyId = propertyIdMatch[ 1 ];
 
 		// Depends on $wgWBRepoSettings['sharedCacheDuration'] being set to 1 second
 		// from the the MediaWiki default of 30 mins
@@ -98,9 +96,9 @@ describe( 'Special:NewProperty', function () {
 					dataType: wikibasePropertyString.urlName,
 					limit: 1000
 				} );
-				numberOfPropertiesAfter =
-					await SpecialListPropertiesPage.properties.length;
-				return numberOfPropertiesAfter === numberOfPropertiesBefore + 1;
+				return $(
+					`.mw-spcontent a[href$="/wiki/Property:${ propertyId }"]`
+				).isExisting();
 			},
 			{
 				timeoutMsg:

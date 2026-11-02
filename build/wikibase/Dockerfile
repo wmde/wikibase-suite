@@ -1,6 +1,7 @@
 # Build configuration
 ARG PHP_IMAGE_URL
 ARG COMPOSER_IMAGE_URL
+ARG COMPOSER_IMAGE_PLATFORM=linux/amd64
 
 # ###########################################################################
 # Based on https://github.com/wikimedia/mediawiki-docker/blob/1161796f04d6a6bcbec9fb4c67a8ce7248392403/1.41/apache/Dockerfile
@@ -107,8 +108,9 @@ RUN set -eux; \
     install -d /var/log/mediawiki -o www-data
 
 # ###########################################################################
-# hadolint ignore=DL3006
-FROM ${COMPOSER_IMAGE_URL} AS composer
+# The Composer builder is only published for AMD64 and produces portable PHP dependencies.
+# hadolint ignore=DL3006,DL3029
+FROM --platform=${COMPOSER_IMAGE_PLATFORM} ${COMPOSER_IMAGE_URL} AS composer
 
 COPY --from=mediawiki --chown=nobody:nogroup /var/www/html /var/www/html
 WORKDIR /var/www/html

@@ -4,7 +4,7 @@
 cd "$(dirname "${BASH_SOURCE[0]}")" || exit
 
 # Must in Docker environment to access test-services by Docker network names
-# If not running in Docker, start dev runner and run script again there
+# If not running in Docker, start the build-tools container and run the script again there
 if [[ ! -f /.dockerenv  ]]; then
   cd .. || exit 1
 

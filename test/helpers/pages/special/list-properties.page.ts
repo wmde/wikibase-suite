@@ -9,7 +9,7 @@ type SpecialListPropertiesPageParams = {
 };
 
 class SpecialListPropertiesPage extends Page {
-	public get properties(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+	public get properties(): ChainablePromiseArray {
 		return $$( '.mw-spcontent ol li' );
 	}
 

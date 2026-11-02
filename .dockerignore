@@ -1,3 +1,7 @@
+.git
+.nx
+.pnpm-store
+node_modules
 test/suites/**/results
 test/log
 test/mwlog

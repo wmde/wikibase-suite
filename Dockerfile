@@ -1,5 +1,5 @@
 # Base image: Node.js LTS (20) on Debian Bookworm (12)
-FROM node:20-bookworm-slim AS wbs-dev-runner
+FROM node:20-bookworm-slim AS wbs-build-tools
 
 # WBS tests use the Selenium Standalone image, so no need for the embedded Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

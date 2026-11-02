@@ -1,5 +1,5 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import SpecialEntityPage from 'wdio-wikibase/pageobjects/item.page.js';
+import LoginPage from '../../helpers/pages/login.page.js';
 import SpecialNewItemPage from '../../helpers/pages/special/new-item.page.js';
 
 describe( 'Special:NewItem', function () {

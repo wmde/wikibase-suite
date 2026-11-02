@@ -17,8 +17,9 @@ $ ./nx build
 # Build only the MediaWiki/Wikibase containers
 $ ./nx build wikibase
 
-# Build the WDQS container without using Docker's cache (accepts `docker buildx bake` options)
-$ ./nx build wdqs --no-cache
+# Build WDQS from fresh base images without reading cached layers
+# (additional arguments are forwarded to `docker buildx build`)
+$ ./nx build wdqs --no-cache --pull
 
 # Update upstream commit hashes for wikibase
 $ ./nx run wikibase:update-commits
@@ -45,8 +46,8 @@ $ ./nx test -- repo --spec specs/repo/special-item.ts
 # Start with a headed browser
 $ ./nx test -- repo --headed
 
-# Start a specific spec only
-./nx test -- repo --spec specs/repo/queryservice.ts
+# Run the Query Service suite
+$ ./nx test -- queryservice
 
 # Start and leave up the test environment for a given test suite without running tests
 $ ./nx test -- repo --setup
@@ -63,6 +64,35 @@ $ docker compose up --wait
 
 ## Development setup
 
+Development requires Git and a current Docker installation with the Compose and
+Buildx plugins. Host installations of Node.js, pnpm, Nx, Python, and the linters
+are not required.
+
+Every `./nx` command builds or loads the `wbs-build-tools` image and runs Nx in
+that container. The repository is mounted into the container, while image builds
+and test services use the host Docker daemon. This is the same entry point used
+by CI.
+
+The first command may take longer while the build-tools image and workspace
+dependencies are prepared. Subsequent commands use Docker's local BuildKit cache.
+CI additionally imports and exports platform-scoped cache records in GHCR.
+
+Optional local overrides belong in `local.env`, which `./nx` creates when it is
+missing.
+
+To rebuild the build-tools image without reading cached layers and refresh its
+base image:
+
+```bash
+$ WBS_BUILD_TOOLS_NO_CACHE=true ./nx lint
+```
+
+To rebuild both the build-tools image and a product image from fresh base images:
+
+```bash
+$ WBS_BUILD_TOOLS_NO_CACHE=true ./nx build wikibase --no-cache --pull
+```
+
 To take advantage of the git hooks we've included, you'll need to configure git to use the `.githooks/` directory.
 
 ```bash
@@ -71,15 +101,19 @@ $ git config core.hooksPath .githooks
 
 ## Testing
 
-Tests are organized in suites, which can be found in `test/suites`. Each suite runs a series of specs (tests) found in the `test/specs` directory. Which specs run by default in each suite are specified in the `.config.ts` file in each suite directory under the `specs` key.
+Tests are organized in suites, which can be found in `test/suites`. Each suite runs a series of specs (tests) found in the `test/specs` directory. Which specs run by default in each suite are specified in the `.conf.ts` file in each suite directory under the `specs` key.
 
-All test suites are run against the most recently built local Docker images, those with the `:latest` tag, which are also selected when no tag is specified. The `deploy` test suite runs against the remote Docker images specified in the configuration in the `./deploy` directory.
+Local test suites run against the most recently built local Docker images, using
+the `:latest` tag by default. CI supplies the registry and run-specific image tag.
+Each suite starts only the optional service profiles it needs; for example,
+Query Service, Elasticsearch, and QuickStatements are not started for the core
+repo suite.
 
 _Note: Builds are currently not performed automatically by tests. Make sure you have built against current changes before running tests. See [Build](#build) above._
 
 You can run the tests in the Docker container locally exactly as they are run in CI by using `./nx test`.
 
-## Examples usage of `./nx test`:
+## Example usage of `./nx test`
 
 ```bash
 # See all`./nx test` CLI options

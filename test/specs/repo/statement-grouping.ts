@@ -1,22 +1,25 @@
 import { getTestString } from 'wdio-mediawiki/Util.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
+import { ChainablePromiseElement } from 'webdriverio';
 import ItemPage from '../../helpers/pages/entity/item.page.js';
 
 const getStatementGroupListForHeading = (
 	headingId: string
-): WebdriverIO.Element => $(
+): ChainablePromiseElement => $(
 	`//h2[@id="${ headingId }"]/following-sibling::div[contains(@class, "wikibase-statementgrouplistview")][1]`
 );
 
 const getStatementGroup = (
-	section: WebdriverIO.Element,
+	section: ChainablePromiseElement,
 	propertyId: string
-): WebdriverIO.Element => section.$(
+): ChainablePromiseElement => section.$(
 	`.//div[@id="${ propertyId }" and contains(@class, "wikibase-statementgroupview")]`
 );
 
 const getHeadingTexts = async (): Promise<string[]> => {
-	const headings = await $$( 'h2.wb-section-heading.section-heading.wikibase-statements' );
+	const headings = await $$(
+		'h2.wb-section-heading.section-heading.wikibase-statements'
+	).getElements();
 	const texts = [];
 
 	for ( const heading of headings ) {
@@ -32,7 +35,9 @@ const findSectionIndex = ( sectionTexts: string[], heading: RegExp ): number =>
 const waitForStatementSections = async (): Promise<void> => {
 	await browser.waitUntil(
 		async () => {
-			const sectionHeadings = await $$( 'h2.wb-section-heading.section-heading.wikibase-statements' );
+			const sectionHeadings = await $$(
+				'h2.wb-section-heading.section-heading.wikibase-statements'
+			).getElements();
 			return sectionHeadings.length >= 2;
 		},
 		{

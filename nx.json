@@ -11,7 +11,7 @@
 			"types": {
 				"build": true,
 				"chore": true,
-				"ci": true,
+				"ci": false,
 				"docs": true,
 				"feat": true,
 				"fix": true,

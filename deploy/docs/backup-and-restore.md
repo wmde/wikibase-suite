@@ -11,9 +11,11 @@ Besides [your configuration](./advanced-configuration.md), your data is what mak
 
 ## Back up your data
 
-Run these commands from the `wikibase-release-pipeline/deploy` directory. To back up your data, shut down the instance and dump the contents of all Docker volumes into `.tar.gz` files.
+Run these commands from the `wikibase-release-pipeline` repository root. They create a `backup` directory beside the repository, shut down the instance, and dump the contents of all Docker volumes into `.tar.gz` files there.
 
 ```sh
+mkdir -p ../backup
+cd deploy
 docker compose down
 
 for v in \
@@ -24,27 +26,30 @@ for v in \
     wbs-deploy_quickstatements-data \
     wbs-deploy_traefik-letsencrypt-data \
     ; do
-  docker run --rm --volume $v:/backup debian:12-slim tar cz backup > $v.tar.gz
+  docker run --rm --volume $v:/backup debian:12-slim tar cz backup > ../../backup/$v.tar.gz
 done
 ```
 
 ## Back up your configuration
 
-To back up local configuration changes, copy the `config` directory:
+To back up local configuration and environment values, copy the `config` directory and `.env` file into the same backup directory:
 
 ```sh
-cp -r ./config ./config-$(date +%Y%m%d%H%M%S)
+mkdir -p ../../backup/config
+cp -a ./config/. ../../backup/config/
+cp -a ./.env ../../backup/.env
 ```
 
-Keep this backup as a reference when resetting or upgrading. It may contain passwords and other secrets, so store it securely. Do not restore old generated configuration files wholesale after reset; manually re-apply your local changes into the new files created during reset.
+Keep this backup as a reference when resetting or upgrading. The `.env` file and configuration may contain plaintext passwords and other secrets, so store the backup directory securely. Do not restore old generated configuration files wholesale after reset; manually re-apply your local changes into the new files created during reset.
 
 ## Restore from a backup
 
-Run these commands from the `wikibase-release-pipeline/deploy` directory. To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from your `.tar.gz` files.
+Run these commands from the `wikibase-release-pipeline` repository root. To restore the volume backups, ensure your instance has been shut down by running `docker compose down` and populate the Docker volumes with data from the sibling `backup` directory. Only restore these backups when recovering from a failed upgrade or reset.
 
 Warning: the restore commands remove the existing Docker volumes before restoring the backup files.
 
 ```sh
+cd deploy
 docker compose down
 
 for v in \
@@ -57,6 +62,6 @@ for v in \
     ; do
   docker volume rm $v 2> /dev/null
   docker volume create $v
-  docker run -i --rm --volume $v:/backup debian:12-slim tar xz < $v.tar.gz
+  docker run -i --rm --volume $v:/backup debian:12-slim tar xz < ../../backup/$v.tar.gz
 done
 ```

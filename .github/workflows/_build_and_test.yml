@@ -1,6 +1,10 @@
 on:
   workflow_call:
 
+env:
+  BUILD_CACHE_REGISTRY: ghcr.io/${{ github.repository_owner }}/wikibase
+  BUILD_CACHE_PUSH: "true"
+
 jobs:
   skip_check:
     runs-on: ubuntu-24.04
@@ -40,7 +44,6 @@ jobs:
     if: needs.skip_check.outputs.should_skip != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-
     strategy:
       fail-fast: false
       matrix:
@@ -68,14 +71,17 @@ jobs:
       - build
     if: needs.skip_check.outputs.should_skip != 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      WBS_TEST_IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}/wikibase
+      WBS_TEST_IMAGE_TAG: dev-${{ github.run_id }}
 
     strategy:
       fail-fast: false
       matrix:
         suite:
           - repo
-          - fedprops
+          - queryservice
           - repo_client
           - quickstatements
           - pingback
@@ -89,19 +95,18 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
 
-      - name: "Pull images from GHCR"
-        uses: ./.github/actions/pull-ghcr
-
       - name: "Run ${{ matrix.suite }} test suite"
         run: ./nx test -- ${{ matrix.suite }}
 
       - name: Show logs
+        if: failure()
         run: |
           ls -lahr test/suites/${{ matrix.suite }}/results test/suites/${{ matrix.suite }}/results/*
           tail -n +1 test/suites/${{ matrix.suite }}/results/*.log
         continue-on-error: true
 
       - uses: actions/upload-artifact@v4
+        if: failure()
         with:
           name: dev-${{ github.run_id }}-${{ matrix.suite }}-test-results
           path: test/suites/**/results

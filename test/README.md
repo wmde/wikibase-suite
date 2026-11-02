@@ -1,4 +1,43 @@
-# Test cases
+# Browser test suites
+
+Run tests through the repository's build-tools container. See
+[DEVELOPMENT.md](../DEVELOPMENT.md#test) for the command reference.
+
+```bash
+# Run every suite sequentially
+./nx test
+
+# Run one suite
+./nx test -- repo_client
+
+# Run one spec within a suite's environment
+./nx test -- repo --spec specs/repo/extensions/babel.ts
+
+# Start a suite's services and leave them running
+./nx test -- queryservice --setup
+```
+
+Tests use locally built `wikibase/*:latest` images by default. Build changed
+images before testing them. CI sets `WBS_TEST_IMAGE_REGISTRY` and
+`WBS_TEST_IMAGE_TAG` to use the images built for that workflow run.
+
+## Suites
+
+| Suite | Coverage and additional services |
+| --- | --- |
+| `repo` | Core Wikibase repository and extensions; runs up to three WDIO workers |
+| `repo_client` | Repository/client federation and change dispatch |
+| `queryservice` | WDQS, updater, and WDQS frontend through the `queryservice` Compose profile |
+| `quickstatements` | QuickStatements through the `quickstatements` Compose profile |
+| `elasticsearch` | Elasticsearch-backed search through the `elasticsearch` Compose profile |
+| `pingback` | Metadata callback behavior using its suite-specific fixture |
+
+Each suite is defined by `test/suites/<suite>/<suite>.conf.ts`. It combines the
+published deployment Compose file with the shared test override and any
+suite-specific override. Test results are written beneath the suite's `results`
+directory; CI uploads them only after a failure.
+
+## Coverage notes
 
 ## Wikibase
 
@@ -32,30 +71,27 @@
 - [x] Verify Lua module can be executed
 - [x] Verify Lua module can be executed within time limit
 
-## Wikibase federated properties (using wikidata.org as source wiki)
-
-- [x] Create an item on Wikibase and add a statement using a federated property
-  - [x] Verify it is available with the correct rdf through the Entity page
-  - [x] Verify it is available through the WDQS-frontend with the correct prefixes
-
 ## Elasticsearch
 
 - [x] Create item with an alias and search by item alias
 - [x] Case-insensitive search should work through Wikibase
 
-## Environment
+## Environment and local overrides
 
-The behavior of the tests can be modified with several environment variables.
+Put local overrides in the repository-root `local.env`. Defaults come from
+`deploy/.env.example`, `test/test-services.env`, and `test/test-runner.env`.
 
-- `WIKIBASE_URL`: protocol, host name and port of the MediaWiki installation. Defaults to `http://127.0.0.1:8080` (Vagrant).
-- `MW_SCRIPT_PATH`: path to `index.php`, `api.php` etc. under `WIKIBASE_URL`. Defaults to `/w`.
+- `WIKIBASE_URL`, `WIKIBASE_CLIENT_URL`, `QUICKSTATEMENTS_URL`, and `WDQS_URL`: service URLs used from the test network.
+- `MW_SCRIPT_PATH`: path to `index.php`, `api.php`, and related endpoints; defaults to `/w`.
 - `WIKIBASE_PROPERTY_STRING`, `WIKIBASE_PROPERTY_URL`, etc.: Property ID of a property with datatype `string`, `url`, etc. – if not set, a new property of this type will be created each time the tests are run. (This will fail unless anonymous users are allowed to create properties on the wiki, so setting `WIKIBASE_PROPERTY_STRING` correctly is recommended.)
-- `HEADED_TESTS`: set to `true` to run tests in a headed browser. Follow the test execution on http://localhost:7900/?autoconnect=1&resize=scale .
+- `HEADED_TESTS`: set to `true` to run tests in a headed browser. Follow the test execution at http://localhost:7900/?autoconnect=1&resize=scale.
+- `MAX_INSTANCES`: default WDIO worker count and Selenium session limit. Individual suites may override it.
+- `TEST_LOG_LEVEL`, `MOCHA_OPTS_TIMEOUT`, and `WAIT_FOR_TIMEOUT`: runner logging and timeout controls.
 
 ## Write more tests
 
 When working on the browser tests, you’ll want to consult the documentation of the following libraries we use:
 
-- [WebdriverIO](https://webdriver.io/docs/api) for controlling the browser (`browser`, `$`, `waitForVisible`, …)
+- [WebdriverIO](https://webdriver.io/docs/api) for controlling the browser (`browser`, `$`, `waitUntil`, …)
 - [Mocha](https://mochajs.org/) as the general testing framework (`describe`, `it`, `before`, …)
 - [`expect`](https://webdriver.io/docs/api/expect-webdriverio/) for assertions (`toBe`, `toEqual`, …)

@@ -5,7 +5,12 @@ import wdioConfig from '../../setup/wdio.conf.js';
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
 	name: 'elasticsearch',
-	specs: [ 'specs/elasticsearch/*.ts' ]
+	specs: [ 'specs/elasticsearch/*.ts' ],
+	composeProfiles: [ 'elasticsearch' ],
+	composeFiles: [
+		...defaultSettings.composeFiles,
+		'suites/elasticsearch/docker-compose.override.yml'
+	]
 } );
 
 export const config = wdioConfig( testEnv );

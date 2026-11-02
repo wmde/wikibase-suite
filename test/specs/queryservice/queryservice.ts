@@ -1,10 +1,34 @@
-import { stringify } from 'querystring';
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import { getTestString } from 'wdio-mediawiki/Util.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import QueryServiceUIPage from '../../helpers/pages/queryservice-ui/queryservice-ui.page.js';
-import SpecialNewItemPage from '../../helpers/pages/special/new-item.page.js';
 import { wikibasePropertyString } from '../../helpers/wikibase-property-types.js';
+
+type SparqlBinding = {
+	p: { value: string };
+	o: { value: string };
+};
+
+const waitForEntityRdf = async (
+	itemId: string,
+	predicate: ( bindings: SparqlBinding[] ) => boolean,
+	timeoutMsg: string
+): Promise<void> => {
+	await browser.waitUntil(
+		async () => {
+			const result = await browser.makeRequest(
+				`${ testEnv.vars.WDQS_URL }/sparql`,
+				{
+					params: {
+						query: `SELECT ?p ?o WHERE { <${ testEnv.vars.WIKIBASE_URL }/entity/${ itemId }> ?p ?o }`,
+						format: 'json'
+					}
+				}
+			);
+			return predicate( result.data.results.bindings );
+		},
+		{ interval: 1000, timeoutMsg }
+	);
+};
 
 const federatedQuery = ( endpoint: string, serviceBody = '?s ?p ?o .' ): string => `
 	SELECT * WHERE {
@@ -34,13 +58,6 @@ const federatedSparqlRequest = async (
 };
 
 describe( 'QueryService', function () {
-	before( async function () {
-		await LoginPage.login(
-			testEnv.vars.MW_ADMIN_NAME,
-			testEnv.vars.MW_ADMIN_PASS
-		);
-	} );
-
 	it( 'Should be able to get sparql endpoint', async function () {
 		const result = await browser.makeRequest(
 			`${ testEnv.vars.WDQS_URL }/sparql`
@@ -97,9 +114,16 @@ describe( 'QueryService', function () {
 		// query the item using wd: prefix
 		await QueryServiceUIPage.open( `SELECT * WHERE{ <http://wikibase.example/entity/${ itemId }> ?p ?o }` );
 
-		// wait for WDQS-updater
-		// eslint-disable-next-line wdio/no-pause
-		await browser.pause( 20 * 1000 );
+		await waitForEntityRdf(
+			itemId,
+			( bindings ) => bindings.some(
+				( binding ) =>
+					binding.p.value ===
+						`${ testEnv.vars.WIKIBASE_URL }/prop/direct/${ propertyId }` &&
+					binding.o.value === propertyValue
+			),
+			`Expected ${ itemId } to be added to WDQS`
+		);
 
 		await QueryServiceUIPage.submit();
 		await QueryServiceUIPage.resultTable;
@@ -155,28 +179,20 @@ describe( 'QueryService', function () {
 	} );
 
 	it( 'Should not show up in queryservice ui after deletion', async function () {
-		await SpecialNewItemPage.open();
-
-		await $( 'input[name="label"]' ).setValue( getTestString( 'T267743-' ) );
-		await $( 'input[name="description"]' ).setValue( getTestString( 'Description' ) );
-		await $( 'input[name="aliases"]' ).setValue(
-			`${ getTestString( 'A' ) }|${ getTestString( 'B' ) }`
+		const itemId = await WikibaseApi.createItem(
+			getTestString( 'T267743-' )
 		);
-		await SpecialNewItemPage.submit();
-
-		await expect( $( 'h1#firstHeading' ).$( 'span.wikibase-title-id' ) ).toHaveText(
-			/\(Q\d+\)/
-		);
-		const itemId = (
-			await $( 'h1#firstHeading' ).$( 'span.wikibase-title-id' ).getText()
-		).replace( /[()]/g, '' );
 
 		// Check it shows up after creation
 		await QueryServiceUIPage.open( `SELECT * WHERE{ <http://wikibase.example/entity/${ itemId }> ?p ?o }` );
 
-		// wait for WDQS-updater
-		// eslint-disable-next-line wdio/no-pause
-		await browser.pause( 20 * 1000 );
+		await waitForEntityRdf(
+			itemId,
+			( bindings ) => bindings.some(
+				( binding ) => binding.p.value === 'http://schema.org/version'
+			),
+			`Expected ${ itemId } to be added to WDQS`
+		);
 
 		await QueryServiceUIPage.submit();
 		await QueryServiceUIPage.resultTable;
@@ -185,24 +201,26 @@ describe( 'QueryService', function () {
 			QueryServiceUIPage.resultIncludes( 'schema:version' )
 		).resolves.toBe( true );
 
-		// Attempt to delete
-		await LoginPage.login(
-			testEnv.vars.MW_ADMIN_NAME,
-			testEnv.vars.MW_ADMIN_PASS
+		const api = await WikibaseApi.getApi();
+		await api.request( {
+			action: 'delete',
+			title: `Item:${ itemId }`,
+			token: await api.getEditToken()
+		} );
+		await browser.waitUntil(
+			async () => ( await WikibaseApi.getEntity( itemId ) ).missing === '',
+			{ timeoutMsg: `Expected ${ itemId } to be deleted from Wikibase` }
 		);
-
-		// goto delete page
-		const query = { action: 'delete', title: 'Item:' + itemId };
-		await browser.url(
-			`${ browser.options.baseUrl }/index.php?${ stringify( query ) }`
-		);
-		await $( '.oo-ui-flaggedElement-destructive button' ).click();
 
 		await QueryServiceUIPage.open( `SELECT * WHERE{ <http://wikibase.example/entity/${ itemId }> ?p ?o }` );
 
-		// wait for WDQS-updater
-		// eslint-disable-next-line wdio/no-pause
-		await browser.pause( 20 * 1000 );
+		await waitForEntityRdf(
+			itemId,
+			( bindings ) => !bindings.some(
+				( binding ) => binding.p.value === 'http://schema.org/version'
+			),
+			`Expected ${ itemId } to be removed from WDQS`
+		);
 
 		await QueryServiceUIPage.submit();
 
@@ -285,9 +303,16 @@ describe( 'QueryService', function () {
 		  <${ testEnv.vars.WIKIBASE_URL }/entity/${ itemId }> <${ testEnv.vars.WIKIBASE_URL }/prop/direct/${ propertyId }> "test-property" .
 		}` );
 
-		// wait for WDQS-updater
-		// eslint-disable-next-line wdio/no-pause
-		await browser.pause( 20 * 1000 );
+		await waitForEntityRdf(
+			itemId,
+			( bindings ) => bindings.some(
+				( binding ) =>
+					binding.p.value ===
+						`${ testEnv.vars.WIKIBASE_URL }/prop/direct/${ propertyId }` &&
+					binding.o.value === 'test-property'
+			),
+			`Expected ${ itemId } to be added to WDQS`
+		);
 
 		await QueryServiceUIPage.submit();
 

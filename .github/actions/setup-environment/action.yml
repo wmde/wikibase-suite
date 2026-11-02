@@ -1,5 +1,5 @@
-name: "Setup Node and Docker build environment"
-description: "Reusable action to set up the environment for builds and tests"
+name: "Setup Docker registry access"
+description: "Authenticate host and containerized builds with Docker registries"
 inputs:
   github_token:
     description: token to access GHCR
@@ -7,31 +7,19 @@ inputs:
   dockerhub_token:
     description: token to access dockerhub
     required: true
+  qemu_platforms:
+    description: comma-separated non-native platforms to enable when a build requests them
+    required: false
+    default: ""
 
 runs:
   using: "composite"
   steps:
-    - uses: pnpm/action-setup@v4
-      with:
-        version: 9.6.0
-
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: "pnpm"
-
-    - name: Install Javascript dependencies (PNPM)
-      shell: bash
-      run: pnpm install
-
-    - name: Setup QEMU
+    - name: Setup QEMU for a multi-platform build
+      if: inputs.qemu_platforms != ''
       uses: docker/setup-qemu-action@v3
-
-    - name: Setup a Docker Buildx builder
-      id: builder
-      uses: docker/setup-buildx-action@v3
       with:
-        platforms: linux/amd64,linux/arm64
+        platforms: ${{ inputs.qemu_platforms }}
 
     - name: Login to Dockerhub Container Registry (to increase rate limit)
       uses: docker/login-action@v3
@@ -47,6 +35,11 @@ runs:
         username: ${{ github.repository_owner }}
         password: ${{ inputs.github_token }}
 
-    - name: Set NX to run locally using Node vs in Docker dev runner container
+    - name: Forward registry credentials to build tools
       shell: bash
-      run: echo "NX_RUN_LOCAL=true" >> $GITHUB_ENV
+      env:
+        GHCR_TOKEN: ${{ inputs.github_token }}
+        DOCKERHUB_TOKEN: ${{ inputs.dockerhub_token }}
+      run: |
+        echo "WBS_GHCR_TOKEN=$GHCR_TOKEN" >> "$GITHUB_ENV"
+        echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> "$GITHUB_ENV"

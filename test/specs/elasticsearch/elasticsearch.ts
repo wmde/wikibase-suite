@@ -1,4 +1,4 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../helpers/pages/login.page.js';
 import { getTestString } from 'wdio-mediawiki/Util.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import ItemPage from '../../helpers/pages/entity/item.page.js';
@@ -40,6 +40,13 @@ describe( 'ElasticSearch', function () {
 
 		// alias should be visible on item page
 		await expect( $( '.wikibase-aliasesview-list-item' ) ).toHaveText( itemAlias );
+	} );
+
+	it( 'Should load the Elasticsearch extensions', async function () {
+		await page.open( '/wiki/Special:Version' );
+		await expect( $( '#mw-version-ext-wikibase-WikibaseCirrusSearch' ) ).toExist();
+		await expect( $( '#mw-version-ext-other-CirrusSearch' ) ).toExist();
+		await expect( $( '#mw-version-ext-other-Elastica' ) ).toExist();
 	} );
 
 	it( 'should be able to search case-insensitive', async function () {

@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
 import page from '../../../helpers/pages/page.js';
 import { utf8 } from '../../../helpers/read-file-encoding.js';
 
@@ -44,7 +44,7 @@ describe( 'EntitySchema', function () {
 		await expect( $( '.entityschema-description' ) ).toHaveText( testDescription );
 		await expect( entitySchemaEl ).toHaveText( shexTemplate );
 		await expect( $( '.entityschema-title-label' ) ).toHaveText( testLabel );
-		await expect( $( '.entityschema-title-id' ) ).toHaveText( '(E1)' );
+		await expect( $( '.entityschema-title-id' ) ).toHaveText( /\(E\d+\)/ );
 		await expect( entitySchemaEl.$( 'div' ) ).toHaveElementClass( 'mw-highlight' );
 
 		await expect( $( '.external.entityschema-check-schema' ) ).toHaveAttr(

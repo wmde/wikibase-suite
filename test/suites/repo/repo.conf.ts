@@ -5,6 +5,7 @@ import wdioConfig from '../../setup/wdio.conf.js';
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
 	name: 'repo',
+	maxInstances: 3,
 	specs: [ 'specs/repo/*.ts', 'specs/repo/extensions/*.ts' ],
 	envFiles: [
 		...defaultSettings.envFiles,

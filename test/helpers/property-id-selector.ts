@@ -1,10 +1,15 @@
 /**
- * `$( '=P1 (P1)' )`
+ * `$( '=property label (P1)' )`
  *
  * @param {string} id
+ * @param {string} label
  * @return {Object}
  */
-const propertyIdSelector = ( id: string ): ChainablePromiseElement =>
-	$( `=${ id } (${ id })` );
+const propertyIdSelector = (
+	id: string,
+	label: string = id
+): ChainablePromiseElement => label === id ?
+	$( `=${ id } (${ id })` ) :
+	$( `.ui-entityselector-list a[href$="/wiki/Property:${ id }"]` );
 
 export default propertyIdSelector;

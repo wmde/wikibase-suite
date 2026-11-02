@@ -49,6 +49,9 @@ jobs:
           dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
 
       - name: Build image and push to Dockerhub with release tags
+        env:
+          BUILD_CACHE_REGISTRY: ghcr.io/${{ github.repository_owner }}/wikibase
+          BUILD_CACHE_PUSH: "true"
         run: |
           set -e # abort on error
           set -x # show commands

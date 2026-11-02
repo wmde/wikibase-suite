@@ -32,16 +32,20 @@ export const baseTestSettings = {
 			throw new SevereServiceError( e );
 		}
 	},
-	afterTest: async ( mochaTest: Frameworks.Test ): Promise<void> => {
+	afterTest: async (
+		mochaTest: Frameworks.Test,
+		result: Frameworks.TestResult
+	): Promise<void> => {
+		if ( result.passed || result.skipped ) {
+			return;
+		}
+
 		const testFile = encodeURIComponent(
 			mochaTest.file.match( /.+\/(.+)\.[jt]s$/ )[ 1 ].replace( /\s+/g, '-' )
 		);
 		const screenshotFilename = `${ testFile }__${ mochaTest.title }`;
 		try {
-			saveScreenshot(
-				screenshotFilename,
-				`${ testEnv.settings.outputDir }/screenshots`
-			);
+			await saveScreenshot( screenshotFilename );
 		} catch ( error ) {
 			console.error( 'failed writing screenshot ...' );
 			console.error( error );
@@ -68,6 +72,11 @@ export const makeTestSettings = (
 		name: settings.name,
 		specs: settings.specs
 	};
+	const maxInstances =
+		settings.maxInstances ?? parseInt( process.env.MAX_INSTANCES );
+	// Docker Compose uses this value to configure the Selenium session limit.
+	// Keep it aligned with the number of workers WebdriverIO will start.
+	testEnvVars.MAX_INSTANCES = maxInstances.toString();
 	const debug = process.env.DEBUG === 'true' || process.env.DEBUG === 'node';
 	const debugNode = process.env.DEBUG === 'node';
 	const outputDir = `suites/${ settings.name }/results`;
@@ -83,11 +92,12 @@ export const makeTestSettings = (
 		waitForTimeout: debug ?
 			ONE_DAY_IN_MS :
 			parseInt( process.env.WAIT_FOR_TIMEOUT ),
-		maxInstances: parseInt( process.env.MAX_INSTANCES ),
+		maxInstances,
 		pwd: process.env.HOST_PWD ? `${ process.env.HOST_PWD }/test` : process.cwd()
 	};
 	const testEnvironmentSettings: TestEnvSettings = {
 		composeFiles: settings.composeFiles || baseTestSettings.composeFiles,
+		composeProfiles: settings.composeProfiles || [],
 		waitForUrls: settings.waitForUrls || baseTestSettings.waitForUrls,
 		envFiles: settings.envFiles || baseTestSettings.envFiles,
 		vars: testEnvVars

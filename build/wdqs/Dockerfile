@@ -16,14 +16,35 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+# ---------------------------------------------------------------------------
+# WDQS DISTRIBUTION SOURCE — TEMPORARY GITLAB WORKAROUND
+#
+# Archiva is the normal source, but it is unreliable due to
+# https://phabricator.wikimedia.org/T426114. To switch back once that is fixed,
+# uncomment the Archiva block and comment out the GitLab block. Keep exactly one
+# of these RUN blocks enabled.
+#
+# Archiva source (disabled):
+# RUN set -x; \
+#     TARBALL="service-${WDQS_VERSION}-dist.tar.gz"; \
+#     wget --no-verbose "https://archiva.wikimedia.org/repository/releases/org/wikidata/query/rdf/service/$WDQS_VERSION/$TARBALL"; \
+#     SIGNATURE="$TARBALL".md5; \
+#     wget --no-verbose "https://archiva.wikimedia.org/repository/releases/org/wikidata/query/rdf/service/$WDQS_VERSION/$SIGNATURE"; \
+#     echo "$(cat $SIGNATURE)  $TARBALL" | md5sum -c; \
+#     mkdir /tmp/wdqs-service; \
+#     tar zxvf $TARBALL -C /tmp/wdqs-service --strip-components=1
+#
+# GitLab source (temporarily enabled):
 RUN set -x; \
     TARBALL="service-${WDQS_VERSION}-dist.tar.gz"; \
-    wget --no-verbose "https://archiva.wikimedia.org/repository/releases/org/wikidata/query/rdf/service/$WDQS_VERSION/$TARBALL"; \
+    wget --no-verbose "https://gitlab.wikimedia.org/api/v4/projects/2745/packages/maven/org/wikidata/query/rdf/service/$WDQS_VERSION/$TARBALL"; \
     SIGNATURE="$TARBALL".md5; \
-    wget --no-verbose "https://archiva.wikimedia.org/repository/releases/org/wikidata/query/rdf/service/$WDQS_VERSION/$SIGNATURE"; \
+    wget --no-verbose "https://gitlab.wikimedia.org/api/v4/projects/2745/packages/maven/org/wikidata/query/rdf/service/$WDQS_VERSION/$SIGNATURE"; \
     echo "$(cat $SIGNATURE)  $TARBALL" | md5sum -c; \
     mkdir /tmp/wdqs-service; \
     tar zxvf $TARBALL -C /tmp/wdqs-service --strip-components=1
+# ---------------------------------------------------------------------------
 
 # ###########################################################################
 # hadolint ignore=DL3006

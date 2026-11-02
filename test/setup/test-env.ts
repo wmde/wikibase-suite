@@ -210,6 +210,9 @@ export default class TestEnv {
 		this.settings.composeFiles.forEach( ( composeFile ) =>
 			dockerComposeCmdArray.push( `-f ${ composeFile }` )
 		);
+		this.settings.composeProfiles.forEach( ( composeProfile ) =>
+			dockerComposeCmdArray.push( `--profile ${ composeProfile }` )
+		);
 
 		return dockerComposeCmdArray.join( ' ' );
 	}

@@ -1,7 +1,7 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import { parseSemVer } from 'semver-parser';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import PropertyPage from '../../helpers/pages/entity/property.page.js';
+import LoginPage from '../../helpers/pages/login.page.js';
 import page from '../../helpers/pages/page.js';
 import SpecialEntityDataPage from '../../helpers/pages/special/entity-data.page.js';
 import propertyIdSelector from '../../helpers/property-id-selector.js';
@@ -18,6 +18,35 @@ const statementText = 'STATEMENT';
 const referenceText = 'REFERENCE';
 const undoSummaryText = 'UNDO_SUMMARY';
 
+const waitForEntityData = async (
+	propertyId: string,
+	condition: ( claim: Claim ) => boolean,
+	timeoutMsg: string
+): Promise<void> => {
+	await browser.waitUntil(
+		async () => {
+			const responseData = await SpecialEntityDataPage.getData( propertyId );
+			const claims = responseData.entities[ propertyId ].claims;
+			return Object.values( claims )
+				.some( ( propertyClaims ) => propertyClaims.some( condition ) );
+		},
+		{ timeoutMsg }
+	);
+};
+
+const waitForValueInputFocus = async (): Promise<void> => {
+	await browser.waitUntil(
+		async () => browser.execute( () => {
+			const activeElement = document.activeElement;
+			return (
+				activeElement !== document.body &&
+				!activeElement.matches( 'a, .ui-entityselector-input' )
+			);
+		} ),
+		{ timeoutMsg: 'Expected focus to move to the statement value input' }
+	);
+};
+
 describe( 'Property', function () {
 	before( async function () {
 		await LoginPage.login(
@@ -32,13 +61,37 @@ describe( 'Property', function () {
 		describe( `Should be able to work with type ${ dataType.name }`, function () {
 			let propertyId: string = null;
 			let stringPropertyId: string = null;
+			let stringPropertyLabel: string = null;
 
 			before( async function () {
 				propertyId = await WikibaseApi.createProperty( dataType.urlName );
+				stringPropertyLabel = `property-selector-${ Date.now() }`;
 				stringPropertyId = await WikibaseApi.createProperty(
-					wikibasePropertyString.urlName
+					wikibasePropertyString.urlName,
+					{
+						labels: {
+							en: {
+								language: 'en',
+								value: stringPropertyLabel
+							}
+						}
+					}
 				);
 				await browser.waitForJobs();
+				await browser.waitUntil(
+					async () => {
+						const result = await browser.makeRequest(
+							`${ testEnv.vars.WIKIBASE_URL }/w/api.php?action=wbsearchentities&search=${ encodeURIComponent( stringPropertyLabel ) }&format=json&errorformat=plaintext&language=en&uselang=en&type=property`
+						);
+						return result.data.search.some(
+							( property ) => property.id === stringPropertyId
+						);
+					},
+					{
+						timeoutMsg:
+							`Expected ${ stringPropertyId } to appear in property search`
+					}
+				);
 			} );
 
 			beforeEach( async function () {
@@ -47,39 +100,74 @@ describe( 'Property', function () {
 
 			it( 'Should be able to add statement to property', async function () {
 				await $( '=add statement' ).click();
-				// fill out property id for statement
-				await browser.keys( stringPropertyId.split( '' ) );
-				await propertyIdSelector( stringPropertyId ).click();
+				await browser.waitUntil(
+					async () => $( '.ui-entityselector-input' ).isFocused(),
+					{ timeoutMsg: 'Expected focus on the statement property selector' }
+				);
+				await browser.keys( stringPropertyLabel.split( '' ) );
+				const propertySelector = propertyIdSelector(
+					stringPropertyId,
+					stringPropertyLabel
+				);
+				await propertySelector.waitForExist();
+				await propertySelector.click();
+				await waitForValueInputFocus();
 				await browser.keys( statementText.split( '' ) );
 				await PropertyPage.saveStatementLink.click();
+				await waitForEntityData(
+					propertyId,
+					( claim ) => claim.mainsnak.property === stringPropertyId &&
+						claim.mainsnak.datavalue.value === statementText,
+					`Expected statement on ${ propertyId } to be persisted`
+				);
 			} );
 
 			it( 'Should be able to see added statement', async function () {
-				this.retries( 4 );
 				await expect( $( `div=${ statementText }` ) ).toExist();
 				await expect( $( `aria/Property:${ stringPropertyId }` ) ).toHaveText(
-					stringPropertyId
+					stringPropertyLabel
 				);
 			} );
 
 			it( 'Should be able to add reference to property', async function () {
 				await $( '=add reference' ).click();
-				// fill out property id for reference
-				await $( '.ui-entityselector-input' ).isFocused();
-				await browser.keys( stringPropertyId.split( '' ) );
-				await propertyIdSelector( stringPropertyId ).click();
+				await browser.waitUntil(
+					async () => $( '.ui-entityselector-input' ).isFocused(),
+					{ timeoutMsg: 'Expected focus on the reference property selector' }
+				);
+				await browser.keys( stringPropertyLabel.split( '' ) );
+				const propertySelector = propertyIdSelector(
+					stringPropertyId,
+					stringPropertyLabel
+				);
+				await propertySelector.waitForExist();
+				await propertySelector.click();
+				await waitForValueInputFocus();
 				await browser.keys( referenceText.split( '' ) );
 				await PropertyPage.saveStatementLink.click();
+				await waitForEntityData(
+					propertyId,
+					( claim ) => Boolean(
+						claim.references &&
+						claim.references.some(
+							( reference ) => Boolean(
+								reference.snaks[ stringPropertyId ] &&
+								reference.snaks[ stringPropertyId ].some(
+									( snak ) => snak.datavalue.value === referenceText
+								)
+							)
+						)
+					),
+					`Expected reference on ${ propertyId } to be persisted`
+				);
 			} );
 
 			it( 'Should be able to see added reference', async function () {
-				this.retries( 4 );
 				await $( '=1 reference' ).click();
 				await expect( $( `div=${ referenceText }` ) ).toExist();
 			} );
 
 			it( 'Should contain statement and reference in EntityData', async function () {
-				this.retries( 4 );
 				const responseData = await SpecialEntityDataPage.getData( propertyId );
 				const claim: Claim =
 					responseData.entities[ propertyId ].claims[ stringPropertyId ][ 0 ];
@@ -97,17 +185,20 @@ describe( 'Property', function () {
 			} );
 
 			it( 'Should display the added properties on the "Recent changes" page', async function () {
-				await browser.waitForJobs();
-				await page.open( '/wiki/Special:RecentChanges' );
-				await expect( $( `=(${ propertyId })` ) ).toExist();
-				await expect( $( `=(${ stringPropertyId })` ) ).toExist();
+				await page.open( '/wiki/Special:RecentChanges?limit=500' );
+				await expect(
+					$( `a[href$="/wiki/Property:${ propertyId }"]` )
+				).toExist();
+				await expect(
+					$( `a[href$="/wiki/Property:${ stringPropertyId }"]` )
+				).toExist();
 			} );
 
 			it( 'Should be able to revert a change', async function () {
 				await $( '=View history' ).click();
-				await expect(
-					$( 'ul.mw-contributions-list' ).$$( 'li' )
-				).resolves.toHaveLength( 3 );
+				expect(
+					await $( 'ul.mw-contributions-list' ).$$( 'li' ).getElements()
+				).toHaveLength( 3 );
 				await $( 'ul.mw-contributions-list' ).$( 'li.before' ).$( 'a=undo' ).click();
 				await $(
 					'label=Summary (will be appended to an automatically generated summary):'
@@ -116,9 +207,9 @@ describe( 'Property', function () {
 				await $( 'button=Save page' ).click();
 
 				await $( '=View history' ).click();
-				await expect(
-					$( 'ul.mw-contributions-list' ).$$( 'li' )
-				).resolves.toHaveLength( 4 );
+				expect(
+					await $( 'ul.mw-contributions-list' ).$$( 'li' ).getElements()
+				).toHaveLength( 4 );
 				await expect( $( 'span.mw-tag-marker-mw-undo' ) ).toExist();
 				await expect( $( 'ul.mw-contributions-list' ).$( 'li.before' ) ).toHaveText(
 					new RegExp( undoSummaryText )

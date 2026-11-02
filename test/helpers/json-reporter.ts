@@ -6,7 +6,7 @@ import { utf8 } from './read-file-encoding.js';
 
 type JsonReporterOptions = {
 	suiteName: string;
-	resultsFilePath: string;
+	resultFilePath: string;
 };
 
 class JsonReporter extends WDIOReporter {
@@ -43,7 +43,8 @@ class JsonReporter extends WDIOReporter {
 	}
 
 	public onSuiteEnd( suiteStats: SuiteStats ): void {
-		const suite = this.options.suiteName;
+		const { suiteName: suite, resultFilePath } =
+			this.options as Partial<Reporters.Options> & JsonReporterOptions;
 
 		const result: ResultType = {
 			[ suite ]: {
@@ -54,10 +55,10 @@ class JsonReporter extends WDIOReporter {
 		};
 
 		// eslint-disable-next-line security/detect-non-literal-fs-filename
-		if ( existsSync( this.options.resultFilePath ) ) {
+		if ( existsSync( resultFilePath ) ) {
 			const existing: ResultType = JSON.parse(
 				// eslint-disable-next-line security/detect-non-literal-fs-filename
-				readFileSync( this.options.resultFilePath, 'utf8' )
+				readFileSync( resultFilePath, 'utf8' )
 			);
 
 			result.start = suiteStats.start;
@@ -72,7 +73,7 @@ class JsonReporter extends WDIOReporter {
 
 		// eslint-disable-next-line security/detect-non-literal-fs-filename
 		writeFileSync(
-			this.options.resultFilePath,
+			resultFilePath,
 			JSON.stringify( result, null, 2 ),
 			utf8.encoding
 		);

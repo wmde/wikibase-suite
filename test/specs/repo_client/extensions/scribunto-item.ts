@@ -1,9 +1,9 @@
 import { readFile } from 'fs/promises';
 import { stringify } from 'querystring';
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import { getTestString } from 'wdio-mediawiki/Util.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import ItemPage from '../../../helpers/pages/entity/item.page.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
 import RepoClientLoginPage from '../../../helpers/pages/repo-client-login.page.js';
 import { utf8 } from '../../../helpers/read-file-encoding.js';
 import ExternalChange from '../../../types/external-change.js';

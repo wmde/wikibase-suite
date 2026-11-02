@@ -6,16 +6,14 @@ declare namespace WebdriverIO {
 	type DatabaseConfig = import( './database-config.js' ).default;
 	type ExternalChange = import( './external-change.js' ).default;
 	type LuaCPUValue = import( './lua-cpu-value.js' ).default;
-	type Options = import( '@wdio/types' ).Options;
+
+	interface Capabilities {
+		'mw:user'?: string;
+		'mw:pwd'?: string;
+		'mw:screenshotPath'?: string;
+	}
 
 	interface Browser {
-		/**
-		 * As of v8 of WDIO the browser.config object is deprecated in preference to browser.options
-		 * This tolerates our reassignment of options to config in default-functions which is
-		 * necessary until the upstream WMDE and WikiMedia WDIO helper modules catch-up
-		 */
-		config: Options;
-
 		/**
 		 * Execute query on database
 		 */

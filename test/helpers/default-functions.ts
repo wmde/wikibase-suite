@@ -11,20 +11,6 @@ import { TestSettings } from '../types/test-settings.js';
 export function defaultFunctions(): void {
 	const settings: TestSettings = testEnv.settings;
 
-	// ======
-	// Custom WDIO config specific to MediaWiki
-	// ======
-	// Use in a test as `browser.options.<key>`.
-
-	// As of v8 of WDIO the browser.config object is deprecated in preference to browser.options
-	// This reassignment of options to config is necessary until the upstream WMDE and WikiMedia
-	// WDIO helper modules catch-up
-	browser.config = browser.options;
-
-	// Base for browser.url() and Page#openTitle()
-	browser.options.baseUrl =
-		testEnv.vars.WIKIBASE_URL + testEnv.vars.MW_SCRIPT_PATH;
-
 	/**
 	 * Execute query on database
 	 */
@@ -61,12 +47,12 @@ export function defaultFunctions(): void {
 	browser.addCommand(
 		'deleteClaim',
 		async ( claimGuid: string ): Promise<BotResponse> => {
-			const bot = await WikibaseApi.getBot();
+			const api = await WikibaseApi.getApi();
 
-			return bot.request( {
+			return api.request( {
 				action: 'wbremoveclaims',
 				claim: claimGuid,
-				token: bot.editToken
+				token: await api.getEditToken()
 			} );
 		}
 	);
@@ -123,10 +109,13 @@ export function defaultFunctions(): void {
 	browser.addCommand(
 		'executeQuickStatement',
 		async ( theQuery: string ): Promise<void> => {
+			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/#/` );
 			await browser.url( `${ testEnv.vars.QUICKSTATEMENTS_URL }/#/batch` );
 
 			// create a batch
-			await $( '.create_batch_box textarea' ).setValue( theQuery );
+			const batchEditor = $( '.create_batch_box textarea' );
+			await batchEditor.waitForExist();
+			await batchEditor.setValue( theQuery );
 
 			// eslint-disable-next-line wdio/no-pause
 			await browser.pause( 1000 );
@@ -173,20 +162,25 @@ export function defaultFunctions(): void {
 				`${ host }/wiki/Special:RecentChanges?limit=50&days=7&urlversion=2`
 			);
 
-			// get all external changes
 			const apiURL = `${ host }/w/api.php?format=json&action=query&list=recentchanges&rctype=external&rcprop=comment|title`;
-			const result = await browser.makeRequest( apiURL );
-			const changes = result.data.query.recentchanges;
-			const foundResult = lodash.find( changes, expectedChange );
+			let foundResult: ExternalChange;
 
-			expect( result.status ).toEqual( 200 );
-
-			if ( !foundResult ) {
-				testEnv.testLog.error( 'Could not find:' );
-				testEnv.testLog.error( expectedChange );
-				testEnv.testLog.error( 'Response: ' );
-				testEnv.testLog.error( changes );
-			}
+			await browser.waitUntil(
+				async () => {
+					const result = await browser.makeRequest( apiURL );
+					expect( result.status ).toEqual( 200 );
+					const changes = result.data.query.recentchanges;
+					foundResult = lodash.find( changes, expectedChange );
+					return Boolean( foundResult );
+				},
+				{
+					timeout: settings.waitForTimeout,
+					interval: 1000,
+					timeoutMsg: `Could not find dispatched change ${ JSON.stringify(
+						expectedChange
+					) }`
+				}
+			);
 
 			return foundResult;
 		}

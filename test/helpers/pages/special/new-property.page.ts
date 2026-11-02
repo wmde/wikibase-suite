@@ -47,6 +47,14 @@ class SpecialNewPropertyPage extends SubmittablePage {
 		await this.datatypeInput;
 		await this.submitBtn;
 	}
+
+	public async submit(): Promise<void> {
+		await super.submit();
+		await browser.waitUntil(
+			async () => /\/wiki\/Property:P\d+/.test( await browser.getUrl() ),
+			{ timeoutMsg: 'Expected new property page after submitting form' }
+		);
+	}
 }
 
 export default new SpecialNewPropertyPage();

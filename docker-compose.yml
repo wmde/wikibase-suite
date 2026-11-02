@@ -7,7 +7,7 @@ networks:
 
 services:
   runner:
-    image: wbs-dev-runner:latest
+    image: ${WBS_BUILD_TOOLS_IMAGE:-wbs-build-tools:latest}
     scale: 0
     build:
       context: .
@@ -24,3 +24,19 @@ services:
       - local.env
     environment:
       HOST_PWD: $PWD
+      BUILD_CACHE_PUSH: ${BUILD_CACHE_PUSH:-false}
+      BUILD_CACHE_REGISTRY: ${BUILD_CACHE_REGISTRY:-}
+      BUILD_CACHE_SCOPE: ${BUILD_CACHE_SCOPE:-}
+      DOCKERHUB_TOKEN: ${DOCKERHUB_TOKEN:-}
+      GITHUB_ACTIONS: ${GITHUB_ACTIONS:-false}
+      GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME:-}
+      GITHUB_REF: ${GITHUB_REF:-}
+      GITHUB_REPOSITORY: ${GITHUB_REPOSITORY:-}
+      GITHUB_REPOSITORY_OWNER: ${GITHUB_REPOSITORY_OWNER:-}
+      GITHUB_RUN_ID: ${GITHUB_RUN_ID:-}
+      GITHUB_SHA: ${GITHUB_SHA:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GH_TOKEN: ${GH_TOKEN:-}
+      WBS_GHCR_TOKEN: ${WBS_GHCR_TOKEN:-}
+      WBS_TEST_IMAGE_REGISTRY: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}
+      WBS_TEST_IMAGE_TAG: ${WBS_TEST_IMAGE_TAG:-latest}

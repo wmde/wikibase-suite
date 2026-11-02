@@ -4,12 +4,9 @@ import wdioConfig from '../../setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'fedprops',
-	specs: [ 'specs/fedprops/*.ts' ],
-	composeFiles: [
-		...defaultSettings.composeFiles,
-		'suites/fedprops/docker-compose.override.yml'
-	]
+	name: 'queryservice',
+	specs: [ 'specs/queryservice/*.ts' ],
+	composeProfiles: [ 'queryservice' ]
 } );
 
 export const config = wdioConfig( testEnv );

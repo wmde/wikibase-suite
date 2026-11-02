@@ -1,4 +1,3 @@
-import type { Capabilities } from '@wdio/types';
 import { Options } from '@wdio/types';
 import { existsSync } from 'fs';
 import { dirname } from 'path';
@@ -20,10 +19,12 @@ export function wdioConfig( providedTestEnv: TestEnv ): WebdriverIO.Config {
 		specs: settings.specs.map(
 			( specFilepath ) => `${ __dirname }/../${ specFilepath }`
 		),
+		maxInstances: settings.maxInstances,
 
 		hostname: 'browser',
 		port: 4444,
 		path: '/wd/hub',
+		baseUrl: `${ testEnv.vars.WIKIBASE_URL }${ testEnv.vars.MW_SCRIPT_PATH }`,
 		// ============
 		// Capabilities
 		// ============
@@ -31,7 +32,9 @@ export function wdioConfig( providedTestEnv: TestEnv ): WebdriverIO.Config {
 		capabilities: [
 			{
 				browserName: 'chrome',
-				maxInstances: settings.maxInstances,
+				'mw:user': testEnv.vars.MW_ADMIN_NAME,
+				'mw:pwd': testEnv.vars.MW_ADMIN_PASS,
+				'mw:screenshotPath': `${ settings.outputDir }/screenshots`,
 				'goog:chromeOptions': {
 					args: [
 						// The window size is relevant for responsive pages rendering differently on
@@ -45,7 +48,7 @@ export function wdioConfig( providedTestEnv: TestEnv ): WebdriverIO.Config {
 						...( existsSync( '/.dockerenv' ) ? [ '--no-sandbox' ] : [] )
 					]
 				}
-			} as Capabilities.ChromeCapabilities
+			} as WebdriverIO.Capabilities
 		],
 
 		// Experimental: Turns-on Node debugging (for VS Code debugger, etc)
@@ -117,9 +120,9 @@ export function wdioConfig( providedTestEnv: TestEnv ): WebdriverIO.Config {
 			}
 		},
 
-		afterTest: async function ( mochaTest ) {
+		afterTest: async function ( mochaTest, _context, result ) {
 			if ( settings.afterTest ) {
-				await settings.afterTest( mochaTest );
+				await settings.afterTest( mochaTest, result );
 			}
 		},
 

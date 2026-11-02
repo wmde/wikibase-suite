@@ -65,6 +65,13 @@ Analysis revealed breaking changes expected for a MediaWiki major-version upgrad
 - ⚠️  move callback to wikibase image
 - ⚠️  bump mediawiki to 1.44.0
 
+## 4.1.2 (2026-07-22)
+
+
+### 🩹 Fixes
+
+- Update MediaWiki to 1.43.9 and refresh WMF-maintained extensions on REL1_43
+
 ## 4.1.1 (2025-07-17)
 
 

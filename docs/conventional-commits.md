@@ -31,7 +31,7 @@ Configured in [`nx.json`](https://github.com/wmde/wikibase-release-pipeline/blob
 | -------- | ----------- | ---------------- |
 | build    | patch       | 📦 Build         |
 | chore    | patch       | 🏡 Chore         |
-| ci       | patch       | 🤖 CI            |
+| ci       | none        | Not included      |
 | docs     | patch       | 📖 Documentation |
 | feat     | minor       | 🚀 Features      |
 | fix      | patch       | 🩹 Fixes         |

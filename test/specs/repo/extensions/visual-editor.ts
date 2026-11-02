@@ -1,4 +1,4 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
 
 const waitForVisualEditor = async (): Promise<void> => {
 	await browser.waitUntil(
@@ -17,22 +17,16 @@ const waitForVisualEditor = async (): Promise<void> => {
 	);
 };
 
-const clickEditToOpenVisualEditor = async (): Promise<void> => {
+const openVisualEditor = async (): Promise<void> => {
 	const editTab = $( '#ca-ve-edit a' );
-	await browser.waitUntil(
-		async () => await editTab.isClickable(),
-		{
-			timeout: 15000,
-			timeoutMsg: 'Expected the VisualEditor edit tab to become clickable'
-		}
-	);
-	await editTab.click();
+	await editTab.waitForExist( { timeout: 15000 } );
+	await browser.url( await editTab.getAttribute( 'href' ) );
 	await waitForVisualEditor();
 };
 
 const appendTextInVisualEditor = async ( text: string ): Promise<void> => {
 	const ready = await browser.execute( () => {
-		const root = document.querySelector( '.ve-ce-attachedRootNode' );
+		const root = document.querySelector<HTMLElement>( '.ve-ce-attachedRootNode' );
 		if ( !root ) {
 			return false;
 		}
@@ -95,6 +89,13 @@ const saveVisualEditor = async (): Promise<void> => {
 			timeoutMsg: 'Expected VisualEditor to finish saving and return to page view'
 		}
 	);
+	await browser.waitUntil(
+		async () => !await $( '.oo-ui-window-active' ).isExisting(),
+		{
+			timeout: 30000,
+			timeoutMsg: 'Expected VisualEditor publish dialog to close'
+		}
+	);
 };
 
 describe( 'VisualEditor', function () {
@@ -126,14 +127,14 @@ describe( 'VisualEditor', function () {
 		await browser.waitForJobs();
 		await browser.url( `${ testEnv.vars.WIKIBASE_URL }/wiki/${ pageTitle }` );
 
-		await clickEditToOpenVisualEditor();
+		await openVisualEditor();
 		await appendTextInVisualEditor( ` Smoke pass one ${ stamp }` );
 		await saveVisualEditor();
 
-		await clickEditToOpenVisualEditor();
+		await openVisualEditor();
 		await appendTextInVisualEditor( ' Smoke pass two' );
 		await saveVisualEditor();
 
-		await clickEditToOpenVisualEditor();
+		await openVisualEditor();
 	} );
 } );

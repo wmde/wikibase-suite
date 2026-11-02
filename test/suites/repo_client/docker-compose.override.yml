@@ -9,7 +9,7 @@ services:
       - ./repo-extra-install.sh:/extra-install.sh
 
   wikibase-client:
-    image: wikibase/wikibase
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
     depends_on:
       mysql:
         condition: service_healthy

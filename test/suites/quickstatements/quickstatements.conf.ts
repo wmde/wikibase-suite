@@ -6,6 +6,7 @@ export const testEnv = TestEnv.create( {
 	...defaultSettings,
 	name: 'quickstatements',
 	specs: [ 'specs/quickstatements/*.ts' ],
+	composeProfiles: [ 'quickstatements' ],
 	composeFiles: [
 		...defaultSettings.composeFiles,
 		'suites/quickstatements/docker-compose.override.yml'

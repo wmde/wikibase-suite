@@ -1,4 +1,4 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
 
 describe( 'Babel', function () {
 	beforeEach( async function () {
@@ -6,6 +6,8 @@ describe( 'Babel', function () {
 	} );
 
 	it( 'Should be able to update the user page with language skills', async function () {
+		const userPage = `User:${ testEnv.vars.MW_ADMIN_NAME }/Babel-${ Date.now() }`;
+
 		await LoginPage.login(
 			testEnv.vars.MW_ADMIN_NAME,
 			testEnv.vars.MW_ADMIN_PASS
@@ -13,7 +15,7 @@ describe( 'Babel', function () {
 
 		const executionContent = await browser.editPage(
 			testEnv.vars.WIKIBASE_URL,
-			'User:' + testEnv.vars.MW_ADMIN_NAME,
+			userPage,
 			'{{#babel: sv | en }}'
 		);
 

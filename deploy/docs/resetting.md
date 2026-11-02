@@ -36,16 +36,6 @@ Make any needed changes to `.env` before starting the stack again. If you are re
 > [!WARNING]
 > If you are preserving existing data, do not change `DB_NAME`, `DB_USER`, or `DB_PASS` during reset unless you also know how to migrate the matching MariaDB credentials manually. The restored database volume keeps the old database credentials.
 
-If you are resetting as part of a major version upgrade, switch to the new WBS version and pull the updated images before the next start:
-
-```sh
-git remote update
-git checkout deploy@3.0.3
-docker compose pull
-```
-
-Replace `deploy@3.0.3` with the version you are upgrading to. See [Major upgrades](./updating.md#major-upgrades) for version-specific notes.
-
 ## 4. Start once to run setup again
 
 Start the stack:

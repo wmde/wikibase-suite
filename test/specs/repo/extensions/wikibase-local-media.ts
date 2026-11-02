@@ -1,6 +1,6 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import ItemPage from '../../../helpers/pages/entity/item.page.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
 import PropertyPage from '../../../helpers/pages/entity/property.page.js';
 import page from '../../../helpers/pages/page.js';
 import propertyIdSelector from '../../../helpers/property-id-selector.js';
@@ -32,14 +32,37 @@ describe( 'WikibaseLocalMedia', function () {
 	} );
 
 	it( 'Should allow to create a property with localMedia datatype', async function () {
-		propertyId = await WikibaseApi.createProperty( 'localMedia' );
+		propertyLabel = `local-media-${ Date.now() }`;
+		propertyId = await WikibaseApi.createProperty(
+			'localMedia',
+			{
+				labels: {
+					en: {
+						language: 'en',
+						value: propertyLabel
+					}
+				}
+			}
+		);
 		expect( propertyId ).toMatch( /^P\d+$/ );
+		await browser.waitUntil(
+			async () => {
+				const result = await browser.makeRequest(
+					`${ testEnv.vars.WIKIBASE_URL }/w/api.php?action=wbsearchentities&search=${ encodeURIComponent( propertyLabel ) }&format=json&errorformat=plaintext&language=en&uselang=en&type=property`
+				);
+				return result.data.search.some(
+					( property ) => property.id === propertyId
+				);
+			},
+			{
+				timeoutMsg: `Expected ${ propertyId } to appear in property search`
+			}
+		);
 
 		await PropertyPage.open( propertyId );
-
-		propertyLabel = await $( '#firstHeading' ).getText();
-		// eslint-disable-next-line security/detect-non-literal-regexp
-		await expect( $( '#firstHeading' ) ).toHaveText( new RegExp( propertyId ) );
+		await expect( $( '#firstHeading' ) ).toHaveText(
+			`${ propertyLabel } (${ propertyId })`
+		);
 	} );
 
 	it( 'Should allow to use uploaded image on statement', async function () {
@@ -74,7 +97,7 @@ describe( 'WikibaseLocalMedia', function () {
 		await $( '=add statement' ).click();
 
 		await browser.keys( propertyLabel.split( '' ) );
-		await propertyIdSelector( propertyId ).click();
+		await propertyIdSelector( propertyId, propertyLabel ).click();
 
 		await browser.keys( 'image.png'.split( '' ) );
 

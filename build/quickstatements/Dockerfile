@@ -1,9 +1,11 @@
 ARG COMPOSER_IMAGE_URL
+ARG COMPOSER_IMAGE_PLATFORM=linux/amd64
 ARG PHP_IMAGE_URL
 
 # ###########################################################################
-# hadolint ignore=DL3006
-FROM ${COMPOSER_IMAGE_URL} as composer
+# The Composer builder is only published for AMD64 and produces portable PHP dependencies.
+# hadolint ignore=DL3006,DL3029
+FROM --platform=${COMPOSER_IMAGE_PLATFORM} ${COMPOSER_IMAGE_URL} AS composer
 ARG QUICKSTATEMENTS_COMMIT
 ARG MAGNUSTOOLS_COMMIT
 

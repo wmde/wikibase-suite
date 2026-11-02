@@ -1,8 +1,8 @@
 import { stringify } from 'querystring';
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
 import { getTestString } from 'wdio-mediawiki/Util.js';
 import WikibaseApi from 'wdio-wikibase/wikibase.api.js';
 import ItemPage from '../../helpers/pages/entity/item.page.js';
+import LoginPage from '../../helpers/pages/login.page.js';
 import page from '../../helpers/pages/page.js';
 import RepoClientLoginPage from '../../helpers/pages/repo-client-login.page.js';
 import SpecialNewItemPage from '../../helpers/pages/special/new-item.page.js';
@@ -102,8 +102,6 @@ describe( 'Item', function () {
 	} );
 
 	it( 'Should be able to see site-link change is dispatched to client', async function () {
-		this.retries( 5 );
-
 		const expectedSiteLinkChange: ExternalChange = {
 			type: 'external',
 			ns: 0,

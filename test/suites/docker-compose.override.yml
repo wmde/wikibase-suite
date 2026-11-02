@@ -7,7 +7,10 @@ networks:
 
 services:
   wikibase:
-    image: wikibase/wikibase
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+    depends_on: !override
+      mysql:
+        condition: service_healthy
     volumes:
       - wikibase-config:/config
       - wikibase-extensions:/var/www/html/extensions/extensions
@@ -15,27 +18,32 @@ services:
       - ./empty.php:/var/www/html/LocalSettings.d/90_UserDefinedExtensions.php
       - ../${OUTPUT_DIR}:/var/log/mediawiki
     environment:
+      ELASTICSEARCH_HOST: !reset null
       MW_WG_SERVER: ${WIKIBASE_URL}
       QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
       WDQS_PUBLIC_FRONTEND_URL: http://${WDQS_PUBLIC_HOST}
       WDQS_PUBLIC_ENDPOINT_URL: http://${WDQS_PUBLIC_HOST}/sparql
 
   wikibase-jobrunner:
-    image: wikibase/wikibase
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
 
   elasticsearch:
-    image: wikibase/elasticsearch
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/elasticsearch:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ elasticsearch ]
 
   wdqs:
-    image: wikibase/wdqs
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ queryservice ]
 
   wdqs-updater:
-    image: wikibase/wdqs
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ queryservice ]
     environment:
       WIKIBASE_CONCEPT_URI: http://${WIKIBASE_PUBLIC_HOST}
 
   wdqs-frontend:
-    image: wikibase/wdqs-frontend
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-frontend:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ queryservice ]
     volumes:
       - wdqs-frontend-config:/config
     environment:
@@ -43,7 +51,8 @@ services:
       WIKIBASE_PUBLIC_URL: http://${WIKIBASE_PUBLIC_HOST}/w/api.php
 
   quickstatements:
-    image: wikibase/quickstatements
+    image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements:${WBS_TEST_IMAGE_TAG:-latest}
+    profiles: [ quickstatements ]
     environment:
       WIKIBASE_PUBLIC_URL: ${WIKIBASE_URL}
       QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}
@@ -56,7 +65,7 @@ services:
       - 5900:5900
       - 7900:7900
     volumes:
-      # Should map to same location as wbs-dev-runner workspace root
+      # Should map to the same location as the build-tools workspace root
       - ../../:/workspace
     shm_size: 2g
     environment:

@@ -34,7 +34,10 @@ export type TestHooks = {
 	// Runs at the start of every WDIO worker
 	beforeTest?( mochaTest: Frameworks.Test ): Promise<void>;
 	// Runs at the end of every WDIO worker
-	afterTest?( mochaTest: Frameworks.Test ): Promise<void>;
+	afterTest?(
+		mochaTest: Frameworks.Test,
+		result: Frameworks.TestResult
+	): Promise<void>;
 	// Runs after every Mocha "suite" (`describe` blocks)
 	afterMochaSuite?( mochaSuite: Frameworks.Suite ): Promise<void>;
 	// Runs once at the end of each spec file (after each WDIO runner)
@@ -45,6 +48,7 @@ export type TestHooks = {
 
 export type TestEnvSettings = {
 	composeFiles?: string[];
+	composeProfiles?: string[];
 	waitForUrls?(): string[];
 	envFiles?: string[];
 	vars: Record<string, string>;

@@ -1,4 +1,5 @@
-import LoginPage from 'wdio-mediawiki/LoginPage.js';
+import LoginPage from '../../../helpers/pages/login.page.js';
+import { ChainablePromiseElement } from 'webdriverio';
 import page from '../../../helpers/pages/page.js';
 
 const waitForDiscussionTools = async (): Promise<void> => {
@@ -14,7 +15,7 @@ const waitForDiscussionTools = async (): Promise<void> => {
 	);
 };
 
-const getVisibleAddTopicButton = async (): Promise<WebdriverIO.Element | null> => {
+const getVisibleAddTopicButton = async (): Promise<ChainablePromiseElement | null> => {
 	const selectors = [
 		'#ca-addsection',
 		'#ca-more-addsection a',
@@ -64,7 +65,7 @@ const openDiscussionToolsNewTopic = async (): Promise<'discussiontools' | 'wikit
 };
 
 const setDiscussionToolsBody = async (
-	replyWidget: WebdriverIO.Element,
+	replyWidget: ChainablePromiseElement,
 	text: string
 ): Promise<void> => {
 	const sourceInput = replyWidget.$( 'textarea.oo-ui-inputWidget-input' );
@@ -84,7 +85,9 @@ const setDiscussionToolsBody = async (
 	}
 
 	const ready = await browser.execute( () => {
-		const root = document.querySelector( '.ext-discussiontools-ui-replyWidget .ve-ce-attachedRootNode' );
+		const root = document.querySelector<HTMLElement>(
+			'.ext-discussiontools-ui-replyWidget .ve-ce-attachedRootNode'
+		);
 		if ( !root ) {
 			return false;
 		}
@@ -195,7 +198,19 @@ describe( 'DiscussionTools', function () {
 				'.ext-discussiontools-ui-newTopic-sectionTitle .oo-ui-inputWidget-input'
 			);
 			await topicTitleInput.waitForDisplayed( { timeout: 15000 } );
-			await topicTitleInput.setValue( topicTitle );
+			await browser.waitUntil(
+				async () => {
+					const currentInput = $(
+						'.ext-discussiontools-ui-newTopic-sectionTitle .oo-ui-inputWidget-input'
+					);
+					await currentInput.setValue( topicTitle );
+					return await currentInput.getValue() === topicTitle;
+				},
+				{
+					timeout: 15000,
+					timeoutMsg: 'Expected DiscussionTools topic title to be retained'
+				}
+			);
 			await expect( topicTitleInput ).toHaveValue( topicTitle );
 		} else {
 			const topicTitleInput = $( '#wpSummary' );
