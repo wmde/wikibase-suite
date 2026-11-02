@@ -1,3 +1,7 @@
+# 7.1.1 (2026-11-02)
+
+- Updates the PHP runtime base image from 8.3.23 to 8.3.36, which fixes the critical vulnerabilities CVE-2026-109618 and CVE-2026-109619 ([PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)).
+
 # 7.1.0 (2026-07-14)
 
 - Adds WikibaseInWikitext so administrators can write local query service examples with `<sparql>` tags.
