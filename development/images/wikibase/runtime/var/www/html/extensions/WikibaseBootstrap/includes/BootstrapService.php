@@ -22,7 +22,7 @@ use Wikibase\Repo\WikibaseRepo;
 /**
  * Applies a reviewed bootstrap plan through Wikibase's entity-store API.
  *
- * This service intentionally supports only the bundled Suite profile. It is
+ * This service intentionally supports only the bundled property set. It is
  * shared by the Special page and maintenance command so neither front end owns
  * entity creation or local-ID resolution.
  */

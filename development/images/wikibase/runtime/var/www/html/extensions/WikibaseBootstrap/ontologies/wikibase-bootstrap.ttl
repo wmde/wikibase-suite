@@ -5,91 +5,83 @@
 @prefix schema: <https://schema.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix vann: <http://purl.org/vocab/vann/> .
-@prefix wbb: <https://wikiba.se/bootstrap#> .
-@prefix wbbs: <https://wikiba.se/bootstrap/entity/> .
+@prefix wb: <https://wikiba.se/bootstrap#> .
 
-wbbs:instance-of a owl:ObjectProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "wikibase-item" ;
-	rdfs:label "instance of"@en ;
-	dcterms:description "rdf:type"@en ;
-	owl:equivalentProperty rdf:type ;
-	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ] ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P31" ] .
 
-wbbs:subclass-of a owl:ObjectProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "wikibase-item" ;
-	rdfs:label "subclass of"@en ;
-	dcterms:description "rdfs:subClassOf"@en ;
-	owl:equivalentProperty rdfs:subClassOf ;
-	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2000/01/rdf-schema#subClassOf> ] ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P279" ] .
+wb:P1 a owl:ObjectProperty ;
+    rdfs:label "instance of"@en ;
+    dcterms:description "rdf:type"@en ;
+    owl:equivalentProperty rdf:type ;
+    skos:note "Wikibase ID: P1"@en,
+        "Wikibase datatype: wikibase-item"@en ;
+    wb:P6 "P31" .
 
-wbbs:part-of a owl:ObjectProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "wikibase-item" ;
-	rdfs:label "part of"@en ;
-	dcterms:description "schema:isPartOf"@en ;
-	owl:equivalentProperty schema:isPartOf ;
-	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <https://schema.org/isPartOf> ] ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P361" ] .
+wb:P2 a owl:ObjectProperty ;
+    rdfs:label "subclass of"@en ;
+    dcterms:description "rdfs:subClassOf"@en ;
+    owl:equivalentProperty rdfs:subClassOf ;
+    skos:note "Wikibase ID: P2"@en,
+        "Wikibase datatype: wikibase-item"@en ;
+    wb:P6 "P279" .
 
-wbbs:subproperty-of a owl:ObjectProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "wikibase-property" ;
-	rdfs:label "subproperty of"@en ;
-	dcterms:description "rdfs:subPropertyOf"@en ;
-	owl:equivalentProperty rdfs:subPropertyOf ;
-	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> ] ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1647" ] .
+wb:P3 a owl:ObjectProperty ;
+    rdfs:label "part of"@en ;
+    dcterms:description "schema:isPartOf"@en ;
+    owl:equivalentProperty schema:isPartOf ;
+    skos:note "Wikibase ID: P3"@en,
+        "Wikibase datatype: wikibase-item"@en ;
+    wb:P6 "P361" .
 
-wbbs:exact-match a owl:DatatypeProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "url" ;
-	rdfs:label "exact match"@en ;
-	dcterms:description "skos:exactMatch"@en ;
-	owl:equivalentProperty skos:exactMatch ;
-	wbb:claim [ wbb:property wbbs:exact-match ; wbb:value <http://www.w3.org/2004/02/skos/core#exactMatch> ] ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P2888" ] .
+wb:P4 a owl:ObjectProperty ;
+    rdfs:label "subproperty of"@en ;
+    dcterms:description "rdfs:subPropertyOf"@en ;
+    owl:equivalentProperty rdfs:subPropertyOf ;
+    skos:note "Wikibase ID: P4"@en,
+        "Wikibase datatype: wikibase-property"@en ;
+    wb:P6 "P1647" .
 
-wbbs:wikidata-entity-id a owl:DatatypeProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "external-id" ;
-	rdfs:label "Wikidata Entity ID"@en ;
-	dcterms:description "used to indicate a mapping from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
-	wbb:claim [ wbb:property wbbs:formatter-uri ; wbb:value "http://www.wikidata.org/entity/$1" ] ;
-	wbb:claim [ wbb:property wbbs:formatter-uri-for-rdf ; wbb:value "http://www.wikidata.org/entity/$1" ] .
+wb:P5 a owl:DatatypeProperty ;
+    rdfs:label "exact match"@en ;
+    dcterms:description "skos:exactMatch"@en ;
+    owl:equivalentProperty skos:exactMatch ;
+    skos:note "Wikibase ID: P5"@en,
+        "Wikibase datatype: url"@en ;
+    wb:P6 "P2888" .
 
-wbbs:formatter-uri a owl:DatatypeProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "string" ;
-	rdfs:label "formatter URL"@en ;
-	dcterms:description "web page URL; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URL changes, add a new statement with preferred rank"@en ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1630" ] .
+wb:P6 a owl:DatatypeProperty ;
+    rdfs:label "Wikidata Entity ID"@en ;
+    dcterms:description "used to indicate a mapping (of some undefined nature, but can be further specified by individual Wikibases) from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
+    skos:note "Wikibase ID: P6"@en,
+        "Wikibase datatype: external-id"@en ;
+    wb:P7 "http://www.wikidata.org/entity/$1" ;
+    wb:P8 "http://www.wikidata.org/entity/$1" .
 
-wbbs:formatter-uri-for-rdf a owl:DatatypeProperty ;
-	wbb:kind wbb:Property ;
-	wbb:datatype "string" ;
-	rdfs:label "formatter URI for RDF"@en ;
-	dcterms:description "formatter URI for RDF resource: URI template from which \"$1\" can be automatically replaced with the effective property value on items (it is the URI of the resources, not the URI of the RDF file describing it)"@en ;
-	wbb:claim [ wbb:property wbbs:wikidata-entity-id ; wbb:value "P1921" ] .
+wb:P7 a owl:DatatypeProperty ;
+    rdfs:label "formatter URI"@en ;
+    dcterms:description "web page URI; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URI changes, add a new statement with preferred rank"@en ;
+    skos:note "Wikibase ID: P7"@en,
+        "Wikibase datatype: string"@en ;
+    wb:P6 "P1630" .
 
-wbbs:bundle a owl:Ontology ;
-	dcterms:contributor "Clair Kronk",
-		"David Lindemann",
-		"Ismael Olea",
-		"Tuukka Hastrup",
-		"User:Nikki" ;
-	dcterms:description "An essential set of entities for new Wikibase instances, mapped with Wikidata and selected by practicalities and common use" ;
-	dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-	dcterms:publisher <http://www.wikidata.org/entity/Q51033881> ;
-	dcterms:rights "CC0 1.0 Universal" ;
-	dcterms:source <https://gitlab.wikimedia.org/olea/wikibase-bootstrap/-/blob/40892e31fd812c9b1402506d1ee86cfc215e1dd6/wikibase-bootstrap.ttl> ;
-	dcterms:title "The Wikibase bootstrap set" ;
-	vann:preferredNamespacePrefix "wbbs" ;
-	vann:preferredNamespaceUri wbbs: ;
-	owl:versionInfo "2026-03-19" .
+wb:P8 a owl:DatatypeProperty ;
+    rdfs:label "formatter URI for RDF"@en ;
+    dcterms:description "formatter URI for RDF resource: URI template from which \"$1\" can be automatically replaced with the effective property value on items (it is the URI of the resources, not the URI of the RDF file describing it)"@en ;
+    skos:note "Wikibase ID: P8"@en,
+        "Wikibase datatype: string"@en ;
+    wb:P6 "P1921" .
 
-<http://www.wikidata.org/entity/Q51033881>
-	rdfs:label "Wikibase Community User Group"@en .
+wb: a owl:Ontology ;
+    dcterms:contributor "Clair Kronk",
+        "David Lindemann",
+        "Ismael Olea",
+        "Tuukka Hastrup",
+        "User:Nikki" ;
+    dcterms:description "An essential set of entities for new Wikibase instances, mapped with Wikidata and selected by practicalities and common use" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:publisher <http://www.wikidata.org/entity/Q51033881> ;
+    dcterms:rights "CC0 1.0 Universal" ;
+    dcterms:title "The Wikibase bootstrap set" ;
+    vann:preferredNamespacePrefix "wb" ;
+    vann:preferredNamespaceUri wb: ;
+    owl:versionInfo "2026-03-19" .
+

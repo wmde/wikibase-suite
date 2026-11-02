@@ -13,6 +13,7 @@ use Wikibase\Repo\WikibaseRepo;
 
 class SpecialOntologyBootstrap extends SpecialPage {
 	private const FLASH_SESSION_KEY = 'WikibaseBootstrapCompletion';
+	private const SOURCE_URL = 'https://gitlab.wikimedia.org/olea/wikibase-bootstrap/-/blob/40892e31fd812c9b1402506d1ee86cfc215e1dd6/wikibase-bootstrap.ttl';
 
 	public function __construct() {
 		parent::__construct( 'OntologyBootstrap' );
@@ -147,9 +148,9 @@ class SpecialOntologyBootstrap extends SpecialPage {
 	}
 
 	/**
-	 * Extract display metadata from the final ontology declaration in a reviewed bundle.
+	 * Extract display metadata from the upstream ontology declaration.
 	 *
-	 * This deliberately remains a narrow reader for the bundled profile. It is not a
+	 * This deliberately remains a narrow reader for the bundled file. It is not a
 	 * general Turtle parser or an upload validator.
 	 *
 	 * @return array{description: string, contributors: list<string>, license: string, publisher: string, publisherLabel: string, rights: string, source: string, version: string}
@@ -157,7 +158,7 @@ class SpecialOntologyBootstrap extends SpecialPage {
 	private function ontologyMetadata( string $contents ): array {
 		$metadata = '';
 		preg_match(
-			'/wbbs:bundle\s+a\s+owl:Ontology\s*;(?<metadata>.*?)\s*\.\s*$/s',
+			'/^wb:\s+a\s+owl:Ontology\s*;(?<metadata>.*?)\s*\.\s*$/ms',
 			$contents,
 			$match
 		);
@@ -202,7 +203,7 @@ class SpecialOntologyBootstrap extends SpecialPage {
 			'publisher' => $publisher,
 			'publisherLabel' => $publisherLabel,
 			'rights' => $literal( 'dcterms:rights' ),
-			'source' => $iri( 'dcterms:source' ),
+			'source' => self::SOURCE_URL,
 			'version' => $literal( 'owl:versionInfo' ),
 		];
 	}

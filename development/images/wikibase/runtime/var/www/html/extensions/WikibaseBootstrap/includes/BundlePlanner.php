@@ -4,56 +4,81 @@ declare( strict_types = 1 );
 
 namespace MediaWiki\Extension\WikibaseBootstrap;
 
-/**
- * Reads the constrained Suite bootstrap profile; this is not a general Turtle
- * parser. The bundled assets are validated separately with SHACL in wbs-dev.
- */
+/** Reads the narrow Turtle convention used by the pinned upstream property set. */
 class BundlePlanner {
 	/** @return array{properties: list<array<string, mixed>>, errors: string[]} */
 	public function plan( string $contents ): array {
 		$prefixes = $this->prefixes( $contents );
-		$properties = [];
+		$propertiesById = [];
 		$errors = [];
 		preg_match_all(
-			'/^([A-Za-z][A-Za-z0-9_-]*):([A-Za-z][A-Za-z0-9_-]*)\s+a\s+owl:(ObjectProperty|DatatypeProperty)\s*;(.*?)(?=^[A-Za-z][A-Za-z0-9_-]*:[A-Za-z][A-Za-z0-9_-]*\s+a\s+owl:|\z)/ms',
+			'/^([A-Za-z][A-Za-z0-9_-]*):(P[1-9][0-9]*)\s+a\s+owl:(?:ObjectProperty|DatatypeProperty)\s*;(.*?)(?=^[A-Za-z][A-Za-z0-9_-]*:(?:P[1-9][0-9]*)?\s+a\s+owl:|\z)/ms',
 			$contents,
 			$matches,
 			PREG_SET_ORDER
 		);
 
 		foreach ( $matches as $match ) {
-			$body = $match[4];
-			$sourceIri = $this->prefixedTerm( $match[1] . ':' . $match[2], $prefixes );
+			$sourceId = $match[2];
+			$body = $match[3];
+			$sourceIri = $this->prefixedTerm( "{$match[1]}:$sourceId", $prefixes );
 			$label = $this->literal( $body, 'rdfs:label' );
-			$datatype = $this->literal( $body, 'wbb:datatype' );
-			if ( $sourceIri === null || $label === null || $datatype === null ) {
-				$errors[] = "The bootstrap entity {$match[1]}:{$match[2]} is missing a source IRI, label, or datatype.";
+			$description = $this->literal( $body, 'dcterms:description' );
+			preg_match( '/"Wikibase ID: (P[1-9][0-9]*)"/', $body, $idNote );
+			preg_match( '/"Wikibase datatype: ([a-z][a-z-]*)"/', $body, $datatypeNote );
+			if ( $sourceIri === null || $label === null || $description === null ||
+				( $idNote[1] ?? '' ) !== $sourceId || !isset( $datatypeNote[1] )
+			) {
+				$errors[] = "The bootstrap property $sourceId is missing a matching ID note, label, description, or datatype.";
 				continue;
 			}
-			if ( !preg_match( '/wbb:kind\s+wbb:Property\b/', $body ) ) {
-				$errors[] = "The bootstrap entity {$match[1]}:{$match[2]} is not declared as a property.";
+			if ( !in_array( $datatypeNote[1], [
+				'wikibase-item', 'wikibase-property', 'url', 'external-id', 'string'
+			], true ) ) {
+				$errors[] = "The bootstrap property $sourceId has an unsupported datatype.";
 				continue;
 			}
 
 			$claims = $this->claims( $body, $prefixes );
 			if ( $claims === null ) {
-				$errors[] = "The bootstrap entity {$match[1]}:{$match[2]} has an invalid claim.";
+				$errors[] = "The bootstrap property $sourceId has an unsupported or invalid claim.";
 				continue;
 			}
-			$properties[] = [
+			if ( isset( $propertiesById[$sourceId] ) ) {
+				$errors[] = "The bootstrap property $sourceId is declared more than once.";
+				continue;
+			}
+			$propertiesById[$sourceId] = [
 				'sourceIri' => $sourceIri,
 				'label' => $label,
-				'description' => $this->literal( $body, 'dcterms:description' ),
-				'datatype' => $datatype['value'],
+				'description' => $description,
+				'datatype' => $datatypeNote[1],
 				'claims' => $claims,
 			];
 		}
 
-		if ( $properties === [] && $errors === [] ) {
-			$errors[] = 'No importable Suite bootstrap properties were found.';
+		if ( $propertiesById === [] ) {
+			$errors[] = 'No importable bootstrap properties were found.';
 		}
 
-		return [ 'properties' => $properties, 'errors' => $errors ];
+		$datatypesByIri = [];
+		foreach ( $propertiesById as $property ) {
+			$datatypesByIri[$property['sourceIri']] = $property['datatype'];
+		}
+		foreach ( $propertiesById as $sourceId => $property ) {
+			foreach ( $property['claims'] as $claim ) {
+				if ( !in_array( $datatypesByIri[$claim['property']] ?? null, [
+					'url', 'external-id', 'string'
+				], true ) ) {
+					$errors[] = "The bootstrap property $sourceId refers to a missing or unsupported claim property.";
+				}
+			}
+		}
+
+		uksort( $propertiesById, static fn ( string $a, string $b ): int =>
+			(int)substr( $a, 1 ) <=> (int)substr( $b, 1 )
+		);
+		return [ 'properties' => array_values( $propertiesById ), 'errors' => $errors ];
 	}
 
 	/** @return array<string, string> */
@@ -88,23 +113,56 @@ class BundlePlanner {
 
 	/**
 	 * @param array<string, string> $prefixes
-	 * @return list<array{property: string, value: string}>
+	 * @return list<array{property: string, value: string}>|null
 	 */
 	private function claims( string $body, array $prefixes ): ?array {
+		$claims = [];
+		preg_match_all( '/^\s*([A-Za-z][A-Za-z0-9_-]*:[A-Za-z][A-Za-z0-9_-]*)\s+/m', $body, $predicates );
+		foreach ( $predicates[1] as $predicate ) {
+			if ( !in_array( $predicate, [
+				'rdfs:label', 'dcterms:description', 'skos:note', 'owl:equivalentProperty'
+			], true ) && !preg_match( '/^wb:P[1-9][0-9]*$/', $predicate ) ) {
+				return null;
+			}
+		}
+		preg_match_all( '/^\s*owl:([A-Za-z][A-Za-z0-9_-]*)\s+/m', $body, $owlPredicates );
+		foreach ( $owlPredicates[1] as $predicate ) {
+			if ( $predicate !== 'equivalentProperty' ) {
+				return null;
+			}
+		}
+		preg_match_all( '/^\s*owl:equivalentProperty\s+([^\s;]+)\s*;/m', $body, $equivalents );
+		if ( count( $equivalents[1] ) !== count( $owlPredicates[1] ) ) {
+			return null;
+		}
+		$exactMatch = $this->prefixedTerm( 'wb:P5', $prefixes );
+		if ( $exactMatch === null ) {
+			return null;
+		}
+		foreach ( $equivalents[1] as $term ) {
+			$value = $this->term( $term, $prefixes );
+			if ( $value === null ) {
+				return null;
+			}
+			$claims[] = [ 'property' => $exactMatch, 'value' => $value ];
+		}
+
+		preg_match_all( '/^\s*[A-Za-z][A-Za-z0-9_-]*:P[1-9][0-9]*\s+/m', $body, $claimLines );
 		preg_match_all(
-			'/wbb:claim\s+\[\s*wbb:property\s+([^;\s]+)\s*;\s*wbb:value\s+([^;\]]+)\s*;?\s*\]/ms',
+			'/^\s*([A-Za-z][A-Za-z0-9_-]*:P[1-9][0-9]*)\s+"((?:[^"\\\\]|\\\\.)*)"\s*[;.]\s*$/m',
 			$body,
 			$matches,
 			PREG_SET_ORDER
 		);
-		$claims = [];
+		if ( count( $claimLines[0] ) !== count( $matches ) ) {
+			return null;
+		}
 		foreach ( $matches as $match ) {
-			$property = $this->term( trim( $match[1] ), $prefixes );
-			$value = $this->term( trim( $match[2] ), $prefixes );
-			if ( $property === null || $value === null ) {
+			$property = $this->prefixedTerm( $match[1], $prefixes );
+			if ( $property === null ) {
 				return null;
 			}
-			$claims[] = [ 'property' => $property, 'value' => $value ];
+			$claims[] = [ 'property' => $property, 'value' => stripcslashes( $match[2] ) ];
 		}
 		return $claims;
 	}
@@ -113,9 +171,6 @@ class BundlePlanner {
 	private function term( string $term, array $prefixes ): ?string {
 		if ( preg_match( '/^<([^>]+)>$/', $term, $match ) ) {
 			return $match[1];
-		}
-		if ( preg_match( '/^"((?:[^"\\\\]|\\\\.)*)"$/', $term, $match ) ) {
-			return stripcslashes( $match[1] );
 		}
 		return $this->prefixedTerm( $term, $prefixes );
 	}

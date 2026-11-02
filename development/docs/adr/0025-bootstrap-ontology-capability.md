@@ -25,7 +25,7 @@ particular local `P…` identifier.
 
 Bundle a `WikibaseBootstrap` MediaWiki extension in the Wikibase image. This
 puts one reviewed, property-only ontology starting point directly where a new
-Wikibase administrator can use them, rather than requiring a separate Python
+Wikibase administrator can use it, rather than requiring a separate Python
 or command-line bootstrap workflow. The feature is opt-in and is available
 only while Wikibase has no active properties.
 
@@ -35,15 +35,18 @@ administrative interface or the command line. The Special page is the intended
 onboarding path; the maintenance script supports automated or operational use.
 
 The service creates properties through Wikibase's entity-store API and lets
-Wikibase allocate fresh local IDs. Bundle source IRIs are stable planning keys;
-claims between bundle properties are resolved using the IDs allocated in that
-same run. Both interfaces use the same server-owned service, which rechecks
+Wikibase allocate fresh local IDs. The upstream `P…` identifiers are
+source keys; claims between bundle properties are resolved using the IDs
+allocated in that same run. `owl:equivalentProperty` assertions become
+exact-match statements using the property identified by upstream `P5`.
+Both interfaces use the same server-owned service, which rechecks
 eligibility immediately before applying a bundle.
 
-The bundled Turtle retains upstream attribution, licence, provenance, and
-version metadata. Its narrow profile is checked with pySHACL by the test suite
-and CI. The running extension deliberately has no Python or RDF/SHACL runtime
-dependency: it reads only the reviewed bundled profile.
+The bundled Turtle is a byte-for-byte copy of the pinned upstream small set,
+including its attribution, licence, and version metadata. Its checksum and
+import plan are checked by the test suite and CI. The running extension has no
+Python or RDF parser dependency: it reads the conventions in that reviewed
+file, rather than providing a general Turtle interpreter.
 
 For small, exploratory Wikibases, the Special page can delete at most 25
 existing Wikibase properties after an explicit typed confirmation, but only
