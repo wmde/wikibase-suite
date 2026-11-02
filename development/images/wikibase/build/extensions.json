@@ -4,9 +4,12 @@
     {
       "name": "Wikibase",
       "source": {
-        "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
+        "repo": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Wikibase",
         "ref": "refs/heads/REL1_45",
-        "commit": "3817e3b9ed0d8b3cab11344f2122f23973d6e701"
+        "commit": "3817e3b9ed0d8b3cab11344f2122f23973d6e701",
+        "patches": [
+          "wikibase-federated-mw146-composer.patch"
+        ]
       }
     },
     {

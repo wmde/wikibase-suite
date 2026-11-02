@@ -1,6 +1,7 @@
 <?php
 
-ini_set( 'display_errors', 1 );
+// Keep deprecation notices in the error log without corrupting JSON API responses.
+ini_set( 'display_errors', 0 );
 
 $wgShowExceptionDetails = true;
 $wgShowSQLErrors = true;
