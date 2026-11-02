@@ -179,7 +179,7 @@ jobs:
         run: |
           set -euo pipefail
           image_name=${RELEASE_TAG%%@*}
-          bake_json=$(IMAGE_REPOSITORY="wikibase/$image_name" TAGS=latest \
+          bake_json=$(IMAGE_REPOSITORY="wikibase/$image_name" \
             docker buildx bake \
               --file "images/$image_name/docker-bake.hcl" \
               --print \
