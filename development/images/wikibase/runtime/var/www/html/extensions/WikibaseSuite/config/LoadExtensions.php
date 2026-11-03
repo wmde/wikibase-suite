@@ -60,3 +60,4 @@ if ( $wikimediaLoginEnabled ) {
 
 # Wikibase Suite integration
 wfLoadExtension( 'WikibaseSuite' );
+wfLoadExtension( 'WikibaseBootstrap' );

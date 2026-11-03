@@ -1,0 +1,72 @@
+.ext-wikibase-bootstrap-catalog__details {
+	display: grid;
+	grid-template-columns: minmax( 0, 1fr ) auto;
+	gap: 24px;
+	padding: 16px 0;
+	border-bottom: 1px solid var( --border-color-subtle, #eaecf0 );
+}
+
+.ext-wikibase-bootstrap-catalog__details h3 {
+	margin-top: 0;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata {
+	display: grid;
+	grid-template-columns: max-content minmax( 0, 1fr );
+	column-gap: 8px;
+	row-gap: 4px;
+	margin: 0;
+	font-size: 0.875em;
+	color: var( --color-subtle, #54595d );
+}
+
+.ext-wikibase-bootstrap-catalog__metadata > div {
+	display: contents;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata dt {
+	font-weight: 600;
+}
+
+.ext-wikibase-bootstrap-catalog__metadata dd {
+	margin: 0;
+}
+
+.ext-wikibase-bootstrap-catalog__summary {
+	color: var( --color-subtle, #54595d );
+	font-weight: normal;
+}
+
+.ext-wikibase-bootstrap-catalog__action {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+@media ( max-width: 700px ) {
+	.ext-wikibase-bootstrap-catalog__details {
+		grid-template-columns: 1fr;
+	}
+
+	.ext-wikibase-bootstrap-catalog__action {
+		align-items: flex-start;
+	}
+}
+
+.ext-wikibase-bootstrap-reset__confirmation {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.ext-wikibase-bootstrap-reset__confirmation label {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.ext-wikibase-bootstrap-reset__confirmation .cdx-text-input {
+	width: 14em;
+}
