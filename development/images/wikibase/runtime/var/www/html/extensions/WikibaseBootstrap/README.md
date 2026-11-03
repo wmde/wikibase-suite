@@ -1,9 +1,11 @@
 # Bundled bootstrap ontology
 
-`ontologies/wikibase-bootstrap.ttl` is a byte-for-byte copy of the reviewed
-small property set from [`olea/wikibase-bootstrap`](https://gitlab.wikimedia.org/olea/wikibase-bootstrap/),
+`ontologies/wikibase-bootstrap.ttl` is based on the reviewed small property set
+from [`olea/wikibase-bootstrap`](https://gitlab.wikimedia.org/olea/wikibase-bootstrap/),
 commit `40892e31fd812c9b1402506d1ee86cfc215e1dd6` (2026-04-08).
-Its SHA-256 is `49e87c0e78d3bf5bf8dc28f3260e0ad407c5dbcf3075aac80b7fa2595c29643b`.
+The P6 and P7 definitions use the corrected wording from
+[the community task comment](https://phabricator.wikimedia.org/T428746#12472907).
+Its SHA-256 is `a04818132d559059a67645830f12479c5d519664a7194b7f435721a6d37df1a9`.
 No runtime network request is made to obtain it.
 
 The source declares CC0 1.0 Universal. Its `wb:P…` identifiers and matching

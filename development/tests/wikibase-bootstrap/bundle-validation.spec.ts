@@ -12,11 +12,13 @@ const bundlePath = fileURLToPath(
 );
 const source = readFileSync(bundlePath);
 const sourceHash =
-	'49e87c0e78d3bf5bf8dc28f3260e0ad407c5dbcf3075aac80b7fa2595c29643b';
+	'a04818132d559059a67645830f12479c5d519664a7194b7f435721a6d37df1a9';
 
 type Plan = {
 	properties: Array<{
 		sourceIri: string;
+		label: { value: string; language: string };
+		description: { value: string; language: string };
 		datatype: string;
 		claims: Array<{ property: string; value: string }>;
 	}>;
@@ -33,11 +35,11 @@ async function plan(contents: string): Promise<Plan> {
 }
 
 describe('Bundled bootstrap source', function () {
-	it('matches the pinned upstream file', function () {
+	it('matches the reviewed bundled file', function () {
 		assert.equal(createHash('sha256').update(source).digest('hex'), sourceHash);
 	});
 
-	it('plans the upstream properties with source-key references', async function () {
+	it('plans the bundled properties with source-key references', async function () {
 		const result = await plan(source.toString());
 		assert.deepEqual(result.errors, []);
 		assert.deepEqual(
@@ -77,6 +79,20 @@ describe('Bundled bootstrap source', function () {
 				value: 'http://www.wikidata.org/entity/$1'
 			}
 		]);
+		assert.deepEqual(result.properties[5].description, {
+			value:
+				'used to indicate a mapping from a Wikibase Item, Property, Lexeme, etc. to Wikidata',
+			language: 'en'
+		});
+		assert.deepEqual(result.properties[6].label, {
+			value: 'formatter URL',
+			language: 'en'
+		});
+		assert.deepEqual(result.properties[6].description, {
+			value:
+				'web page URL; URI template from which "$1" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URL changes, add a new statement with preferred rank',
+			language: 'en'
+		});
 	});
 
 	it('accepts another property in the same source format', async function () {

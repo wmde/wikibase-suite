@@ -42,8 +42,10 @@ exact-match statements using the property identified by upstream `P5`.
 Both interfaces use the same server-owned service, which rechecks
 eligibility immediately before applying a bundle.
 
-The bundled Turtle is a byte-for-byte copy of the pinned upstream small set,
-including its attribution, licence, and version metadata. Its checksum and
+The bundled Turtle is based on the pinned upstream small set, including its
+attribution, licence, and version metadata. The P6 and P7 wording follows
+[the community task correction](https://phabricator.wikimedia.org/T428746#12472907).
+Its checksum and
 import plan are checked by the test suite and CI. The running extension has no
 Python or RDF parser dependency: it reads the conventions in that reviewed
 file, rather than providing a general Turtle interpreter.

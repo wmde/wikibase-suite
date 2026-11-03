@@ -50,15 +50,15 @@ wb:P5 a owl:DatatypeProperty ;
 
 wb:P6 a owl:DatatypeProperty ;
     rdfs:label "Wikidata Entity ID"@en ;
-    dcterms:description "used to indicate a mapping (of some undefined nature, but can be further specified by individual Wikibases) from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
+    dcterms:description "used to indicate a mapping from a Wikibase Item, Property, Lexeme, etc. to Wikidata"@en ;
     skos:note "Wikibase ID: P6"@en,
         "Wikibase datatype: external-id"@en ;
     wb:P7 "http://www.wikidata.org/entity/$1" ;
     wb:P8 "http://www.wikidata.org/entity/$1" .
 
 wb:P7 a owl:DatatypeProperty ;
-    rdfs:label "formatter URI"@en ;
-    dcterms:description "web page URI; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URI changes, add a new statement with preferred rank"@en ;
+    rdfs:label "formatter URL"@en ;
+    dcterms:description "web page URL; URI template from which \"$1\" can be automatically replaced with the effective property value on items. If the site goes offline, set it to deprecated rank. If the formatter URL changes, add a new statement with preferred rank"@en ;
     skos:note "Wikibase ID: P7"@en,
         "Wikibase datatype: string"@en ;
     wb:P6 "P1630" .
