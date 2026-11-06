@@ -8,7 +8,7 @@ import type { RepositoryContext } from '../../lib/context.js';
 import { printSuiteHeading } from './output.js';
 import { discoverSuiteNames, suiteConfigPath } from './suites.js';
 
-type WdioOptions = Partial<RunCommandArguments> & {
+export type WdioOptions = Partial<RunCommandArguments> & {
 	repeat?: number;
 	coverage?: boolean;
 };
@@ -161,10 +161,16 @@ export async function runIntegrationSuites(
 	const passedSuites: string[] = [];
 	const failedSuites: string[] = [];
 	for ( const suiteName of suiteNames ) {
-		const exitCode = await runWdio(
-			suiteConfigPath( context, suiteName ),
-			wdioOptions
-		);
+		const configFilePath = suiteConfigPath( context, suiteName );
+		const suiteModule = await import( pathToFileURL( configFilePath ).href ) as {
+			run?: ( context: RepositoryContext, options: WdioOptions ) => Promise<number>;
+		};
+		let exitCode: number;
+		if ( suiteModule.run ) {
+			exitCode = await suiteModule.run( context, wdioOptions );
+		} else {
+			exitCode = await runWdio( configFilePath, wdioOptions );
+		}
 		if ( exitCode === 0 ) {
 			passedSuites.push( suiteName );
 		} else {

@@ -1,4 +1,16 @@
 {
+	"require": {
+		"doctrine/dbal": "3.10.5",
+		"doctrine/sql-formatter": "1.5.4",
+		"phpunit/phpunit": "9.6.34",
+		"ergebnis/phpunit-slow-test-detector": "2.24.0",
+		"giorgiosironi/eris": "^0.14.0",
+		"hamcrest/hamcrest-php": "^2.0",
+		"seld/jsonlint": "1.11.0",
+		"wikimedia/alea": "1.0.1",
+		"wikimedia/testing-access-wrapper": "4.0.0",
+		"wmde/hamcrest-html-matchers": "^1.0.0"
+	},
 	"extra": {
 		"merge-plugin": {
 			"include": [ "extensions/*/composer.json", "skins/*/composer.json" ]

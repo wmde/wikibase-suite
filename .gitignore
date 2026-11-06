@@ -9,6 +9,7 @@ pnpm
 **/.env
 
 docker-compose.override.yml
+!/development/tests/wikibase-core/docker-compose.override.yml
 /.wbs/*
 !/.wbs/version
 

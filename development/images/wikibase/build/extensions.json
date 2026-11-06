@@ -10,6 +10,14 @@
       }
     },
     {
+      "name": "MobileFrontend",
+      "source": {
+        "repo": "https://github.com/wikimedia/mediawiki-extensions-MobileFrontend.git",
+        "ref": "refs/heads/REL1_46",
+        "commit": "395c667eba966a094418d3e84b1e4db3bca7afb7"
+      }
+    },
+    {
       "name": "WikibaseEdtf",
       "source": {
         "repo": "https://github.com/ProfessionalWiki/WikibaseEdtf.git",

@@ -8,6 +8,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | --- | --- | --- |
 | `wbs-dev-tools` | Tooling | The `wbs-dev` CLI, development commands, and shared development libraries. |
 | `wikibase` | Integration | Core Wikibase repository behavior; runs up to three WDIO workers. |
+| `wikibase-core` | Core integration | The pinned Wikibase source's repository WDIO and PHPUnit tests against a Suite instance. |
 | `upgrade` | Integration | Upgrades from earlier Wikibase Suite configuration and data layouts. |
 | `wikibase-extensions` | Integration | Bundled MediaWiki and Wikibase extensions; runs up to three WDIO workers. |
 | `wikibase-client` | Integration | Repository/client federation and change dispatch. |
@@ -17,6 +18,8 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
 
 Integration suite settings live in `tests/<suite>/<suite>.conf.ts`. Each combines the published deployment Compose file with the shared test override and any suite-specific override. Test results are written beneath the suite's `results` directory; CI uploads them after a failure.
+
+For `wikibase-core`, the runner copies the pinned source from the image and loads Wikibase's own WDIO configuration using the dependencies in `wbs-dev`. Other suite configs export the Suite WDIO `config`. The test command discovers both forms by the same `<suite>.conf.ts` filename.
 
 ## Run Tests
 
@@ -29,6 +32,9 @@ wbs-dev test wbs-dev-tools
 
 # Run one integration suite
 wbs-dev test wikibase-client
+
+# Run the pinned Wikibase source's browser and PHPUnit tests
+wbs-dev test wikibase-core
 
 # Run multiple suites
 wbs-dev test wikibase wdqs
@@ -59,7 +65,19 @@ wbs-dev test wdqs --setup
 - Change shared runner lifecycle code in `tests/_setup/` only when the behavior should apply to every suite.
 - Put reusable TypeScript declarations in `tests/_types/`.
 
-An existing suite automatically discovers a new spec only when its `<suite>.conf.ts` `specs` patterns include the new path. Every direct child directory of `tests/` is a test target except underscore-prefixed infrastructure directories and `node_modules`; a target named `<suite>` therefore supplies `<suite>/<suite>.conf.ts`. The scattered development-tooling specs are exposed explicitly as the synthetic `wbs-dev-tools` target.
+An existing suite automatically discovers a new spec only when its `<suite>.conf.ts` `specs` patterns include the new path. A direct child directory of `tests/` becomes a test target when it supplies `<suite>/<suite>.conf.ts`. For example, `wikibase-extensions/wikibase-extensions.conf.ts` declares its specs and Compose override. A config may export a `run` function to control a different runner while retaining the shared test environment and target discovery.
+
+### Wikibase Core Tests
+
+Run the upstream WDIO and PHPUnit specs from the configured image:
+
+```bash
+./wbs-dev test wikibase-core
+```
+
+The config starts a normal test instance, copies `extensions/Wikibase` from that running image into a temporary directory under `tmp/`, and runs the repository WDIO specs with Wikibase's WDIO config. The specs resolve WDIO, `wdio-mediawiki`, and `wdio-wikibase` from the locked `wbs-dev` dependencies, so changes to upstream test imports may require updating those dependencies. Its Compose override enables anonymous editing for the upstream test profile. MobileFrontend is included in the core image at the matching MediaWiki release branch and enabled only by this suite's LocalSettings override. Results and screenshots go to `tests/wikibase-core/results`.
+
+The upstream test profile enables anonymous editing, raises the edit rate limit, and disables multilingual default terms for compatibility with the pinned specs. It also provides Scribunto's engine defaults to the PHPUnit harness. After the browser specs, the target runs Wikibase's PHPUnit group directly against the pinned source in the image and writes JUnit results to `tests/wikibase-core/results/phpunit.xml`. The image includes a selected set of PHPUnit packages and test helpers through its Composer merge file; it does not install the full Composer dev dependency set. A suite-owned PHPUnit bootstrap loads the test helper functions only for the PHPUnit process. `--spec` selects only browser specs and skips PHPUnit. This target is included in `wbs-dev test all` and the CI matrix like the other targets. The existing `wikibase` Suite tests remain a separate target; `./wbs-dev test wikibase wikibase-core` runs both.
 
 ### WBS Tools Suite
 

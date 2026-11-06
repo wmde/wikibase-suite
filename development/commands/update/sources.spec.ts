@@ -255,8 +255,14 @@ describe('Wikibase source update provider', () => {
 		);
 		assert.ok(registry.extensions.every(({ source }) => source !== null));
 		assert.deepEqual(
-			registry.extensions.slice(0, 4).map(({ name }) => name),
-			['Wikibase', 'WikibaseEdtf', 'EntitySchema', 'WikibaseLocalMedia']
+			registry.extensions.slice(0, 5).map(({ name }) => name),
+			[
+				'Wikibase',
+				'MobileFrontend',
+				'WikibaseEdtf',
+				'EntitySchema',
+				'WikibaseLocalMedia'
+			]
 		);
 	});
 });

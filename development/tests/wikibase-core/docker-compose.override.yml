@@ -1,0 +1,5 @@
+services:
+  wikibase:
+    volumes:
+      - ./wikibase-core/LocalSettings.php:/test-settings/LocalSettings.php:ro
+      - ./wikibase-core/phpunit-bootstrap.php:/test-settings/phpunit-bootstrap.php:ro
