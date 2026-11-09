@@ -1,3 +1,7 @@
+# 7.1.1-fv.2-wikimedia-login (unreleased)
+
+- Adds optional Wikimedia OAuth login to the Federated Values alpha image. Supplying a Meta-Wiki consumer key and secret enables the login option; local login remains available.
+
 # 7.1.1-fv.2 (unreleased)
 
 - Builds the Federated Values alpha on the Wikibase Suite 7.1.1 security update.

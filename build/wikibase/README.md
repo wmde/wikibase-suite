@@ -17,6 +17,7 @@ This image contains the Wikibase extension running on top of MediaWiki. Wikibase
 | [Echo](https://www.mediawiki.org/wiki/Extension:Echo)                                                                                                                                                                       | Provides notifications for user mentions, page activity, and other wiki events.                                                |
 | [EntitySchema](https://www.mediawiki.org/wiki/Extension:EntitySchema)                                                                                                                                                       | Allows to store Shape Expression Schemas on wiki pages.                                                                        |
 | [OAuth](https://www.mediawiki.org/wiki/Extension:OAuth)                                                                                                                                                                     | Allow users to safely authorize another application ("consumer") to use the MediaWiki action API on their behalf.              |
+| [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) and [WSOAuth](https://www.mediawiki.org/wiki/Extension:WSOAuth) | Enable optional Wikimedia account login when a Meta-Wiki OAuth consumer key and secret are configured. |
 | [UniversalLanguageSelector](https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector)                                                                                                                             | Tool that allows users to select a language and configure its support in an easy way.                                          |
 | [WikibaseEdtf](https://github.com/ProfessionalWiki/WikibaseEdtf)                                                                                                                                                            | Adds support for the Extended Date/Time Format (EDTF) Specification via a new data type.<br />*NOTE: Not loaded by default, to enable add `wfLoadExtension('WikibaseEdtf');` in your local configuration.*|
 | [WikibaseInWikitext](https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext)                                                                                                                                     | Adds a `<sparql>` tag for writing local query service examples on wiki pages.                                                  |
@@ -52,7 +53,7 @@ The image reads setup environment variables when it creates `LocalSettings.php`.
 These values are used for initial setup only and should not be changed without recreating the instance. To change them after first setup, follow the [resetting an instance](../../deploy/docs/resetting.md) procedure.
 
 > [!NOTE]
-> `METADATA_CALLBACK` is an exception and may be changed after initial setup.
+> `METADATA_CALLBACK`, `WIKIMEDIA_OAUTH_CONSUMER_KEY`, and `WIKIMEDIA_OAUTH_CONSUMER_SECRET` are exceptions and may be changed after initial setup.
 
 Variables in **bold** are required on first launch without `LocalSettings.php` in the configuration volume. The image will fail to start if one of those variables does not have a value. Default values do not need to be overwritten.
 
@@ -74,6 +75,8 @@ Variables in **bold** are required on first launch without `LocalSettings.php` i
 | `QUICKSTATEMENTS_PUBLIC_URL` | undefined  | Public URL of the QuickStatements server, such as [wikibase/quickstatements](https://hub.docker.com/r/wikibase/quickstatements). Leave undefined to disable QuickStatements functionality.                   |
 | `WDQS_PUBLIC_ENDPOINT_URL`   | undefined  | Public URL of the WDQS API, such as the one provided by [wikibase/wdqs](https://hub.docker.com/r/wikibase/wdqs). Leave undefined to disable WDQS integration.                                                |
 | `WDQS_PUBLIC_FRONTEND_URL`   | undefined  | Public URL of the WDQS frontend, such as [wikibase/wdqs-frontend](https://hub.docker.com/r/wikibase/wdqs-frontend). Used by WikibaseManifest and by `<sparql tryit="1">` links. Leave undefined to disable WDQS integration. |
+
+Set both `WIKIMEDIA_OAUTH_CONSUMER_KEY` and `WIKIMEDIA_OAUTH_CONSUMER_SECRET` to enable Wikimedia login. The values are read when the container starts; local password login remains available. See the [deployment guide](../../deploy/README.md) for the consumer callback URL.
 
 ### Job runner
 

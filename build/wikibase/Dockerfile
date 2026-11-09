@@ -126,7 +126,7 @@ RUN apt-get update; \
     rm -rf /var/lib/apt/lists/*
 USER nobody
 
-ARG WMF_EXTENSIONS="Wikibase,Babel,cldr,CirrusSearch,Elastica,Echo,EntitySchema,OAuth,UniversalLanguageSelector,WikibaseCirrusSearch,WikibaseManifest"
+ARG WMF_EXTENSIONS="Wikibase,Babel,cldr,CirrusSearch,Elastica,Echo,EntitySchema,OAuth,PluggableAuth,UniversalLanguageSelector,WikibaseCirrusSearch,WikibaseManifest,WSOAuth"
 ARG WIKIBASE_COMMIT
 ARG BABEL_COMMIT
 ARG CLDR_COMMIT
@@ -135,9 +135,11 @@ ARG ELASTICA_COMMIT
 ARG ECHO_COMMIT
 ARG ENTITYSCHEMA_COMMIT
 ARG OAUTH_COMMIT
+ARG PLUGGABLEAUTH_COMMIT
 ARG UNIVERSALLANGUAGESELECTOR_COMMIT
 ARG WIKIBASECIRRUSSEARCH_COMMIT
 ARG WIKIBASEMANIFEST_COMMIT
+ARG WSOAUTH_COMMIT
 
 # third-party extensions
 ARG WIKIBASEEDTF_COMMIT
