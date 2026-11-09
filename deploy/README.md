@@ -1,5 +1,8 @@
 # Wikibase Suite
 
+> [!WARNING]
+> This feature is not stable yet. We are actively collecting feedback and plan to add more functionality throughout the year. See the [Federated Items alpha guide](./federated-items-alpha.md).
+
 Wikibase Suite (WBS) helps you run your own [Wikibase](https://wikiba.se) on a server.
 
 WBS is a supported and tested Docker Compose configuration that facilitates deployment of the following services to a public Internet server:
@@ -17,6 +20,7 @@ WBS is a supported and tested Docker Compose configuration that facilitates depl
 ### Index
 - [Installation](#installation)
 - [Upgrading](./docs/updating.md)
+- [Federated Items alpha](./federated-items-alpha.md)
 - [Uninstalling](./docs/uninstalling.md)
 - [Glossary](./docs/glossary.md)
 - [Troubleshooting](./docs/troubleshooting.md)

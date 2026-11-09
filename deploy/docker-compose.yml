@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: wikibase/wikibase:7
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
     depends_on:
       mysql:
         condition: service_healthy
@@ -21,7 +21,7 @@ services:
       - quickstatements-data:/quickstatements/data
     environment:
       # Keep in sync with deploy/package.json version
-      DEPLOY_VERSION: "7.0.0"
+      DEPLOY_VERSION: "7.0.0-fv.1"
       METADATA_CALLBACK: ${METADATA_CALLBACK}
       MW_ADMIN_NAME: ${MW_ADMIN_NAME}
       MW_ADMIN_PASS: ${MW_ADMIN_PASS}
@@ -41,7 +41,7 @@ services:
       start_period: 5m
 
   wikibase-jobrunner:
-    image: wikibase/wikibase:7
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
     command: /jobrunner-entrypoint.sh
     depends_on:
       wikibase:
