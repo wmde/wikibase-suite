@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: wikibase/wikibase:7.1.1-fv.1
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
     depends_on:
       mysql:
         condition: service_healthy
@@ -41,7 +41,7 @@ services:
       start_period: 5m
 
   wikibase-jobrunner:
-    image: wikibase/wikibase:7.1.1-fv.1
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
     command: /jobrunner-entrypoint.sh
     depends_on:
       wikibase:
