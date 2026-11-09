@@ -22,7 +22,7 @@ WBS 7 and earlier releases use `deploy@MAJOR.MINOR.PATCH` tags. WBS 8 and later 
 
 ## Docker Image versions
 
-The WBS Docker Images—Wikibase, Query Service, Query Service frontend, OpenSearch, and QuickStatements—are released and versioned separately from WBS. WBS releases normally use compatible major-version tags. For example, `wikibase/wikibase:7` tracks the latest `7.x.x` Wikibase image without pulling breaking changes from a later major version.
+The published WBS Docker Images—Wikibase, Query Service, Query Service frontend, OpenSearch, and QuickStatements 2—are released and versioned separately from WBS. WBS releases normally use compatible major-version tags. For example, `wikibase/wikibase:7` tracks the latest `7.x.x` Wikibase image without pulling breaking changes from a later major version.
 
 WBS Docker Images are published to [Docker Hub](https://hub.docker.com/u/wikibase) with tags at the following version levels:
 

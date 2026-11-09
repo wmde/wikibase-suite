@@ -205,7 +205,7 @@ touch /app/wbs/docker-called-after-configuration
 					schemaVersion: 1,
 					source: { commit },
 					images: Object.fromEntries(
-						[ 'wikibase', 'opensearch', 'quickstatements', 'wdqs', 'wdqs-frontend',
+						[ 'wikibase', 'opensearch', 'quickstatements3', 'wdqs', 'wdqs-frontend',
 							'wbs-tools', 'unused-build-target' ].map(
 							( name ) => [ name, `ghcr.io/wmde/wikibase/${ name }:${ tag }` ]
 						)

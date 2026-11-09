@@ -39,7 +39,7 @@ async function main(): Promise<void> {
 			'  wbs-dev installer-dev web',
 			'  wbs-dev test',
 			'  wbs-dev lint',
-			'  wbs-dev update wikibase quickstatements',
+			'  wbs-dev update wikibase quickstatements3',
 			'  wbs-dev release all --dry-run'
 		].join('\n')
 	);

@@ -55,7 +55,6 @@ Before updating, you can review the changelog for any images you want to check:
 - [Wikibase](../../development/images/wikibase/CHANGELOG.md)
 - [Query Service](../../development/images/wdqs/CHANGELOG.md)
 - [Query Service frontend](../../development/images/wdqs-frontend/CHANGELOG.md)
-- [QuickStatements](../../development/images/quickstatements/CHANGELOG.md)
 - [OpenSearch](../../development/images/opensearch/CHANGELOG.md)
 
 To update the images used by your installation:

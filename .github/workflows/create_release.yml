@@ -11,7 +11,7 @@ on:
         options:
           - wbs
           - opensearch
-          - quickstatements
+          - quickstatements3
           - wbs-tools
           - wdqs
           - wdqs-frontend
@@ -68,7 +68,7 @@ jobs:
             "All projects")
               release_target=(all)
               ;;
-            opensearch|quickstatements|wbs-tools|wdqs|wdqs-frontend|wikibase)
+            opensearch|quickstatements3|wbs-tools|wdqs|wdqs-frontend|wikibase)
               release_target=(images "$PROJECT_NAME")
               ;;
             *)

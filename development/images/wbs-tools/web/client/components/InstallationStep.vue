@@ -27,9 +27,9 @@
 								<span class="service-link__label">Query Service</span>
 								<span class="service-link__value">{{ queryServiceUrl }}</span>
 							</a>
-							<a class="service-link" :href="quickStatementsUrl" target="_blank">
-								<span class="service-link__label">QuickStatements</span>
-								<span class="service-link__value">{{ quickStatementsUrl }}</span>
+							<a class="service-link" :href="quickStatements3Url" target="_blank">
+								<span class="service-link__label">QuickStatements 3</span>
+								<span class="service-link__value">{{ quickStatements3Url }}</span>
 							</a>
 						</div>
 					</div>
@@ -135,7 +135,7 @@
 					<li>Wikibase and MediaWiki for creating and managing structured linked data.</li>
 					<li>Query Service and Query Service UI for SPARQL queries.</li>
 					<li>Query Service Updater to keep query data in sync.</li>
-					<li>QuickStatements for batch imports and edits.</li>
+							<li>QuickStatements 3 for batch imports and edits.</li>
 					<li>Reverse-proxy service (Traefik) for routing your domain names to Wikibase and the Query Service UI.</li>
 					<li>Required services: job runner, database (MariaDB), and search server (OpenSearch).</li>
 				</ul>
@@ -195,7 +195,7 @@ const progressChecklistItems = computed( () => {
 
 const wikibaseUrl = computed( () => `https://${ props.form.WIKIBASE_PUBLIC_HOST }` );
 const queryServiceUrl = computed( () => `https://${ props.form.WDQS_PUBLIC_HOST }` );
-const quickStatementsUrl = computed( () => `${ wikibaseUrl.value }/tools/quickstatements` );
+const quickStatements3Url = computed( () => `${ wikibaseUrl.value }/tools/quickstatements3` );
 
 watch(
 	() => props.configText,
