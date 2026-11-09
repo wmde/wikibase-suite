@@ -10,6 +10,7 @@ services:
 
   wikibase-client:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
     depends_on:
       mysql:
         condition: service_healthy

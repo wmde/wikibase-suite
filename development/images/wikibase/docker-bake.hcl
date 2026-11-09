@@ -98,15 +98,12 @@ target "wikibase" {
 
 target "wikibase-release" {
   inherits = ["wikibase-base"]
-  tags = distinct(flatten(concat(
-    [
-      image_tags(IMAGE_VERSION),
-      image_tags(split(".", IMAGE_VERSION)[0]),
-      image_tags(join(".", slice(split(".", IMAGE_VERSION), 0, 2))),
-      image_tags("mw${MEDIAWIKI.version}")
-    ],
-    [for tag in TAGS : image_tags(tag)]
-  )))
+  tags = distinct(flatten([
+    image_tags(IMAGE_VERSION),
+    image_tags(split(".", IMAGE_VERSION)[0]),
+    image_tags(join(".", slice(split(".", IMAGE_VERSION), 0, 2))),
+    image_tags("mw${MEDIAWIKI.version}")
+  ]))
 }
 
 group "default" {
