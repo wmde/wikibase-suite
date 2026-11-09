@@ -1,6 +1,6 @@
 {
 	"name": "deploy",
-	"version": "7.0.0-fv.1",
+	"version": "7.0.0-fv.2-wikimedia-login",
 	"nx": {
 		"targets": {
 			"lint": {},

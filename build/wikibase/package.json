@@ -1,6 +1,6 @@
 {
 	"name": "wikibase",
-	"version": "7.1.1-fv.2",
+	"version": "7.1.1-fv.2-wikimedia-login",
 	"nx": {
 		"targets": {
 			"lint": {},

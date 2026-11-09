@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42618113609
     depends_on:
       mysql:
         condition: service_healthy
@@ -21,7 +21,7 @@ services:
       - quickstatements-data:/quickstatements/data
     environment:
       # Keep in sync with deploy/package.json version
-      DEPLOY_VERSION: "7.0.0-fv.1"
+      DEPLOY_VERSION: "7.0.0-fv.2-wikimedia-login"
       METADATA_CALLBACK: ${METADATA_CALLBACK}
       MW_ADMIN_NAME: ${MW_ADMIN_NAME}
       MW_ADMIN_PASS: ${MW_ADMIN_PASS}
@@ -35,14 +35,19 @@ services:
       QUICKSTATEMENTS_PUBLIC_URL: https://${WIKIBASE_PUBLIC_HOST}/tools/quickstatements
       WDQS_PUBLIC_ENDPOINT_URL: https://${WDQS_PUBLIC_HOST}/sparql
       WDQS_PUBLIC_FRONTEND_URL: https://${WDQS_PUBLIC_HOST}
+      WIKIMEDIA_OAUTH_CONSUMER_KEY: ${WIKIMEDIA_OAUTH_CONSUMER_KEY:-}
+      WIKIMEDIA_OAUTH_CONSUMER_SECRET: ${WIKIMEDIA_OAUTH_CONSUMER_SECRET:-}
     healthcheck:
       test: curl --silent --fail localhost/wiki/Main_Page
       interval: 10s
       start_period: 5m
 
   wikibase-jobrunner:
-    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42618113609
     command: /jobrunner-entrypoint.sh
+    environment:
+      WIKIMEDIA_OAUTH_CONSUMER_KEY: ${WIKIMEDIA_OAUTH_CONSUMER_KEY:-}
+      WIKIMEDIA_OAUTH_CONSUMER_SECRET: ${WIKIMEDIA_OAUTH_CONSUMER_SECRET:-}
     depends_on:
       wikibase:
         condition: service_healthy

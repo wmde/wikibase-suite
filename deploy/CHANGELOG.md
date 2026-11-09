@@ -1,3 +1,7 @@
+# 7.0.0-fv.2-wikimedia-login (unreleased)
+
+- Passes optional Wikimedia OAuth consumer credentials from `.env` to the Wikibase and job runner services.
+
 ## 7.0.0 (2026-04-20)
 
 Updates in concert with Wikibase image v7.0.0 (mw-1.45.3) release
