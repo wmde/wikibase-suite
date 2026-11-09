@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42618113609
     depends_on:
       mysql:
         condition: service_healthy
@@ -43,7 +43,7 @@ services:
       start_period: 5m
 
   wikibase-jobrunner:
-    image: ghcr.io/wmde/wikibase/wikibase:dev-42612874958
+    image: ghcr.io/wmde/wikibase/wikibase:dev-42618113609
     command: /jobrunner-entrypoint.sh
     environment:
       WIKIMEDIA_OAUTH_CONSUMER_KEY: ${WIKIMEDIA_OAUTH_CONSUMER_KEY:-}
