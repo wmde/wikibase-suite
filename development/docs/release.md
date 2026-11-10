@@ -1,6 +1,6 @@
 # Release guide
 
-Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into `main`.
+Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into the branch selected for release.
 
 WBS and each image are versioned independently according to the [WBS version policy](../../docs/reference/versions.md) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -38,7 +38,7 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
 
 4. Commit the release changes. If additional product commits changed the release contents, rerun `wbs-dev update` so that its version and changelog proposals include them, then review and commit the refreshed metadata.
 
-5. Merge the pull request into `main` after review and CI pass.
+5. Merge the pull request into the branch selected for release after review and CI pass.
 
 The update command can be rerun safely while preparing the release. It reconstructs each draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading.
 
@@ -46,7 +46,7 @@ The update command can be rerun safely while preparing the release. It reconstru
 
 Run **Create a WBS Release** in GitHub Actions:
 
-1. Select `main` and the product to release.
+1. Select the target release branch and the product to release.
 2. Leave **Validate and preview the release without creating tags** checked, run the workflow, and review the result.
 3. Clear that checkbox and run the workflow again to publish.
 

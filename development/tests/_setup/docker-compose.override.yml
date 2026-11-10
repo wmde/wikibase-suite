@@ -8,6 +8,7 @@ networks:
 services:
   wikibase:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
     depends_on: !override
       mysql:
         condition: service_healthy
@@ -26,24 +27,29 @@ services:
 
   wikibase-jobrunner:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wikibase:${WBS_TEST_IMAGE_TAG:-latest}
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
 
   elasticsearch:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/opensearch:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ opensearch ]
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
+    profiles: [opensearch]
 
   wdqs:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ wdqs ]
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
+    profiles: [wdqs]
 
   wdqs-updater:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ wdqs ]
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
+    profiles: [wdqs]
     environment:
       WIKIBASE_CONCEPT_URI: http://${WIKIBASE_PUBLIC_HOST}
 
   wdqs-frontend:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/wdqs-frontend:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ wdqs-frontend ]
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
+    profiles: [wdqs-frontend]
     volumes:
       - ./${WBS_TEST_CONFIG_DIR}:/config
     environment:
@@ -52,7 +58,8 @@ services:
 
   quickstatements:
     image: ${WBS_TEST_IMAGE_REGISTRY:-wikibase}/quickstatements:${WBS_TEST_IMAGE_TAG:-latest}
-    profiles: [ quickstatements ]
+    pull_policy: ${WBS_TEST_IMAGE_PULL_POLICY:-never}
+    profiles: [quickstatements]
     environment:
       WIKIBASE_PUBLIC_URL: ${WIKIBASE_URL}
       QUICKSTATEMENTS_PUBLIC_URL: ${QUICKSTATEMENTS_URL}

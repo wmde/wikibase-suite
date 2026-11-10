@@ -176,6 +176,12 @@ services:
   # This is the reverse proxy and SSL service
   traefik:
     image: traefik:3
+    # Route Suite public hostnames through Traefik within the Docker network.
+    networks:
+      default:
+        aliases:
+          - ${WIKIBASE_PUBLIC_HOST}
+          - ${WDQS_PUBLIC_HOST}
     command:
       # traefik static configuration via command line
       # enable accesslog

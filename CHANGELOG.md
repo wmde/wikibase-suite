@@ -1,3 +1,9 @@
+# Unreleased
+
+## Network routing
+
+- Suite containers can use the configured public Wikibase and Query Service hostnames through Traefik on the Compose network. Public URLs and TLS routing remain unchanged.
+
 # 8.0.1 (2026-09-03)
 
 ## Dependency updates
