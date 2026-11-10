@@ -4,8 +4,8 @@ import wdioConfig from '../_setup/wdio.conf.js';
 
 export const testEnv = TestEnv.create( {
 	...defaultSettings,
-	name: 'wikibase-bootstrap',
-	specs: [ 'wikibase-bootstrap/*.spec.ts' ]
+	name: 'ontology-presets',
+	specs: [ 'ontology-presets/*.spec.ts' ]
 } );
 
 export const config = wdioConfig( testEnv );

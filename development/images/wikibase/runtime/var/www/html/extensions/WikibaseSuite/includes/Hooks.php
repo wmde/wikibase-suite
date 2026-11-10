@@ -4,9 +4,8 @@ namespace MediaWiki\Extension\WikibaseSuite;
 
 use ExtensionRegistry;
 use MediaWiki\Actions\ActionEntryPoint;
-use MediaWiki\Extension\WikibaseBootstrap\BootstrapService;
+use MediaWiki\Extension\WikibaseOntologyPresets\OntologyPresetsService;
 use MediaWiki\Extension\WikibaseSuite\Utils;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Request\WebRequest;
 use MediaWiki\Skin\Skin;
@@ -190,12 +189,12 @@ class Hooks {
 			];
 		}
 
-		$ontologyBootstrapUrl = self::ontologyBootstrapUrlFor( $skin->getUser() );
-		if ( $ontologyBootstrapUrl !== null ) {
+		$ontologyPresetsUrl = self::ontologyPresetsUrlFor( $skin->getUser() );
+		if ( $ontologyPresetsUrl !== null ) {
 			$wikibaseLinks[] = [
-				'text' => $skin->msg( 'ontologybootstrap' )->text(),
-				'href' => $ontologyBootstrapUrl,
-				'id' => 'n-ontology-bootstrap',
+				'text' => $skin->msg( 'wikibasesuite-sidebar-link-ontology-presets' )->text(),
+				'href' => $ontologyPresetsUrl,
+				'id' => 'n-ontology-presets',
 				'active' => false,
 			];
 		}
@@ -205,17 +204,14 @@ class Hooks {
 		] );
 	}
 
-	public static function ontologyBootstrapUrlFor( User $user ): ?string {
-		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseBootstrap' ) ||
-			!MediaWikiServices::getInstance()
-				->getSpecialPageFactory()
-				->exists( 'OntologyBootstrap' ) ||
-			!BootstrapService::newFromConfig()->isAvailableTo( $user )
+	public static function ontologyPresetsUrlFor( User $user ): ?string {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseOntologyPresets' ) ||
+			!( new OntologyPresetsService() )->isAvailableTo( $user )
 		) {
 			return null;
 		}
 
-		return SpecialPage::getTitleFor( 'OntologyBootstrap' )->getLocalURL();
+		return SpecialPage::getTitleFor( 'OntologyPresets' )->getLocalURL();
 	}
 
 	private static function insertBeforeToolbox( array &$sidebar, array $sections ): void {

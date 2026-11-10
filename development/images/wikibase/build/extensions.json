@@ -131,9 +131,9 @@
       }
     },
     {
-      "name": "WikibaseBootstrap",
+      "name": "WikibaseOntologyPresets",
       "source": {
-        "path": "runtime/var/www/html/extensions/WikibaseBootstrap"
+        "path": "runtime/var/www/html/extensions/WikibaseOntologyPresets"
       }
     }
   ]

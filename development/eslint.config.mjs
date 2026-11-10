@@ -81,8 +81,8 @@ export default defineConfigWithVueTs(
 	},
 	{
 		// MediaWiki ResourceLoader packages extension Vue modules as CommonJS.
-		name: 'wikibase-bootstrap/resource-loader',
-		files: [ 'images/wikibase/runtime/var/www/html/extensions/WikibaseBootstrap/**/*.{js,vue}' ],
+		name: 'ontology-presets/resource-loader',
+		files: [ 'images/wikibase/runtime/var/www/html/extensions/WikibaseOntologyPresets/**/*.{js,vue}' ],
 		languageOptions: {
 			globals: { ...globals.browser, require: 'readonly' }
 		},

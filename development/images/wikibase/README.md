@@ -95,15 +95,16 @@ using the normal MediaWiki instructions for that extension. A complete
 externally managed configuration continues to control its own extension
 loading.
 
-### Bootstrap an initial ontology
+### Start with an ontology preset
 
-To get started with a Wikibase without active properties, you can bootstrap an
-initial set of properties. This community-curated set includes properties
-mapped to Wikidata and common RDF and OWL vocabularies, providing a shared
-starting point for interoperable data.
+On a new Wikibase that has never had a property created, administrators can add
+the Core Properties preset. It creates eight community-curated properties with
+the IDs P1 through P8, including mappings to Wikidata and common RDF and OWL
+vocabularies.
 
-To apply an initial ontology, visit
-`https://<your-wikibase-host>/wiki/Special:OntologyBootstrap` to create the small set.
+Open `https://<your-wikibase-host>/wiki/Special:OntologyPresets` to review the
+properties and confirm their creation. The preset cannot be applied after a
+property ID has been allocated, even if that property was later deleted.
 
 To configure links from external identifiers created with these properties, see
 [Wikibase's configuration guide for external identifiers](https://www.mediawiki.org/wiki/Wikibase/Installation/Advanced_configuration#Define_links_for_external_identifiers).

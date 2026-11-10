@@ -1,0 +1,104 @@
+.ext-wikibase-ontology-presets-catalog__details {
+	padding: 16px 0;
+	border-bottom: 1px solid var( --border-color-subtle, #eaecf0 );
+}
+
+.ext-wikibase-ontology-presets-catalog__heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.ext-wikibase-ontology-presets-catalog__heading h3 {
+	margin-top: 0;
+}
+
+.ext-wikibase-ontology-presets-catalog__metadata {
+	display: grid;
+	grid-template-columns: max-content minmax( 0, 1fr );
+	column-gap: 8px;
+	row-gap: 4px;
+	margin: 0;
+	font-size: 0.875em;
+	color: var( --color-subtle, #54595d );
+}
+
+.ext-wikibase-ontology-presets-catalog__metadata > div {
+	display: contents;
+}
+
+.ext-wikibase-ontology-presets-catalog__metadata dt {
+	font-weight: 600;
+}
+
+.ext-wikibase-ontology-presets-catalog__metadata dd {
+	margin: 0;
+}
+
+.ext-wikibase-ontology-presets-catalog__summary {
+	color: var( --color-subtle, #54595d );
+	font-weight: normal;
+}
+
+.ext-wikibase-ontology-presets-catalog__action {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	flex-shrink: 0;
+}
+
+.ext-wikibase-ontology-presets-catalog__table-scroll {
+	max-width: 100%;
+	overflow-x: auto;
+	margin-top: 32px;
+}
+
+.ext-wikibase-ontology-presets-catalog__table {
+	width: 100%;
+	min-width: 680px;
+	border-collapse: collapse;
+	font-size: 0.875em;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th,
+.ext-wikibase-ontology-presets-catalog__table td {
+	border: 1px solid var( --border-color-subtle, #eaecf0 );
+	padding: 8px;
+	text-align: left;
+	vertical-align: top;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th {
+	font-weight: 600;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th:nth-child( 1 ) {
+	width: 8%;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th:nth-child( 2 ) {
+	width: 20%;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th:nth-child( 3 ) {
+	width: 15%;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th:nth-child( 4 ) {
+	width: 40%;
+}
+
+.ext-wikibase-ontology-presets-catalog__table th:nth-child( 5 ) {
+	width: 17%;
+}
+
+@media ( max-width: 700px ) {
+	.ext-wikibase-ontology-presets-catalog__heading {
+		flex-direction: column;
+	}
+
+	.ext-wikibase-ontology-presets-catalog__action {
+		align-items: flex-start;
+	}
+}

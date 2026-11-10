@@ -2,14 +2,15 @@
 
 declare( strict_types = 1 );
 
-namespace MediaWiki\Extension\WikibaseBootstrap;
+namespace MediaWiki\Extension\WikibaseOntologyPresets;
 
 /** Reads the narrow Turtle convention used by the pinned upstream property set. */
-class BundlePlanner {
-	/** @return array{properties: list<array<string, mixed>>, errors: string[]} */
+class PresetPlanner {
+	/** @return array{properties: list<array<string, mixed>>, metadata: array<string, mixed>, errors: string[]} */
 	public function plan( string $contents ): array {
 		$prefixes = $this->prefixes( $contents );
 		$propertiesById = [];
+		$irisById = [];
 		$errors = [];
 		preg_match_all(
 			'/^([A-Za-z][A-Za-z0-9_-]*):(P[1-9][0-9]*)\s+a\s+owl:(?:ObjectProperty|DatatypeProperty)\s*;(.*?)(?=^[A-Za-z][A-Za-z0-9_-]*:(?:P[1-9][0-9]*)?\s+a\s+owl:|\z)/ms',
@@ -19,66 +20,109 @@ class BundlePlanner {
 		);
 
 		foreach ( $matches as $match ) {
-			$sourceId = $match[2];
+			$id = $match[2];
 			$body = $match[3];
-			$sourceIri = $this->prefixedTerm( "{$match[1]}:$sourceId", $prefixes );
+			$iri = $this->prefixedTerm( "{$match[1]}:$id", $prefixes );
 			$label = $this->literal( $body, 'rdfs:label' );
 			$description = $this->literal( $body, 'dcterms:description' );
 			preg_match( '/"Wikibase ID: (P[1-9][0-9]*)"/', $body, $idNote );
 			preg_match( '/"Wikibase datatype: ([a-z][a-z-]*)"/', $body, $datatypeNote );
-			if ( $sourceIri === null || $label === null || $description === null ||
-				( $idNote[1] ?? '' ) !== $sourceId || !isset( $datatypeNote[1] )
+			if ( $iri === null || $label === null || $description === null ||
+				( $idNote[1] ?? '' ) !== $id || !isset( $datatypeNote[1] )
 			) {
-				$errors[] = "The bootstrap property $sourceId is missing a matching ID note, label, description, or datatype.";
+				$errors[] = "The preset property $id is missing a matching ID note, label, description, or datatype.";
 				continue;
 			}
 			if ( !in_array( $datatypeNote[1], [
 				'wikibase-item', 'wikibase-property', 'url', 'external-id', 'string'
 			], true ) ) {
-				$errors[] = "The bootstrap property $sourceId has an unsupported datatype.";
+				$errors[] = "The preset property $id has an unsupported datatype.";
 				continue;
 			}
 
 			$claims = $this->claims( $body, $prefixes );
 			if ( $claims === null ) {
-				$errors[] = "The bootstrap property $sourceId has an unsupported or invalid claim.";
+				$errors[] = "The preset property $id has an unsupported or invalid claim.";
 				continue;
 			}
-			if ( isset( $propertiesById[$sourceId] ) ) {
-				$errors[] = "The bootstrap property $sourceId is declared more than once.";
+			if ( isset( $propertiesById[$id] ) ) {
+				$errors[] = "The preset property $id is declared more than once.";
 				continue;
 			}
-			$propertiesById[$sourceId] = [
-				'sourceIri' => $sourceIri,
+			$propertiesById[$id] = [
+				'id' => $id,
 				'label' => $label,
 				'description' => $description,
 				'datatype' => $datatypeNote[1],
 				'claims' => $claims,
 			];
+			$irisById[$id] = $iri;
 		}
 
 		if ( $propertiesById === [] ) {
-			$errors[] = 'No importable bootstrap properties were found.';
+			$errors[] = 'No preset properties were found.';
 		}
 
-		$datatypesByIri = [];
-		foreach ( $propertiesById as $property ) {
-			$datatypesByIri[$property['sourceIri']] = $property['datatype'];
+		$idsByIri = [];
+		foreach ( $irisById as $id => $iri ) {
+			$idsByIri[$iri] = $id;
 		}
-		foreach ( $propertiesById as $sourceId => $property ) {
+		foreach ( $propertiesById as $id => $property ) {
+			$mappedClaims = [];
 			foreach ( $property['claims'] as $claim ) {
-				if ( !in_array( $datatypesByIri[$claim['property']] ?? null, [
+				$claimId = $idsByIri[$claim['property']] ?? null;
+				if ( $claimId === null || !in_array( $propertiesById[$claimId]['datatype'], [
 					'url', 'external-id', 'string'
 				], true ) ) {
-					$errors[] = "The bootstrap property $sourceId refers to a missing or unsupported claim property.";
+					$errors[] = "The preset property $id refers to a missing or unsupported claim property.";
+					continue;
 				}
+				$mappedClaims[] = [ 'property' => $claimId, 'value' => $claim['value'] ];
 			}
+			$propertiesById[$id]['claims'] = $mappedClaims;
 		}
 
 		uksort( $propertiesById, static fn ( string $a, string $b ): int =>
 			(int)substr( $a, 1 ) <=> (int)substr( $b, 1 )
 		);
-		return [ 'properties' => array_values( $propertiesById ), 'errors' => $errors ];
+		$nextId = 1;
+		foreach ( array_keys( $propertiesById ) as $id ) {
+			if ( $id !== 'P' . $nextId ) {
+				$errors[] = 'Preset property IDs must be consecutive, starting at P1.';
+				break;
+			}
+			$nextId++;
+		}
+		return [
+			'properties' => array_values( $propertiesById ),
+			'metadata' => $this->metadata( $contents ),
+			'errors' => $errors,
+		];
+	}
+
+	/** @return array{contributors: list<string>, license: string, publisher: string, rights: string, version: string} */
+	private function metadata( string $contents ): array {
+		preg_match(
+			'/^wb:\s+a\s+owl:Ontology\s*;(?<metadata>.*?)\s*\.\s*$/ms',
+			$contents,
+			$match
+		);
+		$metadata = $match['metadata'] ?? '';
+		$contributors = [];
+		if ( preg_match( '/dcterms:contributor\\s+(.*?)\\s*;/s', $metadata, $match ) ) {
+			preg_match_all( '/"([^"]+)"/', $match[1], $contributorMatches );
+			$contributors = $contributorMatches[1];
+		}
+		preg_match( '/dcterms:license\\s+<([^>]+)>/', $metadata, $license );
+		preg_match( '/dcterms:publisher\\s+<([^>]+)>/', $metadata, $publisher );
+
+		return [
+			'contributors' => $contributors,
+			'license' => $license[1] ?? '',
+			'publisher' => $publisher[1] ?? '',
+			'rights' => $this->literal( $metadata, 'dcterms:rights' )['value'] ?? '',
+			'version' => $this->literal( $metadata, 'owl:versionInfo' )['value'] ?? '',
+		];
 	}
 
 	/** @return array<string, string> */

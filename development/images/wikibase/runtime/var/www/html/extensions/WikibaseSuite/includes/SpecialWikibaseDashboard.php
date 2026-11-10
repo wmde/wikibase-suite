@@ -82,11 +82,11 @@ class SpecialWikibaseDashboard extends SpecialPage {
 			'</div>'
 		);
 
-		$importPropertiesUrl = Hooks::ontologyBootstrapUrlFor( $this->getUser() );
-		if ( $importPropertiesUrl !== null ) {
+		$ontologyPresetsUrl = Hooks::ontologyPresetsUrlFor( $this->getUser() );
+		if ( $ontologyPresetsUrl !== null ) {
 			$output->addHTML(
-				'<div class="wbs-dashboard-import-row">' .
-					'<a class="cdx-button cdx-button--fake-button cdx-button--fake-button--enabled cdx-button--action-progressive cdx-button--weight-primary wbs-dashboard-import-button" href="' . htmlspecialchars( $importPropertiesUrl ) . '">Import a set of properties</a>' .
+				'<div class="wbs-dashboard-ontology-presets-row">' .
+					'<a class="cdx-button cdx-button--fake-button cdx-button--fake-button--enabled cdx-button--action-progressive cdx-button--weight-primary wbs-dashboard-ontology-presets-button" href="' . htmlspecialchars( $ontologyPresetsUrl ) . '">' . htmlspecialchars( $this->msg( 'wikibasesuite-dashboard-ontology-presets-action' )->text() ) . '</a>' .
 				'</div>'
 			);
 		}

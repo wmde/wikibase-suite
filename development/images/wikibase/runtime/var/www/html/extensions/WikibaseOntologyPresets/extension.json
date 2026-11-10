@@ -1,0 +1,57 @@
+{
+	"name": "WikibaseOntologyPresets",
+	"version": "0.1.0",
+	"author": ["Wikibase Suite Team"],
+	"url": "https://www.mediawiki.org/wiki/Wikibase/Suite",
+	"namemsg": "wikibaseontologypresets-extensionname",
+	"descriptionmsg": "wikibaseontologypresets-desc",
+	"type": "specialpage",
+	"license-name": "BSD-3-Clause",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseOntologyPresets\\": "includes/"
+	},
+	"ResourceModules": {
+		"ext.wikibaseOntologyPresets.apply": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"localBasePath": "",
+			"packageFiles": [
+				"resources/ext.wikibaseOntologyPresets/init.js",
+				"resources/ext.wikibaseOntologyPresets/OntologyPresetsApp.vue"
+			],
+			"messages": [
+				"ontologypresets-completion-description",
+				"ontologypresets-view-all-properties",
+				"ontologypresets-catalog-heading",
+				"ontologypresets-applied-heading",
+				"ontologypresets-preset-description",
+				"ontologypresets-property-count",
+				"ontologypresets-property-table-id",
+				"ontologypresets-property-table-label",
+				"ontologypresets-property-table-datatype",
+				"ontologypresets-property-table-description",
+				"ontologypresets-property-table-wikidata-id",
+				"ontologypresets-metadata-version",
+				"ontologypresets-metadata-license",
+				"ontologypresets-metadata-publisher",
+				"ontologypresets-metadata-contributors",
+				"ontologypresets-unavailable",
+				"ontologypresets-apply",
+				"ontologypresets-apply-dialog-title",
+				"ontologypresets-cancel",
+				"ontologypresets-apply-confirmation"
+			],
+			"styles": ["resources/ext.wikibaseOntologyPresets.css"],
+			"codexComponents": ["CdxButton", "CdxDialog", "CdxMessage"],
+			"dependencies": ["codex-styles"]
+		}
+	},
+	"SpecialPages": {
+		"OntologyPresets": "MediaWiki\\Extension\\WikibaseOntologyPresets\\SpecialOntologyPresets"
+	},
+	"AvailableRights": ["applyontologypresets"],
+	"GroupPermissions": {
+		"sysop": { "applyontologypresets": true }
+	},
+	"MessagesDirs": { "WikibaseOntologyPresets": ["i18n"] },
+	"manifest_version": 2
+}
