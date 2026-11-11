@@ -110,4 +110,9 @@ describe( 'OpenSearch', function () {
 		expect( searchResult[ 0 ].match.type ).toEqual( 'alias' );
 		expect( searchResult[ 0 ].match.text ).toEqual( itemAlias );
 	} );
+
+	it( 'Should not load Wikibase Faceted Search by default', async function () {
+		await page.open( '/wiki/Special:Version' );
+		await expect( $( '#mw-version-ext-wikibase-Wikibase_Faceted_Search' ) ).not.toExist();
+	} );
 } );
