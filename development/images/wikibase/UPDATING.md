@@ -35,7 +35,7 @@ The same update can be prepared manually:
 2. Set `MEDIAWIKI.ref` in [`docker-bake.hcl`](./docker-bake.hcl) to the corresponding `REL<major>_<minor>` branch—for example, `refs/heads/REL1_47`.
 3. Resolve that branch head and update `MEDIAWIKI.commit`; read `MW_VERSION` from `includes/Defines.php` at the resolved commit and set `MEDIAWIKI.version` to the same value.
 4. Resolve the head of the same branch for every Wikimedia-maintained extension in `build/extensions.json` and update its `source.commit` value.
-5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, and WikibaseInWikitext and update their `source.commit` values.
+5. Resolve the configured branch heads for WikibaseLocalMedia, WikibaseEdtf, WikibaseInWikitext, and WikibaseRDF and update their `source.commit` values.
 6. Review the MediaWiki release notes and every resulting commit range before building or testing the image.
 
 ## Review

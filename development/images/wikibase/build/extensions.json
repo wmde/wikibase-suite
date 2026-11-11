@@ -42,6 +42,14 @@
       }
     },
     {
+      "name": "WikibaseRDF",
+      "source": {
+        "repo": "https://github.com/ProfessionalWiki/WikibaseRDF.git",
+        "ref": "refs/heads/master",
+        "commit": "7e6d572968de36c29b787601989bdcc8d9fa4f2a"
+      }
+    },
+    {
       "name": "WikibaseInWikitext",
       "source": {
         "repo": "https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext.git",
