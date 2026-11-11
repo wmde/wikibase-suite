@@ -86,6 +86,7 @@ extensions and additional packages placed in this image.
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) and [WSOAuth](https://www.mediawiki.org/wiki/Extension:WSOAuth) | Yes | Let users authenticate to Wikibase with their Wikimedia account through a Meta-Wiki OAuth 1.0a consumer. Enabled when both Wikimedia OAuth token variables are set. |
 | [UniversalLanguageSelector](https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector) | Yes | Allows users to select a language and configure its support. |
 | [WikibaseEdtf](https://github.com/ProfessionalWiki/WikibaseEdtf) | No | Adds support for the Extended Date/Time Format (EDTF) specification through a new data type. |
+| [WikibaseExport](https://github.com/ProfessionalWiki/WikibaseExport) | No | Adds a special page and REST API for exporting chosen items and properties as CSV without SPARQL, optionally with one column per year. |
 | [WikibaseInWikitext](https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext) | Yes | Adds a `<sparql>` tag for writing local Query Service examples on wiki pages. |
 | [WikibaseLocalMedia](https://github.com/ProfessionalWiki/WikibaseLocalMedia) | Yes | Adds support for local media files to Wikibase through a new data type. |
 | [WikibaseManifest](https://www.mediawiki.org/wiki/Extension:WikibaseManifest) | Yes | Provides metadata about the structured data repository through an API. |

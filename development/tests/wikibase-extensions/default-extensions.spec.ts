@@ -40,4 +40,9 @@ describe( 'Default extensions', function () {
 		await page.open( '/wiki/Special:Version' );
 		await expect( $( '#mw-version-ext-other-Wikibase_EDTF' ) ).not.toExist();
 	} );
+
+	it( 'Should not load Wikibase Export by default', async function () {
+		await page.open( '/wiki/Special:Version' );
+		await expect( $( '#mw-version-ext-wikibase-Wikibase_Export' ) ).not.toExist();
+	} );
 } );
