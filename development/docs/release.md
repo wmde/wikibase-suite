@@ -4,6 +4,12 @@ Prepare each release in a pull request containing the implementation, versions, 
 
 WBS and each image are versioned independently according to the [WBS version policy](../../docs/reference/versions.md) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Prereleases use a full version such as `8.1.0-rc.1`. Choose a base version ahead of the latest stable release of that project; publication rejects a prerelease once a stable release reaches its base. The update command increments the suffix after a published prerelease with the same base version and channel. WBS and image suffixes advance independently.
+
+Image prereleases publish their full version tag without moving stable aliases. An image manifest may also declare a moving channel tag for compatible prerelease image updates. Both `wbs-dev release` and `wbs-dev build --publish` inspect the resolved Bake tags and reject a prerelease that would move tags outside its channel. Review the dry-run output before release.
+
+The public `latest` installer shortcut stays on stable WBS releases. Install a prerelease from its tagged checkout with `./install`.
+
 The primary release-preparation workflow is the `wbs-dev update` interview. It gathers supported upstream updates, proposes versions, and drafts changelogs for the products being released.
 
 ## Prepare a release

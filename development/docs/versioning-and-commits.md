@@ -1,6 +1,6 @@
 # Versioning and Conventional Commits
 
-Wikibase Suite and each published image have independent versions. All use [Semantic Versioning](https://semver.org/spec/v2.0.0.html), written as `MAJOR.MINOR.PATCH`:
+Wikibase Suite and each published image have independent versions. All use [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Stable releases use `MAJOR.MINOR.PATCH`; a prerelease appends a suffix such as `-rc.1`:
 
 - increment `PATCH` for compatible fixes
 - increment `MINOR` for backward-compatible functionality
@@ -21,7 +21,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) so th
 
 Changed paths determine which independently versioned projects a commit affects; the optional commit scope is descriptive and does not select a project. Uncommitted project changes cause `update` to propose at least a patch so release preparation can include source-pin and metadata updates.
 
-The command generates `Changes` from release-driving commits and `Dependency updates` from source-pin differences, in that order. These two sections are command-owned and replaced on rerun; operator-written summaries and compatibility notes belong outside them and are preserved. Generated-only release commits do not affect a subsequent run. Release operators must review and may change the proposed version or add separate changelog commentary before committing. The `wbs-dev release` commands only publish validated, committed release tags. Prerelease versions are not currently supported.
+The command generates `Changes` from release-driving commits and `Dependency updates` from source-pin differences, in that order. These two sections are command-owned and replaced on rerun; operator-written summaries and compatibility notes belong outside them and are preserved. Generated-only release commits do not affect a subsequent run. Release operators must review and may change the proposed version or add separate changelog commentary before committing. The `wbs-dev release` commands publish validated, committed stable or prerelease tags. When updating a prerelease line, the command selects its latest tag with the same base version and prerelease channel and increments the prerelease number.
 
 See the [release process](./release.md) for preparation, publication ordering, and verification.
 

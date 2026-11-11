@@ -1,9 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { setTimeout as delay } from 'node:timers/promises';
+import semver from 'semver';
 import { GitRepository } from '../../lib/git.js';
 import { projectVersion, type ReleaseProject } from '../../lib/projects.js';
+import { assertSafeReleaseTags } from '../../lib/release-tags.js';
 import {
-	assertStableVersion,
+	assertReleaseVersion,
+	findPreviousRelease,
 	hasChangelogVersion
 } from '../../lib/versioning.js';
 
@@ -18,7 +21,15 @@ function readTarget(
 	project: ReleaseProject
 ): ReleaseTarget {
 	const version = projectVersion(project);
-	assertStableVersion(version, `${project.name} project`);
+	assertReleaseVersion(version, `${project.name} project`);
+	if (semver.prerelease(version)) {
+		const latestStable = findPreviousRelease(git, project, '0.0.0').version;
+		if (latestStable && semver.lt(version, latestStable)) {
+			throw new Error(
+				`${project.name} prerelease ${version} must use a base version above stable ${latestStable}.`
+			);
+		}
+	}
 	if (
 		!hasChangelogVersion(readFileSync(project.changelogPath, 'utf8'), version)
 	) {
@@ -47,7 +58,11 @@ export function preflightRelease(
 	) {
 		throw new Error('Release requires HEAD to exist on a remote branch.');
 	}
-	return projects.map((project) => readTarget(git, project));
+	return projects.map((project) => {
+		const target = readTarget(git, project);
+		assertSafeReleaseTags(project);
+		return target;
+	});
 }
 
 export function publishGitTags(
@@ -150,7 +165,7 @@ export async function requireDockerHubImages(
 	const pending = new Map(
 		projects.map((project) => {
 			const version = projectVersion(project);
-			assertStableVersion(version, `${project.name} project`);
+			assertReleaseVersion(version, `${project.name} project`);
 			return [project.name, version];
 		})
 	);

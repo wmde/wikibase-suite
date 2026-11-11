@@ -2,7 +2,7 @@
 
 Wikibase Suite (WBS) and each WBS Docker Image have independent version numbers. Each WBS release identifies the compatible image versions it uses, while images can be released independently.
 
-They all use [semantic versioning](https://semver.org/spec/v2.0.0.html), written as `MAJOR.MINOR.PATCH`. Major releases may require upgrade work, while minor and patch releases remain compatible.
+They all use [semantic versioning](https://semver.org/spec/v2.0.0.html). Stable releases use `MAJOR.MINOR.PATCH`; prereleases add a suffix such as `-rc.1`. Major releases may require upgrade work, while minor and patch stable releases remain compatible.
 
 This page explains how to read these versions. For update instructions, see [Upgrading](../operate/upgrade.md).
 
@@ -33,3 +33,11 @@ WBS Docker Images are published to [Docker Hub](https://hub.docker.com/u/wikibas
 | Patch | `7.1.0` | Identifies a specific image release. |
 
 Some images also publish tags for the version of the software they contain, such as the bundled MediaWiki or Query Service version. See [Wikibase Suite (WBS) Docker Images](./docker-images.md) for details.
+
+## Prereleases
+
+A prerelease has the form `MAJOR.MINOR.PATCH-CHANNEL.NUMBER`, such as `wbs@8.1.0-rc.1` or `wikibase/wikibase:8.3.0-rc.1`. It is a Semantic Versioning prerelease and sorts below the matching stable version. WBS and each image have independent version numbers and prerelease counters.
+
+An image prerelease always publishes its full version tag. It does not move stable major, minor, or bundled-software tags. An image may additionally declare a moving prerelease channel tag, such as `8-rc`, for compatible updates within that channel. Review the image's release tags before publication.
+
+The public installer shortcut continues to select stable WBS releases. To install a prerelease, check out its full `wbs@…` Git tag and run `./install` from that checkout. WBS prerelease tags are fixed; select a newer full tag when the configuration or documentation changes.

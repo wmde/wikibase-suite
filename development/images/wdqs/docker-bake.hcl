@@ -40,6 +40,15 @@ function "image_tags" {
   result = [for tag in tags : "${IMAGE_REPOSITORY}:${tag}"]
 }
 
+# Prereleases keep the full version tag but do not move stable aliases.
+function "release_tags" {
+  params = [stable_aliases]
+  result = image_tags(concat(
+    [IMAGE_VERSION],
+    length(split("-", IMAGE_VERSION)) > 1 ? [] : stable_aliases
+  ))
+}
+
 target "wdqs-base" {
   context    = "."
   dockerfile = "Dockerfile"
@@ -62,8 +71,7 @@ target "wdqs" {
 
 target "wdqs-release" {
   inherits = ["wdqs-base"]
-  tags = image_tags([
-    IMAGE_VERSION,
+  tags = release_tags([
     split(".", IMAGE_VERSION)[0],
     join(".", slice(split(".", IMAGE_VERSION), 0, 2)),
     "wdqs${WDQS.version}"

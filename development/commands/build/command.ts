@@ -2,9 +2,10 @@ import { Option, type Command } from 'commander';
 import { join } from 'node:path';
 import { BAKE_MANIFEST, readImageManifest } from '../../lib/bake.js';
 import type { RepositoryContext } from '../../lib/context.js';
-import { discoverImageNames } from '../../lib/projects.js';
+import { discoverImageNames, discoverReleaseProjects } from '../../lib/projects.js';
+import { assertSafeReleaseTags } from '../../lib/release-tags.js';
 import { requestTargetNames, resolveNames } from '../../lib/selection.js';
-import { assertStableVersion } from '../../lib/versioning.js';
+import { assertReleaseVersion } from '../../lib/versioning.js';
 import { DEFAULT_BUILD_PARALLELISM, buildImages } from './images.js';
 
 interface ParsedBuildArguments {
@@ -89,7 +90,11 @@ async function runBuild(
 		const manifest = readImageManifest(
 			join(context.imagesRoot, selected[0], BAKE_MANIFEST)
 		);
-		assertStableVersion(manifest.version, `${selected[0]} image`);
+		assertReleaseVersion(manifest.version, `${selected[0]} image`);
+		const project = discoverReleaseProjects(context).find(
+			(candidate) => candidate.name === selected[0]
+		)!;
+		assertSafeReleaseTags(project);
 	}
 
 	await buildImages(selected, parsed.forwarded, context, parsed.parallel);

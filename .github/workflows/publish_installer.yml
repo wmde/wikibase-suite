@@ -197,10 +197,12 @@ jobs:
     if: >-
       (
         github.event_name == 'push' &&
-        startsWith(github.ref, 'refs/tags/wbs@')
+        startsWith(github.ref, 'refs/tags/wbs@') &&
+        !contains(github.ref_name, '-')
       ) || (
         github.event_name == 'workflow_dispatch' &&
-        startsWith(inputs.target, 'wbs@')
+        startsWith(inputs.target, 'wbs@') &&
+        !contains(inputs.target, '-')
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 20

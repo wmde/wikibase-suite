@@ -43,6 +43,10 @@ jobs:
           set -euo pipefail
           image_name=${RELEASE_TAG%%@*}
           echo "image_name=$image_name" >> "$GITHUB_OUTPUT"
+          version=${RELEASE_TAG#*@}
+          if [[ "$version" == *-* ]]; then
+            echo 'is_prerelease=true' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build and publish the AMD64 release image
         env:
@@ -55,6 +59,7 @@ jobs:
             --provenance=false
 
       - name: Prepare image documentation links for Docker Hub
+        if: steps.release.outputs.is_prerelease != 'true'
         env:
           IMAGE_NAME: ${{ steps.release.outputs.image_name }}
         run: |
@@ -77,6 +82,7 @@ jobs:
           fi
 
       - name: Publish image documentation to Docker Hub
+        if: steps.release.outputs.is_prerelease != 'true'
         uses: peter-evans/dockerhub-description@v5
         with:
           username: wmdetravisbot
@@ -171,6 +177,7 @@ jobs:
           dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
 
       - name: Resolve and publish the multi-platform release tags
+        id: release
         env:
           RELEASE_TAG: ${{ github.ref_name }}
           AMD64_DIGEST: ${{ needs.publish_amd64.outputs.digest }}
@@ -179,6 +186,10 @@ jobs:
         run: |
           set -euo pipefail
           image_name=${RELEASE_TAG%%@*}
+          version=${RELEASE_TAG#*@}
+          if [[ "$version" == *-* ]]; then
+            echo 'is_prerelease=true' >> "$GITHUB_OUTPUT"
+          fi
           bake_json=$(IMAGE_REPOSITORY="wikibase/$image_name" \
             docker buildx bake \
               --file "images/$image_name/docker-bake.hcl" \
@@ -200,6 +211,7 @@ jobs:
             "$image@$ARM64_DIGEST"
 
       - name: Prepare image documentation links for Docker Hub
+        if: steps.release.outputs.is_prerelease != 'true'
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
         run: |
@@ -222,6 +234,7 @@ jobs:
           fi
 
       - name: Publish image documentation to Docker Hub
+        if: steps.release.outputs.is_prerelease != 'true'
         uses: peter-evans/dockerhub-description@v5
         with:
           username: wmdetravisbot

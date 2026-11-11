@@ -11,8 +11,8 @@ variable "IMAGE_VERSION" {
   default = "8.2.1"
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
-    error_message = "IMAGE_VERSION must be a stable MAJOR.MINOR.PATCH version."
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z][a-z0-9-]*\\.(0|[1-9][0-9]*))?$", IMAGE_VERSION))
+    error_message = "IMAGE_VERSION must be MAJOR.MINOR.PATCH with an optional CHANNEL.NUMBER prerelease."
   }
 }
 
@@ -67,8 +67,19 @@ variable "PHP_IMAGE" {
 }
 
 function "image_tags" {
-  params = [tag]
-  result = [for repository in split(",", IMAGE_REPOSITORY) : "${repository}:${tag}"]
+  params = [tags]
+  result = distinct(flatten([
+    for tag in tags : [for repository in split(",", IMAGE_REPOSITORY) : "${repository}:${tag}"]
+  ]))
+}
+
+# Prereleases keep the full version tag but do not move stable aliases.
+function "release_tags" {
+  params = [stable_aliases]
+  result = image_tags(concat(
+    [IMAGE_VERSION],
+    length(split("-", IMAGE_VERSION)) > 1 ? [] : stable_aliases
+  ))
 }
 
 target "wikibase-base" {
@@ -92,18 +103,17 @@ target "wikibase-base" {
 
 target "wikibase" {
   inherits = ["wikibase-base"]
-  tags     = image_tags(TAGS[0])
+  tags     = image_tags([TAGS[0]])
   output   = [{ type = "docker" }]
 }
 
 target "wikibase-release" {
   inherits = ["wikibase-base"]
-  tags = distinct(flatten([
-    image_tags(IMAGE_VERSION),
-    image_tags(split(".", IMAGE_VERSION)[0]),
-    image_tags(join(".", slice(split(".", IMAGE_VERSION), 0, 2))),
-    image_tags("mw${MEDIAWIKI.version}")
-  ]))
+  tags = release_tags([
+    split(".", IMAGE_VERSION)[0],
+    join(".", slice(split(".", IMAGE_VERSION), 0, 2)),
+    "mw${MEDIAWIKI.version}"
+  ])
 }
 
 group "default" {
