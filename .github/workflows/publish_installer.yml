@@ -84,7 +84,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT_NAME: ${{ github.event_name }}
           AUTOMATIC_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          AUTOMATIC_HEAD_SHA: ${{ github.event.workflow_run.pull_requests[0].head.sha }}
+          # The PR entry may have advanced since this workflow run completed.
+          AUTOMATIC_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           MANUAL_TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
