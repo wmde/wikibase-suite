@@ -20,12 +20,16 @@ interface CommitRecord {
 	includeInChangelog: boolean;
 }
 
-const STABLE_VERSION = /^\d+\.\d+\.\d+$/u;
+const RELEASE_VERSION = /^\d+\.\d+\.\d+(?:-[a-z][a-z0-9-]*\.(?:0|[1-9]\d*))?$/u;
 
-export function assertStableVersion(version: string, context: string): void {
-	if (!STABLE_VERSION.test(version) || !semver.valid(version)) {
+export function isReleaseVersion(version: string): boolean {
+	return RELEASE_VERSION.test(version) && Boolean(semver.valid(version));
+}
+
+export function assertReleaseVersion(version: string, context: string): void {
+	if (!isReleaseVersion(version)) {
 		throw new Error(
-			`${context} must use a stable MAJOR.MINOR.PATCH version; received "${version}".`
+			`${context} must use MAJOR.MINOR.PATCH with an optional CHANNEL.NUMBER prerelease; received "${version}".`
 		);
 	}
 }
@@ -134,11 +138,13 @@ function readCommits(
 
 export function findPreviousRelease(
 	git: GitRepository,
-	project: ReleaseProject
+	project: ReleaseProject,
+	current = projectVersion(project)
 ): {
 	tag?: string;
 	version?: string;
 } {
+	const channel = semver.prerelease(current)?.[0];
 	const tagNames = [project.name, ...project.legacyTagNames];
 	const candidates = [...git.remoteTags().keys()]
 		.filter((tag) => tagNames.some((name) => tag.startsWith(`${name}@`)))
@@ -146,9 +152,19 @@ export function findPreviousRelease(
 			tag,
 			version: tag.slice(tag.lastIndexOf('@') + 1)
 		}))
-		.filter((candidate) => semver.valid(candidate.version))
+		.filter((candidate) => isReleaseVersion(candidate.version))
 		.sort((left, right) => semver.rcompare(left.version, right.version));
-	return candidates[0] ?? {};
+	const sameBaseChannel = channel
+		? candidates.find(
+				(candidate) =>
+					semver.prerelease(candidate.version)?.[0] === channel &&
+					semver.major(candidate.version) === semver.major(current) &&
+					semver.minor(candidate.version) === semver.minor(current) &&
+					semver.patch(candidate.version) === semver.patch(current)
+			)
+		: undefined;
+	return sameBaseChannel ??
+		candidates.find((candidate) => !semver.prerelease(candidate.version)) ?? {};
 }
 
 function hasRelevantWorkingChanges(
@@ -200,7 +216,7 @@ function hasRelevantWorkingChanges(
 
 function parseHeadings(changelog: string): ChangelogHeading[] {
 	const pattern =
-		/^(#{1,6}[ \t]+)(?:\*\*)?(?:[^\s@]+@)?(Unreleased|\d+\.\d+\.\d+)(?:\*\*)?([ \t]*(?:\([^\n)]*\))?[^\n]*)$/gimu;
+		/^(#{1,6}[ \t]+)(?:\*\*)?(?:[^\s@]+@)?(Unreleased|\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)(?:\*\*)?([ \t]*(?:\([^\n)]*\))?[^\n]*)$/gimu;
 	const headings: ChangelogHeading[] = [];
 	let match: RegExpExecArray | null;
 	while ((match = pattern.exec(changelog)) !== null) {
@@ -410,8 +426,8 @@ export function planVersionUpdate(
 		proposedUpdates.find((update) => update.path === project.versionPath)
 			?.contents ?? readFileSync(project.versionPath, 'utf8');
 	const currentVersion = projectVersion(project, versionContents);
-	assertStableVersion(currentVersion, `${project.name} project`);
-	const previous = findPreviousRelease(git, project);
+	assertReleaseVersion(currentVersion, `${project.name} project`);
+	const previous = findPreviousRelease(git, project, currentVersion);
 	const commits = readCommits(
 		git,
 		project,
@@ -429,7 +445,13 @@ export function planVersionUpdate(
 	const bump = bumps.sort((left, right) => bumpRank(right) - bumpRank(left))[0];
 	let inferred = previous.version;
 	if (bump && previous.version) {
-		inferred = semver.inc(previous.version, bump) ?? undefined;
+		const channel = semver.prerelease(currentVersion)?.[0];
+		if (channel && semver.prerelease(previous.version)?.[0] === channel) {
+			inferred = semver.inc(previous.version, 'prerelease', String(channel)) ?? undefined;
+		} else {
+			const base = semver.inc(previous.version, bump);
+			inferred = base && channel ? `${base}-${channel}.1` : base ?? undefined;
+		}
 	}
 	const changelog = readFileSync(project.changelogPath, 'utf8');
 	const publishedVersions = new Set(
@@ -458,7 +480,7 @@ export function planVersionUpdate(
 		.filter(Boolean)
 		.sort((left, right) => semver.rcompare(left!, right!))[0]!;
 	const targetVersion = options.targetVersion ?? minimumVersion;
-	assertStableVersion(targetVersion, `${project.name} release`);
+	assertReleaseVersion(targetVersion, `${project.name} release`);
 	if (semver.lt(targetVersion, minimumVersion)) {
 		throw new Error(
 			`${project.name} release must be at least ${minimumVersion}; received ${targetVersion}.`

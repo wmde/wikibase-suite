@@ -18,7 +18,11 @@ import {
 	discoverReleaseProjects,
 	resolveProjectSelections
 } from '../../lib/projects.js';
-import { planVersionUpdate, type VersionPlan } from '../../lib/versioning.js';
+import {
+	findPreviousRelease,
+	planVersionUpdate,
+	type VersionPlan
+} from '../../lib/versioning.js';
 import { readWbsVersionManifest } from '../../lib/wbs-version.js';
 import { planWbsToolsAdoption } from '../update/projects/wbs-tools.js';
 import { planWbsUpdate } from '../update/projects/wbs.js';
@@ -62,6 +66,7 @@ function commitAll(fixture: Fixture, message: string): void {
 function wikibaseManifest(version: string, commit = 'aaa'): string {
 	return `variable "IMAGE_NAME" { default = "wikibase" }
 variable "IMAGE_VERSION" { default = "${version}" }
+variable "IMAGE_REPOSITORY" { default = "wikibase/wikibase" }
 variable "WIKIBASE" {
   default = {
     kind = "github"
@@ -71,6 +76,7 @@ variable "WIKIBASE" {
     commit = "${commit}"
   }
 }
+target "wikibase-release" { tags = ["wikibase/wikibase:${version}"] }
 `;
 }
 
@@ -199,6 +205,54 @@ describe('wbs-dev preparation and release workflow', () => {
 	});
 
 	describe('release preparation', () => {
+		it('does not carry a prerelease counter across base versions', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/docker-bake.hcl',
+				wikibaseManifest('1.2.0-rc.1')
+			);
+			git(fixture, 'tag', 'wikibase@1.1.0-rc.9');
+			git(fixture, 'push', 'origin', 'wikibase@1.1.0-rc.9');
+			const context = createRepositoryContext(fixture.development);
+			const repository = new GitRepository(context);
+			repository.fetchRemoteTags();
+			const project = discoverReleaseProjects(context).find(
+				(candidate) => candidate.name === 'wikibase'
+			)!;
+			assert.equal(findPreviousRelease(repository, project).version, '1.0.0');
+		});
+
+		it('increments the prerelease channel without using stable tags as its baseline', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/docker-bake.hcl',
+				wikibaseManifest('1.1.0-rc.1')
+			);
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# 1.1.0-rc.1 (2026-01-02)\n\n- First candidate.\n\n# 1.0.0 (2026-01-01)\n\n- Initial.\n'
+			);
+			commitAll(fixture, 'feat(wikibase): start release candidate');
+			git(fixture, 'tag', 'wikibase@1.1.0-rc.1');
+			git(fixture, 'push', 'origin', 'main', '--tags');
+			write(fixture, 'development/images/wikibase/feature.txt', 'next candidate\n');
+			commitAll(fixture, 'fix(wikibase): improve the candidate');
+
+			const result = versions(fixture, 'wikibase');
+			assert.equal(result.status, 0, result.stderr);
+			assert.equal(imageVersion(fixture), '1.1.0-rc.2');
+			assert.match(
+				readFileSync(
+					join(fixture.root, 'development/images/wikibase/CHANGELOG.md'),
+					'utf8'
+				),
+				/^# 1\.1\.0-rc\.2 \(\d{4}-\d{2}-\d{2}\)/u
+			);
+		});
+
 		it('infers a minor version and generates a structured changelog entry', () => {
 			const fixture = createFixture();
 			write(
@@ -209,6 +263,8 @@ describe('wbs-dev preparation and release workflow', () => {
 			commitAll(fixture, 'feat(wikibase): add useful behavior');
 			git(fixture, 'tag', '--force', 'wikibase@1.0.0', 'HEAD');
 			git(fixture, 'tag', 'wikibase@99.0.0');
+			git(fixture, 'tag', 'wikibase@1.1.0-rc.9');
+			git(fixture, 'push', 'origin', 'wikibase@1.1.0-rc.9');
 			const result = versions(fixture, 'wikibase');
 			assert.equal(result.status, 0, result.stderr);
 			assert.equal(imageVersion(fixture), '1.1.0');
@@ -600,6 +656,77 @@ describe('wbs-dev preparation and release workflow', () => {
 	});
 
 	describe('release publication', () => {
+		it('plans WBS and image prerelease tags together', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/docker-bake.hcl',
+				wikibaseManifest('1.1.0-rc.1')
+			);
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# 1.1.0-rc.1 (2026-01-02)\n\n- Candidate release.\n'
+			);
+			write(
+				fixture,
+				'.wbs/version',
+				'WBS_VERSION=1.1.0-rc.1\nWBS_TOOLS_IMAGE=wikibase/wbs-tools:1.0.0\n'
+			);
+			write(
+				fixture,
+				'CHANGELOG.md',
+				'# 1.1.0-rc.1 (2026-01-02)\n\n- Candidate release.\n'
+			);
+			commitAll(fixture, 'feat(wbs): prepare release candidate');
+			git(fixture, 'push', 'origin', 'main');
+			const result = cli(fixture, 'release', 'all', '--dry-run');
+			assert.equal(result.status, 0, result.stderr);
+			assert.match(result.stdout, /Would create and push wikibase@1\.1\.0-rc\.1/u);
+			assert.match(result.stdout, /Would create and push wbs@1\.1\.0-rc\.1/u);
+		});
+
+		it('rejects an image prerelease that would move stable aliases', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/docker-bake.hcl',
+				wikibaseManifest('1.1.0-rc.1').replace(
+					'tags = ["wikibase/wikibase:1.1.0-rc.1"]',
+					'tags = ["wikibase/wikibase:1.1.0-rc.1", "wikibase/wikibase:1"]'
+				)
+			);
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# 1.1.0-rc.1 (2026-01-02)\n\n- Candidate release.\n'
+			);
+			commitAll(fixture, 'feat(wikibase): prepare unsafe candidate');
+			git(fixture, 'push', 'origin', 'main');
+			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /would move tags outside its channel/u);
+		});
+
+		it('rejects a prerelease whose stable base is already published', () => {
+			const fixture = createFixture();
+			write(
+				fixture,
+				'development/images/wikibase/docker-bake.hcl',
+				wikibaseManifest('1.0.0-rc.1')
+			);
+			write(
+				fixture,
+				'development/images/wikibase/CHANGELOG.md',
+				'# 1.0.0-rc.1 (2026-01-02)\n\n- Candidate release.\n'
+			);
+			commitAll(fixture, 'feat(wikibase): prepare late candidate');
+			git(fixture, 'push', 'origin', 'main');
+			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /must use a base version above stable 1\.0\.0/u);
+		});
+
 		it('creates and pushes a missing image tag, and is rerunnable', () => {
 			const fixture = createFixture();
 			write(
@@ -651,12 +778,15 @@ describe('wbs-dev preparation and release workflow', () => {
 			assert.match(result.stderr, /clean working tree/u);
 		});
 
-		it('rejects prerelease versions until a publication policy exists', () => {
+		it('accepts a reviewed prerelease with a separate moving channel', () => {
 			const fixture = createFixture();
 			write(
 				fixture,
 				'development/images/wikibase/docker-bake.hcl',
-				wikibaseManifest('1.1.0-rc.1')
+				wikibaseManifest('1.1.0-rc.1').replace(
+					'tags = ["wikibase/wikibase:1.1.0-rc.1"]',
+					'tags = ["wikibase/wikibase:1.1.0-rc.1", "wikibase/wikibase:1-rc"]'
+				)
 			);
 			write(
 				fixture,
@@ -666,8 +796,8 @@ describe('wbs-dev preparation and release workflow', () => {
 			commitAll(fixture, 'feat(wikibase): prepare a candidate');
 			git(fixture, 'push', 'origin', 'main');
 			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
-			assert.notEqual(result.status, 0);
-			assert.match(result.stderr, /stable MAJOR\.MINOR\.PATCH/u);
+			assert.equal(result.status, 0, result.stderr);
+			assert.match(result.stdout, /Would create and push wikibase@1\.1\.0-rc\.1/u);
 		});
 	});
 });

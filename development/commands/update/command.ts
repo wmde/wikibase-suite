@@ -25,6 +25,7 @@ import { requestTargetNames } from '../../lib/selection.js';
 import type { SourceChange } from '../../lib/source-changes.js';
 import {
 	findPreviousRelease,
+	isReleaseVersion,
 	planVersionUpdate,
 	type VersionPlan
 } from '../../lib/versioning.js';
@@ -125,8 +126,8 @@ function versionValidation(
 	allowedNoOpVersion?: string
 ): (value: string | undefined) => string | undefined {
 	return (value) => {
-		if (!value || !semver.valid(value) || !/^\d+\.\d+\.\d+$/u.test(value)) {
-			return 'Enter a stable semantic version such as 8.1.0.';
+		if (!value || !isReleaseVersion(value)) {
+			return 'Enter a semantic version such as 8.1.0 or 8.1.0-rc.1.';
 		}
 		if (value !== allowedNoOpVersion && semver.lt(value, minimum)) {
 			return `The version must be at least ${minimum}.`;

@@ -78,8 +78,8 @@ IMAGE_REPOSITORY="wikibase/$IMAGE_NAME"
 TAGS="latest"
 
 if [ "$PUBLISH" = true ]; then
-	[[ "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-		echo "Official image publication requires a stable MAJOR.MINOR.PATCH version; received $IMAGE_VERSION." >&2
+	[[ "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z][a-z0-9-]*\.(0|[1-9][0-9]*))?$ ]] || {
+		echo "Official image publication requires a semantic release version; received $IMAGE_VERSION." >&2
 		exit 1
 	}
 	TARGET="${IMAGE_NAME}-release"
