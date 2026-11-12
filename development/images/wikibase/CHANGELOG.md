@@ -1,3 +1,23 @@
+# 9.0.0 (2026-10-23)
+
+## Dependency updates
+
+- MediaWiki from 1.46.2 to 1.47.0-beta ([Release notes](https://phabricator.wikimedia.org/source/mediawiki/browse/REL1_47/RELEASE-NOTES-1.47)).
+- Added MediaWiki REL1_47 at [Commit](https://github.com/wikimedia/mediawiki/commit/7fd765c053fb54d3aa0aeafcce1ba870d41aac9e).
+- Wikibase REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Wikibase/compare/eecdda89725f7b89c634c006fdda21f21f754bdb...5cc50677c039d9d9e8e21c329373d04ce13ab79a)).
+- EntitySchema REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-EntitySchema/compare/8767fa92e3f30e4658b31e82efb242d92489c3f4...aa0b3fc811c221dc5c71bf2141b855f022aabf6e)).
+- WikibaseManifest REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest/compare/8c034383637dcfceb966f207367305cd5fbb9ef2...ebd539878cd6abf219ca602e06a2ab2eeb211d33)).
+- Babel REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Babel/compare/1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a...98ff0edb31071c18d38453b33546515cd83b77a7)).
+- cldr REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-cldr/compare/470ae38ff7a29ac596fb8ce519d2e4a1f8d02523...cb9ad78029f7f82b6bc100befa9818d3a240e12a)).
+- UniversalLanguageSelector REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/compare/584a24c468593ba3c5a5e5bf8dbe399687212f98...a1dfd405ed037f174d36cd96e3864856765919ad)).
+- Elastica REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Elastica/compare/a3326af107aafd75f6958e8b4ae8e3d00f22b65f...dd33b27e304020cb7562524f74480d23afe7397e)).
+- CirrusSearch REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-CirrusSearch/compare/a89f321d857906a8450295aee40793d61ef18543...45f214117d3a89e11721898846ba460f0310d1f2)).
+- WikibaseCirrusSearch REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/compare/5e404f0fea531ede4c9a92252d682bf8c160e86f...7007b9ade30176ff9f88255236d6cd3e37dd656b)).
+- OAuth REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-OAuth/compare/80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1...705a03fa4ab8ae555a960a3f498567d93a5aa2ed)).
+- Retargeted the OAuth same-host callback patch to OAuth's `ConsumerValidator`.
+- PluggableAuth REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-PluggableAuth/compare/d1e588302c7ccb7806b04f46f62a9b5c34ea1715...393752565845895751b1636cd338e085247de522)).
+- WSOAuth REL1_47 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WSOAuth/compare/0eb464df201ab7caf8264b2a84b4ef67ed309b94...bc18eed1d54dc0e95f403596a9d4beda6ab89e3b)).
+
 # 8.2.1 (2026-10-21)
 
 ## Dependency updates
