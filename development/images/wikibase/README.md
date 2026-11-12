@@ -95,6 +95,20 @@ using the normal MediaWiki instructions for that extension. A complete
 externally managed configuration continues to control its own extension
 loading.
 
+### Start with an ontology preset
+
+On a new Wikibase that has never had a property created, administrators can add
+the Core Properties preset. It creates eight community-curated properties with
+the IDs P1 through P8, including mappings to Wikidata and common RDF and OWL
+vocabularies.
+
+Open `https://<your-wikibase-host>/wiki/Special:OntologyPresets` to review the
+properties and confirm their creation. The preset cannot be applied after a
+property ID has been allocated, even if that property was later deleted.
+
+To configure links from external identifiers created with these properties, see
+[Wikibase's configuration guide for external identifiers](https://www.mediawiki.org/wiki/Wikibase/Installation/Advanced_configuration#Define_links_for_external_identifiers).
+
 ### Login with Wikimedia
 
 To enable Wikimedia login:

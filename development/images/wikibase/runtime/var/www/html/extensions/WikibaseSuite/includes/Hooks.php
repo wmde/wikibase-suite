@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseSuite;
 
 use ExtensionRegistry;
 use MediaWiki\Actions\ActionEntryPoint;
+use MediaWiki\Extension\WikibaseOntologyPresets\OntologyPresetsService;
 use MediaWiki\Extension\WikibaseSuite\Utils;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Request\WebRequest;
@@ -188,9 +189,29 @@ class Hooks {
 			];
 		}
 
+		$ontologyPresetsUrl = self::ontologyPresetsUrlFor( $skin->getUser() );
+		if ( $ontologyPresetsUrl !== null ) {
+			$wikibaseLinks[] = [
+				'text' => $skin->msg( 'wikibasesuite-sidebar-link-ontology-presets' )->text(),
+				'href' => $ontologyPresetsUrl,
+				'id' => 'n-ontology-presets',
+				'active' => false,
+			];
+		}
+
 		self::insertBeforeToolbox( $sidebar, [
 			'wikibase-suite-sidebar' => $wikibaseLinks,
 		] );
+	}
+
+	public static function ontologyPresetsUrlFor( User $user ): ?string {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseOntologyPresets' ) ||
+			!( new OntologyPresetsService() )->isAvailableTo( $user )
+		) {
+			return null;
+		}
+
+		return SpecialPage::getTitleFor( 'OntologyPresets' )->getLocalURL();
 	}
 
 	private static function insertBeforeToolbox( array &$sidebar, array $sections ): void {
