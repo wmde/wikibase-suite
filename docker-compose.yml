@@ -6,7 +6,7 @@ services:
   # --------------------------------------------------
 
   wikibase:
-    image: wikibase/wikibase:8
+    image: ghcr.io/wmde/wikibase/wikibase:pr-1008
     depends_on:
       mysql:
         condition: service_healthy
@@ -42,7 +42,7 @@ services:
       start_period: 5m
 
   wikibase-jobrunner:
-    image: wikibase/wikibase:8
+    image: ghcr.io/wmde/wikibase/wikibase:pr-1008
     command: jobrunner
     environment:
       WIKIMEDIA_OAUTH_CONSUMER_TOKEN: ${WIKIMEDIA_OAUTH_CONSUMER_TOKEN:-}

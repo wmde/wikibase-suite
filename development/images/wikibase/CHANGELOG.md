@@ -1,3 +1,8 @@
+# 8.3.0-fv.3 (2026-11-11)
+
+- Adds the Federated Values alpha Wikibase source to the Suite 8 image on MediaWiki 1.45.6.
+- Pins the Wikimedia extensions to their MediaWiki `REL1_45` branches.
+
 # 8.2.1 (2026-10-21)
 
 ## Dependency updates

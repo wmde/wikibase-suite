@@ -245,7 +245,7 @@ exit 0
 
 		it( 'selects all configured local images for a non-interactive source build', () => {
 			withTemporaryDirectory( 'source-build', ( root ) => {
-				writeConfiguration( root, {}, 'services:\n  wikibase:\n    image: wikibase/wikibase:8\n' );
+				writeConfiguration( root, {}, 'services:\n  wikibase:\n    image: ghcr.io/wmde/wikibase/wikibase:pr-942\n' );
 				mkdirSync( join( root, 'development' ) );
 				writeFileSync( join( root, 'development/docker-compose.yml' ), 'services: {}\n' );
 				writeFileSync( join( root, 'docker-arguments' ), '' );
@@ -266,7 +266,7 @@ printf "%s\\n" "$@" >> /app/wbs/docker-arguments
 printf "%s\\n" --- >> /app/wbs/docker-arguments
 for argument in "$@"; do
   if [ "$argument" = config ]; then
-    printf '%s\n' '{"services":{"wikibase":{"image":"wikibase/wikibase:8"}}}'
+    printf '%s\n' '{"services":{"wikibase":{"image":"ghcr.io/wmde/wikibase/wikibase:pr-942"}}}'
     exit 0
   fi
 done

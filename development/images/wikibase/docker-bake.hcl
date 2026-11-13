@@ -8,11 +8,11 @@ variable "IMAGE_NAME" {
 }
 
 variable "IMAGE_VERSION" {
-  default = "8.2.1"
+  default = "8.3.0-fv.3"
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
-    error_message = "IMAGE_VERSION must be a stable MAJOR.MINOR.PATCH version."
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+(-fv\\.[1-9][0-9]*)?$", IMAGE_VERSION))
+    error_message = "IMAGE_VERSION must be MAJOR.MINOR.PATCH or the branch-local FV alpha version."
   }
 }
 
@@ -34,10 +34,10 @@ variable "MEDIAWIKI" {
   default = {
     # To select a new MediaWiki release line, change only this ref, then run wbs-dev update wikibase.
     # The updater reads the version from that branch's source and pins its commit.
-    ref           = "refs/heads/REL1_46"
+    ref           = "refs/heads/REL1_45"
     repo          = "https://github.com/wikimedia/mediawiki.git"
-    commit        = "d0d9a283f219a1c9487754dc96598080a4a4e30a"
-    version       = "1.46.2"
+    commit        = "c6fd20ee2066c1ab7e9b163810ccb4422e765092"
+    version       = "1.45.6"
     release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
 }

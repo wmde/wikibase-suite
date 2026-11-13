@@ -1,4 +1,8 @@
-# Unreleased
+# 8.1.0-fv.3 (2026-11-11)
+
+- Adds the Federated Values alpha to the Suite 8 configuration and documentation layout while using MediaWiki 1.45.
+- Uses the PR installer and its GHCR image set for alpha installations.
+- Documents new installations and the existing Suite 7 to 8 migration path for Federated Values instances.
 
 ## Network routing
 

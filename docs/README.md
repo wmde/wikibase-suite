@@ -2,6 +2,8 @@
 
 Find instructions below for configuring and maintaining an existing WBS installation. If you’re setting up WBS for the first time, start by [Installing WBS](./install/README.md)⁠.
 
+This branch also provides the [Federated Values alpha](./federated-values-alpha.md), including instructions for a new installation or an upgrade from WBS 7.
+
 ## Access your WBS server
 
 For most operating tasks, first connect to the server where WBS is installed and change to its installation directory.

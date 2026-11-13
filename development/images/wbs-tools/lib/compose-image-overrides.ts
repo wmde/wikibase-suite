@@ -5,7 +5,7 @@ export type ComposeImageService = {
 	image: string;
 };
 
-const SUITE_IMAGE_REPOSITORY = 'wikibase/';
+const SUITE_IMAGE_REPOSITORIES = [ 'wikibase/', 'ghcr.io/wmde/wikibase/' ];
 
 function imageRepository( image: string ): string {
 	const digest = image.indexOf( '@' );
@@ -24,8 +24,9 @@ export function composeImageServices( config: ComposeConfiguration ): ComposeIma
 
 export function suiteImageServices( config: ComposeConfiguration ): Array<ComposeImageService & { imageName: string }> {
 	return composeImageServices( config ).flatMap( ( service ) => {
-		if ( !service.image.startsWith( SUITE_IMAGE_REPOSITORY ) ) return [];
-		return [ { ...service, imageName: service.image.slice( SUITE_IMAGE_REPOSITORY.length ) } ];
+		const repository = SUITE_IMAGE_REPOSITORIES.find( ( prefix ) => service.image.startsWith( prefix ) );
+		if ( !repository ) return [];
+		return [ { ...service, imageName: service.image.slice( repository.length ) } ];
 	} );
 }
 
