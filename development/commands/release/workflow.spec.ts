@@ -2,10 +2,12 @@ import { afterEach, describe, it } from 'mocha';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
+	chmodSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
+	statSync,
 	writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -498,11 +500,16 @@ describe('wbs-dev preparation and release workflow', () => {
 			const projects = discoverReleaseProjects(context);
 			const wbs = projects.find((project) => project.name === 'wbs')!;
 			const tools = projects.find((project) => project.name === 'wbs-tools')!;
+			const installPath = join(fixture.root, 'install');
+			chmodSync(installPath, 0o755);
 			const adoption = planWbsToolsAdoption(wbs, tools, '1.1.0')!;
 			const plan = planWbsUpdate(context, gitRepository, wbs, {
 				toolsAdoption: adoption
 			})!;
 
+			applyFileUpdates(plan.updates);
+			assert.equal(statSync(installPath).mode & 0o777, 0o755);
+			execFileSync(installPath);
 			assert.equal(plan.targetVersion, '1.0.1');
 			const versionUpdate = plan.updates.find(
 				(update) => update.path === wbs.versionPath
@@ -522,6 +529,53 @@ describe('wbs-dev preparation and release workflow', () => {
 				/WBS Tools image from wikibase\/wbs-tools:1\.0\.0 to wikibase\/wbs-tools:1\.1\.0\./u
 			);
 		});
+
+		for (const sharedInput of ['pnpm-lock.yaml', 'pnpm-workspace.yaml']) {
+			it(`proposes a WBS Tools patch for changes to ${sharedInput}`, () => {
+				const fixture = createFixture();
+				write(
+					fixture,
+					'development/images/wbs-tools/docker-bake.hcl',
+					'variable "IMAGE_VERSION" { default = "1.0.0" }\n'
+				);
+				write(
+					fixture,
+					'development/images/wbs-tools/CHANGELOG.md',
+					'# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
+				);
+				write(fixture, `development/${sharedInput}`, '# original\n');
+				commitAll(fixture, 'chore: add WBS Tools');
+				git(fixture, 'tag', 'wbs-tools@1.0.0');
+				git(fixture, 'push', 'origin', 'main', '--tags');
+				const context = createRepositoryContext(fixture.development);
+				const repository = new GitRepository(context);
+				const projects = discoverReleaseProjects(context);
+				const tools = projects.find((project) => project.name === 'wbs-tools')!;
+				write(
+					fixture,
+					`development/${sharedInput}`,
+					'# updated dependency configuration\n'
+				);
+				assert.equal(
+					planVersionUpdate(context, repository, tools)?.targetVersion,
+					'1.0.1'
+				);
+				commitAll(fixture, 'fix(deps): update dependency configuration');
+				const plan = planVersionUpdate(context, repository, tools)!;
+				assert.equal(plan.targetVersion, '1.0.1');
+				assert.deepEqual(plan.changelogSections.changes, [
+					'fix(deps): update dependency configuration'
+				]);
+				assert.equal(
+					planVersionUpdate(
+						context,
+						repository,
+						projects.find((project) => project.name === 'wikibase')!
+					),
+					undefined
+				);
+			});
+		}
 
 		it('does not add a committed generated release draft to its own changelog', () => {
 			const fixture = createFixture();
