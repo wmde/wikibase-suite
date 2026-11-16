@@ -164,6 +164,7 @@ details.
 | Path | Description |
 | --- | --- |
 | `/config/InstanceSettings.php` | Persistent image-generated settings unique to an installed instance. Loaded first by `Settings.php`; do not edit it. |
+| `/config/BeforeExtensions.php` | Optional user-owned settings evaluated after image defaults and before image-loaded extensions. |
 | `/config/LocalSettings.php` | Persistent user-owned MediaWiki and extension customizations, loaded last. |
 | `/config/Extensions.php` | Optional user-owned extension configuration loaded by `LocalSettings.php` for compatibility. New configuration can go directly in `LocalSettings.php`. |
 | `/config/wikibase-php.ini` | Persistent user-customizable PHP settings. The image seeds it during managed setup. |
@@ -172,6 +173,8 @@ details.
 | `/var/www/html/extensions/` | Bundled MediaWiki and Wikibase extensions, available for configuration in `LocalSettings.php`. |
 | `/var/www/html/images/` | MediaWiki image and media upload directory. |
 | `/extra-install.sh` | Optional script for custom functionality run during a fresh installation. |
+
+For a walkthrough of startup and configuration, see [DEVELOPMENT.md](./DEVELOPMENT.md).
 
 ## Releases
 

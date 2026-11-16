@@ -5,6 +5,9 @@ Use these guides to develop, test, document, and release Wikibase Suite. End-use
 - [Getting started](../README.md#getting-started)<br>
   Set up the development environment, learn the `wbs-dev` and `wbs` commands, and follow the normal development cycle.
 
+- [Wikibase image startup and configuration](../images/wikibase/DEVELOPMENT.md)<br>
+  Trace startup from the image entry point through WikibaseSuite setup.
+
 - [Testing](../tests/README.md)<br>
   Run the browser-based integration suites, choose a suite or spec, configure local test environments, and add new tests.
 

@@ -42,7 +42,6 @@ This directory contains the build, test, update, and release tooling for Wikibas
 Make changes in the checkout, then use the relevant `wbs-dev` commands to build, test, and lint them:
 
 ```bash
-wbs-dev build all
 wbs-dev test all
 wbs-dev lint
 ```
