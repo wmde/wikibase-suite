@@ -83,15 +83,14 @@ export async function composeConfiguration( root = repositoryRoot ): Promise<Com
 async function writeLocalImagesOverride(): Promise<string> {
 	const repository = process.env.WBS_LOCAL_IMAGE_REPOSITORY || 'wikibase';
 	const tag = process.env.WBS_LOCAL_IMAGE_TAG || 'latest';
-	const pullPolicy = process.env.WBS_LOCAL_IMAGE_PULL_POLICY === 'always' ?
-		{} : { pullPolicy: 'never' as const };
+	const pullPolicy = process.env.WBS_LOCAL_IMAGE_PULL_POLICY || 'never';
 	const services = suiteImageServices( await composeConfiguration() );
 	const images = Object.fromEntries( runtimeImageNames( services ).map(
 		( imageName ) => [ imageName, `${ repository }/${ imageName }:${ tag }` ]
 	) );
 	const path = localImagesOverridePath();
 	mkdirSync( join( repositoryRoot, '.wbs' ), { recursive: true } );
-	writeFileSync( path, composeOverride( services, images, pullPolicy ), { mode: 0o600 } );
+	writeFileSync( path, composeOverride( services, images, { pullPolicy } ), { mode: 0o600 } );
 	return path;
 }
 

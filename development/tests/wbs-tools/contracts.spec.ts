@@ -281,7 +281,7 @@ done
 			} );
 		} );
 
-		it( 'allows configured remote local images to be pulled', () => {
+		it( 'passes the missing pull policy through for remote local images', () => {
 			withTemporaryDirectory( 'remote-local-images', ( root ) => {
 				writeConfiguration( root, {}, 'services:\n  wikibase:\n    image: wikibase/wikibase:8\n' );
 				const script = `
@@ -294,7 +294,7 @@ done
 						ENV_FILE_PATH: '/app/wbs/.env',
 						WBS_LOCAL_IMAGE_REPOSITORY: 'ghcr.io/example/wikibase',
 						WBS_LOCAL_IMAGE_TAG: 'ci-build',
-						WBS_LOCAL_IMAGE_PULL_POLICY: 'always'
+						WBS_LOCAL_IMAGE_PULL_POLICY: 'missing'
 					},
 					fakeDocker: shellScript`
 #!/bin/sh
@@ -310,7 +310,7 @@ exit 0
 				assert.equal( result.status, 0, result.stderr );
 				const override = readFileSync( join( root, '.wbs/local-images.override.yml' ), 'utf8' );
 				assert.match( override, /wikibase:\n[ ]{4}image: "ghcr\.io\/example\/wikibase\/wikibase:ci-build"/u );
-				assert.doesNotMatch( override, /pull_policy/u );
+				assert.match( override, /pull_policy: "missing"/u );
 			} );
 		} );
 	} );

@@ -1,0 +1,52 @@
+name: Publish Image Documentation
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: JSON array of image names.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        image: ${{ fromJSON(inputs.images) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare image documentation links for Docker Hub
+        env:
+          IMAGE_NAME: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          readme="development/images/$IMAGE_NAME/README.md"
+
+          # Docker Hub URL completion resolves links from the repository root,
+          # while the checked-in READMEs use paths relative to their directory.
+          # Normalize only the disposable Actions checkout; source stays portable.
+          # TODO: Once main represents the latest released state rather than active
+          # development, replace this normalization with stable default-branch links.
+          sed -i \
+            -e "s#](\\./#](development/images/$IMAGE_NAME/#g" \
+            -e 's#](\.\./\.\./\.\./#](#g' \
+            "$readme"
+
+          if grep -nE '\]\((\./|\.\./)' "$readme"; then
+            echo "Unresolved relative documentation link in $readme." >&2
+            exit 1
+          fi
+
+      - name: Publish image documentation to Docker Hub
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: wmdetravisbot
+          password: ${{ secrets.WBS_PUBLISH_TOKEN }}
+          repository: wikibase/${{ matrix.image }}
+          readme-filepath: development/images/${{ matrix.image }}/README.md
+          enable-url-completion: true

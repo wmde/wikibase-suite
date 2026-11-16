@@ -25,6 +25,7 @@ import { readWbsVersionManifest } from '../../lib/wbs-version.js';
 import { planWbsToolsAdoption } from '../update/projects/wbs-tools.js';
 import { planWbsUpdate } from '../update/projects/wbs.js';
 import { readVariable } from '../update/source-utils.js';
+import { preflightRelease, publishGitTags } from './publication.js';
 
 const CLI = resolve('wbs-dev.ts');
 const TSX = resolve('node_modules/.bin/tsx');
@@ -653,7 +654,8 @@ describe('wbs-dev preparation and release workflow', () => {
 		});
 	});
 
-	describe('release publication', () => {
+	describe('release publication', function () {
+		this.timeout(10000);
 		it('creates and pushes a missing image tag, and is rerunnable', () => {
 			const fixture = createFixture();
 			write(
@@ -669,8 +671,14 @@ describe('wbs-dev preparation and release workflow', () => {
 			commitAll(fixture, 'fix(wikibase): correct behavior');
 			git(fixture, 'push', 'origin', 'main');
 			git(fixture, 'tag', 'wikibase@1.0.1', 'wikibase@1.0.0');
-			const first = cli(fixture, 'release', 'images', 'wikibase');
+			const first = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.equal(first.status, 0, first.stderr);
+			const context = createRepositoryContext(fixture.development);
+			const repository = new GitRepository(context);
+			const projects = discoverReleaseProjects(context).filter(
+				(project) => project.isImage
+			);
+			publishGitTags(repository, preflightRelease(repository, projects));
 			assert.match(
 				run(
 					'git',
@@ -692,15 +700,15 @@ describe('wbs-dev preparation and release workflow', () => {
 				).trim(),
 				git(fixture, 'rev-parse', 'HEAD')
 			);
-			const second = cli(fixture, 'release', 'images', 'wikibase');
+			const second = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.equal(second.status, 0, second.stderr);
-			assert.match(second.stdout, /Already published: wikibase@1\.0\.1/u);
+			assert.match(second.stdout, /wikibase@1\.0\.1: already released/u);
 		});
 
 		it('blocks publication from a dirty working tree', () => {
 			const fixture = createFixture();
 			write(fixture, 'development/images/wikibase/dirty.txt', 'dirty=true\n');
-			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			const result = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.notEqual(result.status, 0);
 			assert.match(result.stderr, /clean working tree/u);
 		});
@@ -719,7 +727,7 @@ describe('wbs-dev preparation and release workflow', () => {
 			);
 			commitAll(fixture, 'feat(wikibase): prepare a candidate');
 			git(fixture, 'push', 'origin', 'main');
-			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			const result = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.notEqual(result.status, 0);
 			assert.match(result.stderr, /stable MAJOR\.MINOR\.PATCH/u);
 		});

@@ -36,7 +36,7 @@ export function runtimeImageNames( services: Array<ComposeImageService & { image
 export function composeOverride(
 	services: Array<ComposeImageService & { imageName: string }>,
 	images: Record<string, string>,
-	options: { pullPolicy?: 'never' } = {}
+	options: { pullPolicy?: string } = {}
 ): string {
 	const missing = services.find( ( service ) => !images[service.imageName] );
 	if ( missing ) throw new Error( `No image override supplied for ${ missing.service } (${ missing.imageName }).` );
@@ -46,7 +46,7 @@ export function composeOverride(
 		...services.flatMap( ( service ) => [
 			`  ${ service.service }:`,
 			`    image: ${ JSON.stringify( images[service.imageName] ) }`,
-			...( options.pullPolicy ? [ `    pull_policy: ${ options.pullPolicy }` ] : [] )
+			...( options.pullPolicy ? [ `    pull_policy: ${ JSON.stringify( options.pullPolicy ) }` ] : [] )
 		] ),
 		''
 	].join( '\n' );
