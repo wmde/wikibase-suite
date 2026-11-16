@@ -174,7 +174,7 @@ export async function down(): Promise<void> {
 }
 
 export async function status(): Promise<void> {
-	await runProcess( 'docker', [ ...await composeArgs(), 'ps' ] );
+	await runProcess( 'docker', [ ...await composeArgs(), 'ps', '--all' ] );
 }
 
 export async function reset( options: ResetOptions ): Promise<void> {
