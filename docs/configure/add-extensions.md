@@ -6,7 +6,7 @@ The [MediaWiki Extension Distributor](https://www.mediawiki.org/wiki/Special:Ext
 
 ## Instructions
 
-To install an extension, copy its files into `config/extensions`, load it from `config/Extensions.php`, and restart the Wikibase service. The steps below use `MyExtension.tar.gz` and `MyExtension` as examples; replace them with the archive and directory names of the extension you downloaded.
+The steps below install an extension in `config/extensions`, load it from `config/Extensions.php`, and restart the Wikibase service. They use `MyExtension.tar.gz` and `MyExtension` as examples; replace them with the archive and directory names of the extension you downloaded.
 
 1. Visit `https://<WIKIBASE_PUBLIC_HOST>/wiki/Special:Version` and note the installed MediaWiki version.
 
@@ -42,17 +42,17 @@ To install an extension, copy its files into `config/extensions`, load it from `
    wfLoadExtension( 'extensions/MyExtension' );
    ```
 
-9. Restart the Wikibase and job-runner services so MediaWiki can update itself and both services load the extension:
+9. Restart the Wikibase and job-runner services to load the extension:
 
    ```sh
    docker compose restart wikibase wikibase-jobrunner
    ```
 
    > [!NOTE]
-   > Some extensions instruct you to run `update.php` during installation. The Wikibase Docker Image runs `update.php` during startup, so you do not need to run it manually.
+   > Some extensions instruct you to run `update.php` during installation. When you add an extension and restart, the Wikibase Docker Image runs this step automatically, so you do not need to run it manually.
 
 10. Visit `https://<WIKIBASE_PUBLIC_HOST>/wiki/Special:Version` and confirm that the extension appears in the list of installed extensions.
 
-To keep an extension you installed in `config/extensions` current, follow [Updating Extensions](../operate/update-extensions.md).
+To keep an extension you installed current, follow [Updating Extensions](../operate/update-extensions.md).
 
 For more information, see the [MediaWiki extension manual](https://www.mediawiki.org/wiki/Manual:Extensions).

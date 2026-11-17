@@ -33,16 +33,16 @@ fi
 instance_settings=/config/InstanceSettings.php
 custom_settings=/config/LocalSettings.php
 last_update_file=/config/.last-update
-image_last_update_file=$setup_directory/last-update
 image_state_directory=/config/.wikibase-image
 migration_directory=$image_state_directory/config-migration
 installation_state_file=$image_state_directory/installation-state
 
-record_last_update() {
-    if [ -r "$image_last_update_file" ]; then
-        cp "$image_last_update_file" "$last_update_file.tmp"
-        mv "$last_update_file.tmp" "$last_update_file"
-    fi
+write_current_update_state() {
+    php /var/www/html/maintenance/run.php WikibaseSuite:UpdateState --output "$last_update_file.tmp"
+}
+
+record_successful_update() {
+    mv "$last_update_file.tmp" "$last_update_file"
 }
 
 ensure_image_state_directory() {
@@ -71,7 +71,9 @@ resume_fresh_installation() {
     if [ "$current_phase" = database-installed ]; then
         # installPreConfigured creates the core and extension tables, but a
         # normal update is still needed for extensions using a virtual domain.
+        write_current_update_state
         php /var/www/html/maintenance/run.php update --quick
+        record_successful_update
         set_installation_phase database-updated
         current_phase=database-updated
     fi
@@ -94,9 +96,10 @@ resume_fresh_installation() {
         if [ -f /extra-install.sh ]; then
             bash /extra-install.sh
         fi
-        record_last_update
         rm -f "$installation_state_file"
         remove_image_state_directory_if_empty
+        # Hooks or a resumed installation may have changed configuration or loaded extensions.
+        update_existing_installation
         return
     fi
     echo "Unknown WBS installation phase: $current_phase"
@@ -122,14 +125,15 @@ update_existing_installation() {
         MW_ADMIN_NAME MW_ADMIN_EMAIL MW_ADMIN_PASS \
         MW_WG_SERVER MW_WG_LANGUAGE_CODE MW_WG_SITENAME \
         ELASTICSEARCH_HOST
-    if [ -r "$image_last_update_file" ] && [ -r "$last_update_file" ] && \
-        cmp -s "$image_last_update_file" "$last_update_file"; then
+    write_current_update_state
+    if [ -r "$last_update_file" ] && cmp -s "$last_update_file.tmp" "$last_update_file"; then
+        rm -f "$last_update_file.tmp"
         echo "Wikibase image is already up to date."
         return
     fi
 
     php /var/www/html/maintenance/run.php update --quick
-    record_last_update
+    record_successful_update
 }
 
 install_new_instance() {
@@ -168,14 +172,16 @@ install_new_instance() {
 # otherwise valid InstanceSettings.php and LocalSettings.php files.
 if [ -d "$migration_directory" ]; then
     bash "$setup_directory/migration/migrate.sh"
-    record_last_update
+    write_current_update_state
+    record_successful_update
 elif [ -e "$installation_state_file" ]; then
     resume_interrupted_installation
 elif [ -e "$instance_settings" ]; then
     update_existing_installation
 elif [ -e "$custom_settings" ]; then
     bash "$setup_directory/migration/migrate.sh"
-    record_last_update
+    write_current_update_state
+    record_successful_update
 else
     install_new_instance
 fi

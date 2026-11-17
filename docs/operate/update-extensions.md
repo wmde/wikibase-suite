@@ -1,6 +1,6 @@
 # Updating extensions
 
-These instructions apply only to extensions installed specifically for a Wikibase Suite (WBS) instance in `config/extensions`. Extensions bundled with the Wikibase Docker Image are updated with the Image and require no separate action.
+These instructions apply to extensions installed specifically for a Wikibase Suite (WBS) instance, such as those in `config/extensions`. Extensions bundled with the Wikibase Docker Image are updated with the Image and require no separate action.
 
 Instance-specific extensions have their own release cycles. You are responsible for keeping them up to date. Updates can contain security fixes and may be required when a WBS major upgrade changes the MediaWiki version. During a major upgrade, follow the migration guide for that WBS version to determine when to update your extensions.
 
@@ -37,9 +37,15 @@ Instance-specific extensions have their own release cycles. You are responsible 
    tar -xzf MyExtension.tar.gz -C config/extensions
    ```
 
-7. Follow the extension's update instructions. Apply any required changes to `config/Extensions.php` or other user-owned configuration files.
+7. Follow the extension's update instructions. Apply any required changes to your configuration, such as `config/LocalSettings.php` or `config/Extensions.php`.
 
-8. Start WBS. The Wikibase Docker Image runs the MediaWiki database updates during startup.
+   For a routine extension update, if those instructions require running `update.php`, run:
+
+   ```sh
+   docker compose run --rm wikibase maintenance update --quick
+   ```
+
+8. Start WBS.
 
    If you are updating extensions as part of a major WBS upgrade, return to the migration guide and use its instructions to start WBS. Then return here for step 9.
 

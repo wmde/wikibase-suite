@@ -71,7 +71,7 @@ To update the images used by your installation:
    docker compose up -d
    ```
 
-4. If you installed extensions in `config/extensions`, keep them up to date independently. See [Updating Extensions](./update-extensions.md) for the update procedure.
+4. If you installed additional extensions, keep them up to date independently. See [Updating Extensions](./update-extensions.md) for the update procedure.
 
 ### Automatically update WBS Docker Images
 
@@ -87,4 +87,4 @@ To pull compatible WBS Docker Image updates whenever you start the stack:
 
 You can run this command manually or schedule it with a systemd timer, cron job, or similar.
 
-This updates only the WBS Docker Images referenced by the current `docker-compose.yml`. It does not upgrade WBS to another release, perform a major version upgrade, or update extensions in `config/extensions`.
+This updates only the WBS Docker Images referenced by the current `docker-compose.yml`. It does not upgrade WBS to another release, perform a major version upgrade, or update extensions you installed separately.
