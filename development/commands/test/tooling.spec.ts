@@ -213,3 +213,100 @@ fi
 		}
 	});
 });
+
+describe('WBS lifecycle command contracts', () => {
+	function runLifecycle(
+		command: string,
+		failure = false
+	): {
+		status: number | null;
+		output: string;
+		calls: string;
+	} {
+		const root = mkdtempSync(join(tmpdir(), 'wbs-lifecycle-'));
+		try {
+			writeFileSync(
+				join(root, '.env'),
+				[
+					'WIKIBASE_PUBLIC_HOST=wikibase.test',
+					'WDQS_PUBLIC_HOST=query.wikibase.test',
+					'MW_ADMIN_NAME=Admin',
+					'MW_ADMIN_EMAIL=admin@example.test',
+					'MW_ADMIN_PASS=test-admin-password',
+					'DB_PASS=test-db-password',
+					'DB_NAME=my_wiki',
+					'DB_USER=sqluser'
+				].join('\n')
+			);
+			writeFileSync(join(root, 'docker-compose.yml'), 'services: {}\n');
+			writeFileSync(
+				join(root, 'docker'),
+				`#!/bin/sh
+printf '%s\\n' "$*" >> "$FAKE_DOCKER_LOG"
+if [ "$FAKE_DOCKER_FAILURE" = true ]; then
+  echo 'Cannot connect to Docker daemon' >&2
+  exit 1
+fi
+case "$*" in
+  *'ps --services --status running') echo mysql ;;
+  *'ps --all') echo 'wikibase exited'; echo 'mysql running' ;;
+esac
+`,
+				{ mode: 0o755 }
+			);
+			const log = join(root, 'docker.log');
+			const result = spawnSync(
+				process.execPath,
+				['--import=tsx', resolve('images/wbs-tools/wbs.ts'), command],
+				{
+					encoding: 'utf8',
+					env: {
+						...process.env,
+						PATH: `${root}:${process.env.PATH}`,
+						WBS_DIR: root,
+						ENV_FILE_PATH: join(root, '.env'),
+						WBS_LOG_PATH: join(root, 'wbs.log'),
+						FAKE_DOCKER_LOG: log,
+						FAKE_DOCKER_FAILURE: String(failure)
+					}
+				}
+			);
+			return {
+				status: result.status,
+				output: result.stdout + result.stderr,
+				calls: readFileSync(log, 'utf8')
+			};
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	}
+
+	it('reconciles a partially running stack instead of returning early', () => {
+		const result = runLifecycle('up');
+		assert.equal(result.status, 0, result.output);
+		assert.match(result.calls, /up --detach --wait/u);
+		assert.doesNotMatch(result.output, /already running/u);
+	});
+
+	it('removes stopped containers through Compose down', () => {
+		const result = runLifecycle('down');
+		assert.equal(result.status, 0, result.output);
+		assert.match(result.calls, / down$/mu);
+	});
+
+	it('shows stopped services alongside running services', () => {
+		const result = runLifecycle('status');
+		assert.equal(result.status, 0, result.output);
+		assert.match(result.output, /wikibase exited/u);
+		assert.match(result.output, /mysql running/u);
+	});
+
+	for (const command of ['up', 'down', 'status']) {
+		it(`fails visibly when Docker fails during ${command}`, () => {
+			const result = runLifecycle(command, true);
+			assert.notEqual(result.status, 0);
+			assert.match(result.output, /Cannot connect to Docker daemon/u);
+			assert.doesNotMatch(result.output, /not currently running/u);
+		});
+	}
+});

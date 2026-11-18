@@ -9,6 +9,10 @@ WBS Tools is the containerized foundation of the [Wikibase Suite Installer](../.
 3. The browser-facing container collects configuration without receiving the Docker socket.
 4. A separate, non-networked worker receives the socket, starts the services, reports progress, and exits.
 
+The [controller](./lib/web-installer-controller.ts) starts the browser and worker containers. The browser saves configuration and writes `.wbs/install-request`; the [worker](./lib/installation.ts) consumes it, runs Compose, and records readiness or failure in `.wbs/logs/installation.log`. Relaunching the browser installer clears that attempt log and request, so preserve diagnostics first.
+
+These files track the installer attempt. MediaWiki setup and migration state belong to the [WikibaseSuite extension](../wikibase/runtime/var/www/html/extensions/WikibaseSuite/README.md) inside the Wikibase image. Test this outer installer flow with `wbs-dev test wbs-tools`.
+
 Users should follow the [WBS installation guide](../../../docs/install/installer.md) rather than run this image directly.
 
 ## Releases and development

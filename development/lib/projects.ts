@@ -59,7 +59,13 @@ export function discoverReleaseProjects(
 				name,
 				versionPath: join(context.imagesRoot, name, BAKE_MANIFEST),
 				changelogPath: join(context.imagesRoot, name, 'CHANGELOG.md'),
-				pathspecs: [`development/images/${name}`],
+				pathspecs: [
+					`development/images/${name}`,
+					// WBS Tools builds from the shared workspace, outside its image directory.
+					...(name === 'wbs-tools'
+						? ['development/pnpm-lock.yaml', 'development/pnpm-workspace.yaml']
+						: [])
+				],
 				legacyTagNames: [],
 				isImage: true
 			})

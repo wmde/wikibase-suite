@@ -18,7 +18,16 @@ on:
         required: true
         default: false
   workflow_call:
+    outputs:
+      image_tag:
+        description: Image tag from this build, including only tested architectures.
+        value: ${{ (inputs.test_arm64 || vars.WBS_RELEASE_ARM64 == 'true') && jobs.setup.outputs.image_tag || format('{0}-amd64', jobs.setup.outputs.image_tag) }}
     inputs:
+      force_build:
+        description: Run the full gate even if an earlier workflow could justify skipping.
+        type: boolean
+        required: false
+        default: false
       build_arm64:
         description: Build native ARM64 images and include them in CI manifests.
         type: boolean
@@ -31,6 +40,7 @@ on:
         default: false
 
 permissions:
+  actions: write
   contents: read
   packages: write
 
@@ -46,19 +56,24 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
       images: ${{ steps.targets.outputs.images }}
       test_targets: ${{ steps.targets.outputs.test_targets }}
+      image_tag: ${{ steps.targets.outputs.image_tag }}
     steps:
       - name: Check for duplicate successful runs
         id: skip_check
+        if: inputs.force_build != true
         uses: fkirc/skip-duplicate-actions@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          paths_ignore: '["docs/**", "**/*.md", "**/*.txt", "*.md", "*.txt"]'
+          paths_ignore: '["docs/**", "development/docs/**", "**/README.md", "**/CHANGELOG.md", "**/UPDATING.md"]'
           skip_after_successful_duplicate: true
           cancel_others: true
-          do_not_skip: '["schedule"]'
+          # Release gates always run. Reusing earlier runs is a separate optimization.
+          do_not_skip: '["schedule", "workflow_dispatch"]'
 
       - uses: actions/checkout@v4
         if: steps.skip_check.outputs.should_skip != 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: ./.github/actions/setup-environment
         if: steps.skip_check.outputs.should_skip != 'true'
@@ -77,6 +92,7 @@ jobs:
           test_targets=$(./wbs-dev test --list=json | jq -ce '.')
           echo "images=$images" >> "$GITHUB_OUTPUT"
           echo "test_targets=$test_targets" >> "$GITHUB_OUTPUT"
+          echo "image_tag=dev-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
 
   lint:
     needs:
@@ -124,6 +140,7 @@ jobs:
 
       - name: build-and-push/${{ matrix.imageName }} (${{ matrix.architecture }})
         env:
+          IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
           IMAGE_NAME: ${{ matrix.imageName }}
           ARCHITECTURE: ${{ matrix.architecture }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -131,9 +148,9 @@ jobs:
         run: |
           set -euo pipefail
           build_args=(
-            "$IMAGE_NAME" --push
+            "$IMAGE_NAME" --push --provenance=false
             --platform="linux/$ARCHITECTURE" \
-            --set "$IMAGE_NAME.tags=$CI_IMAGE_REGISTRY/$IMAGE_NAME:dev-${GITHUB_RUN_ID}-$ARCHITECTURE"
+            --set "$IMAGE_NAME.tags=$CI_IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG-$ARCHITECTURE"
           )
           if [[ -n "$PR_NUMBER" && "$PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             pr_tag="pr-${PR_NUMBER}-${PR_HEAD_SHA:0:12}-${ARCHITECTURE}"
@@ -164,15 +181,16 @@ jobs:
 
       - name: Assemble multi-platform manifests
         env:
+          IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
           IMAGES: ${{ needs.setup.outputs.images }}
         run: |
           set -euo pipefail
           while IFS= read -r image_name; do
             image="$CI_IMAGE_REGISTRY/$image_name"
             docker buildx imagetools create \
-              --tag "$image:dev-${GITHUB_RUN_ID}" \
-              "$image:dev-${GITHUB_RUN_ID}-amd64" \
-              "$image:dev-${GITHUB_RUN_ID}-arm64"
+              --tag "$image:$IMAGE_TAG" \
+              "$image:$IMAGE_TAG-amd64" \
+              "$image:$IMAGE_TAG-arm64"
           done < <(jq -r '.[]' <<< "$IMAGES")
 
   test:
@@ -185,7 +203,7 @@ jobs:
     timeout-minutes: 30
     env:
       WBS_TEST_IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}/wikibase
-      WBS_TEST_IMAGE_TAG: dev-${{ github.run_id }}-${{ matrix.architecture }}
+      WBS_TEST_IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}-${{ matrix.architecture }}
       WBS_TEST_IMAGE_PULL_POLICY: missing
 
     strategy:
@@ -231,4 +249,4 @@ jobs:
       )
     runs-on: ubuntu-24.04
     steps:
-      - run: "true"
+      - run: echo "All required checks passed."
