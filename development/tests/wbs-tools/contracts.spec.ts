@@ -80,6 +80,56 @@ describe( 'WBS Tools contracts', () => {
 				{ encoding: 'utf8' }
 			);
 		} );
+
+		it( 'tracks the source branch of a moving PR link from its tested commit', () => {
+			withTemporaryDirectory( 'pr-checkout', ( root ) => {
+				const source = join( root, 'source' );
+				mkdirSync( source );
+				const git = ( directory: string, ...args: string[] ) => execFileSync(
+					'git', [ '-C', directory, ...args ], { encoding: 'utf8' }
+				).trim();
+				const branch = 'feature/installer-test';
+				git( source, 'init', '--quiet', '--initial-branch', branch );
+				git( source, 'config', 'user.email', 'installer-test@example.invalid' );
+				git( source, 'config', 'user.name', 'WBS tools test' );
+				writeFileSync( join( source, 'docker-compose.yml' ), 'services:\n  wikibase:\n    image: wikibase/wikibase:8\n' );
+				git( source, 'add', 'docker-compose.yml' );
+				git( source, 'commit', '--quiet', '-m', 'Tested PR snapshot' );
+				const commit = git( source, 'rev-parse', 'HEAD' );
+				git( source, 'commit', '--quiet', '--allow-empty', '-m', 'Newer PR commit' );
+
+				const script = `
+					const { prepareRepository } = await import( './dist/lib/repository.js' );
+					const source = { commit: '${ commit }', ref: '${ branch }' };
+					for ( const [ directory, tag ] of [
+						[ 'moving', 'pr-942' ],
+						[ 'immutable', 'pr-942-${ commit.slice( 0, 12 ) }' ]
+					] ) {
+						globalThis.fetch = async () => new Response( JSON.stringify( {
+							schemaVersion: 1, channel: 'pr', pr: 942, source,
+							images: {
+								wikibase: 'ghcr.io/wmde/wikibase/wikibase:' + tag,
+								'wbs-tools': 'ghcr.io/wmde/wikibase/wbs-tools:' + tag
+							}
+						} ) );
+						await prepareRepository( {
+							target: '/app/wbs/' + directory,
+							repository: 'file:///app/wbs/source',
+							ref: source.commit,
+							manifestUrl: 'https://example.test/manifest.json'
+						} );
+					}
+				`;
+				const result = runTools( root, [ '--input-type=module', '--eval', script ] );
+				assert.equal( result.status, 0, result.stderr );
+				const moving = join( root, 'moving' );
+				const immutable = join( root, 'immutable' );
+				assert.equal( git( moving, 'rev-parse', 'HEAD' ), commit );
+				assert.equal( git( moving, 'rev-parse', '--abbrev-ref', '@{upstream}' ), `origin/${ branch }` );
+				assert.equal( git( immutable, 'rev-parse', 'HEAD' ), commit );
+				assert.equal( git( immutable, 'branch', '--show-current' ), '' );
+			} );
+		} );
 	} );
 
 	describe( 'CLI configuration', () => {

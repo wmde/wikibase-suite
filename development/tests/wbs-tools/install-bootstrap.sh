@@ -55,6 +55,9 @@ create_fixture_remote() {
   git -C "$fixture_repo" tag 'wbs@2.0.0-rc.1'
   git -C "$fixture_repo" tag 'wbs@not-semver'
 
+  git -C "$fixture_repo" switch -q -c release/wbs-1 'wbs@1.10.0'
+  create_commit "$fixture_repo" "1.11.0"
+
   git clone -q --bare "$fixture_repo" "$fixture_remote"
   printf '%s' "$fixture_remote"
 }
@@ -119,6 +122,11 @@ grep -qx 'install' "$TEST_ROOT/latest/wikibase-suite/wbs-invocation"
 grep -qx -- '--web' "$TEST_ROOT/latest/wikibase-suite/wbs-invocation"
 test -f "$TEST_ROOT/latest/wikibase-suite/.wbs/logs/wbs.log"
 grep -q '===== Bootstrap =====' "$TEST_ROOT/latest/wikibase-suite/.wbs/logs/wbs.log"
+latest_checkout="$TEST_ROOT/latest/wikibase-suite"
+test "$(git -C "$latest_checkout" branch --show-current)" = 'release/wbs-1'
+test "$(git -C "$latest_checkout" rev-parse --abbrev-ref '@{upstream}')" = 'origin/release/wbs-1'
+git -C "$latest_checkout" pull --ff-only
+grep -q '^WBS_VERSION=1.11.0$' "$latest_checkout/.wbs/version"
 
 WBS_TEST_INSTALL_FROM_STDIN=true \
   run_bootstrap piped "$fixture_remote"
@@ -148,6 +156,12 @@ WBS_TEST_USE_INSTALL_DEFAULT=true \
   WBS_REF='wbs@1.9.0' run_bootstrap checkout-pin "$fixture_remote"
 grep -qx 'wikibase/wbs-tools:0.9.0' \
   "$TEST_ROOT/checkout-pin/wikibase-suite/wbs-tools-image"
+
+git --git-dir="$fixture_remote" update-ref refs/heads/release/wbs-1 "$commit_ref"
+WBS_REF='wbs@1.10.0' run_bootstrap branch-behind-tag "$fixture_remote"
+behind_checkout="$TEST_ROOT/branch-behind-tag/wikibase-suite"
+grep -q '^WBS_VERSION=1.10.0$' "$behind_checkout/.wbs/version"
+test -z "$(git -C "$behind_checkout" branch --show-current)"
 
 prerelease_repo="$TEST_ROOT/prerelease-only"
 prerelease_remote="$TEST_ROOT/prerelease-only.git"

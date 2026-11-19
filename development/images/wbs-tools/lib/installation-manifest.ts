@@ -8,8 +8,11 @@ const COMMIT_SHA = /^[0-9a-f]{40}$/u;
 
 type InstallationManifest = {
 	schemaVersion: number;
+	channel?: string;
+	pr?: number;
 	source: {
 		commit: string;
+		ref?: string;
 	};
 	images: Record<string, string>;
 };
@@ -48,7 +51,7 @@ export async function applyInstallationManifest( options: {
 	repositoryRoot: string;
 	manifestUrl: string;
 	resolvedSha: string;
-} ): Promise<void> {
+} ): Promise<string | undefined> {
 	const url = new URL( options.manifestUrl );
 	if ( url.protocol !== 'https:' ) {
 		throw new Error( 'Installation manifest URL must use HTTPS.' );
@@ -89,4 +92,13 @@ export async function applyInstallationManifest( options: {
 		{ mode: 0o600 }
 	);
 	console.log( `Applied installation manifest for ${ options.resolvedSha }.` );
+
+	const { channel, pr, source, images } = installationManifest;
+	// Only the moving PR link has image tags that advance with successive CI builds.
+	if ( channel === 'pr' && typeof pr === 'number' && Number.isSafeInteger( pr ) && pr > 0 &&
+		typeof source.ref === 'string' &&
+		Object.values( images ).every( ( image ) => image.endsWith( `:pr-${ pr }` ) )
+	) {
+		return source.ref;
+	}
 }
