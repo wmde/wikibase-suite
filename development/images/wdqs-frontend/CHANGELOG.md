@@ -1,3 +1,9 @@
+# 2.2.2 (2026-11-19)
+
+## Dependency updates
+
+- Wikidata Query GUI main ([Diff](https://gitlab.wikimedia.org/repos/wmde/wikidata-query-gui/-/compare/176149abd58c475f8670965fa6f695ca10274a56...046c3e036074a66ccc00f902afd669971c2fcdc4)).
+
 # 2.2.1 (2026-09-03)
 
 ## Dependency updates
