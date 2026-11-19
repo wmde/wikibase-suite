@@ -73,3 +73,5 @@ Images are staged under a unique attempt tag in `wikibase` on Docker Hub by defa
 Local releases default to `linux/amd64`. Use `--platform linux/amd64,linux/arm64` with a builder and runtime capable of both architectures; each architecture is tested. Actions uses both when `WBS_RELEASE_ARM64=true`, otherwise AMD64. Registry staging avoids requiring a local multi-platform image store.
 
 After tests pass, the local command prints a `--publish` command for retrying publication from the same images. Actions can rerun failed publication jobs. This stage trusts its caller's completed tests; it does not search earlier runs or store test receipts. Existing version tags must match the source digest and are never overwritten. `update` remains a separate preparation command.
+
+If image publication succeeded and only the Docker Hub descriptions need to be refreshed, run **Publish Image Documentation** in GitHub Actions. Select the branch with the intended READMEs and any workflow fixes. This updates the descriptions for all images without building images or creating tags.
