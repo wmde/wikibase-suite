@@ -21,7 +21,7 @@ variable "WDQS_QUERY_GUI" {
 variable "NGINX_IMAGE" {
   default = {
     image  = "nginx"
-    tag    = "1.27.0-bookworm"
+    tag    = "1.30.7-trixie"
     source = "https://hub.docker.com/_/nginx"
   }
 }
