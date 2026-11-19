@@ -7,6 +7,7 @@
 
 ## Dependency updates
 
+- PHP base image from 8.3.36 to 8.3.37 (Apache, Debian Bookworm), including security fixes. ([PHP 8.3.37 changelog](https://www.php.net/ChangeLog-8.php#8.3.37)).
 - Added MediaWiki REL1_46 at [Commit](https://github.com/wikimedia/mediawiki/commit/5b13bf6feef30a6876a5dfcd4219e569142b4088).
 - Wikibase REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Wikibase/compare/eecdda89725f7b89c634c006fdda21f21f754bdb...f4439bff9baebaa027a7b37be2bcaa8019b8f861)).
 - EntitySchema REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-EntitySchema/compare/8767fa92e3f30e4658b31e82efb242d92489c3f4...8744b3ce1421b69d442e5f28255c90fe431a81cc)).
