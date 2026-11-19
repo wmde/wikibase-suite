@@ -170,12 +170,6 @@ RUN chmod 755 \
     /var/www/html/extensions/WikibaseSuite/setup/migration/migrate.sh \
     /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
 
-# Docker reuses this layer when the image inputs are unchanged. When a build
-# changes those inputs, this versioned last-update value lets WBS run its
-# updater once.
-RUN printf '%s-%s\n' "$WIKIBASE_IMAGE_VERSION" "$(date -u +%s%N)" \
-    > /var/www/html/extensions/WikibaseSuite/setup/last-update
-
 ENV DB_NAME=my_wiki \
     MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php \
     MW_WG_SITENAME=wikibase \
