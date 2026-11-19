@@ -1,4 +1,4 @@
-# Unreleased
+# 8.0.2 (2026-11-19)
 
 ## Network routing
 
