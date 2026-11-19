@@ -1,5 +1,9 @@
 # 8.3.0 (2026-11-19)
 
+## Database updates
+
+- Wikibase once again runs database updates on every web startup to ensure required extension migrations are applied. Users may need to sign in again after a restart. ([T445048](https://phabricator.wikimedia.org/T445048))
+
 ## Dependency updates
 
 - Added MediaWiki REL1_46 at [Commit](https://github.com/wikimedia/mediawiki/commit/5b13bf6feef30a6876a5dfcd4219e569142b4088).

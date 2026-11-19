@@ -16,7 +16,7 @@ The image entry point runs the setup scripts before Apache starts. MediaWiki loa
 [`setup/setup.sh`](./setup/setup.sh) looks at the files in the mounted `/config` directory to decide what the instance needs before it can start:
 
 - **New instance:** generate `InstanceSettings.php` and `LocalSettings.php`, install and update the database, create the administrator, then run integration setup and optional `/extra-install.sh`.
-- **Existing instance:** use `InstanceSettings.php` and run MediaWiki's `update --quick` when `.last-update` does not match the image marker.
+- **Existing instance:** use `InstanceSettings.php` and run MediaWiki's `update --quick` before Apache starts.
 
 If a previous installation or migration was interrupted, setup resumes that work first, using the progress saved under `/config/.wikibase-image/`. Installation records each phase after it completes, so the interrupted phase may run again, including custom hooks. Setup credentials must remain available until installation finishes.
 
@@ -38,9 +38,9 @@ Once the instance is installed, its saved configuration is authoritative: changi
 
 ## 3. Record completion and return
 
-After a successful installation, migration, or image update, setup copies the image's update marker to `/config/.last-update`. This lets the next startup recognize that the instance is already up to date. Completed installation or migration also removes its working state. Setup then returns control to the image entry point, which starts Apache.
+A completed installation or migration removes its working state. After setup succeeds, the entry point starts Apache.
 
-If setup fails, it leaves its progress available for the next startup attempt. Restarting retries the work; it does not roll back database changes. Keep the state files and markers so setup can identify unfinished work, and inspect the container logs before attempting recovery. Preserve the configuration and database state before making recovery changes.
+If setup fails, it leaves its progress available for the next startup attempt. Restarting retries the work; it does not roll back database changes. Keep the installation or migration state files so setup can identify unfinished work, and inspect the container logs before attempting recovery. Preserve the configuration and database state before making recovery changes.
 
 ## Testing changes
 

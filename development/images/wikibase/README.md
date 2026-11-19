@@ -134,7 +134,7 @@ commands:
 
 | Command | Behavior |
 | --- | --- |
-| `web` (default) | Prepares configuration when necessary, applies database updates, and starts Apache. |
+| `web` (default) | With WBS-managed configuration, runs the MediaWiki database updater on startup before starting Apache. |
 | `jobrunner [arguments...]` | Runs MediaWiki jobs continuously. Requires an existing `InstanceSettings.php`. |
 | `maintenance <command> [arguments...]` | Runs a MediaWiki maintenance command through `maintenance/run.php`. Requires an existing `InstanceSettings.php`. For example: `maintenance update --quick`. |
 | Any other command | Runs through the base PHP image entry point without WBS configuration preparation. |
