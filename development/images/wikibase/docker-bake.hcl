@@ -8,7 +8,7 @@ variable "IMAGE_NAME" {
 }
 
 variable "IMAGE_VERSION" {
-  default = "8.2.1"
+  default = "8.3.0"
 
   validation {
     condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", IMAGE_VERSION))
@@ -36,7 +36,7 @@ variable "MEDIAWIKI" {
     # The updater reads the version from that branch's source and pins its commit.
     ref           = "refs/heads/REL1_46"
     repo          = "https://github.com/wikimedia/mediawiki.git"
-    commit        = "d0d9a283f219a1c9487754dc96598080a4a4e30a"
+    commit        = "5b13bf6feef30a6876a5dfcd4219e569142b4088"
     version       = "1.46.2"
     release_notes = "https://phabricator.wikimedia.org/source/mediawiki/browse/{branch}/RELEASE-NOTES-{line}"
   }
