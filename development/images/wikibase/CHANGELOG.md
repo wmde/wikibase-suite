@@ -1,5 +1,6 @@
 # Unreleased
 
+- Adds `Special:OntologyPresets`, where administrators can create a curated set of core properties on a new Wikibase installation. ([T428746](https://phabricator.wikimedia.org/T428746))
 - Wikibase once again runs database updates on every web startup to ensure required extension migrations are applied. Users may need to sign in again after a restart. ([T445048](https://phabricator.wikimedia.org/T445048))
 
 # 8.2.1 (2026-10-21)
