@@ -1,6 +1,7 @@
 name: Publish Image Documentation
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       images:
@@ -15,8 +16,9 @@ jobs:
   documentation:
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
-        image: ${{ fromJSON(inputs.images) }}
+        image: ${{ fromJSON(inputs.images || '["opensearch","quickstatements","wbs-tools","wdqs","wdqs-frontend","wikibase"]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +36,7 @@ jobs:
           # development, replace this normalization with stable default-branch links.
           sed -i \
             -e "s#](\\./#](development/images/$IMAGE_NAME/#g" \
+            -e 's#](\.\./\([[:alnum:]_-]\)#](development/images/\1#g' \
             -e 's#](\.\./\.\./\.\./#](#g' \
             "$readme"
 
