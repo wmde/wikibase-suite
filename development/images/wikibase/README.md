@@ -139,8 +139,6 @@ commands:
 | `maintenance <command> [arguments...]` | Runs a MediaWiki maintenance command through `maintenance/run.php`. Requires an existing `InstanceSettings.php`. For example: `maintenance update --quick`. |
 | Any other command | Runs through the base PHP image entry point without WBS configuration preparation. |
 
-The updater clears database-backed login sessions. Users may need to sign in again after a web restart.
-
 The job runner and maintenance workloads use the same configuration as the web
 workload but do not initialize it. The web workload must initialize the shared
 `/config` volume first.
