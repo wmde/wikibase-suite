@@ -12,5 +12,7 @@
 	"wikibasesuite-sidebar-link-all-properties": "All properties",
 	"wikibasesuite-sidebar-link-quickstatements": "QuickStatements",
 	"wikibasesuite-sidebar-link-sparql-query-service": "SPARQL Query Service",
+	"wikibasesuite-sidebar-link-ontology-presets": "Ontology preset",
+	"wikibasesuite-dashboard-ontology-presets-action": "Start with an Ontology Preset",
 	"wikibasedashboard": "Dashboard"
 }

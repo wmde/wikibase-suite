@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\WikibaseSuite;
 
 use ExtensionRegistry;
 use MediaWiki\Actions\ActionEntryPoint;
+use MediaWiki\Extension\WikibaseOntologyPresets\OntologyPresetsService;
 use MediaWiki\Extension\WikibaseSuite\Utils;
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Request\WebRequest;
@@ -144,29 +145,29 @@ class Hooks {
 			[
 				'text' => $skin->msg( 'wikibasedashboard' )->text(),
 				'href' => SpecialPage::getTitleFor( 'WikibaseDashboard' )->getLocalURL(),
-				'id'   => 'n-wbs-link-one',
+				'id'   => 'n-wbs-dashboard',
 			],
 			[
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-create-item' )->text(),
 				'href' => SpecialPage::getTitleFor( 'NewItem' )->getLocalURL(),
-				'id'   => 'n-wbs-link-one',
+				'id'   => 'n-wbs-create-item',
 			],
 			[
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-create-property' )->text(),
 				'href' => SpecialPage::getTitleFor( 'NewProperty' )->getLocalURL(),
-				'id'   => 'n-wbs-link-two',
+				'id'   => 'n-wbs-create-property',
 			],
 			[
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-all-items' )->text(),
 				'href' => SpecialPage::getTitleFor( 'AllPages' )->getLocalURL( [
 					'namespace' => WB_NS_ITEM,
 				] ),
-				'id'   => 'n-wbs-link-three',
+				'id'   => 'n-wbs-all-items',
 			],
 			[
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-all-properties' )->text(),
 				'href' => SpecialPage::getTitleFor( 'ListProperties' )->getLocalURL(),
-				'id'   => 'n-wbs-link-four',
+				'id'   => 'n-wbs-all-properties',
 			],
 		];
 
@@ -175,7 +176,7 @@ class Hooks {
 			$wikibaseLinks[] = [
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-quickstatements' )->text(),
 				'href' => $quickStatementsUrl,
-				'id'   => 'n-wbs-link-five',
+				'id'   => 'n-wbs-quickstatements',
 			];
 		}
 
@@ -184,13 +185,34 @@ class Hooks {
 			$wikibaseLinks[] = [
 				'text' => $skin->msg( 'wikibasesuite-sidebar-link-sparql-query-service' )->text(),
 				'href' => $queryServiceUrl,
-				'id'   => 'n-wbs-link-six',
+				'id'   => 'n-wbs-sparql-query-service',
+			];
+		}
+
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'WikibaseOntologyPresets' ) &&
+			$skin->getUser()->isAllowed( 'applyontologypresets' )
+		) {
+			$wikibaseLinks[] = [
+				'text' => $skin->msg( 'wikibasesuite-sidebar-link-ontology-presets' )->text(),
+				'href' => SpecialPage::getTitleFor( 'OntologyPresets' )->getLocalURL(),
+				'id' => 'n-ontology-presets',
+				'active' => false,
 			];
 		}
 
 		self::insertBeforeToolbox( $sidebar, [
 			'wikibase-suite-sidebar' => $wikibaseLinks,
 		] );
+	}
+
+	public static function ontologyPresetsUrlFor( User $user ): ?string {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseOntologyPresets' ) ||
+			!( new OntologyPresetsService() )->isAvailableTo( $user )
+		) {
+			return null;
+		}
+
+		return SpecialPage::getTitleFor( 'OntologyPresets' )->getLocalURL();
 	}
 
 	private static function insertBeforeToolbox( array &$sidebar, array $sections ): void {

@@ -51,10 +51,10 @@ describe('wbs-dev command contracts', () => {
 
 		const test = cli('test', '--list=json');
 		assert.equal(test.status, 0, test.stderr);
-		assert.deepEqual((JSON.parse(test.stdout) as string[]).slice(0, 2), [
-			'wbs-dev-tools',
-			'opensearch'
-		]);
+		const testTargets = JSON.parse(test.stdout) as string[];
+		assert.equal(testTargets[0], 'wbs-dev-tools');
+		assert.ok(testTargets.includes('ontology-presets'));
+		assert.ok(testTargets.includes('opensearch'));
 	});
 
 	it('requires explicit targets for non-interactive target commands', () => {
