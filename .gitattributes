@@ -1,1 +1,2 @@
 build/wdqs-frontend/*.patch whitespace=-space-before-tab
+development/images/wikibase/runtime/var/www/html/extensions/WikibaseOntologyPresets/ontologies/ontology-presets.ttl whitespace=-blank-at-eof
