@@ -1,3 +1,10 @@
+# 1.2.4 (2026-11-19)
+
+## Dependency updates
+
+- MagnusTools through `a07c951` ([Diff](https://codeberg.org/magnusmanske/magnustools/compare/ec79940688576567b12b90373cc091715e3dea06...a07c9518986cf48064bfbc4a229cf12a37f6e8a2)).
+- QuickStatements master ([Diff](https://github.com/magnusmanske/quickstatements/compare/558474da79766d8c7f9d7d0e727194f3cc9ade3a...dfcaf48778fd46e4b2f2027224fa7387c4271169)).
+
 # 1.2.3 (2026-10-23)
 
 ## Changes
