@@ -1,7 +1,27 @@
-# Unreleased
+# 8.3.0 (2026-11-19)
+
+## Changes
 
 - Adds `Special:OntologyPresets`, where administrators can create a curated set of core properties on a new Wikibase installation. ([T428746](https://phabricator.wikimedia.org/T428746))
 - Wikibase once again runs database updates on every web startup to ensure required extension migrations are applied. Users may need to sign in again after a restart. ([T445048](https://phabricator.wikimedia.org/T445048))
+
+## Dependency updates
+
+- PHP base image from 8.3.36 to 8.3.37 (Apache, Debian Bookworm), including security fixes. ([PHP 8.3.37 changelog](https://www.php.net/ChangeLog-8.php#8.3.37)).
+- Added MediaWiki REL1_46 at [Commit](https://github.com/wikimedia/mediawiki/commit/5b13bf6feef30a6876a5dfcd4219e569142b4088).
+- Wikibase REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Wikibase/compare/eecdda89725f7b89c634c006fdda21f21f754bdb...f4439bff9baebaa027a7b37be2bcaa8019b8f861)).
+- EntitySchema REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-EntitySchema/compare/8767fa92e3f30e4658b31e82efb242d92489c3f4...8744b3ce1421b69d442e5f28255c90fe431a81cc)).
+- WikibaseLocalMedia master ([Diff](https://github.com/ProfessionalWiki/WikibaseLocalMedia/compare/26795a660a2d870e7f87f29e388ca8abb9220510...3cc1f1a0c7a601947b63820af8da9abddf8f8528)).
+- WikibaseManifest REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest/compare/8c034383637dcfceb966f207367305cd5fbb9ef2...2b51fbf491251f1dc8cccaa926e2c391729b51a9)).
+- Babel REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Babel/compare/1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a...230f87efdb1c25e47a7957510b576a25b3c9e740)).
+- cldr REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-cldr/compare/470ae38ff7a29ac596fb8ce519d2e4a1f8d02523...db24690ec0c55a85a7b056392faaf2e2e3b88d04)).
+- UniversalLanguageSelector REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/compare/584a24c468593ba3c5a5e5bf8dbe399687212f98...ddc5f9e10c4657cbe4f5eae2b4d401a634561e48)).
+- Elastica REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-Elastica/compare/a3326af107aafd75f6958e8b4ae8e3d00f22b65f...95f908d2f9f80939d4e0546023405305b436379b)).
+- CirrusSearch REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-CirrusSearch/compare/a89f321d857906a8450295aee40793d61ef18543...69e99251173745d119b8cb1cef7f761a02bdbd77)).
+- WikibaseCirrusSearch REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/compare/5e404f0fea531ede4c9a92252d682bf8c160e86f...c0e9eec7ebce110077fb7e492095b4ee85e58f8b)).
+- OAuth REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-OAuth/compare/80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1...c92da9c9b5cf51aacab5e58a9e6a07d034664955)).
+- PluggableAuth REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-PluggableAuth/compare/d1e588302c7ccb7806b04f46f62a9b5c34ea1715...1224083a4ecb8f12b9198921f6dc5a09acaa494c)).
+- WSOAuth REL1_46 ([Diff](https://github.com/wikimedia/mediawiki-extensions-WSOAuth/compare/0eb464df201ab7caf8264b2a84b4ef67ed309b94...63da4d1e21cec7d9af97e3a0b38717525b9fd3d3)).
 
 # 8.2.1 (2026-10-21)
 

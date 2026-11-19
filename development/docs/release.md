@@ -1,6 +1,6 @@
 # Release guide
 
-Prepare each release in a pull request containing the implementation, versions, and changelogs. Publish only after that pull request is reviewed and merged into the branch selected for release.
+Prepare product changes, versions, and changelogs in a pull request targeting `main`. If publishing from a release branch, bring the reviewed changes from `main` to that branch before running the release workflow.
 
 WBS and each image are versioned independently according to the [WBS version policy](../../docs/reference/versions.md) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -38,17 +38,26 @@ The primary release-preparation workflow is the `wbs-dev update` interview. It g
 
 4. Commit the release changes. If additional product commits changed the release contents, rerun `wbs-dev update` so that its version and changelog proposals include them, then review and commit the refreshed metadata.
 
-5. Merge the pull request into the branch selected for release after review and CI pass.
+5. Merge the pull request into `main` after review and CI pass.
 
 The update command can be rerun safely while preparing the release. It reconstructs each draft from the latest published tag, replaces the generated `Changes` and `Dependency updates` sections, and preserves prose outside those sections. Keep manually maintained release commentary under a separate heading.
 
+## Promote changes to a release branch
+
+If publishing from a release branch such as `release/wbs-8`, choose the reviewed `main` commit that contains the release changes.
+
+- If the release should include all changes from `main` through the chosen commit, fast-forward the release branch when possible. For a promotion pull request, use a branch pointing at the chosen commit as the head and the release branch as the base. Review the full diff and use a merge commit to preserve the history from `main`.
+- If the release needs only selected changes, cherry-pick those commits from `main` into a backport pull request targeting the release branch. Check the versions and changelogs against that release line, then merge after review and CI pass.
+
 ## Publish a release
 
-Run **Create a Release** in Actions with space-separated targets such as `wikibase quickstatements`, `wbs`, or `all`. **Dry run** performs preflight only and defaults to off.
+In GitHub Actions, open **Create a Release** and select the branch that contains the reviewed release changes, such as `release/wbs-8` for a WBS 8 release or `main` when publishing directly from trunk. Confirm that the selected branch has the release workflow and tooling you intend to use.
+
+Enter space-separated targets such as `wikibase quickstatements`, `wbs`, or `all`. Enable **Dry run** for preflight, review the results, then run again with **Dry run** cleared to publish.
 
 Both paths follow **preflight → build → test → publish → Git tags**, sharing preflight, build tooling, tests, and publication code. Actions distributes builds and tests across runners. Publication copies the tested images without rebuilding. Image Git tags no longer trigger builds; `wbs@…` still triggers installer publication.
 
-From `development/`, the equivalent local release is:
+For a local release, check out the release commit and run the equivalent command from `development/`.
 
 ```sh
 wbs-dev release wikibase quickstatements
