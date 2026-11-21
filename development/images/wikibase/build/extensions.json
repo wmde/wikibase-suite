@@ -34,6 +34,14 @@
       }
     },
     {
+      "name": "WikibaseExport",
+      "source": {
+        "repo": "https://github.com/ProfessionalWiki/WikibaseExport.git",
+        "ref": "refs/heads/master",
+        "commit": "855562bddc41d2815dc28aeba6b4c4d28d3e7514"
+      }
+    },
+    {
       "name": "WikibaseManifest",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest.git",
