@@ -89,6 +89,7 @@ extensions and additional packages placed in this image.
 | [WikibaseInWikitext](https://github.com/wbstack/mediawiki-extensions-WikibaseInWikitext) | Yes | Adds a `<sparql>` tag for writing local Query Service examples on wiki pages. |
 | [WikibaseLocalMedia](https://github.com/ProfessionalWiki/WikibaseLocalMedia) | Yes | Adds support for local media files to Wikibase through a new data type. |
 | [WikibaseManifest](https://www.mediawiki.org/wiki/Extension:WikibaseManifest) | Yes | Provides metadata about the structured data repository through an API. |
+| [WikibaseRDF](https://github.com/ProfessionalWiki/WikibaseRDF) | No | Lets editors link items and properties to other ontologies, for example with `owl:sameAs`, and adds these links to the RDF output. |
 
 Enable and configure additional packaged extensions in `LocalSettings.php`
 using the normal MediaWiki instructions for that extension. A complete
