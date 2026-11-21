@@ -98,6 +98,14 @@
       }
     },
     {
+      "name": "WikibaseFacetedSearch",
+      "source": {
+        "repo": "https://github.com/ProfessionalWiki/WikibaseFacetedSearch.git",
+        "ref": "refs/heads/master",
+        "commit": "c0a57c7a049572ea52dfdca8d4fd7bb19f456f01"
+      }
+    },
+    {
       "name": "OAuth",
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-OAuth.git",
