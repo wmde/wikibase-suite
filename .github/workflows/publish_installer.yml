@@ -1,11 +1,6 @@
 name: Publish Installer
 
 on:
-  workflow_run:
-    workflows:
-      - "Build and Test"
-    types:
-      - completed
   pull_request_target:
     types:
       - closed
@@ -15,17 +10,25 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'PR number (pr-942) or WBS tag (wbs@8.0.0) to republish.'
+        description: 'PR (pr-942), branch (branch:release/wbs-8), or WBS tag.'
         type: string
         required: true
+      commit:
+        description: 'Source commit for a complete preview build.'
+        type: string
+        required: false
+      build_tag:
+        description: 'CI image set tag (dev-RUN-ATTEMPT) for a preview build.'
+        type: string
+        required: false
 
 permissions:
+  actions: read
   contents: read
-  packages: write
-  pull-requests: write
+  packages: read
 
 concurrency:
-  group: installer-${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || github.ref_name || inputs.target || github.run_id }}
+  group: installer-${{ github.event.pull_request.number || inputs.target || github.ref_name || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -36,9 +39,20 @@ jobs:
       - name: Validate publication target
         env:
           TARGET: ${{ inputs.target }}
+          COMMIT: ${{ inputs.commit }}
+          BUILD_TAG: ${{ inputs.build_tag }}
         run: |
-          if [[ ! "$TARGET" =~ ^(pr-[1-9][0-9]*|wbs@[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            echo "Expected a target such as pr-942 or wbs@8.0.0; received $TARGET." >&2
+          if [[ ! "$TARGET" =~ ^(pr-[1-9][0-9]*|branch:(main|release/wbs-[1-9][0-9]*)|wbs@[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "Invalid publication target: $TARGET." >&2
+            exit 1
+          fi
+          if [[ "$TARGET" != wbs@* ]]; then
+            [[ "$COMMIT" =~ ^[0-9a-f]{40}$ && "$BUILD_TAG" =~ ^dev-[1-9][0-9]*-[1-9][0-9]*$ ]] || {
+              echo 'Preview publication requires a commit and complete CI build tag.' >&2
+              exit 1
+            }
+          elif [[ -n "$COMMIT" || -n "$BUILD_TAG" ]]; then
+            echo 'Release publication does not take a CI preview commit or build tag.' >&2
             exit 1
           fi
 
@@ -58,141 +72,51 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: .github/scripts/publish-installer.sh cleanup-pr
 
-  publish-pr:
+  publish-preview:
     if: >-
-      (
-        github.event_name == 'workflow_run' &&
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.event == 'pull_request' &&
-        github.event.workflow_run.pull_requests[0].number != null
-      ) || (
-        github.event_name == 'workflow_dispatch' &&
-        startsWith(inputs.target, 'pr-')
-      )
+      github.event_name == 'workflow_dispatch' &&
+      inputs.build_tag != '' &&
+      (startsWith(inputs.target, 'pr-') || startsWith(inputs.target, 'branch:'))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-
     steps:
       - uses: actions/checkout@v4
         with:
-          # Deliberately use trusted publisher code, never code from the PR.
+          # The privileged publisher always runs trusted default-branch code.
           ref: ${{ github.event.repository.default_branch }}
-
-      - name: Resolve pull request publication
-        id: pull-request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT_NAME: ${{ github.event_name }}
-          AUTOMATIC_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          # The PR entry may have advanced since this workflow run completed.
-          AUTOMATIC_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          MANUAL_TARGET: ${{ inputs.target }}
-        run: |
-          set -euo pipefail
-          if [[ "$EVENT_NAME" == 'workflow_run' ]]; then
-            pr_number="$AUTOMATIC_PR_NUMBER"
-            head_sha="$AUTOMATIC_HEAD_SHA"
-          else
-            pr_number="${MANUAL_TARGET#pr-}"
-            pull_request="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number")"
-            head_sha="$(jq -r '.head.sha' <<< "$pull_request")"
-          fi
-          {
-            echo "number=$pr_number"
-            echo "head_sha=$head_sha"
-          } >> "$GITHUB_OUTPUT"
-
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish coordinated PR images
+      - name: Publish complete preview image set
         env:
-          ORIGIN_REPOSITORY: ${{ github.repository }}
-          PR_NUMBER: ${{ steps.pull-request.outputs.number }}
-          PR_HEAD_SHA: ${{ steps.pull-request.outputs.head_sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: .github/scripts/publish-installer.sh prepare-pr
-
-      - name: Dispatch PR installer publication
+          ORIGIN_REPOSITORY: ${{ github.repository }}
+          PREVIEW_TARGET: ${{ inputs.target }}
+          SOURCE_COMMIT: ${{ inputs.commit }}
+          BUILD_TAG: ${{ inputs.build_tag }}
+        run: .github/scripts/publish-installer.sh prepare-preview
+      - name: Publish preview installer
         env:
           GH_TOKEN: ${{ secrets.GH_WBS_BOT_TOKEN }}
-        run: .github/scripts/publish-installer.sh dispatch-pr
-
-      - name: Summarize PR installer
-        id: installer
-        env:
-          PR_NUMBER: ${{ steps.pull-request.outputs.number }}
-          PR_HEAD_SHA: ${{ steps.pull-request.outputs.head_sha }}
+        run: .github/scripts/publish-installer.sh dispatch-preview
+      - name: Summarize preview installer
         run: |
-          short_sha="${PR_HEAD_SHA:0:12}"
-          payload="$RUNNER_TEMP/wikibase-suite-installer/pr-dispatch.json"
-          if [[ ! -s "$payload" ]]; then
-            echo 'published=false' >> "$GITHUB_OUTPUT"
-            echo 'No PR installer was published by this run.' >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          current="$(jq -r '.client_payload.current' "$payload")"
-          if [[ "$current" == true ]]; then
-            installer_url="https://wmde.github.io/wikibase-suite-install/pr-${PR_NUMBER}"
+          payload="$RUNNER_TEMP/wikibase-suite-installer/preview-dispatch.json"
+          if [[ "$(jq -r '.client_payload.pr // 0' "$payload")" != 0 ]]; then
+            alias="pr-$(jq -r '.client_payload.pr' "$payload")"
           else
-            installer_url="https://wmde.github.io/wikibase-suite-install/pr-${PR_NUMBER}-${short_sha}"
+            alias="branch-$(jq -r '.client_payload.branch | gsub("/"; "-")' "$payload")"
           fi
+          pinned="$alias-$(jq -r '.client_payload.commit[0:12]' "$payload")-$(jq -r '.client_payload.buildId' "$payload")"
           {
-            echo 'published=true'
-            echo "current=$current"
-            echo "url=$installer_url"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo '### Wikibase Suite PR installer'
+            echo '### Preview installer'
             echo
-            echo 'Use this installer URL instead of the one in the published documentation to test this PR:'
-            echo
-            echo '```sh'
-            echo "curl -fsSL $installer_url | bash"
-            echo '```'
+            echo "Pinned build: https://wmde.github.io/wikibase-suite-install/$pinned"
+            echo "Moving link: https://wmde.github.io/wikibase-suite-install/$alias"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Comment PR installer
-        if: >-
-          steps.installer.outputs.published == 'true' &&
-          steps.installer.outputs.current == 'true'
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INSTALLER_URL: ${{ steps.installer.outputs.url }}
-          PR_NUMBER: ${{ steps.pull-request.outputs.number }}
-        run: |
-          marker='<!-- wikibase-suite-pr-installer -->'
-          body="$(printf '%s\n' \
-            "$marker" \
-            '### Test this PR installer' \
-            '' \
-            'Use this command instead of the installer command in the published documentation:' \
-            '' \
-            '```sh' \
-            "curl -fsSL $INSTALLER_URL | bash" \
-            '```' \
-            '' \
-            'This URL tracks the latest successfully published source and image build for this PR.')"
-          comment_id="$(
-            gh api --paginate \
-              "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-              --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | contains("<!-- wikibase-suite-pr-installer -->")) | .id' |
-              tail -n 1
-          )"
-          if [[ -n "$comment_id" ]]; then
-            gh api --method PATCH \
-              "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
-              -f body="$body"
-          else
-            gh api --method POST \
-              "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
-              -f body="$body"
-          fi
 
   publish-release:
     if: >-

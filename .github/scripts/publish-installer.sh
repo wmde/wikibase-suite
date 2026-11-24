@@ -5,26 +5,20 @@ set -euo pipefail
 readonly INSTALLER_REPOSITORY="wmde/wikibase-suite-install"
 readonly PAGES_ROOT="https://wmde.github.io/wikibase-suite-install"
 readonly STATE_DIR="${RUNNER_TEMP:-/tmp}/wikibase-suite-installer"
-readonly PR_PAYLOAD_PATH="$STATE_DIR/pr-dispatch.json"
+readonly PREVIEW_PAYLOAD_PATH="$STATE_DIR/preview-dispatch.json"
 readonly PR_CLEANUP_PAYLOAD_PATH="$STATE_DIR/pr-cleanup-dispatch.json"
 readonly RELEASE_PAYLOAD_PATH="$STATE_DIR/release-dispatch.json"
 declare -a IMAGES=()
 
 load_images() {
-  local source_commit="${1:-}"
-  if [[ -n "$source_commit" ]]; then
-    # This publisher runs trusted default-branch code. Read the PR's image
-    # directories as Git data instead of running its wbs-dev command, so the
-    # installation manifest matches the images CI built for that commit.
-    git fetch --no-tags origin "$source_commit" >/dev/null
-    mapfile -t IMAGES < <(
-      git ls-tree -d --name-only "$source_commit:development/images" |
-        grep -Ev '^(_|node_modules$)' |
-        sort
-    )
-  else
-    mapfile -t IMAGES < <(cd development && ./wbs-dev build --list=json | jq -r '.[]')
-  fi
+  local source_commit="$1"
+  # Read the image list from the built source commit without executing its code.
+  git fetch --no-tags origin "$source_commit" >/dev/null
+  mapfile -t IMAGES < <(
+    git ls-tree -d --name-only "$source_commit:development/images" |
+      grep -Ev '^(_|node_modules$)' |
+      sort
+  )
   ((${#IMAGES[@]} > 0)) || {
     echo "Could not discover any Suite images." >&2
     exit 1
@@ -71,90 +65,6 @@ wait_for_publication() {
   exit 1
 }
 
-prepare_pr() {
-  validate_origin_repository
-  [[ "${PR_NUMBER:-}" =~ ^[1-9][0-9]*$ ]] || {
-    echo "Invalid PR number." >&2
-    exit 1
-  }
-  [[ "${PR_HEAD_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || {
-    echo "Invalid PR head SHA." >&2
-    exit 1
-  }
-  load_images "$PR_HEAD_SHA"
-
-  mkdir -p "$STATE_DIR"
-  rm -f "$PR_PAYLOAD_PATH"
-
-  local short_sha="${PR_HEAD_SHA:0:12}"
-  local tag="pr-${PR_NUMBER}-${short_sha}"
-  local pull_request current_sha head_ref state
-  pull_request="$(gh api "repos/$ORIGIN_REPOSITORY/pulls/$PR_NUMBER")"
-  current_sha="$(jq -r '.head.sha' <<< "$pull_request")"
-  head_ref="$(jq -r '.head.ref' <<< "$pull_request")"
-  state="$(jq -r '.state' <<< "$pull_request")"
-  if [[ "$state" != open ]]; then
-    echo "Pull request $PR_NUMBER is no longer open; skipping installer publication."
-    return
-  fi
-  local current=false
-  if [[ "$current_sha" == "$PR_HEAD_SHA" ]]; then
-    current=true
-  fi
-  git check-ref-format --branch "$head_ref" >/dev/null || {
-    echo "Invalid PR head branch: $head_ref" >&2
-    exit 1
-  }
-
-  local images_json='{}'
-  local image_name image source_amd64 source_arm64
-  local -a sources
-  for image_name in "${IMAGES[@]}"; do
-    image="ghcr.io/wmde/wikibase/$image_name"
-    source_amd64="$image:$tag-amd64"
-    source_arm64="$image:$tag-arm64"
-    if ! docker buildx imagetools inspect "$source_amd64" >/dev/null 2>&1; then
-      echo "No PR image found at $source_amd64; this successful run did not publish a PR set."
-      return
-    fi
-
-    sources=("$source_amd64")
-    if docker buildx imagetools inspect "$source_arm64" >/dev/null 2>&1; then
-      sources+=("$source_arm64")
-    fi
-    docker buildx imagetools create --tag "$image:$tag" "${sources[@]}"
-    if [[ "$current" == true ]]; then
-      docker buildx imagetools create --tag "$image:pr-$PR_NUMBER" "$image:$tag"
-    fi
-    images_json="$(jq -c --arg name "$image_name" --arg image "$image:$tag" \
-      '. + {($name): $image}' <<< "$images_json")"
-  done
-
-  # Coordinated image publication currently supports same-repository PRs.
-  jq -n \
-    --arg event_type publish-pr-installation \
-    --arg origin_repository "$ORIGIN_REPOSITORY" \
-    --arg source_repository "$ORIGIN_REPOSITORY" \
-    --arg source_ref "$head_ref" \
-    --argjson pr "$PR_NUMBER" \
-    --arg commit "$PR_HEAD_SHA" \
-    --argjson current "$current" \
-    --argjson images "$images_json" \
-    '{
-      event_type: $event_type,
-      client_payload: {
-        schemaVersion: 1,
-        originRepository: $origin_repository,
-        sourceRepository: $source_repository,
-        sourceRef: $source_ref,
-        pr: $pr,
-        commit: $commit,
-        current: $current,
-        images: $images
-      }
-    }' > "$PR_PAYLOAD_PATH"
-}
-
 cleanup_pr() {
   validate_origin_repository
   [[ "${PR_NUMBER:-}" =~ ^[1-9][0-9]*$ ]] || {
@@ -181,33 +91,123 @@ cleanup_pr() {
   dispatch_payload "$PR_CLEANUP_PAYLOAD_PATH"
 }
 
-dispatch_pr() {
-  if [[ ! -s "$PR_PAYLOAD_PATH" ]]; then
-    echo "No coordinated PR payload was produced; skipping installer publication."
-    return
+# CI invokes this only after the complete temporary image set has built. GitHub
+# refs select the source; the manifest records the fixed images for that build.
+prepare_preview() {
+  validate_origin_repository
+  [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]] || {
+    echo "Invalid preview source commit." >&2
+    exit 1
+  }
+  [[ "${BUILD_TAG:-}" =~ ^dev-([1-9][0-9]*)-([1-9][0-9]*)$ ]] || {
+    echo "Expected the CI run image tag dev-RUN-ATTEMPT." >&2
+    exit 1
+  }
+  local build_id="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}"
+  local build_run_id="${BASH_REMATCH[1]}"
+  local build_run
+  build_run="$(gh api "repos/$ORIGIN_REPOSITORY/actions/runs/$build_run_id")"
+  if [[ "$(jq -r '.name' <<< "$build_run")" != 'Build and Test' ||
+        "$(jq -r '.head_sha' <<< "$build_run")" != "$SOURCE_COMMIT" ]]; then
+    echo "The CI image tag does not belong to the requested source commit." >&2
+    exit 1
   fi
-  dispatch_payload "$PR_PAYLOAD_PATH"
+  local channel source_ref state pr_number='' branch=''
+  if [[ "${PREVIEW_TARGET:-}" =~ ^pr-([1-9][0-9]*)$ ]]; then
+    channel='pr'
+    pr_number="${BASH_REMATCH[1]}"
+    local pull_request
+    pull_request="$(gh api "repos/$ORIGIN_REPOSITORY/pulls/$pr_number")"
+    state="$(jq -r '.state' <<< "$pull_request")"
+    [[ "$state" == open ]] || { echo "PR $pr_number is closed." >&2; exit 1; }
+    [[ "$(jq -r '.head.repo.full_name' <<< "$pull_request")" == "$ORIGIN_REPOSITORY" ]] || {
+      echo "Preview publication supports same-repository PRs only." >&2
+      exit 1
+    }
+    source_ref="$(jq -r '.head.ref' <<< "$pull_request")"
+    git check-ref-format --branch "$source_ref" >/dev/null
+    if ! jq -e --argjson pr "$pr_number" \
+      '.event == "pull_request" and any(.pull_requests[]; .number == $pr)' \
+      <<< "$build_run" >/dev/null; then
+      echo "The CI build does not belong to PR $pr_number." >&2
+      exit 1
+    fi
+  elif [[ "${PREVIEW_TARGET:-}" =~ ^branch:(main|release/wbs-[1-9][0-9]*)$ ]]; then
+    channel=branch
+    branch="${BASH_REMATCH[1]}"
+    source_ref="$branch"
+    if ! jq -e --arg branch "$branch" \
+      '(.event == "push" or .event == "workflow_dispatch") and .head_branch == $branch' \
+      <<< "$build_run" >/dev/null; then
+      echo "The CI build does not belong to branch $branch." >&2
+      exit 1
+    fi
+  else
+    echo "Expected pr-N or branch:main or branch:release/wbs-N." >&2
+    exit 1
+  fi
+  load_images "$SOURCE_COMMIT"
+  mkdir -p "$STATE_DIR"
+  rm -f "$PREVIEW_PAYLOAD_PATH"
 
-  local pr commit short_sha current
-  pr="$(jq -r '.client_payload.pr' "$PR_PAYLOAD_PATH")"
-  commit="$(jq -r '.client_payload.commit' "$PR_PAYLOAD_PATH")"
-  current="$(jq -r '.client_payload.current' "$PR_PAYLOAD_PATH")"
+  local images_json='{}' image source digest
+  for image_name in "${IMAGES[@]}"; do
+    image="ghcr.io/wmde/wikibase/$image_name"
+    # The assemble job creates the unsuffixed tag for multi-platform builds.
+    # Otherwise CI publishes the AMD64 tag. The manifest records its digest.
+    source="$image:$BUILD_TAG"
+    if ! docker buildx imagetools inspect "$source" >/dev/null 2>&1; then
+      source="$image:$BUILD_TAG-amd64"
+    fi
+    digest="$(docker buildx imagetools inspect "$source" \
+      --format '{{json .Manifest}}' | jq -er '.digest')"
+    [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+      echo "Invalid digest for $source." >&2
+      exit 1
+    }
+    images_json="$(jq -c --arg name "$image_name" --arg image "$image@$digest" \
+      '. + {($name): $image}' <<< "$images_json")"
+  done
+
+  jq -n \
+    --arg event_type "publish-$channel-installation" \
+    --arg origin_repository "$ORIGIN_REPOSITORY" \
+    --arg source_repository "$ORIGIN_REPOSITORY" \
+    --arg source_ref "$source_ref" \
+    --arg branch "$branch" \
+    --argjson pr "${pr_number:-0}" \
+    --arg commit "$SOURCE_COMMIT" \
+    --arg build_id "$build_id" \
+    --argjson current true \
+    --argjson images "$images_json" \
+    '{event_type: $event_type, client_payload: ({
+      schemaVersion: 1, originRepository: $origin_repository,
+      sourceRepository: $source_repository, sourceRef: $source_ref,
+      commit: $commit, buildId: $build_id, current: $current, images: $images
+    } + (if $pr > 0 then {pr: $pr} else {branch: $branch} end))}' \
+    > "$PREVIEW_PAYLOAD_PATH"
+}
+
+dispatch_preview() {
+  dispatch_payload "$PREVIEW_PAYLOAD_PATH"
+  local channel commit build_id short_sha alias immutable
+  channel="$(jq -r '.event_type' "$PREVIEW_PAYLOAD_PATH")"
+  commit="$(jq -r '.client_payload.commit' "$PREVIEW_PAYLOAD_PATH")"
+  build_id="$(jq -r '.client_payload.buildId' "$PREVIEW_PAYLOAD_PATH")"
   short_sha="${commit:0:12}"
-  wait_for_publication \
-    "$PAGES_ROOT/pr-$pr-$short_sha" "export WBS_REF='$commit'" \
-    "immutable PR installer"
-  wait_for_publication \
-    "$PAGES_ROOT/manifests/pr-$pr-$short_sha.json" "\"commit\": \"$commit\"" \
-    "PR installation manifest"
-  if [[ "$current" == true ]]; then
-    wait_for_publication \
-      "$PAGES_ROOT/pr-$pr" "export WBS_REF='$commit'" \
-      "current PR installer"
-    wait_for_publication \
-      "$PAGES_ROOT/manifests/pr-$pr.json" \
-      "ghcr.io/wmde/wikibase/wikibase:pr-$pr" \
-      "current PR installation manifest"
+  if [[ "$channel" == publish-pr-installation ]]; then
+    local pr
+    pr="$(jq -r '.client_payload.pr' "$PREVIEW_PAYLOAD_PATH")"
+    alias="pr-$pr"
+    immutable="$alias-$short_sha-$build_id"
+  else
+    local branch
+    branch="$(jq -r '.client_payload.branch' "$PREVIEW_PAYLOAD_PATH")"
+    alias="branch-${branch//\//-}"
+    immutable="$alias-$short_sha-$build_id"
   fi
+  wait_for_publication "$PAGES_ROOT/$immutable" "export WBS_REF='$commit'" \
+    "pinned preview installer"
 }
 
 publish_release() {
@@ -252,12 +252,12 @@ publish_release() {
 }
 
 case "${1:-}" in
-  prepare-pr) prepare_pr ;;
-  dispatch-pr) dispatch_pr ;;
+  prepare-preview) prepare_preview ;;
+  dispatch-preview) dispatch_preview ;;
   cleanup-pr) cleanup_pr ;;
   publish-release) publish_release ;;
   *)
-    echo "Usage: $0 {prepare-pr|dispatch-pr|cleanup-pr|publish-release}" >&2
+    echo "Usage: $0 {prepare-preview|dispatch-preview|cleanup-pr|publish-release}" >&2
     exit 2
     ;;
 esac
