@@ -120,6 +120,8 @@ export default class TestEnv {
 			env: {
 				...process.env,
 				...this.vars,
+				// Bind mounts need a path the host Docker daemon can resolve.
+				...( process.env.HOST_PWD ? { WBS_DIR: process.env.HOST_PWD } : {} ),
 				OUTPUT_DIR: this.settings.outputDir
 			}
 		} );

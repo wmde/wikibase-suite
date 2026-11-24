@@ -1,0 +1,41 @@
+# QuickStatements 3: prototype findings and next steps
+
+## Current result
+
+The local discovery prototype has demonstrated that QuickStatements 3 can run in the Wikibase Suite Compose stack and make authenticated edits to the local wiki. This is enough to justify continued prototyping, but not a release or migration decision. QS3 adds a database-backed batch worker, OAuth 2 provisioning, persistent credentials, and a few Suite-specific patches; it is likely to be one of the more operationally demanding auxiliary services.
+
+The implementation is in [`development/images/quickstatements3`](../development/images/quickstatements3/README.md). It builds pinned upstream source into a Suite image named `wikibase/quickstatements3`, with Gunicorn, WhiteNoise, and Supervisor running the web app and batch worker in one container. No maintained upstream image suitable for Suite deployment was identified; the upstream Dockerfile is Toolforge-oriented. The Compose stack routes `/tools/quickstatements3` through Traefik and connects QS3 to a dedicated database in the existing Suite MariaDB instance.
+
+Fresh-install provisioning succeeded. One Suite script supplies idempotent SQL to MariaDB's `--init-file`, creating the shared application user, the MediaWiki database, and the separate QS3 database when QS3 is configured. Wikibase registers an approved OAuth 2 consumer and stores the OAuth credentials, QS3 database connection, and Django secret in one protected `runtime.json` file on the `quickstatements3-data` volume. QS3 can also accept the same settings directly from the environment outside Suite. The `quickstatements3` browser suite exercises OAuth consent, token exchange, and batch edits through Traefik's internal hostname alias. The test environment uses an HTTP hostname explicitly allowed for local OAuth 2 callbacks; production HTTPS routing still needs a trusted-certificate end-to-end check. The stack previously started successfully against the existing local Suite volume after `.env` password sanitization; the latest database-provisioning change has passed isolated MariaDB tests but has not yet been exercised against the full stack.
+
+Manual batches created properties and items, and the renamed `quickstatements3` browser suite exercises item creation, labels, aliases, descriptions, statements, qualifiers, references, and batch history. The pinned QS3 source already sends `bot: true` on edits, expecting the [Wikibase REST API fix in T421631](https://phabricator.wikimedia.org/T421631): edits by non-bot users succeed, while edits by users with the bot right are marked as bot edits. Our MediaWiki 1.46 image pins a Wikibase `REL1_46` commit with the older behavior, which rejects `bot: true` from non-bot users with HTTP 403. This POC therefore removes the flag at image build time to work with the 1.46 image; bot users' QS3 edits are consequently not marked as bot edits. When Suite moves to MediaWiki 1.47, verify that the selected Wikibase `REL1_47` commit includes T421631 and remove the patch.
+
+## Packaging and configuration
+
+The image and service are named `quickstatements3` to distinguish them from QS2. The app and worker share one container; MariaDB remains a separate service. The image accepts Wikibase-style `DB_SERVER`, `DB_NAME`, `DB_USER`, and `DB_PASS` settings, along with OAuth and application settings, in the environment or a mounted JSON file. Suite writes the database connection and OAuth credentials to that file. Compose supplies the public QS3 and Wikibase URLs; the image derives its path prefix, OAuth endpoints, and default batch target from them. QS2's configuration contract does not directly apply. Wikibase provisions QS3 only when both the QS3 data mount and public URL exist. An explicit `setup-quickstatements3.sh --regenerate-oauth` command creates a new consumer and replaces the saved credentials; QS3 must then restart and users must reauthorize.
+
+QS3 uses the `QUICKSTATEMENTS3_PUBLIC_URL` setting and `/tools/quickstatements3` route, leaving the generic names available for QS2. WikibaseManifest is an upstream exception: its allowlisted external-service key is `quickstatements`, so the current manifest advertises QS3 through that key. If both versions ship, the manifest can advertise only one until the upstream schema gains another key.
+
+Suite currently owns the image build, source pin, subpath/static configuration, normal-user edit behavior, OAuth 2 provisioning, and credential handoff. These patches and scripts add maintenance surface. The upstream requirements pin Django 5.0.9; dependency updates and opportunities to contribute patches upstream need review before production use.
+
+## Database and upgrade question
+
+Use the existing Wikibase Suite MariaDB instance, or another MariaDB instance supplied through environment-based configuration. QS3's database stores batches, commands, execution progress, users, and tokens, so preserve it across app-container replacement and include it in backups.
+
+The Suite Compose definition mounts one SQL-generating script into MariaDB. Its small startup wrapper renders an `--init-file` before invoking MariaDB's normal entrypoint; running a script after that entrypoint would require a separate process and the unavailable root password on existing installs. The script reads Suite-specific `WIKIBASE_DB_NAME`, `WBS_DB_USER`, and `WBS_DB_PASSWORD` settings, creates the shared account on a fresh volume, and grants access to the MediaWiki database and, when `QUICKSTATEMENTS3_PUBLIC_URL` is configured, the QS3 database. `QUICKSTATEMENTS3_DB_NAME` optionally overrides the latter's default of `quickstatements3`; Suite currently uses that default. On existing volumes, the script preserves the user's password and reapplies grants without recovering or resetting the randomly generated root password. Wikibase setup reads the MediaWiki database connection from `InstanceSettings.php` after installation, falling back to `.env` inputs before that file exists, and writes it to the private QS3 volume. Isolated MariaDB 10.11 tests passed for fresh provisioning, restart with `DB_PASS` absent, a custom QS3 database name, and unusual database names and passwords. The full stack still needs to be retested after this provisioning change. Sharing the database account expands QS3's access to MediaWiki's database and should be reviewed before release.
+
+## Remaining validation before an MVP decision
+
+- Test a fresh ordinary autoconfirmed editor as well as an administrator. QS3 currently restricts batch execution to autoconfirmed users; verify first-use behavior and decide Suite's eligibility policy.
+- Verify OAuth token refresh and behavior after QS3 container recreation.
+- Exercise MariaDB unavailability, worker interruption, batch retry, and graceful shutdown. Confirm failed batches are observable and do not create duplicate entities when retried.
+- Verify backup and restore for both the MariaDB QS3 database and `quickstatements3-data` credentials.
+- Resolve the QS3 worker failure on `MERGE` commands. The existing sitelink test also remains skipped pending separate investigation.
+- Review the patches against the pinned upstream commit and determine which can be removed or contributed upstream.
+- Validate the revised `--init-file` provisioning and credential handoff in the full Suite stack, including a clean pre-QS3 installation whose `.env` password has been cleared. Isolated MariaDB tests passed, but the complete upgrade path remains untested.
+
+## Reproduction
+
+Build and start the configured local stack with `./development/wbs up --build`. For a fresh installation, use the supported local source-install flow, then accept the defaults. Run `./development/wbs-dev test quickstatements3 --skip-build` against locally built images. The end-to-end batch used V1 commands with `CREATE_PROPERTY | string` and `CREATE`, followed by `LAST` label and description commands. Inspect the batch report and the resulting property/item pages to verify writes.
+
+The current recommendation is to continue with a bounded prototype and review/refinement pass. Do not treat this as release-ready until the revised existing-install flow, ordinary-user eligibility, refresh/recovery behavior, and backup/restore have been validated.

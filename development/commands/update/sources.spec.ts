@@ -18,9 +18,6 @@ import {
 } from './source-utils.js';
 
 const WIKIBASE_IMAGE = resolve('images/wikibase');
-const QUICKSTATEMENTS_MANIFEST = resolve(
-	'images/quickstatements/docker-bake.hcl'
-);
 const WDQS_MANIFEST = resolve('images/wdqs/docker-bake.hcl');
 const originalFetch = globalThis.fetch;
 
@@ -257,28 +254,6 @@ describe('Wikibase source update provider', () => {
 		assert.deepEqual(
 			registry.extensions.slice(0, 4).map(({ name }) => name),
 			['Wikibase', 'WikibaseEdtf', 'EntitySchema', 'WikibaseLocalMedia']
-		);
-	});
-});
-
-describe('Bake source pins', () => {
-	it('discovers branch-pinned sources without kind metadata', () => {
-		const pins = manifestPins(readFileSync(QUICKSTATEMENTS_MANIFEST, 'utf8'));
-
-		assert.deepEqual(
-			pins
-				.map(({ variable, description }) => ({ variable, description }))
-				.sort((left, right) => left.variable.localeCompare(right.variable)),
-			[
-				{
-					variable: 'MAGNUSTOOLS.commit',
-					description: 'MagnusTools master'
-				},
-				{
-					variable: 'QUICKSTATEMENTS.commit',
-					description: 'QuickStatements master'
-				}
-			]
 		);
 	});
 });

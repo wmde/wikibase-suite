@@ -49,7 +49,7 @@ function printInstallationComplete( configuration: ConfigureResult ): void {
 		'',
 		`  Wikibase:        ${ wikibaseUrl }`,
 		`  Query Service:   https://${ config.WDQS_PUBLIC_HOST }`,
-		`  QuickStatements: ${ wikibaseUrl }/tools/quickstatements`
+		`  QuickStatements 3: ${ wikibaseUrl }/tools/quickstatements3`
 	].join( '\n' ) );
 }
 

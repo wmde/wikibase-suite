@@ -1,0 +1,10 @@
+services:
+  wikibase:
+    volumes:
+      - ./quickstatements3/LocalSettings.php:/test-settings/LocalSettings.php:ro
+      - quickstatements3-data:/quickstatements3/data
+    environment:
+      QUICKSTATEMENTS3_PUBLIC_URL: ${QUICKSTATEMENTS3_URL}
+  mysql:
+    environment:
+      QUICKSTATEMENTS3_PUBLIC_URL: ${QUICKSTATEMENTS3_URL}
