@@ -51,6 +51,21 @@ If publishing from a release branch such as `release/wbs-8`, choose the reviewed
 
 ## Publish a release
 
+CI preview installers are separate from official releases. For same-repository
+PRs and for push or manual runs on `main` or `release/wbs-X`, CI builds every Suite image under
+a run-specific GHCR tag. When the entire image set is built, the trusted
+publisher records those image digests in an installer manifest. The
+moving `/pr-N` or `/branch-release-wbs-X` installer advances only if that
+commit is still the ref's head. Tests run independently and can fail after a
+preview becomes available. Preview publication never writes Docker Hub release
+version tags or the stable `/latest` installer.
+
+An installer checks out the published commit and uses the manifest's fixed
+image digests. Moving links select the latest complete preview at installation
+time; links that include the commit and CI run remain pinned. An existing
+checkout is not automatically updated when its link moves.
+The separate **Publish Installer** workflow lists both links in its job summary.
+
 In GitHub Actions, open **Create a Release** and select the branch that contains the reviewed release changes, such as `release/wbs-8` for a WBS 8 release or `main` when publishing directly from trunk. Confirm that the selected branch has the release workflow and tooling you intend to use.
 
 Enter space-separated targets such as `wikibase quickstatements`, `wbs`, or `all`. Enable **Dry run** for preflight, review the results, then run again with **Dry run** cleared to publish.

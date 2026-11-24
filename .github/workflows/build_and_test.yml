@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - 'release/wbs-*'
   workflow_dispatch:
     inputs:
       build_arm64:
@@ -143,8 +144,6 @@ jobs:
           IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
           IMAGE_NAME: ${{ matrix.imageName }}
           ARCHITECTURE: ${{ matrix.architecture }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           build_args=(
@@ -152,10 +151,6 @@ jobs:
             --platform="linux/$ARCHITECTURE" \
             --set "$IMAGE_NAME.tags=$CI_IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG-$ARCHITECTURE"
           )
-          if [[ -n "$PR_NUMBER" && "$PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            pr_tag="pr-${PR_NUMBER}-${PR_HEAD_SHA:0:12}-${ARCHITECTURE}"
-            build_args+=(--set "$IMAGE_NAME.tags+=$CI_IMAGE_REGISTRY/$IMAGE_NAME:$pr_tag")
-          fi
           ./wbs-dev build "${build_args[@]}"
         working-directory: development
 
@@ -192,6 +187,53 @@ jobs:
               "$image:$IMAGE_TAG-amd64" \
               "$image:$IMAGE_TAG-arm64"
           done < <(jq -r '.[]' <<< "$IMAGES")
+
+  # Publish a complete preview set as soon as every image builds. Integration
+  # tests continue independently; official Docker Hub releases still require
+  # the full test gate in Create a Release.
+  publish-preview:
+    needs:
+      - setup
+      - build
+      - assemble
+    if: >-
+      always() &&
+      needs.setup.outputs.should_skip != 'true' &&
+      needs.build.result == 'success' &&
+      (needs.assemble.result == 'success' || needs.assemble.result == 'skipped') &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' &&
+        (github.ref_name == 'main' || startsWith(github.ref_name, 'release/wbs-'))) ||
+       (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch trusted preview publisher
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
+          BUILD_TAG: ${{ needs.setup.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          # During review, the trusted default-branch publisher does not yet
+          # understand preview inputs. Activate dispatch after it is merged.
+          publisher_workflow="$(gh api \
+            "repos/$GITHUB_REPOSITORY/contents/.github/workflows/publish_installer.yml" \
+            -H 'Accept: application/vnd.github.raw+json')"
+          if ! grep -q 'build_tag:' <<< "$publisher_workflow"; then
+            echo 'Preview dispatch activates after the trusted publisher is merged.'
+            exit 0
+          fi
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            target="pr-$PR_NUMBER"
+          else
+            target="branch:$SOURCE_BRANCH"
+          fi
+          gh workflow run publish_installer.yml --ref main \
+            -f target="$target" -f commit="$SOURCE_COMMIT" -f build_tag="$BUILD_TAG"
 
   test:
     name: test/${{ matrix.target }} (${{ matrix.architecture }})
