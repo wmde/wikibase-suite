@@ -32,7 +32,7 @@ async function main(): Promise<void> {
 		[
 			'',
 			'Preparation commands update local, unstaged files for review.',
-			'Publication commands validate committed state before creating tags.',
+			'Release builds and tests committed state before publishing images and tags.',
 			'',
 			'Examples:',
 			'  wbs-dev build',
@@ -40,7 +40,7 @@ async function main(): Promise<void> {
 			'  wbs-dev test',
 			'  wbs-dev lint',
 			'  wbs-dev update wikibase quickstatements',
-			'  wbs-dev release all --dry-run'
+			'  wbs-dev release all --preflight'
 		].join('\n')
 	);
 

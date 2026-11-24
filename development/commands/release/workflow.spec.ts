@@ -2,10 +2,12 @@ import { afterEach, describe, it } from 'mocha';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
+	chmodSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
+	statSync,
 	writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -23,6 +25,7 @@ import { readWbsVersionManifest } from '../../lib/wbs-version.js';
 import { planWbsToolsAdoption } from '../update/projects/wbs-tools.js';
 import { planWbsUpdate } from '../update/projects/wbs.js';
 import { readVariable } from '../update/source-utils.js';
+import { preflightRelease, publishGitTags } from './publication.js';
 
 const CLI = resolve('wbs-dev.ts');
 const TSX = resolve('node_modules/.bin/tsx');
@@ -498,11 +501,16 @@ describe('wbs-dev preparation and release workflow', () => {
 			const projects = discoverReleaseProjects(context);
 			const wbs = projects.find((project) => project.name === 'wbs')!;
 			const tools = projects.find((project) => project.name === 'wbs-tools')!;
+			const installPath = join(fixture.root, 'install');
+			chmodSync(installPath, 0o755);
 			const adoption = planWbsToolsAdoption(wbs, tools, '1.1.0')!;
 			const plan = planWbsUpdate(context, gitRepository, wbs, {
 				toolsAdoption: adoption
 			})!;
 
+			applyFileUpdates(plan.updates);
+			assert.equal(statSync(installPath).mode & 0o777, 0o755);
+			execFileSync(installPath);
 			assert.equal(plan.targetVersion, '1.0.1');
 			const versionUpdate = plan.updates.find(
 				(update) => update.path === wbs.versionPath
@@ -522,6 +530,53 @@ describe('wbs-dev preparation and release workflow', () => {
 				/WBS Tools image from wikibase\/wbs-tools:1\.0\.0 to wikibase\/wbs-tools:1\.1\.0\./u
 			);
 		});
+
+		for (const sharedInput of ['pnpm-lock.yaml', 'pnpm-workspace.yaml']) {
+			it(`proposes a WBS Tools patch for changes to ${sharedInput}`, () => {
+				const fixture = createFixture();
+				write(
+					fixture,
+					'development/images/wbs-tools/docker-bake.hcl',
+					'variable "IMAGE_VERSION" { default = "1.0.0" }\n'
+				);
+				write(
+					fixture,
+					'development/images/wbs-tools/CHANGELOG.md',
+					'# 1.0.0 (2026-01-01)\n\n- Initial release.\n'
+				);
+				write(fixture, `development/${sharedInput}`, '# original\n');
+				commitAll(fixture, 'chore: add WBS Tools');
+				git(fixture, 'tag', 'wbs-tools@1.0.0');
+				git(fixture, 'push', 'origin', 'main', '--tags');
+				const context = createRepositoryContext(fixture.development);
+				const repository = new GitRepository(context);
+				const projects = discoverReleaseProjects(context);
+				const tools = projects.find((project) => project.name === 'wbs-tools')!;
+				write(
+					fixture,
+					`development/${sharedInput}`,
+					'# updated dependency configuration\n'
+				);
+				assert.equal(
+					planVersionUpdate(context, repository, tools)?.targetVersion,
+					'1.0.1'
+				);
+				commitAll(fixture, 'fix(deps): update dependency configuration');
+				const plan = planVersionUpdate(context, repository, tools)!;
+				assert.equal(plan.targetVersion, '1.0.1');
+				assert.deepEqual(plan.changelogSections.changes, [
+					'fix(deps): update dependency configuration'
+				]);
+				assert.equal(
+					planVersionUpdate(
+						context,
+						repository,
+						projects.find((project) => project.name === 'wikibase')!
+					),
+					undefined
+				);
+			});
+		}
 
 		it('does not add a committed generated release draft to its own changelog', () => {
 			const fixture = createFixture();
@@ -599,7 +654,8 @@ describe('wbs-dev preparation and release workflow', () => {
 		});
 	});
 
-	describe('release publication', () => {
+	describe('release publication', function () {
+		this.timeout(10000);
 		it('creates and pushes a missing image tag, and is rerunnable', () => {
 			const fixture = createFixture();
 			write(
@@ -615,8 +671,14 @@ describe('wbs-dev preparation and release workflow', () => {
 			commitAll(fixture, 'fix(wikibase): correct behavior');
 			git(fixture, 'push', 'origin', 'main');
 			git(fixture, 'tag', 'wikibase@1.0.1', 'wikibase@1.0.0');
-			const first = cli(fixture, 'release', 'images', 'wikibase');
+			const first = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.equal(first.status, 0, first.stderr);
+			const context = createRepositoryContext(fixture.development);
+			const repository = new GitRepository(context);
+			const projects = discoverReleaseProjects(context).filter(
+				(project) => project.isImage
+			);
+			publishGitTags(repository, preflightRelease(repository, projects));
 			assert.match(
 				run(
 					'git',
@@ -638,15 +700,15 @@ describe('wbs-dev preparation and release workflow', () => {
 				).trim(),
 				git(fixture, 'rev-parse', 'HEAD')
 			);
-			const second = cli(fixture, 'release', 'images', 'wikibase');
+			const second = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.equal(second.status, 0, second.stderr);
-			assert.match(second.stdout, /Already published: wikibase@1\.0\.1/u);
+			assert.match(second.stdout, /wikibase@1\.0\.1: already released/u);
 		});
 
 		it('blocks publication from a dirty working tree', () => {
 			const fixture = createFixture();
 			write(fixture, 'development/images/wikibase/dirty.txt', 'dirty=true\n');
-			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			const result = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.notEqual(result.status, 0);
 			assert.match(result.stderr, /clean working tree/u);
 		});
@@ -665,7 +727,7 @@ describe('wbs-dev preparation and release workflow', () => {
 			);
 			commitAll(fixture, 'feat(wikibase): prepare a candidate');
 			git(fixture, 'push', 'origin', 'main');
-			const result = cli(fixture, 'release', 'images', 'wikibase', '--dry-run');
+			const result = cli(fixture, 'release', 'wikibase', '--preflight');
 			assert.notEqual(result.status, 0);
 			assert.match(result.stderr, /stable MAJOR\.MINOR\.PATCH/u);
 		});

@@ -21,6 +21,7 @@ PUSH=false
 NO_CACHE=false
 PLATFORMS=""
 BAKE_ARGS=()
+CUSTOM_BUILDER=false
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -42,6 +43,17 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--no-cache)
 			NO_CACHE=true
+			BAKE_ARGS+=("$1")
+			shift
+			;;
+		--builder)
+			[[ -n "${2:-}" ]] || { echo "--builder requires a value." >&2; exit 1; }
+			CUSTOM_BUILDER=true
+			BAKE_ARGS+=("$1" "$2")
+			shift 2
+			;;
+		--builder=*)
+			CUSTOM_BUILDER=true
 			BAKE_ARGS+=("$1")
 			shift
 			;;
@@ -124,7 +136,9 @@ if [ -n "${BUILD_CACHE_REGISTRY:-}" ]; then
 	CACHE_REF="${CACHE_REGISTRY}/${IMAGE_NAME}:buildcache-${CACHE_SCOPE}"
 	LEGACY_CACHE_REF="${CACHE_REGISTRY}/${IMAGE_NAME}:buildcache"
 
-	BAKE_ARGS+=(--builder "$BUILDER_NAME")
+	if [ "$CUSTOM_BUILDER" = false ]; then
+		BAKE_ARGS+=(--builder "$BUILDER_NAME")
+	fi
 	if [ "$NO_CACHE" = false ]; then
 		BAKE_ARGS+=(
 			--set "${TARGET}.cache-from=type=registry,ref=${CACHE_REF}"
@@ -137,7 +151,7 @@ if [ -n "${BUILD_CACHE_REGISTRY:-}" ]; then
 		)
 	fi
 
-	if [ "$DRY_RUN" = false ]; then
+	if [ "$DRY_RUN" = false ] && [ "$CUSTOM_BUILDER" = false ]; then
 		if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
 			if ! create_output=$(docker buildx create --name "$BUILDER_NAME" --driver docker-container 2>&1); then
 				docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1 || {

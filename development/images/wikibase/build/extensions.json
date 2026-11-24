@@ -6,7 +6,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Wikibase.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "eecdda89725f7b89c634c006fdda21f21f754bdb"
+        "commit": "f4439bff9baebaa027a7b37be2bcaa8019b8f861"
       }
     },
     {
@@ -22,7 +22,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-EntitySchema.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "8767fa92e3f30e4658b31e82efb242d92489c3f4"
+        "commit": "8744b3ce1421b69d442e5f28255c90fe431a81cc"
       }
     },
     {
@@ -30,7 +30,7 @@
       "source": {
         "repo": "https://github.com/ProfessionalWiki/WikibaseLocalMedia.git",
         "ref": "refs/heads/master",
-        "commit": "26795a660a2d870e7f87f29e388ca8abb9220510"
+        "commit": "3cc1f1a0c7a601947b63820af8da9abddf8f8528"
       }
     },
     {
@@ -38,7 +38,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseManifest.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "8c034383637dcfceb966f207367305cd5fbb9ef2"
+        "commit": "2b51fbf491251f1dc8cccaa926e2c391729b51a9"
       }
     },
     {
@@ -54,7 +54,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Babel.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "1e2ca31e1a8ef0373a95fb14e7d7e4b671eac39a"
+        "commit": "230f87efdb1c25e47a7957510b576a25b3c9e740"
       }
     },
     {
@@ -62,7 +62,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-cldr.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "470ae38ff7a29ac596fb8ce519d2e4a1f8d02523"
+        "commit": "db24690ec0c55a85a7b056392faaf2e2e3b88d04"
       }
     },
     {
@@ -70,7 +70,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "584a24c468593ba3c5a5e5bf8dbe399687212f98"
+        "commit": "ddc5f9e10c4657cbe4f5eae2b4d401a634561e48"
       }
     },
     {
@@ -78,7 +78,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-Elastica.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "a3326af107aafd75f6958e8b4ae8e3d00f22b65f"
+        "commit": "95f908d2f9f80939d4e0546023405305b436379b"
       }
     },
     {
@@ -86,7 +86,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-CirrusSearch.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "a89f321d857906a8450295aee40793d61ef18543"
+        "commit": "69e99251173745d119b8cb1cef7f761a02bdbd77"
       }
     },
     {
@@ -94,7 +94,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "5e404f0fea531ede4c9a92252d682bf8c160e86f"
+        "commit": "c0e9eec7ebce110077fb7e492095b4ee85e58f8b"
       }
     },
     {
@@ -102,7 +102,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-OAuth.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "80b5f7b4297f0a9db5865c59d8d9b1bd22dc00d1",
+        "commit": "c92da9c9b5cf51aacab5e58a9e6a07d034664955",
         "patches": [
           "mediawiki-extensions-OAuth-same-domain.patch"
         ]
@@ -113,7 +113,7 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-PluggableAuth.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "d1e588302c7ccb7806b04f46f62a9b5c34ea1715"
+        "commit": "1224083a4ecb8f12b9198921f6dc5a09acaa494c"
       }
     },
     {
@@ -121,13 +121,19 @@
       "source": {
         "repo": "https://github.com/wikimedia/mediawiki-extensions-WSOAuth.git",
         "ref": "refs/heads/REL1_46",
-        "commit": "0eb464df201ab7caf8264b2a84b4ef67ed309b94"
+        "commit": "63da4d1e21cec7d9af97e3a0b38717525b9fd3d3"
       }
     },
     {
       "name": "WikibaseSuite",
       "source": {
         "path": "runtime/var/www/html/extensions/WikibaseSuite"
+      }
+    },
+    {
+      "name": "WikibaseOntologyPresets",
+      "source": {
+        "path": "runtime/var/www/html/extensions/WikibaseOntologyPresets"
       }
     }
   ]

@@ -95,6 +95,24 @@ using the normal MediaWiki instructions for that extension. A complete
 externally managed configuration continues to control its own extension
 loading.
 
+### Start with an ontology preset
+
+On a new Wikibase that has never had a property created, administrators can add
+the Core Properties preset. It creates eight community-curated properties with
+the IDs P1 through P8, including mappings to Wikidata and common RDF and OWL
+vocabularies.
+
+Open `https://<your-wikibase-host>/wiki/Special:OntologyPresets` to review the
+properties and confirm their creation. The preset cannot be applied after a
+property ID has been allocated, even if that property was later deleted.
+
+By default, Wikibase displays external identifiers such as Wikidata Entity ID as
+plain text. To display them as links and make their full URIs available in Query
+Service, set the formatter URL and formatter URI for RDF properties in
+`config/LocalSettings.php`.
+
+[Follow the configuration guide](https://www.mediawiki.org/wiki/Wikibase/Installation/Advanced_configuration#Define_links_for_external_identifiers)
+
 ### Login with Wikimedia
 
 To enable Wikimedia login:
@@ -134,7 +152,7 @@ commands:
 
 | Command | Behavior |
 | --- | --- |
-| `web` (default) | Prepares configuration when necessary, applies database updates, and starts Apache. |
+| `web` (default) | With WBS-managed configuration, runs the MediaWiki database updater on startup before starting Apache. |
 | `jobrunner [arguments...]` | Runs MediaWiki jobs continuously. Requires an existing `InstanceSettings.php`. |
 | `maintenance <command> [arguments...]` | Runs a MediaWiki maintenance command through `maintenance/run.php`. Requires an existing `InstanceSettings.php`. For example: `maintenance update --quick`. |
 | Any other command | Runs through the base PHP image entry point without WBS configuration preparation. |
@@ -164,6 +182,7 @@ details.
 | Path | Description |
 | --- | --- |
 | `/config/InstanceSettings.php` | Persistent image-generated settings unique to an installed instance. Loaded first by `Settings.php`; do not edit it. |
+| `/config/BeforeExtensions.php` | Optional user-owned settings evaluated after image defaults and before image-loaded extensions. |
 | `/config/LocalSettings.php` | Persistent user-owned MediaWiki and extension customizations, loaded last. |
 | `/config/Extensions.php` | Optional user-owned extension configuration loaded by `LocalSettings.php` for compatibility. New configuration can go directly in `LocalSettings.php`. |
 | `/config/wikibase-php.ini` | Persistent user-customizable PHP settings. The image seeds it during managed setup. |
@@ -172,6 +191,8 @@ details.
 | `/var/www/html/extensions/` | Bundled MediaWiki and Wikibase extensions, available for configuration in `LocalSettings.php`. |
 | `/var/www/html/images/` | MediaWiki image and media upload directory. |
 | `/extra-install.sh` | Optional script for custom functionality run during a fresh installation. |
+
+For a walkthrough of startup and configuration, see [DEVELOPMENT.md](./DEVELOPMENT.md).
 
 ## Releases
 

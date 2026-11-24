@@ -39,7 +39,7 @@ Instance-specific extensions have their own release cycles. You are responsible 
 
 7. Follow the extension's update instructions. Apply any required changes to `config/Extensions.php` or other user-owned configuration files.
 
-8. Start WBS. The Wikibase Docker Image runs the MediaWiki database updates during startup.
+8. Start WBS. The `wikibase` service runs the MediaWiki database updater before serving requests.
 
    If you are updating extensions as part of a major WBS upgrade, return to the migration guide and use its instructions to start WBS. Then return here for step 9.
 

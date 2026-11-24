@@ -1,5 +1,5 @@
 import { Option, type Command } from 'commander';
-import { composeServicesAreRunning, missingConfigurationKeys, up } from '../lib/compose.js';
+import { missingConfigurationKeys, up } from '../lib/compose.js';
 
 type UpOptions = {
 	update?: boolean;
@@ -7,10 +7,6 @@ type UpOptions = {
 };
 
 async function startSuite( options: UpOptions ): Promise<void> {
-	if ( options.update !== true && options.build !== true && await composeServicesAreRunning() ) {
-		console.log( 'Wikibase Suite is already running.' );
-		return;
-	}
 	const missing = missingConfigurationKeys();
 	if ( missing.length ) {
 		throw new Error(

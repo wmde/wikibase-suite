@@ -14,6 +14,7 @@ Run the fast development-tooling tests and browser-based integration suites thro
 | `wdqs` | Integration | WDQS, its updater, and the WDQS frontend through the `wdqs` and `wdqs-frontend` Compose profiles. |
 | `quickstatements` | Integration | QuickStatements through the `quickstatements` Compose profile. |
 | `opensearch` | Integration | OpenSearch-backed search through the `opensearch` Compose profile. |
+| `ontology-presets` | Integration | Bundled preset validation and the administrator onboarding flow. |
 | `wbs-tools` | Integration | WBS Tools lifecycle, including bootstrap selection, web configuration, deployment health, and administrator login. |
 
 Integration suite settings live in `tests/<suite>/<suite>.conf.ts`. Each combines the published deployment Compose file with the shared test override and any suite-specific override. Test results are written beneath the suite's `results` directory; CI uploads them after a failure.
@@ -59,7 +60,7 @@ wbs-dev test wdqs --setup
 - Change shared runner lifecycle code in `tests/_setup/` only when the behavior should apply to every suite.
 - Put reusable TypeScript declarations in `tests/_types/`.
 
-An existing suite automatically discovers a new spec only when its `<suite>.conf.ts` `specs` patterns include the new path. Every direct child directory of `tests/` is a test target except underscore-prefixed infrastructure directories and `node_modules`; a target named `<suite>` therefore supplies `<suite>/<suite>.conf.ts`. The scattered development-tooling specs are exposed explicitly as the synthetic `wbs-dev-tools` target.
+An existing suite automatically discovers a new spec only when its `<suite>.conf.ts` `specs` patterns include the new path. A suite is a test target when `tests/<suite>/<suite>.conf.ts` exists; underscore-prefixed directories and `node_modules` are excluded. The scattered development-tooling specs are exposed explicitly as the synthetic `wbs-dev-tools` target.
 
 ### WBS Tools Suite
 
@@ -102,11 +103,9 @@ CI uses `--skip-build` and supplies `WBS_TEST_IMAGE_REGISTRY` and `WBS_TEST_IMAG
 
 ### Architecture Coverage in CI
 
-CI always runs every suite above against the native AMD64 image set. The suites collectively exercise all distributed images: Wikibase through the repository, extension, client, and installer scenarios; WDQS through `wdqs` and its frontend through `wdqs-frontend`; QuickStatements through `quickstatements`; OpenSearch through `opensearch`; and WBS Tools through its end-to-end suite.
+PR/main and release CI run every suite against native AMD64 images. With `WBS_RELEASE_ARM64=true`, they also build and test on native ARM64 runners.
 
-Create Release repeats the complete target matrix on native ARM64 runners when `WBS_RELEASE_ARM64=true`. Pull requests and pushes to `main` remain AMD64-only.
-
-For a one-off confidence run, start the **Build and Test** workflow manually and enable **Build and assemble CI images for AMD64 and ARM64** and **Run every test suite against the ARM64 image set too**. These inputs affect that run only, so an AMD64-only production interval does not remove the ARM64 test capability.
+The manual **Build and Test** inputs can additionally enable ARM64 for that run. Building ARM64 alone does not test it; enable **Run every test suite against the ARM64 image set too** for test coverage.
 
 ## Further Reading
 

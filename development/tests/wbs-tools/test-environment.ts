@@ -139,7 +139,9 @@ export function toolsImage(): string {
 export function startInstaller(): void {
 	copyCheckout();
 	const image = toolsImage();
-	const skipPull = process.env.GITHUB_ACTIONS === 'true' ? 'false' : 'true';
+	const pullPolicy = process.env.WBS_TEST_IMAGE_PULL_POLICY ||
+		( process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never' );
+	const skipPull = pullPolicy === 'never' ? 'true' : 'false';
 
 	run( 'bash', [ './install', '--local' ], {
 		cwd: CHECKOUT_ROOT,
@@ -148,21 +150,20 @@ export function startInstaller(): void {
 			COMPOSE_PROJECT_NAME: INSTALL_PROJECT,
 			WBS_LOG_PATH: WBS_LOG,
 			INSTALLATION_LOG_PATH: INSTALL_LOG,
-			WBS_E2E_PULL_POLICY:
-				process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never',
+			WBS_E2E_PULL_POLICY: pullPolicy,
 			WBS_E2E_HTTP_PORT: '18080',
 			WBS_E2E_HTTPS_PORT: String( WIKIBASE_HTTPS_PORT ),
 			WBS_LOCAL_IMAGES: 'true',
 			WBS_LOCAL_IMAGE_REPOSITORY: process.env.WBS_TEST_IMAGE_REGISTRY || 'wikibase',
 			WBS_LOCAL_IMAGE_TAG: process.env.WBS_TEST_IMAGE_TAG || 'latest',
-			WBS_LOCAL_IMAGE_PULL_POLICY:
-				process.env.GITHUB_ACTIONS === 'true' ? 'always' : 'never',
+			WBS_LOCAL_IMAGE_PULL_POLICY: pullPolicy,
 			WBS_INSTALLER_CONTAINER_NAME: INSTALLER_CONTAINER,
 			WBS_INSTALLER_WORKER_CONTAINER_NAME: INSTALLER_WORKER_CONTAINER,
 			WBS_INSTALLER_PORT: String( INSTALLER_PORT ),
 			WBS_INSTALLER_ACCESS_CODE: INSTALLER_ACCESS_CODE,
 			WBS_SKIP_DEPENDENCY_INSTALLS: 'true',
 			WBS_TOOLS_ENV_PASSTHROUGH: [
+				'DOCKER_DEFAULT_PLATFORM',
 				'WBS_E2E_PULL_POLICY',
 				'WBS_E2E_HTTP_PORT',
 				'WBS_E2E_HTTPS_PORT',

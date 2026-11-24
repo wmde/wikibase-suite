@@ -3,83 +3,97 @@ name: Create a Release
 on:
   workflow_dispatch:
     inputs:
-      project_name:
-        description: 'Release target'
-        type: choice
+      targets:
+        description: 'Space-separated image names, wbs, or all.'
+        type: string
         required: true
-        default: 'wikibase'
-        options:
-          - wbs
-          - opensearch
-          - quickstatements
-          - wbs-tools
-          - wdqs
-          - wdqs-frontend
-          - wikibase
-          - All projects
+        default: all
       dry_run:
-        description: 'Validate and preview the release without creating tags.'
+        description: 'Run preflight only; do not build or publish.'
         type: boolean
         required: true
-        default: true
+        default: false
 
 permissions:
+  actions: write
   contents: write
   packages: write
 
+# Serialize release publication, including updates to rolling image aliases.
+concurrency:
+  group: create-release
+  cancel-in-progress: false
+
 jobs:
-  build_and_test:
-    uses: ./.github/workflows/build_and_test.yml
-    with:
-      build_arm64: ${{ vars.WBS_RELEASE_ARM64 == 'true' }}
-      test_arm64: ${{ vars.WBS_RELEASE_ARM64 == 'true' }}
-    secrets: inherit
-
-  release:
-    needs: build_and_test
-    if: needs.build_and_test.result == 'success'
+  preflight:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
-
+    outputs:
+      images: ${{ steps.preflight.outputs.images }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-tags: true
           fetch-depth: 0
           token: ${{ secrets.GH_WBS_BOT_TOKEN }}
-
       - uses: ./.github/actions/setup-environment
         with:
           github_token: ${{ secrets.GH_WBS_BOT_TOKEN }}
           dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
-
-      - name: Validate and publish the selected release
-        env:
-          PROJECT_NAME: ${{ inputs.project_name }}
-          DRY_RUN: ${{ inputs.dry_run }}
+      - name: Validate release targets
+        id: preflight
         working-directory: development
+        env:
+          RELEASE_TARGETS: ${{ inputs.targets }}
         run: |
           set -euo pipefail
+          read -r -a targets <<< "$RELEASE_TARGETS"
+          if [[ ${#targets[@]} == 0 ]]; then targets=(all); fi
+          ./wbs-dev release "${targets[@]}" --preflight
+          images=$(./wbs-dev build --list=json)
+          selected=$(printf '%s\n' "${targets[@]}" | jq -R . | jq -s .)
+          images=$(jq -c --argjson selected "$selected" \
+            '[.[] | select(($selected | index("all")) or (. as $name | $selected | index($name)))]' <<< "$images")
+          echo "images=$images" >> "$GITHUB_OUTPUT"
 
-          case "$PROJECT_NAME" in
-            wbs)
-              release_target=(wbs)
-              ;;
-            "All projects")
-              release_target=(all)
-              ;;
-            opensearch|quickstatements|wbs-tools|wdqs|wdqs-frontend|wikibase)
-              release_target=(images "$PROJECT_NAME")
-              ;;
-            *)
-              echo "Unknown release target: $PROJECT_NAME"
-              exit 1
-              ;;
-          esac
+  build_and_test:
+    needs: preflight
+    if: inputs.dry_run != true
+    uses: ./.github/workflows/build_and_test.yml
+    with:
+      force_build: true
+      build_arm64: ${{ vars.WBS_RELEASE_ARM64 == 'true' }}
+      test_arm64: ${{ vars.WBS_RELEASE_ARM64 == 'true' }}
+    secrets: inherit
 
-          release_options=()
-          if [ "$DRY_RUN" = "true" ]; then
-            release_options+=(--dry-run)
-          fi
+  publish:
+    needs: build_and_test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_WBS_BOT_TOKEN }}
+      - uses: ./.github/actions/setup-environment
+        with:
+          github_token: ${{ secrets.GH_WBS_BOT_TOKEN }}
+          dockerhub_token: ${{ secrets.WBS_PUBLISH_TOKEN }}
+      - name: Publish tested images and Git tags
+        working-directory: development
+        env:
+          RELEASE_TARGETS: ${{ inputs.targets }}
+          IMAGE_TAG: ${{ needs.build_and_test.outputs.image_tag }}
+          STAGING_REGISTRY: ghcr.io/${{ github.repository_owner }}/wikibase
+        run: |
+          set -euo pipefail
+          read -r -a targets <<< "$RELEASE_TARGETS"
+          if [[ ${#targets[@]} == 0 ]]; then targets=(all); fi
+          ./wbs-dev release "${targets[@]}" --publish \
+            --staging-registry "$STAGING_REGISTRY" --image-tag "$IMAGE_TAG"
 
-          ./wbs-dev release "${release_target[@]}" "${release_options[@]}"
+  documentation:
+    needs: [preflight, publish]
+    if: needs.preflight.outputs.images != '[]'
+    uses: ./.github/workflows/publish_image_documentation.yml
+    with:
+      images: ${{ needs.preflight.outputs.images }}
+    secrets: inherit

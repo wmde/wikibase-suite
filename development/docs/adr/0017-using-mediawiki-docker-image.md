@@ -4,7 +4,9 @@ Date: 2021-06-18
 
 ## Status
 
-accepted
+Historical — no longer describes the implementation (reviewed 2026-11-16).
+
+The current Wikibase image builds on PHP/Apache and fetches pinned MediaWiki source. See the [image update guide](../../images/wikibase/UPDATING.md) for source selection and maintenance responsibilities. The original decision below is retained as history.
 
 ## Context
 

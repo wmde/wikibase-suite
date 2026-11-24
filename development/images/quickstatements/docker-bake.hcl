@@ -1,7 +1,7 @@
 # QuickStatements image manifest. Runtime build policy is supplied by wbs-dev.
 
 variable "IMAGE_NAME" { default = "quickstatements" }
-variable "IMAGE_VERSION" { default = "1.2.3" }
+variable "IMAGE_VERSION" { default = "1.2.4" }
 variable "IMAGE_REPOSITORY" { default = "wikibase/quickstatements" }
 variable "TAGS" {
   type    = list(string)
@@ -16,7 +16,7 @@ variable "QUICKSTATEMENTS" {
     name     = "QuickStatements"
     repo     = "https://github.com/magnusmanske/quickstatements.git"
     ref      = "refs/heads/master"
-    commit   = "558474da79766d8c7f9d7d0e727194f3cc9ade3a"
+    commit   = "dfcaf48778fd46e4b2f2027224fa7387c4271169"
   }
 }
 
@@ -25,9 +25,9 @@ variable "MAGNUSTOOLS" {
     name           = "MagnusTools"
     repo           = "https://codeberg.org/magnusmanske/magnustools.git"
     ref            = "refs/heads/master"
-    commit         = "ec79940688576567b12b90373cc091715e3dea06"
+    commit         = "a07c9518986cf48064bfbc4a229cf12a37f6e8a2"
     archive        = "https://codeberg.org/magnusmanske/magnustools/archive/{commit}.tar.gz"
-    archive_sha256 = "fc80e7fa915126f47d64c3054ede2315f96d16daf4c46f0fe76c0c9dbcefc847"
+    archive_sha256 = "3d5fc7d9bcad80e90b11bd37ebface38a6989850b960878ba262af147ed4557a"
   }
 }
 
@@ -43,7 +43,7 @@ variable "COMPOSER_IMAGE" {
 variable "PHP_IMAGE" {
   default = {
     image  = "php"
-    tag    = "8.3.36-apache-bookworm"
+    tag    = "8.3.37-apache-bookworm"
     source = "https://hub.docker.com/_/php"
     info   = "https://www.php.net/supported-versions.php"
   }

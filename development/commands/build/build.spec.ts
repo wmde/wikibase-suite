@@ -1,7 +1,9 @@
 import { describe, it } from 'mocha';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { parseBuildArguments } from './command.js';
 
 const RUN_IMAGE_BUILD = resolve('commands/build/image.sh');
@@ -24,6 +26,48 @@ function dryRun(...buildArguments: string[]): string {
 }
 
 describe('wbs-dev build', () => {
+	it('honors an explicit builder instead of selecting or creating the cache builder', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'wbs-build-builder-'));
+		try {
+			const docker = join(directory, 'docker');
+			writeFileSync(
+				docker,
+				`#!${process.execPath}
+const args = process.argv.slice(2);
+if (args.includes('--list=type=variables,format=json')) {
+  console.log(JSON.stringify([{name: 'IMAGE_NAME', value: 'wikibase'}, {name: 'IMAGE_VERSION', value: '1.0.0'}]));
+} else if (args[1] === 'bake') {
+  console.log(JSON.stringify(args));
+} else process.exit(1);
+`
+			);
+			chmodSync(docker, 0o755);
+			for (const builder of [
+				['--builder', 'my-builder'],
+				['--builder=my-builder']
+			]) {
+				const output = execFileSync(
+					RUN_IMAGE_BUILD,
+					['wikibase', '--push', ...builder],
+					{
+						encoding: 'utf8',
+						env: {
+							...process.env,
+							PATH: `${directory}:${process.env.PATH}`,
+							BUILD_CACHE_REGISTRY: 'example/cache',
+							BUILD_CACHE_SCOPE: 'linux-amd64'
+						}
+					}
+				);
+				const args = JSON.parse(output) as string[];
+				assert.ok(builder.every((argument) => args.includes(argument)));
+				assert.equal(args.includes('wbs-application-builder'), false);
+			}
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	it('adds the scoped and legacy registry caches', () => {
 		const command = dryRun('--push');
 		assert.match(

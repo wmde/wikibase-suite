@@ -49,7 +49,7 @@ To install an extension, copy its files into `config/extensions`, load it from `
    ```
 
    > [!NOTE]
-   > Some extensions instruct you to run `update.php` during installation. The Wikibase Docker Image runs `update.php` during startup, so you do not need to run it manually.
+   > The `wikibase` service runs the MediaWiki database updater on startup, including when an extension’s installation instructions call for `update.php`.
 
 10. Visit `https://<WIKIBASE_PUBLIC_HOST>/wiki/Special:Version` and confirm that the extension appears in the list of installed extensions.
 
