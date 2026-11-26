@@ -17,6 +17,8 @@ RUN apt-get update; \
         gettext-base \
         librsvg2-bin \
         imagemagick \
+        # Required by Score MediaWiki Extension
+        lilypond \
         # Required by SyntaxHighlighting MediaWiki Extension
         python3 \
         # Required by Scribunto MediaWiki Extension
@@ -52,9 +54,9 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
         opcache \
         ; \
     \
-    pecl install APCu-5.1.21; \
+    pecl install APCu-5.1.21 redis-6.3.0; \
         docker-php-ext-enable \
-        apcu \
+        apcu redis \
         ; \
     rm -r /tmp/pear; \
     \
