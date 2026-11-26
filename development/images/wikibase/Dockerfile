@@ -171,6 +171,7 @@ RUN chmod 755 \
     /var/www/html/extensions/WikibaseSuite/setup/scripts/*.sh
 
 ENV DB_NAME=my_wiki \
+    MW_LOG_STDERR=1 \
     MW_CONFIG_FILE=/var/www/html/extensions/WikibaseSuite/config/Settings.php \
     MW_WG_SITENAME=wikibase \
     MW_WG_LANGUAGE_CODE=en
